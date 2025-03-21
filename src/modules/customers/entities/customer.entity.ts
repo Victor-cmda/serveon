@@ -1,1 +1,1 @@
-export class CustomerEntity {}
+export class Customer {}

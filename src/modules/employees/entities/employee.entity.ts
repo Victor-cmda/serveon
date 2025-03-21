@@ -1,1 +1,1 @@
-export class EmployeeEntity {}
+export class Employee {}
