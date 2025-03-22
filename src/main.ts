@@ -6,13 +6,17 @@ import * as DailyRotateFile from 'winston-daily-rotate-file';
 import * as fs from 'fs';
 import * as winston from 'winston';
 import * as path from 'path';
+import { ValidationPipe } from './common/pipes/validation.pipe';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { INestApplication } from '@nestjs/common';
 
 async function bootstrap() {
-  
+
   const logDir = path.join(__dirname, '../logs');
   if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
   }
+
   const loggerInstance = WinstonModule.createLogger({
     transports: [
       new winston.transports.Console({
@@ -58,19 +62,46 @@ async function bootstrap() {
     logger: loggerInstance
   });
 
+  app.enableCors();
+
+  app.setGlobalPrefix('api');
+
+  configureGlobalPipes(app);
+  configureGlobalFilters(app);
+
+  configureSwagger(app);
+
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+
+  loggerInstance.log(`Aplicação iniciada na porta ${port}`, 'Bootstrap');
+}
+
+function configureGlobalPipes(app: INestApplication) {
+  app.useGlobalPipes(
+    new ValidationPipe(),
+  );
+}
+
+function configureGlobalFilters(app: INestApplication) {
+  app.useGlobalFilters(
+    new HttpExceptionFilter(),
+  );
+}
+
+function configureSwagger(app: INestApplication) {
   const config = new DocumentBuilder()
-    .setTitle('Serveon')
-    .setDescription('Documentação Serveon API')
+    .setTitle('Serveon API')
+    .setDescription('API RESTful para o sistema Serveon')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
 
-
   fs.writeFileSync('./openapi-spec.json', JSON.stringify(document, null, 2));
 
-  SwaggerModule.setup('api', app, document);
-
-  await app.listen(process.env.PORT ?? 3000);
+  SwaggerModule.setup('api/docs', app, document);
 }
+
 bootstrap();
