@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCustomerDto {
@@ -100,12 +100,12 @@ export class CreateCustomerDto {
   bairro?: string;
 
   @ApiProperty({
-    description: 'ID da cidade no sistema',
-    example: 1
+    description: 'ID da cidade no sistema (UUID)',
+    example: '550e8400-e29b-41d4-a716-446655440000'
   })
   @IsNotEmpty({ message: 'ID da cidade é obrigatório' })
-  @IsNumber({}, { message: 'ID da cidade deve ser um número' })
-  cidadeId: number;
+  @IsUUID(4, { message: 'ID da cidade deve ser um UUID válido' })
+  cidadeId: string;  // Changed from number to string for UUID
 
   @ApiProperty({
     description: 'CEP (opcional)',

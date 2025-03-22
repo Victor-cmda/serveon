@@ -10,9 +10,8 @@ export class CustomersService {
 
   async create(createCustomerDto: CreateCustomerDto): Promise<Customer> {
     try {
-      // Verificar se o cliente já existe
       const existingCustomer = await this.databaseService.query(
-        'SELECT cnpj_cpf FROM nfe.destinatario WHERE cnpj_cpf = $1',
+        'SELECT cnpj_cpf FROM dbo.destinatario WHERE cnpj_cpf = $1',
         [createCustomerDto.cnpjCpf]
       );
 
@@ -20,9 +19,8 @@ export class CustomersService {
         throw new ConflictException(`Cliente com CNPJ/CPF ${createCustomerDto.cnpjCpf} já existe`);
       }
 
-      // Inserir o novo cliente
       const result = await this.databaseService.query(
-        `INSERT INTO nfe.destinatario
+        `INSERT INTO dbo.destinatario
           (cnpj_cpf, tipo, razao_social, nome_fantasia, inscricao_estadual, 
            inscricao_municipal, endereco, numero, complemento, bairro, 
            cidade_id, cep, telefone, email, ativo)
@@ -62,9 +60,9 @@ export class CustomersService {
     try {
       const result = await this.databaseService.query(`
         SELECT d.*, c.nome as cidade_nome, e.nome as estado_nome, e.uf
-        FROM nfe.destinatario d
-        LEFT JOIN nfe.cidade c ON d.cidade_id = c.id
-        LEFT JOIN nfe.estado e ON c.estado_id = e.id
+        FROM dbo.destinatario d
+        LEFT JOIN dbo.cidade c ON d.cidade_id = c.id
+        LEFT JOIN dbo.estado e ON c.estado_id = e.id
         ORDER BY d.razao_social
       `);
 
@@ -79,9 +77,9 @@ export class CustomersService {
     try {
       const result = await this.databaseService.query(`
         SELECT d.*, c.nome as cidade_nome, e.nome as estado_nome, e.uf
-        FROM nfe.destinatario d
-        LEFT JOIN nfe.cidade c ON d.cidade_id = c.id
-        LEFT JOIN nfe.estado e ON c.estado_id = e.id
+        FROM dbo.destinatario d
+        LEFT JOIN dbo.cidade c ON d.cidade_id = c.id
+        LEFT JOIN dbo.estado e ON c.estado_id = e.id
         WHERE d.cnpj_cpf = $1
       `, [cnpjCpf]);
 
@@ -101,9 +99,8 @@ export class CustomersService {
 
   async update(cnpjCpf: string, updateCustomerDto: UpdateCustomerDto): Promise<Customer> {
     try {
-      // Verificar se o cliente existe
       const existingCustomer = await this.databaseService.query(
-        'SELECT cnpj_cpf FROM nfe.destinatario WHERE cnpj_cpf = $1',
+        'SELECT cnpj_cpf FROM dbo.destinatario WHERE cnpj_cpf = $1',
         [cnpjCpf]
       );
 
@@ -111,79 +108,77 @@ export class CustomersService {
         throw new NotFoundException(`Cliente com CNPJ/CPF ${cnpjCpf} não encontrado`);
       }
 
-      // Construir a consulta de atualização dinamicamente
       const updates: string[] = [];
       const values: any[] = [];
       let paramCounter = 1;
 
-      // Adicionar cada campo do DTO à consulta, se estiver definido
       if (updateCustomerDto.tipo !== undefined) {
-        updates.push(`tipo = ${paramCounter++}`);
+        updates.push(`tipo = $${paramCounter++}`);
         values.push(updateCustomerDto.tipo);
       }
 
       if (updateCustomerDto.razaoSocial !== undefined) {
-        updates.push(`razao_social = ${paramCounter++}`);
+        updates.push(`razao_social = $${paramCounter++}`);
         values.push(updateCustomerDto.razaoSocial);
       }
 
       if (updateCustomerDto.nomeFantasia !== undefined) {
-        updates.push(`nome_fantasia = ${paramCounter++}`);
+        updates.push(`nome_fantasia = $${paramCounter++}`);
         values.push(updateCustomerDto.nomeFantasia);
       }
 
       if (updateCustomerDto.inscricaoEstadual !== undefined) {
-        updates.push(`inscricao_estadual = ${paramCounter++}`);
+        updates.push(`inscricao_estadual = $${paramCounter++}`);
         values.push(updateCustomerDto.inscricaoEstadual);
       }
 
       if (updateCustomerDto.inscricaoMunicipal !== undefined) {
-        updates.push(`inscricao_municipal = ${paramCounter++}`);
+        updates.push(`inscricao_municipal = $${paramCounter++}`);
         values.push(updateCustomerDto.inscricaoMunicipal);
       }
 
       if (updateCustomerDto.endereco !== undefined) {
-        updates.push(`endereco = ${paramCounter++}`);
+        updates.push(`endereco = $${paramCounter++}`);
         values.push(updateCustomerDto.endereco);
       }
 
       if (updateCustomerDto.numero !== undefined) {
-        updates.push(`numero = ${paramCounter++}`);
+        updates.push(`numero = $${paramCounter++}`);
         values.push(updateCustomerDto.numero);
       }
 
       if (updateCustomerDto.complemento !== undefined) {
-        updates.push(`complemento = ${paramCounter++}`);
+        updates.push(`complemento = $${paramCounter++}`);
         values.push(updateCustomerDto.complemento);
       }
 
       if (updateCustomerDto.bairro !== undefined) {
-        updates.push(`bairro = ${paramCounter++}`);
+        updates.push(`bairro = $${paramCounter++}`);
         values.push(updateCustomerDto.bairro);
       }
 
       if (updateCustomerDto.cidadeId !== undefined) {
-        updates.push(`cidade_id = ${paramCounter++}`);
+        updates.push(`cidade_id = $${paramCounter++}`);
         values.push(updateCustomerDto.cidadeId);
       }
 
       if (updateCustomerDto.cep !== undefined) {
-        updates.push(`cep = ${paramCounter++}`);
+        updates.push(`cep = $${paramCounter++}`);
         values.push(updateCustomerDto.cep);
       }
 
       if (updateCustomerDto.telefone !== undefined) {
-        updates.push(`telefone = ${paramCounter++}`);
+        updates.push(`telefone = $${paramCounter++}`);
         values.push(updateCustomerDto.telefone);
       }
 
       if (updateCustomerDto.email !== undefined) {
-        updates.push(`email = ${paramCounter++}`);
+        updates.push(`email = $${paramCounter++}`);
         values.push(updateCustomerDto.email);
       }
 
       if (updateCustomerDto.ativo !== undefined) {
-        updates.push(`ativo = ${paramCounter++}`);
+        updates.push(`ativo = $${paramCounter++}`);
         values.push(updateCustomerDto.ativo);
       }
 
@@ -197,9 +192,9 @@ export class CustomersService {
 
       // Executar a consulta de atualização
       const updateQuery = `
-        UPDATE nfe.destinatario
+        UPDATE dbo.destinatario
         SET ${updates.join(', ')}
-        WHERE cnpj_cpf = ${paramCounter}
+        WHERE cnpj_cpf = $${paramCounter}
         RETURNING *
       `;
 
@@ -218,7 +213,7 @@ export class CustomersService {
     try {
       // Verificar se o cliente existe
       const existingCustomer = await this.databaseService.query(
-        'SELECT cnpj_cpf FROM nfe.destinatario WHERE cnpj_cpf = $1',
+        'SELECT cnpj_cpf FROM dbo.destinatario WHERE cnpj_cpf = $1',
         [cnpjCpf]
       );
 
@@ -228,20 +223,20 @@ export class CustomersService {
 
       // Verificar se o cliente está sendo referenciado em alguma nota fiscal
       const hasReferences = await this.databaseService.query(
-        'SELECT chave_acesso FROM nfe.nfe WHERE cnpj_destinatario = $1 LIMIT 1',
+        'SELECT chave_acesso FROM dbo.nfe WHERE cnpj_destinatario = $1 LIMIT 1',
         [cnpjCpf]
       );
 
       if (hasReferences.rowCount > 0) {
         // Em vez de excluir, marcamos como inativo
         await this.databaseService.query(
-          'UPDATE nfe.destinatario SET ativo = false WHERE cnpj_cpf = $1',
+          'UPDATE dbo.destinatario SET ativo = false WHERE cnpj_cpf = $1',
           [cnpjCpf]
         );
       } else {
         // Se não há referências, podemos excluir
         await this.databaseService.query(
-          'DELETE FROM nfe.destinatario WHERE cnpj_cpf = $1',
+          'DELETE FROM dbo.destinatario WHERE cnpj_cpf = $1',
           [cnpjCpf]
         );
       }
@@ -254,9 +249,6 @@ export class CustomersService {
     }
   }
 
-  /**
-   * Mapeia um registro do banco de dados para a entidade Customer
-   */
   private mapToCustomerEntity(dbRecord: any): Customer {
     const customer: Customer = {
       cnpjCpf: dbRecord.cnpj_cpf,
