@@ -6,6 +6,7 @@ import * as DailyRotateFile from 'winston-daily-rotate-file';
 import * as fs from 'fs';
 import * as winston from 'winston';
 import * as path from 'path';
+import * as express from 'express';
 import { ValidationPipe } from './common/pipes/validation.pipe';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { INestApplication } from '@nestjs/common';
@@ -68,8 +69,17 @@ async function bootstrap() {
 
   configureGlobalPipes(app);
   configureGlobalFilters(app);
-
   configureSwagger(app);
+
+  app.use(express.static(path.join(__dirname, '..', 'wwwroot')));
+  
+  // Redirecionar todas as requisições não-API para o index.html
+  app.use('*', (req, res, next) => {
+    if (!req.originalUrl.startsWith('/api/') && !req.originalUrl.startsWith('/api/docs')) {
+      return res.sendFile(path.join(__dirname, '..', 'wwwroot', 'index.html'));
+    }
+    next();
+  });
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
