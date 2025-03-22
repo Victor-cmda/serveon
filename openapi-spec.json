@@ -754,6 +754,256 @@
           "States"
         ]
       }
+    },
+    "/api/cities": {
+      "post": {
+        "operationId": "CitiesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cidade criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/City"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "404": {
+            "description": "Estado não encontrado"
+          },
+          "409": {
+            "description": "Cidade com mesmo nome ou código IBGE já existe"
+          }
+        },
+        "summary": "Criar nova cidade",
+        "tags": [
+          "Cities"
+        ]
+      },
+      "get": {
+        "operationId": "CitiesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de cidades retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/City"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todas as cidades",
+        "tags": [
+          "Cities"
+        ]
+      }
+    },
+    "/api/cities/estado/{estadoId}": {
+      "get": {
+        "operationId": "CitiesController_findByEstado",
+        "parameters": [
+          {
+            "name": "estadoId",
+            "required": true,
+            "in": "path",
+            "description": "ID do estado",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de cidades do estado retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/City"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Estado não encontrado"
+          }
+        },
+        "summary": "Listar cidades por estado",
+        "tags": [
+          "Cities"
+        ]
+      }
+    },
+    "/api/cities/ibge/{codigoIbge}": {
+      "get": {
+        "operationId": "CitiesController_findByIbgeCode",
+        "parameters": [
+          {
+            "name": "codigoIbge",
+            "required": true,
+            "in": "path",
+            "description": "Código IBGE da cidade",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cidade encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/City"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cidade não encontrada"
+          }
+        },
+        "summary": "Obter cidade por código IBGE",
+        "tags": [
+          "Cities"
+        ]
+      }
+    },
+    "/api/cities/{id}": {
+      "get": {
+        "operationId": "CitiesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da cidade",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cidade encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/City"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cidade não encontrada"
+          }
+        },
+        "summary": "Obter cidade por ID",
+        "tags": [
+          "Cities"
+        ]
+      },
+      "patch": {
+        "operationId": "CitiesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da cidade",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cidade atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/City"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "404": {
+            "description": "Cidade não encontrada"
+          },
+          "409": {
+            "description": "Cidade com mesmo nome ou código IBGE já existe"
+          }
+        },
+        "summary": "Atualizar cidade por ID",
+        "tags": [
+          "Cities"
+        ]
+      },
+      "delete": {
+        "operationId": "CitiesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da cidade",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Cidade removida com sucesso"
+          },
+          "404": {
+            "description": "Cidade não encontrada"
+          },
+          "409": {
+            "description": "Não é possível excluir a cidade pois ela está sendo referenciada"
+          }
+        },
+        "summary": "Remover cidade por ID",
+        "tags": [
+          "Cities"
+        ]
+      }
     }
   },
   "info": {
@@ -1226,6 +1476,96 @@
         ]
       },
       "UpdateStateDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateCityDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome da cidade",
+            "example": "São Paulo"
+          },
+          "codigoIbge": {
+            "type": "string",
+            "description": "Código IBGE da cidade",
+            "example": "3550308"
+          },
+          "estadoId": {
+            "type": "string",
+            "description": "ID do estado ao qual a cidade pertence (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          }
+        },
+        "required": [
+          "nome",
+          "estadoId"
+        ]
+      },
+      "City": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID único da cidade (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome da cidade",
+            "example": "São Paulo"
+          },
+          "codigoIbge": {
+            "type": "string",
+            "description": "Código IBGE da cidade",
+            "example": "3550308"
+          },
+          "estadoId": {
+            "type": "string",
+            "description": "ID do estado ao qual a cidade pertence (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de criação do registro",
+            "example": "2023-01-15T12:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data da última atualização do registro",
+            "example": "2023-01-15T12:00:00.000Z"
+          },
+          "estadoNome": {
+            "type": "string",
+            "description": "Nome do estado",
+            "example": "São Paulo"
+          },
+          "uf": {
+            "type": "string",
+            "description": "UF do estado",
+            "example": "SP"
+          },
+          "paisNome": {
+            "type": "string",
+            "description": "Nome do país",
+            "example": "Brasil"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "estadoId",
+          "createdAt",
+          "updatedAt",
+          "estadoNome",
+          "uf",
+          "paisNome"
+        ]
+      },
+      "UpdateCityDto": {
         "type": "object",
         "properties": {}
       }

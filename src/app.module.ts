@@ -5,6 +5,7 @@ import { CustomersModule } from './modules/customers/customers.module';
 import { DatabaseModule } from './common/database/database.module';
 import { CountriesModule } from './modules/countries/countries.module';
 import { StatesModule } from './modules/states/states.module';
+import { CitiesModule } from './modules/cities/cities.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { StatesModule } from './modules/states/states.module';
     CustomersModule,
     CountriesModule,
     StatesModule,
+    CitiesModule,
   ],
 })
 export class AppModule { }
