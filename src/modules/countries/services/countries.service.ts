@@ -10,7 +10,6 @@ export class CountriesService {
 
     async create(createCountryDto: CreateCountryDto): Promise<Country> {
         try {
-            // Verificar se já existe um país com o mesmo código
             const existingCodeCountry = await this.databaseService.query(
                 'SELECT id FROM dbo.pais WHERE codigo = $1',
                 [createCountryDto.codigo]
@@ -20,7 +19,6 @@ export class CountriesService {
                 throw new ConflictException(`País com código ${createCountryDto.codigo} já existe`);
             }
 
-            // Verificar se já existe um país com a mesma sigla
             const existingSiglaCountry = await this.databaseService.query(
                 'SELECT id FROM dbo.pais WHERE sigla = $1',
                 [createCountryDto.sigla]
@@ -30,13 +28,12 @@ export class CountriesService {
                 throw new ConflictException(`País com sigla ${createCountryDto.sigla} já existe`);
             }
 
-            // Inserir o novo país
             const result = await this.databaseService.query(
                 `INSERT INTO dbo.pais
-          (nome, codigo, sigla)
-         VALUES
-          ($1, $2, $3)
-         RETURNING *`,
+                    (nome, codigo, sigla)
+                VALUES
+                    ($1, $2, $3)
+                RETURNING *`,
                 [
                     createCountryDto.nome,
                     createCountryDto.codigo,
@@ -133,7 +130,6 @@ export class CountriesService {
 
     async update(id: string, updateCountryDto: UpdateCountryDto): Promise<Country> {
         try {
-            // Verificar se o país existe
             const existingCountry = await this.databaseService.query(
                 'SELECT id FROM dbo.pais WHERE id = $1',
                 [id]
@@ -143,7 +139,6 @@ export class CountriesService {
                 throw new NotFoundException(`País com ID ${id} não encontrado`);
             }
 
-            // Se estiver atualizando o código, verificar se já existe outro país com este código
             if (updateCountryDto.codigo) {
                 const existingCode = await this.databaseService.query(
                     'SELECT id FROM dbo.pais WHERE codigo = $1 AND id != $2',
@@ -155,7 +150,6 @@ export class CountriesService {
                 }
             }
 
-            // Se estiver atualizando a sigla, verificar se já existe outro país com esta sigla
             if (updateCountryDto.sigla) {
                 const existingSigla = await this.databaseService.query(
                     'SELECT id FROM dbo.pais WHERE sigla = $1 AND id != $2',
@@ -167,12 +161,10 @@ export class CountriesService {
                 }
             }
 
-            // Construir a consulta de atualização dinamicamente
             const updates: string[] = [];
             const values: any[] = [];
             let paramCounter = 1;
 
-            // Adicionar cada campo do DTO à consulta, se estiver definido
             if (updateCountryDto.nome !== undefined) {
                 updates.push(`nome = $${paramCounter++}`);
                 values.push(updateCountryDto.nome);
@@ -188,15 +180,12 @@ export class CountriesService {
                 values.push(updateCountryDto.sigla);
             }
 
-            // Se não houver campos para atualizar, retornar o país atual
             if (updates.length === 0) {
                 return this.findOne(id);
             }
 
-            // Adicionar o id aos valores
             values.push(id);
 
-            // Executar a consulta de atualização
             const updateQuery = `
         UPDATE dbo.pais
         SET ${updates.join(', ')}
@@ -217,7 +206,6 @@ export class CountriesService {
 
     async remove(id: string): Promise<void> {
         try {
-            // Verificar se o país existe
             const existingCountry = await this.databaseService.query(
                 'SELECT id FROM dbo.pais WHERE id = $1',
                 [id]
@@ -227,7 +215,6 @@ export class CountriesService {
                 throw new NotFoundException(`País com ID ${id} não encontrado`);
             }
 
-            // Verificar se o país está sendo referenciado na tabela estado
             const hasEstados = await this.databaseService.query(
                 'SELECT id FROM dbo.estado WHERE pais_id = $1 LIMIT 1',
                 [id]
@@ -237,7 +224,6 @@ export class CountriesService {
                 throw new ConflictException(`Não é possível excluir o país pois ele possui estados vinculados`);
             }
 
-            // Excluir o país
             await this.databaseService.query(
                 'DELETE FROM dbo.pais WHERE id = $1',
                 [id]
@@ -251,9 +237,6 @@ export class CountriesService {
         }
     }
 
-    /**
-     * Mapeia um registro do banco de dados para a entidade Country
-     */
     private mapToCountryEntity(dbRecord: any): Country {
         return {
             id: dbRecord.id,

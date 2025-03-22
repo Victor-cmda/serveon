@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/employees": {
+    "/api/employees": {
       "post": {
         "operationId": "EmployeesController_create",
         "parameters": [],
@@ -37,7 +37,7 @@
         ]
       }
     },
-    "/employees/{id}": {
+    "/api/employees/{id}": {
       "get": {
         "operationId": "EmployeesController_findOne",
         "parameters": [
@@ -112,7 +112,7 @@
         ]
       }
     },
-    "/customers": {
+    "/api/customers": {
       "post": {
         "operationId": "CustomersController_create",
         "parameters": [],
@@ -128,9 +128,23 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "Cliente criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "409": {
+            "description": "Cliente com mesmo CNPJ/CPF já existe"
           }
         },
+        "summary": "Criar novo cliente",
         "tags": [
           "Customers"
         ]
@@ -140,15 +154,26 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Lista de clientes retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            }
           }
         },
+        "summary": "Listar todos os clientes",
         "tags": [
           "Customers"
         ]
       }
     },
-    "/customers/{id}": {
+    "/api/customers/{id}": {
       "get": {
         "operationId": "CustomersController_findOne",
         "parameters": [
@@ -156,6 +181,7 @@
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "CNPJ/CPF do cliente",
             "schema": {
               "type": "string"
             }
@@ -163,9 +189,20 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Cliente encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cliente não encontrado"
           }
         },
+        "summary": "Obter cliente por CNPJ/CPF",
         "tags": [
           "Customers"
         ]
@@ -177,6 +214,7 @@
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "CNPJ/CPF do cliente",
             "schema": {
               "type": "string"
             }
@@ -194,9 +232,23 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "Cliente atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "404": {
+            "description": "Cliente não encontrado"
           }
         },
+        "summary": "Atualizar cliente por CNPJ/CPF",
         "tags": [
           "Customers"
         ]
@@ -208,6 +260,96 @@
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "CNPJ/CPF do cliente",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Cliente removido com sucesso"
+          },
+          "404": {
+            "description": "Cliente não encontrado"
+          }
+        },
+        "summary": "Remover cliente por CNPJ/CPF",
+        "tags": [
+          "Customers"
+        ]
+      }
+    },
+    "/api/countries": {
+      "post": {
+        "operationId": "CountriesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCountryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "País criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Country"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "409": {
+            "description": "País com mesmo código ou sigla já existe"
+          }
+        },
+        "summary": "Criar novo país",
+        "tags": [
+          "Countries"
+        ]
+      },
+      "get": {
+        "operationId": "CountriesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de países retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Country"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todos os países",
+        "tags": [
+          "Countries"
+        ]
+      }
+    },
+    "/api/countries/code/{code}": {
+      "get": {
+        "operationId": "CountriesController_findByCode",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "description": "Código do país",
             "schema": {
               "type": "string"
             }
@@ -215,38 +357,875 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "País encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Country"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "País não encontrado"
           }
         },
+        "summary": "Obter país por código",
         "tags": [
-          "Customers"
+          "Countries"
+        ]
+      }
+    },
+    "/api/countries/sigla/{sigla}": {
+      "get": {
+        "operationId": "CountriesController_findBySigla",
+        "parameters": [
+          {
+            "name": "sigla",
+            "required": true,
+            "in": "path",
+            "description": "Sigla do país",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "País encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Country"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "País não encontrado"
+          }
+        },
+        "summary": "Obter país por sigla",
+        "tags": [
+          "Countries"
+        ]
+      }
+    },
+    "/api/countries/{id}": {
+      "get": {
+        "operationId": "CountriesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do país",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "País encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Country"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "País não encontrado"
+          }
+        },
+        "summary": "Obter país por ID",
+        "tags": [
+          "Countries"
+        ]
+      },
+      "patch": {
+        "operationId": "CountriesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do país",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCountryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "País atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Country"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "404": {
+            "description": "País não encontrado"
+          },
+          "409": {
+            "description": "País com mesmo código ou sigla já existe"
+          }
+        },
+        "summary": "Atualizar país por ID",
+        "tags": [
+          "Countries"
+        ]
+      },
+      "delete": {
+        "operationId": "CountriesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do país",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "País removido com sucesso"
+          },
+          "404": {
+            "description": "País não encontrado"
+          },
+          "409": {
+            "description": "Não é possível excluir o país pois ele possui estados vinculados"
+          }
+        },
+        "summary": "Remover país por ID",
+        "tags": [
+          "Countries"
+        ]
+      }
+    },
+    "/api/states": {
+      "post": {
+        "operationId": "StatesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Estado criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/State"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "404": {
+            "description": "País não encontrado"
+          },
+          "409": {
+            "description": "Estado com mesma UF já existe para o país informado"
+          }
+        },
+        "summary": "Criar novo estado",
+        "tags": [
+          "States"
+        ]
+      },
+      "get": {
+        "operationId": "StatesController_findAll",
+        "parameters": [
+          {
+            "name": "paisId",
+            "required": false,
+            "in": "query",
+            "description": "Filtrar estados por país",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de estados retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/State"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todos os estados",
+        "tags": [
+          "States"
+        ]
+      }
+    },
+    "/api/states/uf/{uf}/pais/{paisId}": {
+      "get": {
+        "operationId": "StatesController_findByUf",
+        "parameters": [
+          {
+            "name": "uf",
+            "required": true,
+            "in": "path",
+            "description": "UF do estado",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "paisId",
+            "required": true,
+            "in": "path",
+            "description": "ID do país",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/State"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Estado não encontrado"
+          }
+        },
+        "summary": "Obter estado por UF e país",
+        "tags": [
+          "States"
+        ]
+      }
+    },
+    "/api/states/{id}": {
+      "get": {
+        "operationId": "StatesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do estado",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/State"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Estado não encontrado"
+          }
+        },
+        "summary": "Obter estado por ID",
+        "tags": [
+          "States"
+        ]
+      },
+      "patch": {
+        "operationId": "StatesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do estado",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estado atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/State"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "404": {
+            "description": "Estado não encontrado"
+          },
+          "409": {
+            "description": "Estado com mesma UF já existe para o país informado"
+          }
+        },
+        "summary": "Atualizar estado por ID",
+        "tags": [
+          "States"
+        ]
+      },
+      "delete": {
+        "operationId": "StatesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do estado",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Estado removido com sucesso"
+          },
+          "404": {
+            "description": "Estado não encontrado"
+          },
+          "409": {
+            "description": "Não é possível excluir o estado pois ele possui cidades vinculadas"
+          }
+        },
+        "summary": "Remover estado por ID",
+        "tags": [
+          "States"
         ]
       }
     }
   },
   "info": {
-    "title": "Serveon",
-    "description": "Documentação Serveon API",
+    "title": "Serveon API",
+    "description": "API RESTful para o sistema Serveon",
     "version": "1.0",
     "contact": {}
   },
   "tags": [],
   "servers": [],
   "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
     "schemas": {
       "CreateEmployeeDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome completo do funcionário",
+            "example": "João da Silva"
+          },
+          "cpf": {
+            "type": "string",
+            "description": "CPF do funcionário (apenas números)",
+            "example": "12345678901"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email profissional do funcionário",
+            "example": "joao.silva@empresa.com"
+          },
+          "telefone": {
+            "type": "string",
+            "description": "Telefone de contato",
+            "example": "11987654321"
+          },
+          "cargo": {
+            "type": "string",
+            "description": "Cargo do funcionário",
+            "example": "Vendedor"
+          },
+          "departamento": {
+            "type": "string",
+            "description": "Departamento do funcionário",
+            "example": "Comercial"
+          },
+          "dataAdmissao": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de admissão no formato YYYY-MM-DD",
+            "example": "2023-01-15"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status ativo/inativo do funcionário",
+            "example": true,
+            "default": true
+          }
+        },
+        "required": [
+          "nome",
+          "cpf",
+          "email",
+          "cargo",
+          "departamento",
+          "dataAdmissao",
+          "ativo"
+        ]
       },
       "UpdateEmployeeDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "dataDemissao": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de demissão no formato YYYY-MM-DD",
+            "example": "2023-12-31"
+          }
+        }
       },
       "CreateCustomerDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "cnpjCpf": {
+            "type": "string",
+            "description": "CNPJ ou CPF do cliente (apenas números)",
+            "example": "12345678901234"
+          },
+          "tipo": {
+            "type": "string",
+            "description": "Tipo de cliente: F para Pessoa Física, J para Pessoa Jurídica",
+            "example": "J",
+            "enum": [
+              "F",
+              "J"
+            ]
+          },
+          "razaoSocial": {
+            "type": "string",
+            "description": "Razão Social ou Nome Completo",
+            "example": "Empresa XYZ Ltda"
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "description": "Nome Fantasia (opcional)",
+            "example": "XYZ Tecnologia"
+          },
+          "inscricaoEstadual": {
+            "type": "string",
+            "description": "Inscrição Estadual (opcional)",
+            "example": "123456789"
+          },
+          "inscricaoMunicipal": {
+            "type": "string",
+            "description": "Inscrição Municipal (opcional)",
+            "example": "123456"
+          },
+          "endereco": {
+            "type": "string",
+            "description": "Endereço (opcional)",
+            "example": "Av. Brasil"
+          },
+          "numero": {
+            "type": "string",
+            "description": "Número do endereço (opcional)",
+            "example": "123"
+          },
+          "complemento": {
+            "type": "string",
+            "description": "Complemento do endereço (opcional)",
+            "example": "Sala 101"
+          },
+          "bairro": {
+            "type": "string",
+            "description": "Bairro (opcional)",
+            "example": "Centro"
+          },
+          "cidadeId": {
+            "type": "string",
+            "description": "ID da cidade no sistema (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "cep": {
+            "type": "string",
+            "description": "CEP (opcional)",
+            "example": "12345678"
+          },
+          "telefone": {
+            "type": "string",
+            "description": "Telefone (opcional)",
+            "example": "11987654321"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email (opcional)",
+            "example": "contato@empresa.com"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status ativo/inativo do cliente",
+            "example": true,
+            "default": true
+          }
+        },
+        "required": [
+          "cnpjCpf",
+          "tipo",
+          "razaoSocial",
+          "cidadeId",
+          "ativo"
+        ]
+      },
+      "Customer": {
+        "type": "object",
+        "properties": {
+          "cnpjCpf": {
+            "type": "string",
+            "description": "CNPJ ou CPF do cliente",
+            "example": "12345678901234"
+          },
+          "tipo": {
+            "type": "string",
+            "description": "Tipo de cliente: F para Pessoa Física, J para Pessoa Jurídica",
+            "example": "J",
+            "enum": [
+              "F",
+              "J"
+            ]
+          },
+          "razaoSocial": {
+            "type": "string",
+            "description": "Razão Social ou Nome Completo",
+            "example": "Empresa XYZ Ltda"
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "description": "Nome Fantasia",
+            "example": "XYZ Tecnologia"
+          },
+          "inscricaoEstadual": {
+            "type": "string",
+            "description": "Inscrição Estadual",
+            "example": "123456789"
+          },
+          "inscricaoMunicipal": {
+            "type": "string",
+            "description": "Inscrição Municipal",
+            "example": "123456"
+          },
+          "endereco": {
+            "type": "string",
+            "description": "Endereço",
+            "example": "Av. Brasil"
+          },
+          "numero": {
+            "type": "string",
+            "description": "Número do endereço",
+            "example": "123"
+          },
+          "complemento": {
+            "type": "string",
+            "description": "Complemento do endereço",
+            "example": "Sala 101"
+          },
+          "bairro": {
+            "type": "string",
+            "description": "Bairro",
+            "example": "Centro"
+          },
+          "cidadeId": {
+            "type": "string",
+            "description": "ID da cidade (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "cep": {
+            "type": "string",
+            "description": "CEP",
+            "example": "12345678"
+          },
+          "telefone": {
+            "type": "string",
+            "description": "Telefone",
+            "example": "11987654321"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email",
+            "example": "contato@empresa.com"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status ativo/inativo do cliente",
+            "example": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de criação",
+            "example": "2023-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data da última atualização",
+            "example": "2023-01-01T00:00:00.000Z"
+          },
+          "cidadeNome": {
+            "type": "string",
+            "description": "Nome da cidade",
+            "example": "São Paulo"
+          },
+          "estadoNome": {
+            "type": "string",
+            "description": "Nome do estado",
+            "example": "São Paulo"
+          },
+          "uf": {
+            "type": "string",
+            "description": "UF do estado",
+            "example": "SP"
+          }
+        },
+        "required": [
+          "cnpjCpf",
+          "tipo",
+          "razaoSocial",
+          "nomeFantasia",
+          "inscricaoEstadual",
+          "inscricaoMunicipal",
+          "endereco",
+          "numero",
+          "complemento",
+          "bairro",
+          "cidadeId",
+          "cep",
+          "telefone",
+          "email",
+          "ativo",
+          "createdAt",
+          "updatedAt",
+          "cidadeNome",
+          "estadoNome",
+          "uf"
+        ]
       },
       "UpdateCustomerDto": {
+        "type": "object",
+        "properties": {
+          "ativo": {
+            "type": "boolean",
+            "description": "Status ativo/inativo do cliente",
+            "example": true
+          }
+        }
+      },
+      "CreateCountryDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome do país",
+            "example": "Brasil"
+          },
+          "codigo": {
+            "type": "string",
+            "description": "Código de chamada internacional do país",
+            "example": "55"
+          },
+          "sigla": {
+            "type": "string",
+            "description": "Sigla do país (2 caracteres)",
+            "example": "BR"
+          }
+        },
+        "required": [
+          "nome",
+          "codigo",
+          "sigla"
+        ]
+      },
+      "Country": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID único do país (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome do país",
+            "example": "Brasil"
+          },
+          "codigo": {
+            "type": "string",
+            "description": "Código de chamada internacional do país",
+            "example": "55"
+          },
+          "sigla": {
+            "type": "string",
+            "description": "Sigla do país",
+            "example": "BR"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de criação do registro",
+            "example": "2023-01-15T12:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data da última atualização do registro",
+            "example": "2023-01-15T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "codigo",
+          "sigla",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateCountryDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateStateDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome do estado",
+            "example": "São Paulo"
+          },
+          "uf": {
+            "type": "string",
+            "description": "UF do estado (2 caracteres)",
+            "example": "SP"
+          },
+          "paisId": {
+            "type": "string",
+            "description": "ID do país ao qual o estado pertence (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          }
+        },
+        "required": [
+          "nome",
+          "uf",
+          "paisId"
+        ]
+      },
+      "State": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID único do estado (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome do estado",
+            "example": "São Paulo"
+          },
+          "uf": {
+            "type": "string",
+            "description": "UF do estado",
+            "example": "SP"
+          },
+          "paisId": {
+            "type": "string",
+            "description": "ID do país ao qual o estado pertence (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "paisNome": {
+            "type": "string",
+            "description": "Nome do país ao qual o estado pertence",
+            "example": "Brasil"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de criação do registro",
+            "example": "2023-01-15T12:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data da última atualização do registro",
+            "example": "2023-01-15T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "uf",
+          "paisId",
+          "paisNome",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateStateDto": {
         "type": "object",
         "properties": {}
       }

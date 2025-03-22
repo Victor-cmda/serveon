@@ -182,15 +182,12 @@ export class CustomersService {
         values.push(updateCustomerDto.ativo);
       }
 
-      // Se não houver campos para atualizar, retornar o cliente atual
       if (updates.length === 0) {
         return this.findOne(cnpjCpf);
       }
 
-      // Adicionar o cnpj_cpf aos valores
       values.push(cnpjCpf);
 
-      // Executar a consulta de atualização
       const updateQuery = `
         UPDATE dbo.destinatario
         SET ${updates.join(', ')}
@@ -211,7 +208,6 @@ export class CustomersService {
 
   async remove(cnpjCpf: string): Promise<void> {
     try {
-      // Verificar se o cliente existe
       const existingCustomer = await this.databaseService.query(
         'SELECT cnpj_cpf FROM dbo.destinatario WHERE cnpj_cpf = $1',
         [cnpjCpf]
@@ -221,20 +217,17 @@ export class CustomersService {
         throw new NotFoundException(`Cliente com CNPJ/CPF ${cnpjCpf} não encontrado`);
       }
 
-      // Verificar se o cliente está sendo referenciado em alguma nota fiscal
       const hasReferences = await this.databaseService.query(
         'SELECT chave_acesso FROM dbo.nfe WHERE cnpj_destinatario = $1 LIMIT 1',
         [cnpjCpf]
       );
 
       if (hasReferences.rowCount > 0) {
-        // Em vez de excluir, marcamos como inativo
         await this.databaseService.query(
           'UPDATE dbo.destinatario SET ativo = false WHERE cnpj_cpf = $1',
           [cnpjCpf]
         );
       } else {
-        // Se não há referências, podemos excluir
         await this.databaseService.query(
           'DELETE FROM dbo.destinatario WHERE cnpj_cpf = $1',
           [cnpjCpf]

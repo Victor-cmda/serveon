@@ -6,11 +6,10 @@ import { Employee } from '../entities/employee.entity';
 
 @Injectable()
 export class EmployeesService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly databaseService: DatabaseService) { }
 
   async create(createEmployeeDto: CreateEmployeeDto): Promise<Employee> {
     try {
-      // Verificar se já existe um funcionário com o mesmo CPF
       const existingEmployee = await this.databaseService.query(
         'SELECT id FROM dbo.funcionario WHERE cpf = $1',
         [createEmployeeDto.cpf]
@@ -20,7 +19,6 @@ export class EmployeesService {
         throw new ConflictException(`Funcionário com CPF ${createEmployeeDto.cpf} já existe`);
       }
 
-      // Verificar se já existe um funcionário com o mesmo email
       const existingEmail = await this.databaseService.query(
         'SELECT id FROM dbo.funcionario WHERE email = $1',
         [createEmployeeDto.email]
@@ -30,7 +28,6 @@ export class EmployeesService {
         throw new ConflictException(`Email ${createEmployeeDto.email} já está em uso`);
       }
 
-      // Inserir o novo funcionário
       const result = await this.databaseService.query(
         `INSERT INTO dbo.funcionario
           (nome, cpf, email, telefone, cargo, departamento, data_admissao, ativo)
@@ -96,7 +93,6 @@ export class EmployeesService {
 
   async update(id: number, updateEmployeeDto: UpdateEmployeeDto): Promise<Employee> {
     try {
-      // Verificar se o funcionário existe
       const existingEmployee = await this.databaseService.query(
         'SELECT id FROM dbo.funcionario WHERE id = $1',
         [id]
@@ -106,7 +102,6 @@ export class EmployeesService {
         throw new NotFoundException(`Funcionário com ID ${id} não encontrado`);
       }
 
-      // Se estiver atualizando o email, verificar se já existe
       if (updateEmployeeDto.email) {
         const existingEmail = await this.databaseService.query(
           'SELECT id FROM dbo.funcionario WHERE email = $1 AND id != $2',
@@ -118,7 +113,6 @@ export class EmployeesService {
         }
       }
 
-      // Se estiver atualizando o CPF, verificar se já existe
       if (updateEmployeeDto.cpf) {
         const existingCpf = await this.databaseService.query(
           'SELECT id FROM dbo.funcionario WHERE cpf = $1 AND id != $2',
@@ -130,12 +124,10 @@ export class EmployeesService {
         }
       }
 
-      // Construir a consulta de atualização dinamicamente
       const updates: string[] = [];
       const values: any[] = [];
       let paramCounter = 1;
 
-      // Adicionar cada campo do DTO à consulta, se estiver definido
       if (updateEmployeeDto.nome !== undefined) {
         updates.push(`nome = $${paramCounter++}`);
         values.push(updateEmployeeDto.nome);
@@ -181,15 +173,12 @@ export class EmployeesService {
         values.push(updateEmployeeDto.ativo);
       }
 
-      // Se não houver campos para atualizar, retornar o funcionário atual
       if (updates.length === 0) {
         return this.findOne(id);
       }
 
-      // Adicionar o id aos valores
       values.push(id);
 
-      // Executar a consulta de atualização
       const updateQuery = `
         UPDATE dbo.funcionario
         SET ${updates.join(', ')}
@@ -210,7 +199,6 @@ export class EmployeesService {
 
   async remove(id: number): Promise<void> {
     try {
-      // Verificar se o funcionário existe
       const existingEmployee = await this.databaseService.query(
         'SELECT id FROM dbo.funcionario WHERE id = $1',
         [id]
@@ -220,18 +208,14 @@ export class EmployeesService {
         throw new NotFoundException(`Funcionário com ID ${id} não encontrado`);
       }
 
-      // Verificar se o funcionário está sendo referenciado em alguma tabela
-      // Se tiver referências, apenas desativar em vez de excluir
-      const hasReferences = false; // Implementar lógica para verificar referências se necessário
+      const hasReferences = false;
 
       if (hasReferences) {
-        // Desativar o funcionário
         await this.databaseService.query(
           'UPDATE dbo.funcionario SET ativo = false, data_demissao = CURRENT_DATE WHERE id = $1',
           [id]
         );
       } else {
-        // Se não há referências, podemos excluir
         await this.databaseService.query(
           'DELETE FROM dbo.funcionario WHERE id = $1',
           [id]
@@ -246,9 +230,7 @@ export class EmployeesService {
     }
   }
 
-  /**
-   * Mapeia um registro do banco de dados para a entidade Employee
-   */
+
   private mapToEmployeeEntity(dbRecord: any): Employee {
     return {
       id: dbRecord.id,
