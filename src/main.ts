@@ -73,9 +73,8 @@ async function bootstrap() {
 
   app.use(express.static(path.join(__dirname, '..', 'wwwroot')));
   
-  // Redirecionar todas as requisições não-API para o index.html
-  app.use('*', (req, res, next) => {
-    if (!req.originalUrl.startsWith('/api/') && !req.originalUrl.startsWith('/api/docs')) {
+  app.use((req, res, next) => {
+    if (req.originalUrl && !req.originalUrl.startsWith('/api/') && !req.originalUrl.startsWith('/api/docs')) {
       return res.sendFile(path.join(__dirname, '..', 'wwwroot', 'index.html'));
     }
     next();
