@@ -1,5 +1,3 @@
-// src/components/Sidebar.tsx
-import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";

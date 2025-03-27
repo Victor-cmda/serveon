@@ -10,7 +10,7 @@ import {
     UpdateCityDto
 } from '../types/location';
 
-const API_URL = '/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 const handleResponse = async (response: Response) => {
     if (!response.ok) {

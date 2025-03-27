@@ -33,7 +33,6 @@ import {
 import { stateApi, countryApi } from '@/services/api';
 import { Country, CreateStateDto, State } from '@/types/location';
 
-// Schema de validação
 const formSchema = z.object({
     nome: z.string().min(2, 'Nome do estado é obrigatório e deve ter pelo menos 2 caracteres'),
     uf: z.string().length(2, 'UF deve ter exatamente 2 caracteres').toUpperCase(),
@@ -56,7 +55,6 @@ const StateCreationDialog = ({
     const [isLoading, setIsLoading] = useState(false);
     const [countries, setCountries] = useState<Country[]>([]);
 
-    // Criar formulário
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -66,14 +64,12 @@ const StateCreationDialog = ({
         },
     });
 
-    // Atualizar valor do país quando selectedCountryId mudar
     useEffect(() => {
         if (selectedCountryId) {
             form.setValue('paisId', selectedCountryId);
         }
     }, [selectedCountryId, form]);
 
-    // Carregar países disponíveis
     useEffect(() => {
         const fetchCountries = async () => {
             try {
@@ -90,7 +86,6 @@ const StateCreationDialog = ({
         }
     }, [open]);
 
-    // Resetar formulário quando o diálogo fechar
     useEffect(() => {
         if (!open) {
             form.reset({

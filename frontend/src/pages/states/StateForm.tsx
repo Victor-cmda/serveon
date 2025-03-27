@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -23,7 +23,8 @@ import {
 } from "@/components/ui/select";
 import { stateApi, countryApi } from '@/services/api';
 import { CreateStateDto, UpdateStateDto, Country } from '@/types/location';
-import { toast } from "sonner";
+import { toast } from 'sonner';
+import CountryCreationDialog from '@/components/dialogs/CountryCreationDialog';
 
 const formSchema = z.object({
     nome: z.string().min(2, 'Nome do estado é obrigatório e deve ter pelo menos 2 caracteres'),
@@ -36,6 +37,7 @@ const StateForm = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [countries, setCountries] = useState<Country[]>([]);
+    const [countryDialogOpen, setCountryDialogOpen] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -53,14 +55,12 @@ const StateForm = () => {
                 setCountries(data);
             } catch (error) {
                 console.error('Erro ao buscar países:', error);
-                toast.error("Erro", {
-                    description: "Não foi possível carregar a lista de países.",
-                });
+                toast.error("Não foi possível carregar a lista de países.");
             }
         };
 
         fetchCountries();
-    }, [toast]);
+    }, []);
 
     useEffect(() => {
         const fetchState = async () => {
@@ -76,9 +76,7 @@ const StateForm = () => {
                 });
             } catch (error) {
                 console.error('Erro ao buscar estado:', error);
-                toast.error("Erro", {
-                    description: "Não foi possível carregar os dados do estado.",
-                });
+                toast.error("Não foi possível carregar os dados do estado.");
                 navigate('/states');
             } finally {
                 setIsLoading(false);
@@ -86,7 +84,7 @@ const StateForm = () => {
         };
 
         fetchState();
-    }, [id, navigate, toast, form]);
+    }, [id, navigate, form]);
 
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         setIsLoading(true);
@@ -100,9 +98,7 @@ const StateForm = () => {
                 };
 
                 await stateApi.update(id, updateData);
-                toast.success("Sucesso", {
-                    description: "Estado atualizado com sucesso!",
-                });
+                toast.success("Estado atualizado com sucesso!");
             } else {
                 const createData: CreateStateDto = {
                     nome: data.nome,
@@ -111,20 +107,22 @@ const StateForm = () => {
                 };
 
                 await stateApi.create(createData);
-                toast.success("Sucesso", {
-                    description: "Estado criado com sucesso!",
-                });
+                toast.success("Estado criado com sucesso!");
             }
 
             navigate('/states');
         } catch (error: any) {
             console.error('Erro ao salvar estado:', error);
-            toast.success("Sucesso", {
-                description: error.message || "Ocorreu um erro ao salvar o estado.",
-            });
+            toast.error(error.message || "Ocorreu um erro ao salvar o estado.");
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleCountryCreated = (newCountry: Country) => {
+        setCountries(prev => [...prev, newCountry]);
+
+        form.setValue('paisId', newCountry.id);
     };
 
     return (
@@ -149,24 +147,34 @@ const StateForm = () => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>País</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
-                                        disabled={isLoading}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Selecione um país" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {countries.map((country) => (
-                                                <SelectItem key={country.id} value={country.id}>
-                                                    {country.nome}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <div className="flex gap-2">
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            defaultValue={field.value}
+                                            disabled={isLoading}
+                                        >
+                                            <FormControl>
+                                                <SelectTrigger className="flex-1">
+                                                    <SelectValue placeholder="Selecione um país" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {countries.map((country) => (
+                                                    <SelectItem key={country.id} value={country.id}>
+                                                        {country.nome}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <Button
+                                            type="button"
+                                            size="icon"
+                                            onClick={() => setCountryDialogOpen(true)}
+                                            disabled={isLoading}
+                                        >
+                                            <Plus className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -215,6 +223,12 @@ const StateForm = () => {
                     </form>
                 </Form>
             </div>
+
+            <CountryCreationDialog
+                open={countryDialogOpen}
+                onOpenChange={setCountryDialogOpen}
+                onSuccess={handleCountryCreated}
+            />
         </div>
     );
 };

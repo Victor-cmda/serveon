@@ -63,7 +63,11 @@ async function bootstrap() {
     logger: loggerInstance
   });
 
-  app.enableCors();
+  app.enableCors({
+    origin: ['https://serveon-app.vercel.app', 'http://localhost:5173'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
 
   app.setGlobalPrefix('api');
 
@@ -72,7 +76,7 @@ async function bootstrap() {
   configureSwagger(app);
 
   app.use(express.static(path.join(__dirname, '..', 'wwwroot')));
-  
+
   app.use((req, res, next) => {
     if (req.originalUrl && !req.originalUrl.startsWith('/api/') && !req.originalUrl.startsWith('/api/docs')) {
       return res.sendFile(path.join(__dirname, '..', 'wwwroot', 'index.html'));

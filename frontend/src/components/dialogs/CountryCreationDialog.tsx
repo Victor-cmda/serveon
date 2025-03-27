@@ -1,4 +1,3 @@
-// src/components/dialogs/CountryCreationDialog.tsx
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,7 +25,6 @@ import {
 import { countryApi } from '@/services/api';
 import { Country, CreateCountryDto } from '@/types/location';
 
-// Schema de validação
 const formSchema = z.object({
     nome: z.string().min(2, 'Nome do país é obrigatório e deve ter pelo menos 2 caracteres'),
     sigla: z.string().length(2, 'Sigla deve ter exatamente 2 caracteres').toUpperCase(),
@@ -49,7 +47,6 @@ const CountryCreationDialog = ({
 }: CountryCreationDialogProps) => {
     const [isLoading, setIsLoading] = useState(false);
 
-    // Criar formulário
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -59,7 +56,6 @@ const CountryCreationDialog = ({
         },
     });
 
-    // Resetar formulário quando o diálogo fechar
     useEffect(() => {
         if (!open) {
             form.reset({

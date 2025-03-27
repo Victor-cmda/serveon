@@ -1,9 +1,10 @@
+// src/pages/cities/CityForm.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -25,7 +26,8 @@ import {
 import { cityApi, stateApi, countryApi } from '@/services/api';
 import { CreateCityDto, UpdateCityDto, Country, State } from '@/types/location';
 import { toast } from 'sonner';
-
+import StateCreationDialog from '@/components/dialogs/StateCreationDialog';
+import CountryCreationDialog from '@/components/dialogs/CountryCreationDialog';
 
 const formSchema = z.object({
     nome: z.string().min(2, 'Nome da cidade é obrigatório e deve ter pelo menos 2 caracteres'),
@@ -44,6 +46,8 @@ const CityForm = () => {
     const [countries, setCountries] = useState<Country[]>([]);
     const [states, setStates] = useState<State[]>([]);
     const [filteredStates, setFilteredStates] = useState<State[]>([]);
+    const [stateDialogOpen, setStateDialogOpen] = useState(false);
+    const [countryDialogOpen, setCountryDialogOpen] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -83,14 +87,12 @@ const CityForm = () => {
                 setStates(statesData);
             } catch (error) {
                 console.error('Erro ao buscar dados:', error);
-                toast.error("Erro", {
-                    description: "Não foi possível carregar os dados necessários.",
-                });
+                toast.error("Não foi possível carregar os dados necessários.");
             }
         };
 
         fetchData();
-    }, [toast]);
+    }, []);
 
     useEffect(() => {
         const fetchCity = async () => {
@@ -110,9 +112,7 @@ const CityForm = () => {
                 });
             } catch (error) {
                 console.error('Erro ao buscar cidade:', error);
-                toast.error("Erro", {
-                    description: "Não foi possível carregar os dados da cidade.",
-                });
+                toast.error("Não foi possível carregar os dados da cidade.");
                 navigate('/cities');
             } finally {
                 setIsLoading(false);
@@ -122,7 +122,7 @@ const CityForm = () => {
         if (id && states.length > 0) {
             fetchCity();
         }
-    }, [id, navigate, toast, form, states]);
+    }, [id, navigate, form, states]);
 
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
         setIsLoading(true);
@@ -139,25 +139,31 @@ const CityForm = () => {
 
             if (id) {
                 await cityApi.update(id, formattedData as UpdateCityDto);
-                toast.success("Sucesso", {
-                    description: "Cidade atualizada com sucesso!",
-                });
+                toast.success("Cidade atualizada com sucesso!");
             } else {
                 await cityApi.create(formattedData as CreateCityDto);
-                toast.success("Sucesso", {
-                    description: "Cidade criada com sucesso!",
-                });
+                toast.success("Cidade criada com sucesso!");
             }
 
             navigate('/cities');
         } catch (error: any) {
             console.error('Erro ao salvar cidade:', error);
-            toast.error("Erro", {
-                description: error.message || "Ocorreu um erro ao salvar a cidade.",
-            });
+            toast.error(error.message || "Ocorreu um erro ao salvar a cidade.");
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleStateCreated = (newState: State) => {
+        setStates(prev => [...prev, newState]);
+
+        form.setValue('estadoId', newState.id);
+    };
+
+    const handleCountryCreated = (newCountry: Country) => {
+        setCountries(prev => [...prev, newCountry]);
+
+        form.setValue('paisId', newCountry.id);
     };
 
     return (
@@ -177,68 +183,92 @@ const CityForm = () => {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <FormField
-                                control={form.control}
-                                name="paisId"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>País</FormLabel>
-                                        <Select
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value}
-                                            disabled={isLoading}
-                                        >
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Selecione um país" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {countries.map((country) => (
-                                                    <SelectItem key={country.id} value={country.id}>
-                                                        {country.nome}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <div>
+                                <FormField
+                                    control={form.control}
+                                    name="paisId"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>País</FormLabel>
+                                            <div className="flex gap-2">
+                                                <Select
+                                                    onValueChange={field.onChange}
+                                                    defaultValue={field.value}
+                                                    disabled={isLoading}
+                                                >
+                                                    <FormControl>
+                                                        <SelectTrigger className="flex-1">
+                                                            <SelectValue placeholder="Selecione um país" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {countries.map((country) => (
+                                                            <SelectItem key={country.id} value={country.id}>
+                                                                {country.nome}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <Button
+                                                    type="button"
+                                                    size="icon"
+                                                    onClick={() => setCountryDialogOpen(true)}
+                                                    disabled={isLoading}
+                                                >
+                                                    <Plus className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
 
-                            <FormField
-                                control={form.control}
-                                name="estadoId"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Estado</FormLabel>
-                                        <Select
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value}
-                                            disabled={isLoading || !selectedCountry || filteredStates.length === 0}
-                                        >
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Selecione um estado" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {filteredStates.map((state) => (
-                                                    <SelectItem key={state.id} value={state.id}>
-                                                        {state.nome} ({state.uf})
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                        {!selectedCountry && (
-                                            <FormDescription>
-                                                Selecione um país primeiro
-                                            </FormDescription>
-                                        )}
-                                    </FormItem>
-                                )}
-                            />
+                            <div>
+                                <FormField
+                                    control={form.control}
+                                    name="estadoId"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Estado</FormLabel>
+                                            <div className="flex gap-2">
+                                                <Select
+                                                    onValueChange={field.onChange}
+                                                    defaultValue={field.value}
+                                                    disabled={isLoading || !selectedCountry || filteredStates.length === 0}
+                                                >
+                                                    <FormControl>
+                                                        <SelectTrigger className="flex-1">
+                                                            <SelectValue placeholder="Selecione um estado" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {filteredStates.map((state) => (
+                                                            <SelectItem key={state.id} value={state.id}>
+                                                                {state.nome} ({state.uf})
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <Button
+                                                    type="button"
+                                                    size="icon"
+                                                    onClick={() => setStateDialogOpen(true)}
+                                                    disabled={isLoading || !selectedCountry}
+                                                >
+                                                    <Plus className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                            <FormMessage />
+                                            {!selectedCountry && (
+                                                <FormDescription>
+                                                    Selecione um país primeiro
+                                                </FormDescription>
+                                            )}
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                         </div>
 
                         <FormField
@@ -286,6 +316,19 @@ const CityForm = () => {
                     </form>
                 </Form>
             </div>
+
+            <StateCreationDialog
+                open={stateDialogOpen}
+                onOpenChange={setStateDialogOpen}
+                onSuccess={handleStateCreated}
+                selectedCountryId={selectedCountry}
+            />
+
+            <CountryCreationDialog
+                open={countryDialogOpen}
+                onOpenChange={setCountryDialogOpen}
+                onSuccess={handleCountryCreated}
+            />
         </div>
     );
 };
