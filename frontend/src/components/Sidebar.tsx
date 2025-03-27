@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+// src/components/Sidebar.tsx
+import { useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Home, Users, Package, FileText, Settings } from "lucide-react";
+import { Home, Users, Package, FileText, Settings, MapPin, Globe, Map } from "lucide-react";
 
 interface MenuItem {
     id: string;
@@ -11,7 +13,7 @@ interface MenuItem {
 }
 
 const Sidebar = () => {
-    const [activeItem, setActiveItem] = useState("dashboard");
+    const location = useLocation();
 
     const mainMenuItems: MenuItem[] = [
         {
@@ -24,19 +26,40 @@ const Sidebar = () => {
             id: "customers",
             title: "Clientes",
             icon: <Users className="h-5 w-5" />,
-            path: "/clientes",
+            path: "/customers",
         },
         {
             id: "products",
             title: "Produtos",
             icon: <Package className="h-5 w-5" />,
-            path: "/produtos",
+            path: "/products",
         },
         {
             id: "invoices",
             title: "Notas Fiscais",
             icon: <FileText className="h-5 w-5" />,
-            path: "/notas-fiscais",
+            path: "/invoices",
+        },
+    ];
+
+    const locationMenuItems: MenuItem[] = [
+        {
+            id: "countries",
+            title: "Países",
+            icon: <Globe className="h-5 w-5" />,
+            path: "/countries",
+        },
+        {
+            id: "states",
+            title: "Estados",
+            icon: <Map className="h-5 w-5" />,
+            path: "/states",
+        },
+        {
+            id: "cities",
+            title: "Cidades",
+            icon: <MapPin className="h-5 w-5" />,
+            path: "/cities",
         },
     ];
 
@@ -45,9 +68,13 @@ const Sidebar = () => {
             id: "settings",
             title: "Configurações",
             icon: <Settings className="h-5 w-5" />,
-            path: "/configuracoes",
+            path: "/settings",
         },
     ];
+
+    const isActive = (path: string) => {
+        return location.pathname === path || location.pathname.startsWith(`${path}/`);
+    };
 
     return (
         <aside
@@ -64,16 +91,42 @@ const Sidebar = () => {
                                 variant="ghost"
                                 className={cn(
                                     "w-full justify-start px-3",
-                                    activeItem === item.id
+                                    isActive(item.path)
                                         ? "bg-accent text-accent-foreground"
                                         : "hover:bg-accent hover:text-accent-foreground"
                                 )}
-                                onClick={() => setActiveItem(item.id)}
+                                asChild
                             >
-                                {item.icon}
-                                <span className="ml-3">{item.title}</span>
+                                <NavLink to={item.path}>
+                                    {item.icon}
+                                    <span className="ml-3">{item.title}</span>
+                                </NavLink>
                             </Button>
                         ))}
+
+                        <div className="pt-5 mt-5 space-y-2 border-t border-border">
+                            <h3 className="px-3 text-xs font-semibold uppercase text-muted-foreground">
+                                Localização
+                            </h3>
+                            {locationMenuItems.map((item) => (
+                                <Button
+                                    key={item.id}
+                                    variant="ghost"
+                                    className={cn(
+                                        "w-full justify-start px-3",
+                                        isActive(item.path)
+                                            ? "bg-accent text-accent-foreground"
+                                            : "hover:bg-accent hover:text-accent-foreground"
+                                    )}
+                                    asChild
+                                >
+                                    <NavLink to={item.path}>
+                                        {item.icon}
+                                        <span className="ml-3">{item.title}</span>
+                                    </NavLink>
+                                </Button>
+                            ))}
+                        </div>
 
                         <div className="pt-5 mt-5 space-y-2 border-t border-border">
                             <h3 className="px-3 text-xs font-semibold uppercase text-muted-foreground">
@@ -85,14 +138,16 @@ const Sidebar = () => {
                                     variant="ghost"
                                     className={cn(
                                         "w-full justify-start px-3",
-                                        activeItem === item.id
+                                        isActive(item.path)
                                             ? "bg-accent text-accent-foreground"
                                             : "hover:bg-accent hover:text-accent-foreground"
                                     )}
-                                    onClick={() => setActiveItem(item.id)}
+                                    asChild
                                 >
-                                    {item.icon}
-                                    <span className="ml-3">{item.title}</span>
+                                    <NavLink to={item.path}>
+                                        {item.icon}
+                                        <span className="ml-3">{item.title}</span>
+                                    </NavLink>
                                 </Button>
                             ))}
                         </div>
