@@ -64,9 +64,14 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: ['https://serveon-app.vercel.app', 'http://localhost:5173'],
+    origin: [
+      'https://serveon-k32xgjzn9-victor-cmdas-projects.vercel.app',
+      'http://localhost:5173'
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   });
 
   app.setGlobalPrefix('api');
