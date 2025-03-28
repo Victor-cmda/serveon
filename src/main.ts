@@ -66,7 +66,8 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'https://serveon-k32xgjzn9-victor-cmdas-projects.vercel.app',
-      'http://localhost:5173'
+      'http://localhost:5173',
+      'https://serveon.vercel.app'
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
