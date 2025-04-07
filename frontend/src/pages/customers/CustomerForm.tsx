@@ -93,7 +93,7 @@ const CustomerForm = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
-    const [isEditing, setIsEditing] = useState(!!id);
+    const [isEditing] = useState(!!id);
     const [countries, setCountries] = useState<Country[]>([]);
     const [states, setStates] = useState<State[]>([]);
     const [cities, setCities] = useState<City[]>([]);
