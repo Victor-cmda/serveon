@@ -11,11 +11,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       host: this.configService.get('DB_HOST', 'localhost'),
       port: this.configService.get<number>('DB_PORT', 5432),
       user: this.configService.get('DB_USERNAME', 'postgres'),
-      password: this.configService.get('DB_PASSWORD', 'postgres'),
-      database: this.configService.get('DB_DATABASE', 'pratix'),
-      ssl: {
-        rejectUnauthorized: false // Necessário para conexões com o Render
-      }
+      password: this.configService.get('DB_PASSWORD', '1234'),
+      database: this.configService.get('DB_DATABASE', 'postgres'),
+      // ssl: {
+      //   rejectUnauthorized: false // Necessário para conexões com o Render
+      // }
     });
   }
 

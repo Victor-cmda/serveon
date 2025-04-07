@@ -193,7 +193,7 @@ const CityForm = () => {
                                             <div className="flex gap-2">
                                                 <Select
                                                     onValueChange={field.onChange}
-                                                    defaultValue={field.value}
+                                                    value={field.value}
                                                     disabled={isLoading}
                                                 >
                                                     <FormControl>
@@ -234,7 +234,7 @@ const CityForm = () => {
                                             <div className="flex gap-2">
                                                 <Select
                                                     onValueChange={field.onChange}
-                                                    defaultValue={field.value}
+                                                    value={field.value}
                                                     disabled={isLoading || !selectedCountry || filteredStates.length === 0}
                                                 >
                                                     <FormControl>
