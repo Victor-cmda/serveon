@@ -9,6 +9,8 @@ import StateForm from './pages/states/StateForm';
 import CitiesList from './pages/cities/CitiesList';
 import CityForm from './pages/cities/CityForm';
 import NotFound from './pages/notfound/NotFound';
+import CustomersList from './pages/customers/CustomersList';
+import CustomerForm from './pages/customers/CustomerForm';
 
 const router = createBrowserRouter([
     {
@@ -18,6 +20,19 @@ const router = createBrowserRouter([
             {
                 index: true,
                 element: <Dashboard />,
+            },
+            //Clientes
+            {
+                path: 'customers',
+                element: <CustomersList />,
+            },
+            {
+                path: 'customers/new',
+                element: <CustomerForm />,
+            },
+            {
+                path: 'customers/edit/:id',
+                element: <CustomerForm />,
             },
             // Países
             {

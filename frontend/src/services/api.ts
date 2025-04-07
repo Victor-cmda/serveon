@@ -9,6 +9,7 @@ import {
     CreateCityDto,
     UpdateCityDto
 } from '../types/location';
+import { Customer, CreateCustomerDto, UpdateCustomerDto } from '../types/customer';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -157,6 +158,52 @@ export const cityApi = {
 
     delete: async (id: string): Promise<void> => {
         const response = await fetch(`${API_URL}/cities/${id}`, {
+            method: 'DELETE',
+        });
+        return handleResponse(response);
+    }
+};
+
+export const customerApi = {
+    getAll: async (): Promise<Customer[]> => {
+        const response = await fetch(`${API_URL}/customers`);
+        return handleResponse(response);
+    },
+
+    getById: async (id: string): Promise<Customer> => {
+        const response = await fetch(`${API_URL}/customers/${id}`);
+        return handleResponse(response);
+    },
+
+    getByCountry: async (countryId: string): Promise<Customer[]> => {
+        const response = await fetch(`${API_URL}/customers/country/${countryId}`);
+        return handleResponse(response);
+    },
+
+    create: async (customer: CreateCustomerDto): Promise<Customer> => {
+        const response = await fetch(`${API_URL}/customers`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(customer),
+        });
+        return handleResponse(response);
+    },
+
+    update: async (id: string, customer: UpdateCustomerDto): Promise<Customer> => {
+        const response = await fetch(`${API_URL}/customers/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(customer),
+        });
+        return handleResponse(response);
+    },
+
+    delete: async (id: string): Promise<void> => {
+        const response = await fetch(`${API_URL}/customers/${id}`, {
             method: 'DELETE',
         });
         return handleResponse(response);
