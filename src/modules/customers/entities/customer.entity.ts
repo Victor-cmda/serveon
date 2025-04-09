@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class Customer {
   @ApiProperty({
-    description: 'CNPJ ou CPF do cliente',
+    description: 'CNPJ, CPF ou documento internacional do cliente',
     example: '12345678901234'
   })
   cnpjCpf: string;
@@ -13,6 +13,19 @@ export class Customer {
     enum: ['F', 'J']
   })
   tipo: 'F' | 'J';
+  
+  @ApiProperty({
+    description: 'Indica se é um cliente estrangeiro',
+    example: false
+  })
+  isEstrangeiro: boolean;
+  
+  @ApiProperty({
+    description: 'Tipo de documento para clientes estrangeiros',
+    example: 'passport',
+    required: false
+  })
+  tipoDocumento?: string;
 
   @ApiProperty({
     description: 'Razão Social ou Nome Completo',
@@ -27,16 +40,34 @@ export class Customer {
   nomeFantasia?: string;
 
   @ApiProperty({
-    description: 'Inscrição Estadual',
+    description: 'Inscrição Estadual ou informações complementares do documento',
     example: '123456789'
   })
   inscricaoEstadual?: string;
 
   @ApiProperty({
-    description: 'Inscrição Municipal',
+    description: 'Inscrição Municipal ou registro comercial internacional',
     example: '123456'
   })
   inscricaoMunicipal?: string;
+
+  @ApiProperty({
+    description: 'ID do país (UUID)',
+    example: '550e8400-e29b-41d4-a716-446655440000'
+  })
+  paisId: string;
+  
+  @ApiProperty({
+    description: 'Nome do país',
+    example: 'Brasil'
+  })
+  paisNome?: string;
+  
+  @ApiProperty({
+    description: 'ID do estado/província (UUID)',
+    example: '550e8400-e29b-41d4-a716-446655440000'
+  })
+  estadoId: string;
 
   @ApiProperty({
     description: 'Endereço',
@@ -69,7 +100,7 @@ export class Customer {
   cidadeId: string;
 
   @ApiProperty({
-    description: 'CEP',
+    description: 'CEP ou código postal',
     example: '12345678'
   })
   cep?: string;

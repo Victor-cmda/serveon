@@ -260,7 +260,10 @@ export class CustomersService {
       email: dbRecord.email,
       ativo: dbRecord.ativo,
       createdAt: dbRecord.created_at,
-      updatedAt: dbRecord.updated_at
+      updatedAt: dbRecord.updated_at,
+      isEstrangeiro: dbRecord.is_estrangeiro || false, // valor padrão false se não existir
+      paisId: dbRecord.pais_id || null, // valor padrão null se não existir
+      estadoId: dbRecord.estado_id || null // valor padrão null se não existir
     };
     
     if (dbRecord.cidade_nome) customer.cidadeNome = dbRecord.cidade_nome;
@@ -268,5 +271,5 @@ export class CustomersService {
     if (dbRecord.uf) customer.uf = dbRecord.uf;
     
     return customer;
-  }
+  }  
 }

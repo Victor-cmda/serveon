@@ -91,22 +91,30 @@ CREATE TABLE Destinatario (
     -- F = Física, J = Jurídica
     razao_social VARCHAR(100) NOT NULL,
     nome_fantasia VARCHAR(60),
-    inscricao_estadual VARCHAR(20),
+    inscricao_estadual VARCHAR(50),
     inscricao_municipal VARCHAR(20),
     endereco VARCHAR(100),
     numero VARCHAR(10),
     complemento VARCHAR(60),
     bairro VARCHAR(50),
     cidade_id UUID NOT NULL,
-    cep VARCHAR(10),
+    cep VARCHAR(15),
     telefone VARCHAR(20),
     email VARCHAR(100),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    -- Novos campos para suporte a clientes estrangeiros
+    is_estrangeiro BOOLEAN NOT NULL DEFAULT FALSE,
+    tipo_documento VARCHAR(20),
+    pais_id UUID NOT NULL REFERENCES Pais (id),
+    estado_id UUID NOT NULL REFERENCES Estado (id),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_destinatario_cidade FOREIGN KEY (cidade_id) REFERENCES Cidade (id),
+    CONSTRAINT fk_destinatario_pais FOREIGN KEY (pais_id) REFERENCES Pais (id),
+    CONSTRAINT fk_destinatario_estado FOREIGN KEY (estado_id) REFERENCES Estado (id),
     CONSTRAINT ck_destinatario_tipo CHECK (tipo IN ('F', 'J'))
 );
+
 -- Tabela TRANSPORTADOR
 CREATE TABLE Transportador (
     cnpj_cpf VARCHAR(18) PRIMARY KEY,

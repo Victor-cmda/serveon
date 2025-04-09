@@ -1095,7 +1095,7 @@
         "properties": {
           "cnpjCpf": {
             "type": "string",
-            "description": "CNPJ ou CPF do cliente (apenas números)",
+            "description": "CNPJ, CPF ou número de documento internacional do cliente",
             "example": "12345678901234"
           },
           "tipo": {
@@ -1105,6 +1105,23 @@
             "enum": [
               "F",
               "J"
+            ]
+          },
+          "isEstrangeiro": {
+            "type": "boolean",
+            "description": "Indica se é um cliente estrangeiro",
+            "example": false,
+            "default": false
+          },
+          "tipoDocumento": {
+            "type": "string",
+            "description": "Tipo de documento para clientes estrangeiros",
+            "example": "passport",
+            "enum": [
+              "passport",
+              "tax_id",
+              "national_id",
+              "other"
             ]
           },
           "razaoSocial": {
@@ -1119,7 +1136,7 @@
           },
           "inscricaoEstadual": {
             "type": "string",
-            "description": "Inscrição Estadual (opcional)",
+            "description": "Inscrição Estadual ou dados adicionais do documento estrangeiro",
             "example": "123456789"
           },
           "inscricaoMunicipal": {
@@ -1127,9 +1144,24 @@
             "description": "Inscrição Municipal (opcional)",
             "example": "123456"
           },
+          "paisId": {
+            "type": "string",
+            "description": "ID do país (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "estadoId": {
+            "type": "string",
+            "description": "ID do estado/província (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "cidadeId": {
+            "type": "string",
+            "description": "ID da cidade no sistema (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
           "endereco": {
             "type": "string",
-            "description": "Endereço (opcional)",
+            "description": "Endereço",
             "example": "Av. Brasil"
           },
           "numero": {
@@ -1147,14 +1179,9 @@
             "description": "Bairro (opcional)",
             "example": "Centro"
           },
-          "cidadeId": {
-            "type": "string",
-            "description": "ID da cidade no sistema (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
           "cep": {
             "type": "string",
-            "description": "CEP (opcional)",
+            "description": "CEP ou Código Postal",
             "example": "12345678"
           },
           "telefone": {
@@ -1177,7 +1204,10 @@
         "required": [
           "cnpjCpf",
           "tipo",
+          "isEstrangeiro",
           "razaoSocial",
+          "paisId",
+          "estadoId",
           "cidadeId",
           "ativo"
         ]
@@ -1187,7 +1217,7 @@
         "properties": {
           "cnpjCpf": {
             "type": "string",
-            "description": "CNPJ ou CPF do cliente",
+            "description": "CNPJ, CPF ou documento internacional do cliente",
             "example": "12345678901234"
           },
           "tipo": {
@@ -1198,6 +1228,16 @@
               "F",
               "J"
             ]
+          },
+          "isEstrangeiro": {
+            "type": "boolean",
+            "description": "Indica se é um cliente estrangeiro",
+            "example": false
+          },
+          "tipoDocumento": {
+            "type": "string",
+            "description": "Tipo de documento para clientes estrangeiros",
+            "example": "passport"
           },
           "razaoSocial": {
             "type": "string",
@@ -1211,13 +1251,28 @@
           },
           "inscricaoEstadual": {
             "type": "string",
-            "description": "Inscrição Estadual",
+            "description": "Inscrição Estadual ou informações complementares do documento",
             "example": "123456789"
           },
           "inscricaoMunicipal": {
             "type": "string",
-            "description": "Inscrição Municipal",
+            "description": "Inscrição Municipal ou registro comercial internacional",
             "example": "123456"
+          },
+          "paisId": {
+            "type": "string",
+            "description": "ID do país (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "paisNome": {
+            "type": "string",
+            "description": "Nome do país",
+            "example": "Brasil"
+          },
+          "estadoId": {
+            "type": "string",
+            "description": "ID do estado/província (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "endereco": {
             "type": "string",
@@ -1246,7 +1301,7 @@
           },
           "cep": {
             "type": "string",
-            "description": "CEP",
+            "description": "CEP ou código postal",
             "example": "12345678"
           },
           "telefone": {
@@ -1295,10 +1350,14 @@
         "required": [
           "cnpjCpf",
           "tipo",
+          "isEstrangeiro",
           "razaoSocial",
           "nomeFantasia",
           "inscricaoEstadual",
           "inscricaoMunicipal",
+          "paisId",
+          "paisNome",
+          "estadoId",
           "endereco",
           "numero",
           "complemento",

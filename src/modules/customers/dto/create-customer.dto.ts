@@ -1,14 +1,13 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MaxLength } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MaxLength, ValidateIf } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCustomerDto {
   @ApiProperty({
-    description: 'CNPJ ou CPF do cliente (apenas números)',
+    description: 'CNPJ, CPF ou número de documento internacional do cliente',
     example: '12345678901234',
   })
-  @IsNotEmpty({ message: 'CNPJ/CPF é obrigatório' })
-  @Matches(/^[0-9]+$/, { message: 'CNPJ/CPF deve conter apenas números' })
-  @MaxLength(14, { message: 'CNPJ/CPF deve ter no máximo 14 caracteres' })
+  @IsNotEmpty({ message: 'Documento de identificação é obrigatório' })
+  @MaxLength(20, { message: 'Documento deve ter no máximo 20 caracteres' })
   cnpjCpf: string;
 
   @ApiProperty({
@@ -19,6 +18,25 @@ export class CreateCustomerDto {
   @IsNotEmpty({ message: 'Tipo de cliente é obrigatório' })
   @IsEnum(['F', 'J'], { message: 'Tipo deve ser F (Física) ou J (Jurídica)' })
   tipo: 'F' | 'J';
+  
+  @ApiProperty({
+    description: 'Indica se é um cliente estrangeiro',
+    example: false,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'isEstrangeiro deve ser um valor booleano' })
+  isEstrangeiro?: boolean = false;
+  
+  @ApiProperty({
+    description: 'Tipo de documento para clientes estrangeiros',
+    example: 'passport',
+    enum: ['passport', 'tax_id', 'national_id', 'other'],
+    required: false
+  })
+  @IsOptional()
+  @IsString({ message: 'Tipo de documento deve ser uma string' })
+  tipoDocumento?: string;
 
   @ApiProperty({
     description: 'Razão Social ou Nome Completo',
@@ -40,13 +58,13 @@ export class CreateCustomerDto {
   nomeFantasia?: string;
 
   @ApiProperty({
-    description: 'Inscrição Estadual (opcional)',
+    description: 'Inscrição Estadual ou dados adicionais do documento estrangeiro',
     example: '123456789',
     required: false
   })
   @IsOptional()
   @IsString({ message: 'Inscrição Estadual deve ser uma string' })
-  @MaxLength(20, { message: 'Inscrição Estadual deve ter no máximo 20 caracteres' })
+  @MaxLength(50, { message: 'Inscrição Estadual deve ter no máximo 50 caracteres' })
   inscricaoEstadual?: string;
 
   @ApiProperty({
@@ -60,7 +78,31 @@ export class CreateCustomerDto {
   inscricaoMunicipal?: string;
 
   @ApiProperty({
-    description: 'Endereço (opcional)',
+    description: 'ID do país (UUID)',
+    example: '550e8400-e29b-41d4-a716-446655440000'
+  })
+  @IsNotEmpty({ message: 'ID do país é obrigatório' })
+  @IsUUID(4, { message: 'ID do país deve ser um UUID válido' })
+  paisId: string;
+  
+  @ApiProperty({
+    description: 'ID do estado/província (UUID)',
+    example: '550e8400-e29b-41d4-a716-446655440000'
+  })
+  @IsNotEmpty({ message: 'ID do estado é obrigatório' })
+  @IsUUID(4, { message: 'ID do estado deve ser um UUID válido' })
+  estadoId: string;
+
+  @ApiProperty({
+    description: 'ID da cidade no sistema (UUID)',
+    example: '550e8400-e29b-41d4-a716-446655440000'
+  })
+  @IsNotEmpty({ message: 'ID da cidade é obrigatório' })
+  @IsUUID(4, { message: 'ID da cidade deve ser um UUID válido' })
+  cidadeId: string;
+
+  @ApiProperty({
+    description: 'Endereço',
     example: 'Av. Brasil',
     required: false
   })
@@ -100,21 +142,13 @@ export class CreateCustomerDto {
   bairro?: string;
 
   @ApiProperty({
-    description: 'ID da cidade no sistema (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000'
-  })
-  @IsNotEmpty({ message: 'ID da cidade é obrigatório' })
-  @IsUUID(4, { message: 'ID da cidade deve ser um UUID válido' })
-  cidadeId: string;  // Changed from number to string for UUID
-
-  @ApiProperty({
-    description: 'CEP (opcional)',
+    description: 'CEP ou Código Postal',
     example: '12345678',
     required: false
   })
   @IsOptional()
   @IsString({ message: 'CEP deve ser uma string' })
-  @MaxLength(10, { message: 'CEP deve ter no máximo 10 caracteres' })
+  @MaxLength(15, { message: 'CEP deve ter no máximo 15 caracteres' })
   cep?: string;
 
   @ApiProperty({
