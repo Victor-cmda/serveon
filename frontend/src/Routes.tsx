@@ -11,79 +11,84 @@ import CityForm from './pages/cities/CityForm';
 import NotFound from './pages/notfound/NotFound';
 import CustomersList from './pages/customers/CustomersList';
 import CustomerForm from './pages/customers/CustomerForm';
+import { FormStateProvider } from './contexts/FormStateContext';
 
 const router = createBrowserRouter([
-    {
-        path: '/',
-        element: <Layout />,
-        children: [
-            {
-                index: true,
-                element: <Dashboard />,
-            },
-            //Clientes
-            {
-                path: 'customers',
-                element: <CustomersList />,
-            },
-            {
-                path: 'customers/new',
-                element: <CustomerForm />,
-            },
-            {
-                path: 'customers/edit/:id',
-                element: <CustomerForm />,
-            },
-            // Países
-            {
-                path: 'countries',
-                element: <CountriesList />,
-            },
-            {
-                path: 'countries/new',
-                element: <CountryForm />,
-            },
-            {
-                path: 'countries/edit/:id',
-                element: <CountryForm />,
-            },
-            // Estados
-            {
-                path: 'states',
-                element: <StatesList />,
-            },
-            {
-                path: 'states/new',
-                element: <StateForm />,
-            },
-            {
-                path: 'states/edit/:id',
-                element: <StateForm />,
-            },
-            // Cidades
-            {
-                path: 'cities',
-                element: <CitiesList />,
-            },
-            {
-                path: 'cities/new',
-                element: <CityForm />,
-            },
-            {
-                path: 'cities/edit/:id',
-                element: <CityForm />,
-            },
-            // Rota de fallback
-            {
-                path: '*',
-                element: <NotFound />,
-            },
-        ],
-    },
+  {
+    path: '/',
+    element: <Layout />,
+    children: [
+      {
+        index: true,
+        element: <Dashboard />,
+      },
+      //Clientes
+      {
+        path: 'customers',
+        element: <CustomersList />,
+      },
+      {
+        path: 'customers/new',
+        element: <CustomerForm />,
+      },
+      {
+        path: 'customers/edit/:id',
+        element: <CustomerForm />,
+      },
+      // Países
+      {
+        path: 'countries',
+        element: <CountriesList />,
+      },
+      {
+        path: 'countries/new',
+        element: <CountryForm />,
+      },
+      {
+        path: 'countries/edit/:id',
+        element: <CountryForm />,
+      },
+      // Estados
+      {
+        path: 'states',
+        element: <StatesList />,
+      },
+      {
+        path: 'states/new',
+        element: <StateForm />,
+      },
+      {
+        path: 'states/edit/:id',
+        element: <StateForm />,
+      },
+      // Cidades
+      {
+        path: 'cities',
+        element: <CitiesList />,
+      },
+      {
+        path: 'cities/new',
+        element: <CityForm />,
+      },
+      {
+        path: 'cities/edit/:id',
+        element: <CityForm />,
+      },
+      // Rota de fallback
+      {
+        path: '*',
+        element: <NotFound />,
+      },
+    ],
+  },
 ]);
 
 const Routes = () => {
-    return <RouterProvider router={router} />;
+  return (
+    <FormStateProvider>
+      <RouterProvider router={router} />
+    </FormStateProvider>
+  );
 };
 
 export default Routes;
