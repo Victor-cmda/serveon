@@ -19,8 +19,6 @@ export interface Customer {
   ativo: boolean;
   createdAt: string;
   updatedAt: string;
-
-  // Campos adicionais para o frontend
   isEstrangeiro?: boolean;
   tipoDocumento?: string; // Tipo de documento para estrangeiros (passaporte, id fiscal, etc)
 }

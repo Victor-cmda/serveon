@@ -17,7 +17,6 @@ import {
 import { countryApi } from '@/services/api';
 import { CreateCountryDto, UpdateCountryDto } from '@/types/location';
 import { toast } from 'sonner';
-import { useFormState } from '@/contexts/FormStateContext';
 
 const formSchema = z.object({
   nome: z
@@ -37,7 +36,6 @@ const formSchema = z.object({
 const CountryForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getFormState } = useFormState();
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
 
@@ -96,7 +94,6 @@ const CountryForm = () => {
       let createdOrUpdatedId: string;
 
       if (id) {
-        // Atualização
         const updateData: UpdateCountryDto = {
           nome: data.nome,
           sigla: data.sigla,
@@ -109,7 +106,6 @@ const CountryForm = () => {
         });
         createdOrUpdatedId = id;
       } else {
-        // Criação
         const createData: CreateCountryDto = {
           nome: data.nome,
           sigla: data.sigla,
@@ -125,7 +121,6 @@ const CountryForm = () => {
 
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
-        // Include the created entity information in the return URL
         const returnWithParams = `${returnUrl}?createdEntity=country&createdId=${createdOrUpdatedId}`;
         navigate(returnWithParams);
       } else {

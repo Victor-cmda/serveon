@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash, Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Edit, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -32,7 +32,6 @@ const CustomersList = () => {
   const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(
     null,
   );
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCustomers();
@@ -88,7 +87,7 @@ const CustomersList = () => {
       toast.success('Sucesso', {
         description: `Cliente ${customerToDelete.razaoSocial} removido com sucesso.`,
       });
-      fetchCustomers(); // Recarregar a lista
+      fetchCustomers();
     } catch (error: any) {
       console.error('Erro ao excluir cliente:', error);
       toast.error('Erro', {
@@ -104,12 +103,10 @@ const CustomersList = () => {
 
   const formatCpfCnpj = (doc: string, tipo: 'F' | 'J') => {
     if (tipo === 'F') {
-      // Formatar CPF: 000.000.000-00
       if (doc.length === 11) {
         return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
       }
     } else {
-      // Formatar CNPJ: 00.000.000/0000-00
       if (doc.length === 14) {
         return doc.replace(
           /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,

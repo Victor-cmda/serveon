@@ -1,4 +1,3 @@
-// src/components/SearchDialog.tsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   X,
@@ -9,7 +8,6 @@ import {
   Star,
   Table,
   LayoutGrid,
-  Check,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +18,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -33,7 +30,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -46,7 +42,6 @@ import {
 } from '@/components/ui/tooltip';
 import { debounce } from 'lodash';
 
-// Tipo base para qualquer entidade que pode ser usada no SearchDialog
 export interface Entity {
   id: string;
   [key: string]: any;
@@ -70,7 +65,7 @@ export interface SearchDialogProps<T extends Entity = Entity> {
   searchKeys: (keyof T)[];
   entityType?: string; // Identificador único para o tipo de entidade (usado para favoritos)
   hideNewButton?: boolean;
-  extraActions?: React.ReactNode; // Added this property for additional action buttons
+  extraActions?: React.ReactNode;
 }
 
 interface FilterCondition<T extends Entity = Entity> {
@@ -107,7 +102,6 @@ export function SearchDialog<T extends Entity = Entity>({
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Filtrar apenas colunas que podem ser usadas em filtros (não funções)
   const filterableColumns = displayColumns.filter(
     (col) =>
       typeof col.key === 'string' ||
@@ -115,19 +109,16 @@ export function SearchDialog<T extends Entity = Entity>({
       typeof col.key === 'symbol',
   );
 
-  // Salvar favoritos no localStorage quando mudar
   useEffect(() => {
     localStorage.setItem(`favorites-${entityType}`, JSON.stringify(favorites));
   }, [favorites, entityType]);
 
-  // Resetar campos de filtro quando o diálogo for fechado
   useEffect(() => {
     if (!open) {
       setFilterField('');
       setFilterOperator('contém');
       setFilterValue('');
     } else {
-      // Focar no campo de busca quando o diálogo for aberto
       setTimeout(() => {
         if (searchInputRef.current) {
           searchInputRef.current.focus();
@@ -149,7 +140,6 @@ export function SearchDialog<T extends Entity = Entity>({
   const isFavorite = (id: string) => favorites.includes(id);
 
   const addFilter = (e?: React.MouseEvent) => {
-    // Prevenir comportamento padrão do botão
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -182,15 +172,12 @@ export function SearchDialog<T extends Entity = Entity>({
   };
 
   const exportToCSV = () => {
-    // Filtrar as entidades primeiro
     const filteredEntities = filterEntities(entities);
 
-    // Criar cabeçalhos baseados nas colunas de exibição (apenas para colunas de string)
     const headers = displayColumns
       .filter((col) => typeof col.key === 'string')
       .map((col) => col.header);
 
-    // Criar linhas de dados
     const rows = filteredEntities.map((entity) =>
       displayColumns
         .filter((col) => typeof col.key === 'string')
@@ -202,13 +189,11 @@ export function SearchDialog<T extends Entity = Entity>({
         }),
     );
 
-    // Combinar tudo em um CSV
     const csvContent = [
       headers.join(','),
       ...rows.map((row) => row.join(',')),
     ].join('\n');
 
-    // Criar um blob e link para download
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -224,7 +209,6 @@ export function SearchDialog<T extends Entity = Entity>({
     (items: T[]) => {
       let filtered = [...items];
 
-      // Aplicar termo de busca
       if (searchTerm) {
         const searchTermLower = searchTerm.toLowerCase();
         filtered = filtered.filter((item) =>
@@ -237,7 +221,6 @@ export function SearchDialog<T extends Entity = Entity>({
         );
       }
 
-      // Aplicar filtros avançados
       if (filters.length > 0) {
         filtered = filtered.filter((item) =>
           filters.every((filter) => {
@@ -267,7 +250,6 @@ export function SearchDialog<T extends Entity = Entity>({
     [searchTerm, filters, searchKeys],
   );
 
-  // Função debounce para o termo de busca
   const debouncedSetSearchTerm = useCallback(
     debounce((value: string) => {
       setSearchTerm(value);
@@ -279,10 +261,8 @@ export function SearchDialog<T extends Entity = Entity>({
     debouncedSetSearchTerm(e.target.value);
   };
 
-  // Filtrar as entidades
   const filteredEntities = filterEntities(entities);
 
-  // Renderizar valor da célula baseado no tipo da coluna
   const renderCellValue = (entity: T, column: DisplayColumn<T>) => {
     if (typeof column.key === 'function') {
       return column.key(entity);
@@ -293,14 +273,12 @@ export function SearchDialog<T extends Entity = Entity>({
     return String(value);
   };
 
-  // Mostrar favoritos primeiro
   const sortedEntities = [...filteredEntities].sort((a, b) => {
     const aFav = isFavorite(a.id) ? 0 : 1;
     const bFav = isFavorite(b.id) ? 0 : 1;
     return aFav - bFav;
   });
 
-  // Botão para alternar entre visualização tabela/cards
   const renderViewToggle = () => (
     <div className="flex">
       <TooltipProvider>
@@ -411,12 +389,10 @@ export function SearchDialog<T extends Entity = Entity>({
             </div>
           </div>
 
-          {/* Filtros avançados */}
           {showAdvancedFilters && (
             <div className="space-y-3 border rounded-md p-4">
               <div className="text-base font-medium">Filtros Avançados</div>
 
-              {/* Lista de filtros ativos */}
               {filters.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-4">
                   {filters.map((filter, index) => (
@@ -441,7 +417,6 @@ export function SearchDialog<T extends Entity = Entity>({
                 </div>
               )}
 
-              {/* Formulário para adicionar filtros */}
               <div className="flex flex-wrap gap-3">
                 <Select
                   value={filterField as string}
@@ -496,9 +471,7 @@ export function SearchDialog<T extends Entity = Entity>({
             </div>
           )}
 
-          {/* Área de conteúdo principal (tabela ou cards) */}
           <div className="flex-1 overflow-hidden">
-            {/* Visualização de tabela */}
             {viewMode === 'table' && (
               <div className="rounded-md border overflow-hidden h-full">
                 <div className="overflow-x-auto h-full">
@@ -580,7 +553,6 @@ export function SearchDialog<T extends Entity = Entity>({
               </div>
             )}
 
-            {/* Visualização de cards */}
             {viewMode === 'card' && (
               <div className="h-full overflow-y-auto pr-2">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
@@ -594,7 +566,6 @@ export function SearchDialog<T extends Entity = Entity>({
                     </div>
                   ) : (
                     sortedEntities.map((entity) => {
-                      // Pegar os primeiros 3 campos para mostrar no card
                       const mainColumns = displayColumns.slice(0, 3);
                       const mainColumn = mainColumns[0];
                       const secondaryColumns = mainColumns.slice(1);

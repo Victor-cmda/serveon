@@ -1,6 +1,5 @@
-// src/pages/customers/CustomerForm.tsx
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,29 +16,16 @@ import {
   FormMessage,
   FormDescription,
 } from '@/components/ui/form';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFormState } from '@/contexts/FormStateContext';
 import { customerApi, cityApi, stateApi, countryApi } from '@/services/api';
 import { Country, State, City } from '@/types/location';
-import { Customer } from '@/types/customer';
 import { toast } from 'sonner';
 import { SearchDialog } from '@/components/SearchDialog';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 
-// Importar os componentes de diálogo
 import StateCreationDialog from '@/components/dialogs/StateCreationDialog';
 import CityCreationDialog from '@/components/dialogs/CityCreationDialog';
 
-// Define the schema
 const formSchema = z.object({
-  // Customer form fields
   cnpjCpf: z.string().min(1, 'Documento é obrigatório'),
   tipo: z.enum(['F', 'J']),
   isEstrangeiro: z.boolean().default(false),
@@ -55,39 +41,31 @@ const formSchema = z.object({
   telefone: z.string().optional(),
   email: z.string().email('Email inválido').optional(),
 
-  // Reference field - only city is needed directly
   cidadeId: z.string().uuid('Cidade é obrigatória'),
 
-  // System fields
   ativo: z.boolean().default(true),
 });
 
 const CustomerForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
   const { saveFormState, getFormState } = useFormState();
   const formId = id ? `customer-${id}` : 'customer-new';
 
-  // States
   const [isLoading, setIsLoading] = useState(false);
   const [states, setStates] = useState<State[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
-  const [countries, setCountries] = useState<Country[]>([]);
+  const [country, setCountries] = useState<Country[]>([]);
 
-  // Reference dialogs
   const [stateSearchOpen, setStateSearchOpen] = useState(false);
   const [citySearchOpen, setCitySearchOpen] = useState(false);
 
-  // New dialogs for entity creation
   const [newCityDialogOpen, setNewCityDialogOpen] = useState(false);
   const [newStateDialogOpen, setNewStateDialogOpen] = useState(false);
 
-  // Selected reference values
   const [selectedStateId, setSelectedStateId] = useState<string>('');
 
-  // Initialize form
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -110,12 +88,9 @@ const CustomerForm = () => {
     },
   });
 
-  // Watch values for conditional rendering
   const watchTipo = form.watch('tipo');
   const watchIsEstrangeiro = form.watch('isEstrangeiro');
-  const watchCidadeId = form.watch('cidadeId');
 
-  // Load all cities
   const fetchCities = async () => {
     try {
       setIsLoading(true);
@@ -129,7 +104,6 @@ const CustomerForm = () => {
     }
   };
 
-  // Load cities for a specific state
   const loadCitiesForState = async (stateId: string) => {
     try {
       setIsLoading(true);
@@ -143,38 +117,31 @@ const CustomerForm = () => {
     }
   };
 
-  // Filtra as cidades por estado quando o diálogo é aberto
   useEffect(() => {
     if (citySearchOpen && selectedStateId) {
       loadCitiesForState(selectedStateId);
     }
   }, [citySearchOpen, selectedStateId]);
 
-  // Load saved form state if available
   useEffect(() => {
     const savedState = getFormState(formId);
     if (savedState) {
       form.reset(savedState);
 
-      // If there's a selected city in the form, find its data
       if (savedState.cidadeId) {
         const cityId = savedState.cidadeId;
 
-        // Load the city data
         const loadCityData = async () => {
           try {
             const city = await cityApi.getById(cityId);
             setSelectedCity(city);
 
-            // Load state data
             if (city.estadoId) {
               setSelectedStateId(city.estadoId);
 
-              // Load cities for the city's state
               const citiesData = await cityApi.getByState(city.estadoId);
               setCities(citiesData);
 
-              // Load all states for reference
               const statesData = await stateApi.getAll();
               setStates(statesData);
             }
@@ -188,7 +155,6 @@ const CustomerForm = () => {
     }
   }, [formId, getFormState, form]);
 
-  // Save form state when values change
   useEffect(() => {
     const subscription = form.watch((value) => {
       saveFormState(formId, value);
@@ -196,7 +162,6 @@ const CustomerForm = () => {
     return () => subscription.unsubscribe();
   }, [form, formId, saveFormState]);
 
-  // Load all countries initially
   useEffect(() => {
     const loadCountries = async () => {
       try {
@@ -211,7 +176,6 @@ const CustomerForm = () => {
     loadCountries();
   }, []);
 
-  // Load all states initially
   useEffect(() => {
     const loadStates = async () => {
       try {
@@ -226,7 +190,6 @@ const CustomerForm = () => {
     loadStates();
   }, []);
 
-  // Load cities when state is selected
   useEffect(() => {
     if (selectedStateId) {
       const loadCities = async () => {
@@ -234,7 +197,6 @@ const CustomerForm = () => {
           const citiesData = await cityApi.getByState(selectedStateId);
           setCities(citiesData);
 
-          // Clear city if state changes and current city doesn't belong to this state
           const currentCityId = form.getValues('cidadeId');
           if (
             currentCityId &&
@@ -251,14 +213,12 @@ const CustomerForm = () => {
 
       loadCities();
     } else {
-      // If no state is selected, clear cities
       setCities([]);
       setSelectedCity(null);
       form.setValue('cidadeId', '');
     }
   }, [selectedStateId, form]);
 
-  // Load customer data if editing
   useEffect(() => {
     if (!id) return;
 
@@ -267,7 +227,6 @@ const CustomerForm = () => {
       try {
         const customer = await customerApi.getById(id);
 
-        // Load city data to get state and country
         if (customer.cidadeId) {
           try {
             const city = await cityApi.getById(customer.cidadeId);
@@ -276,11 +235,9 @@ const CustomerForm = () => {
             if (city.estadoId) {
               setSelectedStateId(city.estadoId);
 
-              // Load states
               const statesData = await stateApi.getAll();
               setStates(statesData);
 
-              // Find the state to get its country
               const state = statesData.find((s) => s.id === city.estadoId);
               if (state && state.paisId) {
                 form.setValue('cidadeId', city.id);
@@ -291,7 +248,6 @@ const CustomerForm = () => {
           }
         }
 
-        // Set form data
         form.reset({
           cnpjCpf: customer.cnpjCpf,
           tipo: customer.tipo,
@@ -322,12 +278,10 @@ const CustomerForm = () => {
     loadCustomer();
   }, [id, navigate, form]);
 
-  // Handle form submission
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
 
     try {
-      // Create a sanitized version of the data with nulls converted to undefined
       const formattedData = {
         ...data,
         email: data.email || undefined,
@@ -350,29 +304,24 @@ const CustomerForm = () => {
     }
   };
 
-  // Handle state selection
   const onSelectState = (state: State) => {
     setSelectedStateId(state.id);
     setStateSearchOpen(false);
 
-    // Clear city when state changes
     form.setValue('cidadeId', '');
     setSelectedCity(null);
   };
 
-  // Handle creating a new state
   const onCreateNewState = () => {
     setNewStateDialogOpen(true);
   };
 
-  // Handle city selection
   const onSelectCity = (city: City) => {
     form.setValue('cidadeId', city.id);
     setSelectedCity(city);
     setCitySearchOpen(false);
   };
 
-  // Handle creating a new city
   const onCreateNewCity = () => {
     setNewCityDialogOpen(true);
   };
@@ -392,7 +341,6 @@ const CustomerForm = () => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Dados Gerais */}
           <div className="rounded-md border p-6">
             <h2 className="mb-6 text-lg font-semibold">Dados Gerais</h2>
 
@@ -879,35 +827,27 @@ const CustomerForm = () => {
         description="Selecione uma cidade para o cadastro do cliente. Você pode filtrar por estado ou pesquisar pelo nome da cidade, código IBGE ou UF."
       />
 
-      {/* New State Dialog */}
       <StateCreationDialog
         open={newStateDialogOpen}
         onOpenChange={setNewStateDialogOpen}
         onSuccess={(newState: State) => {
-          // Select the newly created state
           setSelectedStateId(newState.id);
 
-          // Load cities for this state
           loadCitiesForState(newState.id);
 
-          // Verify if we came from the city dialog
           if (newCityDialogOpen) {
-            // We're creating a state from the city dialog
             toast.success('Estado criado com sucesso!');
           } else {
-            // We're creating a state from the state search dialog
             setCitySearchOpen(true);
             toast.success('Estado criado com sucesso!');
           }
         }}
       />
 
-      {/* New City Dialog */}
       <CityCreationDialog
         open={newCityDialogOpen}
         onOpenChange={setNewCityDialogOpen}
         onSuccess={(newCity: City) => {
-          // Select the newly created city
           onSelectCity(newCity);
           toast.success('Cidade criada com sucesso!');
         }}
