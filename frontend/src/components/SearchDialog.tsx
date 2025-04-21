@@ -317,7 +317,7 @@ export function SearchDialog<T extends Entity = Entity>({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[95vw] md:max-w-[92vw] lg:max-w-[90vw] xl:max-w-[85vw] 2xl:max-w-[80vw] w-[98vw] h-[92vh] max-h-[92vh] p-6 overflow-hidden flex flex-col">
+      <DialogContent className="sm:max-w-[95vw] md:max-w-[95vw] lg:max-w-[95vw] xl:max-w-[95vw] 2xl:max-w-[95vw] w-[98vw] h-[95vh] max-h-[95vh] p-6 overflow-hidden flex flex-col">
         <DialogHeader className="pb-4">
           <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
           {description && (

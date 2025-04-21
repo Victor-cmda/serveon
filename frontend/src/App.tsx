@@ -1,8 +1,11 @@
 import Routes from './Routes'
+import { ThemeProvider } from 'next-themes'
 
 function App() {
   return (
-    <Routes />
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <Routes />
+    </ThemeProvider>
   )
 }
 

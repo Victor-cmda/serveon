@@ -1,6 +1,5 @@
 import { createContext, useState, useContext, ReactNode } from 'react';
 
-// Define the context type
 interface FormStateContextType {
   formStates: Record<string, any>;
   saveFormState: (formId: string, state: any) => void;

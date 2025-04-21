@@ -35,7 +35,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     console.log('Database connection closed');
   }
 
-  async query<T = any>(text: string, params: any[] = []): Promise<QueryResult<T>> {
+  async query<T = any>(
+    text: string,
+    params: any[] = [],
+  ): Promise<QueryResult<T>> {
     const start = Date.now();
     const result = await this.pool.query<T>(text, params);
     const duration = Date.now() - start;

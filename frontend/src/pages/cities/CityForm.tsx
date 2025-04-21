@@ -1,4 +1,3 @@
-// src/pages/cities/CityForm.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -41,7 +40,6 @@ const CityForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [states, setStates] = useState<State[]>([]);
 
-  // Dialog states
   const [stateDialogOpen, setStateDialogOpen] = useState(false);
   const [stateSearchOpen, setStateSearchOpen] = useState(false);
 
@@ -56,7 +54,6 @@ const CityForm = () => {
     },
   });
 
-  // Load all states initially
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -71,7 +68,6 @@ const CityForm = () => {
     fetchData();
   }, []);
 
-  // Load city data when editing
   useEffect(() => {
     const fetchCity = async () => {
       if (!id) return;
@@ -98,7 +94,6 @@ const CityForm = () => {
     }
   }, [id, navigate, form]);
 
-  // Handle state parameter from URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const stateId = params.get('stateId');

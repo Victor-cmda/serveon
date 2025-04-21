@@ -56,7 +56,7 @@ const CustomerForm = () => {
   const [states, setStates] = useState<State[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
-  const [country, setCountries] = useState<Country[]>([]);
+  const [countries, setCountries] = useState<Country[]>([]);
 
   const [stateSearchOpen, setStateSearchOpen] = useState(false);
   const [citySearchOpen, setCitySearchOpen] = useState(false);
@@ -548,7 +548,7 @@ const CustomerForm = () => {
               <FormField
                 control={form.control}
                 name="cidadeId"
-                render={({ field }) => (
+                render={() => (
                   <FormItem>
                     <FormLabel className="text-base font-medium">
                       Cidade
