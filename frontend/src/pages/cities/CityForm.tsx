@@ -4,7 +4,7 @@ import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, Save, Loader2, Plus } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -16,18 +16,11 @@ import {
   FormMessage,
   FormDescription,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { cityApi, stateApi, countryApi } from '@/services/api';
-import { CreateCityDto, UpdateCityDto, Country, State } from '@/types/location';
+import { cityApi, stateApi } from '@/services/api';
+import { CreateCityDto, UpdateCityDto, State } from '@/types/location';
 import { toast } from 'sonner';
 import StateCreationDialog from '@/components/dialogs/StateCreationDialog';
-import CountryCreationDialog from '@/components/dialogs/CountryCreationDialog';
+import { SearchDialog } from '@/components/SearchDialog';
 
 const formSchema = z.object({
   nome: z
@@ -40,18 +33,18 @@ const formSchema = z.object({
       message: 'O código IBGE deve ter exatamente 7 dígitos numéricos',
     }),
   estadoId: z.string().uuid('Selecione um estado válido'),
-  paisId: z.string().uuid('Selecione um país válido'),
 });
 
 const CityForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [countries, setCountries] = useState<Country[]>([]);
   const [states, setStates] = useState<State[]>([]);
-  const [filteredStates, setFilteredStates] = useState<State[]>([]);
+
+  // Dialog states
   const [stateDialogOpen, setStateDialogOpen] = useState(false);
-  const [countryDialogOpen, setCountryDialogOpen] = useState(false);
+  const [stateSearchOpen, setStateSearchOpen] = useState(false);
+
   const location = useLocation();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -60,50 +53,25 @@ const CityForm = () => {
       nome: '',
       codigoIbge: '',
       estadoId: '',
-      paisId: '',
     },
   });
 
-  const selectedCountry = form.watch('paisId');
-
-  useEffect(() => {
-    if (selectedCountry && states.length > 0) {
-      const filtered = states.filter(
-        (state) => state.paisId === selectedCountry,
-      );
-      setFilteredStates(filtered);
-
-      const currentStateId = form.getValues('estadoId');
-      if (
-        currentStateId &&
-        !filtered.some((state) => state.id === currentStateId)
-      ) {
-        form.setValue('estadoId', '');
-      }
-    } else {
-      setFilteredStates([]);
-    }
-  }, [selectedCountry, states, form]);
-
+  // Load all states initially
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [countriesData, statesData] = await Promise.all([
-          countryApi.getAll(),
-          stateApi.getAll(),
-        ]);
-
-        setCountries(countriesData);
+        const statesData = await stateApi.getAll();
         setStates(statesData);
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
-        toast.error('Não foi possível carregar os dados necessários.');
+        toast.error('Não foi possível carregar a lista de estados.');
       }
     };
 
     fetchData();
   }, []);
 
+  // Load city data when editing
   useEffect(() => {
     const fetchCity = async () => {
       if (!id) return;
@@ -111,14 +79,10 @@ const CityForm = () => {
       setIsLoading(true);
       try {
         const city = await cityApi.getById(id);
-
-        const cityState = states.find((state) => state.id === city.estadoId);
-
         form.reset({
           nome: city.nome,
           codigoIbge: city.codigoIbge || '',
           estadoId: city.estadoId,
-          paisId: cityState?.paisId || '',
         });
       } catch (error) {
         console.error('Erro ao buscar cidade:', error);
@@ -129,30 +93,18 @@ const CityForm = () => {
       }
     };
 
-    if (id && states.length > 0) {
+    if (id) {
       fetchCity();
     }
-  }, [id, navigate, form, states]);
+  }, [id, navigate, form]);
 
+  // Handle state parameter from URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const stateId = params.get('stateId');
 
     if (stateId) {
       form.setValue('estadoId', stateId);
-
-      const loadStateData = async () => {
-        try {
-          const state = await stateApi.getById(stateId);
-          if (state.paisId) {
-            form.setValue('paisId', state.paisId);
-          }
-        } catch (error) {
-          console.error('Error loading state data:', error);
-        }
-      };
-
-      loadStateData();
     }
   }, [location.search, form]);
 
@@ -160,27 +112,32 @@ const CityForm = () => {
     setIsLoading(true);
 
     try {
-      const { paisId, ...cityData } = data;
-
       const formattedData = {
-        ...cityData,
+        ...data,
         codigoIbge:
-          cityData.codigoIbge && cityData.codigoIbge.trim() !== ''
-            ? cityData.codigoIbge
+          data.codigoIbge && data.codigoIbge.trim() !== ''
+            ? data.codigoIbge
             : undefined,
       };
+
+      let createdOrUpdatedId: string;
 
       if (id) {
         await cityApi.update(id, formattedData as UpdateCityDto);
         toast.success('Cidade atualizada com sucesso!');
+        createdOrUpdatedId = id;
       } else {
-        await cityApi.create(formattedData as CreateCityDto);
+        const createdCity = await cityApi.create(
+          formattedData as CreateCityDto,
+        );
         toast.success('Cidade criada com sucesso!');
+        createdOrUpdatedId = createdCity.id;
       }
 
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
-        navigate(returnUrl);
+        const returnWithParams = `${returnUrl}?createdEntity=city&createdId=${createdOrUpdatedId}`;
+        navigate(returnWithParams);
       } else {
         navigate('/cities');
       }
@@ -194,14 +151,8 @@ const CityForm = () => {
 
   const handleStateCreated = (newState: State) => {
     setStates((prev) => [...prev, newState]);
-
     form.setValue('estadoId', newState.id);
-  };
-
-  const handleCountryCreated = (newCountry: Country) => {
-    setCountries((prev) => [...prev, newCountry]);
-
-    form.setValue('paisId', newCountry.id);
+    setStateDialogOpen(false);
   };
 
   return (
@@ -217,116 +168,63 @@ const CityForm = () => {
         </Button>
       </div>
 
-      <div className="rounded-md border p-4">
+      <div className="rounded-md border p-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <FormField
-                  control={form.control}
-                  name="paisId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>País</FormLabel>
-                      <div className="flex gap-2">
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          disabled={isLoading}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="flex-1">
-                              <SelectValue placeholder="Selecione um país" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {countries.map((country) => (
-                              <SelectItem key={country.id} value={country.id}>
-                                {country.nome}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          type="button"
-                          size="icon"
-                          onClick={() => setCountryDialogOpen(true)}
-                          disabled={isLoading}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div>
-                <FormField
-                  control={form.control}
-                  name="estadoId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado</FormLabel>
-                      <div className="flex gap-2">
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          disabled={
-                            isLoading ||
-                            !selectedCountry ||
-                            filteredStates.length === 0
-                          }
-                        >
-                          <FormControl>
-                            <SelectTrigger className="flex-1">
-                              <SelectValue placeholder="Selecione um estado" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {filteredStates.map((state) => (
-                              <SelectItem key={state.id} value={state.id}>
-                                {state.nome} ({state.uf})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          type="button"
-                          size="icon"
-                          onClick={() => setStateDialogOpen(true)}
-                          disabled={isLoading || !selectedCountry}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <FormMessage />
-                      {!selectedCountry && (
-                        <FormDescription>
-                          Selecione um país primeiro
-                        </FormDescription>
-                      )}
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="estadoId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base font-medium">
+                    Estado
+                  </FormLabel>
+                  <div className="flex gap-2">
+                    <div className="w-full flex-1">
+                      <Input
+                        value={
+                          states.find((s) => s.id === field.value)?.nome || ''
+                        }
+                        readOnly
+                        placeholder="Selecione um estado"
+                        className="cursor-pointer h-11 text-base"
+                        onClick={() => setStateSearchOpen(true)}
+                      />
+                      <input type="hidden" {...field} />
+                    </div>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      onClick={() => setStateSearchOpen(true)}
+                      disabled={isLoading}
+                      className="h-11 w-11"
+                    >
+                      <Search className="h-5 w-5" />
+                    </Button>
+                  </div>
+                  <FormMessage className="text-sm" />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
               name="nome"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome da Cidade</FormLabel>
+                  <FormLabel className="text-base font-medium">
+                    Nome da Cidade
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Ex: São Paulo"
                       {...field}
                       disabled={isLoading}
+                      className="h-11 text-base"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-sm" />
                 </FormItem>
               )}
             />
@@ -336,44 +234,68 @@ const CityForm = () => {
               name="codigoIbge"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Código IBGE (opcional)</FormLabel>
+                  <FormLabel className="text-base font-medium">
+                    Código IBGE (opcional)
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Ex: 3550308"
                       {...field}
                       maxLength={7}
                       disabled={isLoading}
+                      className="h-11 text-base"
                     />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="text-sm">
                     Código de 7 dígitos do IBGE para o município
                   </FormDescription>
-                  <FormMessage />
+                  <FormMessage className="text-sm" />
                 </FormItem>
               )}
             />
 
-            <div className="flex justify-end">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                <Save className="mr-2 h-4 w-4" /> Salvar
+            <div className="flex justify-end pt-4">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="h-11 px-6 text-base"
+              >
+                {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                <Save className="mr-2 h-5 w-5" /> Salvar
               </Button>
             </div>
           </form>
         </Form>
       </div>
 
+      {/* Dialogs */}
       <StateCreationDialog
         open={stateDialogOpen}
         onOpenChange={setStateDialogOpen}
         onSuccess={handleStateCreated}
-        selectedCountryId={selectedCountry}
+        selectedCountryId=""
       />
 
-      <CountryCreationDialog
-        open={countryDialogOpen}
-        onOpenChange={setCountryDialogOpen}
-        onSuccess={handleCountryCreated}
+      <SearchDialog
+        open={stateSearchOpen}
+        onOpenChange={setStateSearchOpen}
+        title="Selecionar Estado"
+        entities={states}
+        isLoading={isLoading}
+        onSelect={(state) => {
+          form.setValue('estadoId', state.id);
+          setStateSearchOpen(false);
+        }}
+        onCreateNew={() => {
+          setStateSearchOpen(false);
+          setStateDialogOpen(true);
+        }}
+        displayColumns={[
+          { key: 'nome', header: 'Nome' },
+          { key: 'uf', header: 'UF' },
+          { key: 'paisNome', header: 'País' },
+        ]}
+        searchKeys={['nome', 'uf', 'paisNome']}
       />
     </div>
   );

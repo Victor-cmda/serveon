@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -39,6 +39,7 @@ const CountryForm = () => {
   const navigate = useNavigate();
   const { getFormState } = useFormState();
   const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -92,6 +93,8 @@ const CountryForm = () => {
     setIsLoading(true);
 
     try {
+      let createdOrUpdatedId: string;
+
       if (id) {
         // Atualização
         const updateData: UpdateCountryDto = {
@@ -104,6 +107,7 @@ const CountryForm = () => {
         toast.success('Sucesso', {
           description: 'País atualizado com sucesso!',
         });
+        createdOrUpdatedId = id;
       } else {
         // Criação
         const createData: CreateCountryDto = {
@@ -112,13 +116,21 @@ const CountryForm = () => {
           codigo: data.codigo,
         };
 
-        await countryApi.create(createData);
+        const createdCountry = await countryApi.create(createData);
         toast.success('Sucesso', {
           description: 'País criado com sucesso!',
         });
+        createdOrUpdatedId = createdCountry.id;
       }
 
-      navigate('/countries');
+      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
+      if (returnUrl) {
+        // Include the created entity information in the return URL
+        const returnWithParams = `${returnUrl}?createdEntity=country&createdId=${createdOrUpdatedId}`;
+        navigate(returnWithParams);
+      } else {
+        navigate('/countries');
+      }
     } catch (error: any) {
       console.error('Erro ao salvar país:', error);
       toast.error('Erro', {
@@ -142,34 +154,39 @@ const CountryForm = () => {
         </Button>
       </div>
 
-      <div className="rounded-md border p-4">
+      <div className="rounded-md border p-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="nome"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome do País</FormLabel>
+                  <FormLabel className="text-base font-medium">
+                    Nome do País
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Ex: Brasil"
                       {...field}
                       disabled={isLoading}
+                      className="h-11 text-base"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-sm" />
                 </FormItem>
               )}
             />
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="sigla"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Sigla (2 caracteres)</FormLabel>
+                    <FormLabel className="text-base font-medium">
+                      Sigla (2 caracteres)
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Ex: BR"
@@ -179,9 +196,10 @@ const CountryForm = () => {
                           field.onChange(e.target.value.toUpperCase())
                         }
                         disabled={isLoading}
+                        className="h-11 text-base"
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-sm" />
                   </FormItem>
                 )}
               />
@@ -191,25 +209,32 @@ const CountryForm = () => {
                 name="codigo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Código</FormLabel>
+                    <FormLabel className="text-base font-medium">
+                      Código
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Ex: 55"
                         {...field}
                         maxLength={3}
                         disabled={isLoading}
+                        className="h-11 text-base"
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-sm" />
                   </FormItem>
                 )}
               />
             </div>
 
-            <div className="flex justify-end">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                <Save className="mr-2 h-4 w-4" /> Salvar
+            <div className="flex justify-end pt-4">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="h-11 px-6 text-base"
+              >
+                {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                <Save className="mr-2 h-5 w-5" /> Salvar
               </Button>
             </div>
           </form>

@@ -2,167 +2,297 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-    FormDescription,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
-import { cityApi } from '@/services/api';
-import { City, CreateCityDto } from '@/types/location';
+import { cityApi, stateApi } from '@/services/api';
+import { City, CreateCityDto, State } from '@/types/location';
+import StateCreationDialog from './StateCreationDialog';
+import { SearchDialog } from '@/components/SearchDialog';
 
 const formSchema = z.object({
-    nome: z.string().min(2, 'Nome da cidade é obrigatório e deve ter pelo menos 2 caracteres'),
-    codigoIbge: z.string()
-        .optional()
-        .refine(val => !val || /^[0-9]{7}$/.test(val), {
-            message: 'O código IBGE deve ter exatamente 7 dígitos numéricos'
-        }),
-    estadoId: z.string().uuid('Estado é obrigatório'),
+  nome: z
+    .string()
+    .min(2, 'Nome da cidade é obrigatório e deve ter pelo menos 2 caracteres'),
+  codigoIbge: z
+    .string()
+    .optional()
+    .refine((val) => !val || /^[0-9]{7}$/.test(val), {
+      message: 'O código IBGE deve ter exatamente 7 dígitos numéricos',
+    }),
+  estadoId: z.string().uuid('Estado é obrigatório'),
 });
 
 interface CityCreationDialogProps {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    onSuccess: (city: City) => void;
-    selectedStateId?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: (city: City) => void;
+  selectedStateId?: string;
 }
 
 const CityCreationDialog = ({
-    open,
-    onOpenChange,
-    onSuccess,
-    selectedStateId
+  open,
+  onOpenChange,
+  onSuccess,
+  selectedStateId,
 }: CityCreationDialogProps) => {
-    const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [states, setStates] = useState<State[]>([]);
+  const [stateDialogOpen, setStateDialogOpen] = useState(false);
+  const [stateSearchOpen, setStateSearchOpen] = useState(false);
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            nome: '',
-            codigoIbge: '',
-            estadoId: selectedStateId || '',
-        },
-    });
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      nome: '',
+      codigoIbge: '',
+      estadoId: selectedStateId || '',
+    },
+  });
 
-    useEffect(() => {
-        if (selectedStateId) {
-            form.setValue('estadoId', selectedStateId);
-        }
-    }, [selectedStateId, form]);
+  useEffect(() => {
+    if (selectedStateId) {
+      form.setValue('estadoId', selectedStateId);
+    }
+  }, [selectedStateId, form]);
 
-    useEffect(() => {
-        if (!open) {
-            form.reset({
-                nome: '',
-                codigoIbge: '',
-                estadoId: selectedStateId || '',
-            });
-        }
-    }, [open, form, selectedStateId]);
+  useEffect(() => {
+    if (!open) {
+      form.reset({
+        nome: '',
+        codigoIbge: '',
+        estadoId: selectedStateId || '',
+      });
+    }
+  }, [open, form, selectedStateId]);
 
-    const onSubmit = async (data: z.infer<typeof formSchema>) => {
-        setIsLoading(true);
-
+  useEffect(() => {
+    if (open) {
+      const loadStates = async () => {
         try {
-            const createData: CreateCityDto = {
-                nome: data.nome,
-                codigoIbge: data.codigoIbge && data.codigoIbge.trim() !== '' ? data.codigoIbge : undefined,
-                estadoId: data.estadoId,
-            };
-
-            const newCity = await cityApi.create(createData);
-            toast.success(`Cidade ${data.nome} criada com sucesso!`);
-
-            onSuccess(newCity);
-            onOpenChange(false);
-        } catch (error: any) {
-            console.error('Erro ao criar cidade:', error);
-            toast.error(error.message || "Ocorreu um erro ao criar a cidade.");
-        } finally {
-            setIsLoading(false);
+          const statesData = await stateApi.getAll();
+          setStates(statesData);
+        } catch (error) {
+          console.error('Error loading states:', error);
+          toast.error('Não foi possível carregar a lista de estados');
         }
-    };
+      };
 
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                    <DialogTitle>Adicionar nova cidade</DialogTitle>
-                    <DialogDescription>
-                        Preencha os campos abaixo para cadastrar uma nova cidade.
-                    </DialogDescription>
-                </DialogHeader>
+      loadStates();
+    }
+  }, [open]);
 
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField
-                            control={form.control}
-                            name="nome"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Nome da Cidade</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Ex: São Paulo" {...field} disabled={isLoading} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
+
+    try {
+      const createData: CreateCityDto = {
+        nome: data.nome,
+        codigoIbge:
+          data.codigoIbge && data.codigoIbge.trim() !== ''
+            ? data.codigoIbge
+            : undefined,
+        estadoId: data.estadoId,
+      };
+
+      const newCity = await cityApi.create(createData);
+      toast.success(`Cidade ${data.nome} criada com sucesso!`);
+
+      onSuccess(newCity);
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error('Erro ao criar cidade:', error);
+      toast.error(error.message || 'Ocorreu um erro ao criar a cidade.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStateCreated = (newState: State) => {
+    setStates((prevStates) => [...prevStates, newState]);
+    form.setValue('estadoId', newState.id);
+    setStateDialogOpen(false);
+  };
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[95vw] md:max-w-[85vw] lg:max-w-[75vw] xl:max-w-[65vw] 2xl:max-w-[55vw] max-h-[95vh] overflow-y-auto p-6">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              Adicionar nova cidade
+            </DialogTitle>
+            <DialogDescription className="text-base">
+              Preencha os campos abaixo para cadastrar uma nova cidade.
+            </DialogDescription>
+          </DialogHeader>
+
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6 py-4"
+            >
+              <FormField
+                control={form.control}
+                name="estadoId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">
+                      Estado
+                    </FormLabel>
+                    <div className="flex gap-2">
+                      <div className="w-full flex-1">
+                        <Input
+                          value={
+                            states.find((s) => s.id === field.value)?.nome || ''
+                          }
+                          readOnly
+                          placeholder="Selecione um estado"
+                          className="cursor-pointer h-12 text-base"
+                          onClick={() => setStateSearchOpen(true)}
                         />
+                        <input type="hidden" {...field} />
+                      </div>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="outline"
+                        onClick={() => setStateSearchOpen(true)}
+                        disabled={isLoading}
+                        className="h-12 w-12"
+                      >
+                        <Search className="h-5 w-5" />
+                      </Button>
+                    </div>
+                    <FormMessage className="text-sm" />
+                  </FormItem>
+                )}
+              />
 
-                        <FormField
-                            control={form.control}
-                            name="codigoIbge"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Código IBGE (opcional)</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            placeholder="Ex: 3550308"
-                                            {...field}
-                                            maxLength={7}
-                                            disabled={isLoading}
-                                        />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Código de 7 dígitos do IBGE para o município
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="nome"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-medium">
+                        Nome da Cidade
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: São Paulo"
+                          {...field}
+                          disabled={isLoading}
+                          className="h-12 text-base"
                         />
+                      </FormControl>
+                      <FormMessage className="text-sm" />
+                    </FormItem>
+                  )}
+                />
 
-                        <input type="hidden" {...form.register('estadoId')} />
+                <FormField
+                  control={form.control}
+                  name="codigoIbge"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-medium">
+                        Código IBGE (opcional)
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: 3550308"
+                          {...field}
+                          maxLength={7}
+                          disabled={isLoading}
+                          className="h-12 text-base"
+                        />
+                      </FormControl>
+                      <FormDescription className="text-sm">
+                        Código de 7 dígitos do IBGE para o município
+                      </FormDescription>
+                      <FormMessage className="text-sm" />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
-                                Cancelar
-                            </Button>
-                            <Button type="submit" disabled={isLoading}>
-                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Salvar
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                </Form>
-            </DialogContent>
-        </Dialog>
-    );
+              <DialogFooter className="pt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isLoading}
+                  className="h-12 px-6 text-base"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="h-12 px-6 text-base"
+                >
+                  {isLoading && (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  )}
+                  Salvar
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      <StateCreationDialog
+        open={stateDialogOpen}
+        onOpenChange={setStateDialogOpen}
+        onSuccess={handleStateCreated}
+        selectedCountryId=""
+      />
+
+      <SearchDialog
+        open={stateSearchOpen}
+        onOpenChange={setStateSearchOpen}
+        title="Selecionar Estado"
+        entities={states}
+        isLoading={isLoading}
+        onSelect={(state) => {
+          form.setValue('estadoId', state.id);
+          setStateSearchOpen(false);
+        }}
+        onCreateNew={() => {
+          setStateSearchOpen(false);
+          setStateDialogOpen(true);
+        }}
+        displayColumns={[
+          { key: 'nome', header: 'Nome' },
+          { key: 'uf', header: 'UF' },
+          { key: 'paisNome', header: 'País' },
+        ]}
+        searchKeys={['nome', 'uf', 'paisNome']}
+        entityType="estados"
+        description="Selecione um estado para associar à cidade ou cadastre um novo estado."
+      />
+    </>
+  );
 };
 
 export default CityCreationDialog;

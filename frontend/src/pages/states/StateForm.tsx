@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, Save, Loader2, Plus } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -14,17 +14,11 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { stateApi, countryApi } from '@/services/api';
 import { CreateStateDto, UpdateStateDto, Country } from '@/types/location';
 import { toast } from 'sonner';
 import CountryCreationDialog from '@/components/dialogs/CountryCreationDialog';
+import { SearchDialog } from '@/components/SearchDialog';
 
 const formSchema = z.object({
   nome: z
@@ -40,7 +34,9 @@ const StateForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [countries, setCountries] = useState<Country[]>([]);
   const [countryDialogOpen, setCountryDialogOpen] = useState(false);
+  const [countrySearchOpen, setCountrySearchOpen] = useState(false);
   const location = useLocation();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -101,6 +97,8 @@ const StateForm = () => {
     setIsLoading(true);
 
     try {
+      let createdOrUpdatedId: string;
+
       if (id) {
         const updateData: UpdateStateDto = {
           nome: data.nome,
@@ -110,6 +108,7 @@ const StateForm = () => {
 
         await stateApi.update(id, updateData);
         toast.success('Estado atualizado com sucesso!');
+        createdOrUpdatedId = id;
       } else {
         const createData: CreateStateDto = {
           nome: data.nome,
@@ -117,13 +116,15 @@ const StateForm = () => {
           paisId: data.paisId,
         };
 
-        await stateApi.create(createData);
+        const createdState = await stateApi.create(createData);
         toast.success('Estado criado com sucesso!');
+        createdOrUpdatedId = createdState.id;
       }
 
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
-        navigate(returnUrl);
+        const returnWithParams = `${returnUrl}?createdEntity=state&createdId=${createdOrUpdatedId}`;
+        navigate(returnWithParams);
       } else {
         navigate('/states');
       }
@@ -137,8 +138,8 @@ const StateForm = () => {
 
   const handleCountryCreated = (newCountry: Country) => {
     setCountries((prev) => [...prev, newCountry]);
-
     form.setValue('paisId', newCountry.id);
+    setCountryDialogOpen(false);
   };
 
   return (
@@ -154,44 +155,41 @@ const StateForm = () => {
         </Button>
       </div>
 
-      <div className="rounded-md border p-4">
+      <div className="rounded-md border p-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="paisId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>País</FormLabel>
+                  <FormLabel className="text-base font-medium">País</FormLabel>
                   <div className="flex gap-2">
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      disabled={isLoading}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Selecione um país" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {countries.map((country) => (
-                          <SelectItem key={country.id} value={country.id}>
-                            {country.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="w-full flex-1">
+                      <Input
+                        value={
+                          countries.find((c) => c.id === field.value)?.nome ||
+                          ''
+                        }
+                        readOnly
+                        placeholder="Selecione um país"
+                        className="cursor-pointer h-11 text-base"
+                        onClick={() => setCountrySearchOpen(true)}
+                      />
+                      <input type="hidden" {...field} />
+                    </div>
                     <Button
                       type="button"
                       size="icon"
-                      onClick={() => setCountryDialogOpen(true)}
+                      variant="outline"
+                      onClick={() => setCountrySearchOpen(true)}
                       disabled={isLoading}
+                      className="h-11 w-11"
                     >
-                      <Plus className="h-4 w-4" />
+                      <Search className="h-5 w-5" />
                     </Button>
                   </div>
-                  <FormMessage />
+                  <FormMessage className="text-sm" />
                 </FormItem>
               )}
             />
@@ -201,15 +199,18 @@ const StateForm = () => {
               name="nome"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome do Estado</FormLabel>
+                  <FormLabel className="text-base font-medium">
+                    Nome do Estado
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Ex: São Paulo"
                       {...field}
                       disabled={isLoading}
+                      className="h-11 text-base"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-sm" />
                 </FormItem>
               )}
             />
@@ -219,7 +220,9 @@ const StateForm = () => {
               name="uf"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>UF (2 caracteres)</FormLabel>
+                  <FormLabel className="text-base font-medium">
+                    UF (2 caracteres)
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Ex: SP"
@@ -229,27 +232,55 @@ const StateForm = () => {
                         field.onChange(e.target.value.toUpperCase())
                       }
                       disabled={isLoading}
+                      className="h-11 text-base"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-sm" />
                 </FormItem>
               )}
             />
 
-            <div className="flex justify-end">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                <Save className="mr-2 h-4 w-4" /> Salvar
+            <div className="flex justify-end pt-4">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="h-11 px-6 text-base"
+              >
+                {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                <Save className="mr-2 h-5 w-5" /> Salvar
               </Button>
             </div>
           </form>
         </Form>
       </div>
 
+      {/* Dialogs */}
       <CountryCreationDialog
         open={countryDialogOpen}
         onOpenChange={setCountryDialogOpen}
         onSuccess={handleCountryCreated}
+      />
+
+      <SearchDialog
+        open={countrySearchOpen}
+        onOpenChange={setCountrySearchOpen}
+        title="Selecionar País"
+        entities={countries}
+        isLoading={isLoading}
+        onSelect={(country) => {
+          form.setValue('paisId', country.id);
+          setCountrySearchOpen(false);
+        }}
+        onCreateNew={() => {
+          setCountrySearchOpen(false);
+          setCountryDialogOpen(true);
+        }}
+        displayColumns={[
+          { key: 'nome', header: 'Nome' },
+          { key: 'sigla', header: 'Sigla' },
+          { key: 'codigo', header: 'Código' },
+        ]}
+        searchKeys={['nome', 'sigla', 'codigo']}
       />
     </div>
   );

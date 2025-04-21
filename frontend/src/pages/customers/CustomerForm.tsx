@@ -15,6 +15,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFormState } from '@/contexts/FormStateContext';
@@ -23,6 +24,18 @@ import { Country, State, City } from '@/types/location';
 import { Customer } from '@/types/customer';
 import { toast } from 'sonner';
 import { SearchDialog } from '@/components/SearchDialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+
+// Importar os componentes de diálogo
+import StateCreationDialog from '@/components/dialogs/StateCreationDialog';
+import CityCreationDialog from '@/components/dialogs/CityCreationDialog';
 
 // Define the schema
 const formSchema = z.object({
@@ -58,18 +71,20 @@ const CustomerForm = () => {
 
   // States
   const [isLoading, setIsLoading] = useState(false);
-  const [countries, setCountries] = useState<Country[]>([]);
   const [states, setStates] = useState<State[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
+  const [countries, setCountries] = useState<Country[]>([]);
 
   // Reference dialogs
-  const [countrySearchOpen, setCountrySearchOpen] = useState(false);
   const [stateSearchOpen, setStateSearchOpen] = useState(false);
   const [citySearchOpen, setCitySearchOpen] = useState(false);
 
+  // New dialogs for entity creation
+  const [newCityDialogOpen, setNewCityDialogOpen] = useState(false);
+  const [newStateDialogOpen, setNewStateDialogOpen] = useState(false);
+
   // Selected reference values
-  const [selectedCountryId, setSelectedCountryId] = useState<string>('');
   const [selectedStateId, setSelectedStateId] = useState<string>('');
 
   // Initialize form
@@ -100,6 +115,41 @@ const CustomerForm = () => {
   const watchIsEstrangeiro = form.watch('isEstrangeiro');
   const watchCidadeId = form.watch('cidadeId');
 
+  // Load all cities
+  const fetchCities = async () => {
+    try {
+      setIsLoading(true);
+      const citiesData = await cityApi.getAll();
+      setCities(citiesData);
+    } catch (error) {
+      console.error('Erro ao carregar cidades:', error);
+      toast.error('Não foi possível carregar a lista de cidades');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load cities for a specific state
+  const loadCitiesForState = async (stateId: string) => {
+    try {
+      setIsLoading(true);
+      const citiesData = await cityApi.getByState(stateId);
+      setCities(citiesData);
+    } catch (error) {
+      console.error('Erro ao carregar cidades:', error);
+      toast.error('Não foi possível carregar a lista de cidades');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Filtra as cidades por estado quando o diálogo é aberto
+  useEffect(() => {
+    if (citySearchOpen && selectedStateId) {
+      loadCitiesForState(selectedStateId);
+    }
+  }, [citySearchOpen, selectedStateId]);
+
   // Load saved form state if available
   useEffect(() => {
     const savedState = getFormState(formId);
@@ -119,18 +169,14 @@ const CustomerForm = () => {
             // Load state data
             if (city.estadoId) {
               setSelectedStateId(city.estadoId);
+
+              // Load cities for the city's state
+              const citiesData = await cityApi.getByState(city.estadoId);
+              setCities(citiesData);
+
+              // Load all states for reference
               const statesData = await stateApi.getAll();
               setStates(statesData);
-
-              // Find the state to get its country
-              const state = statesData.find((s) => s.id === city.estadoId);
-              if (state && state.paisId) {
-                setSelectedCountryId(state.paisId);
-
-                // Load cities for this state
-                const citiesData = await cityApi.getByState(city.estadoId);
-                setCities(citiesData);
-              }
             }
           } catch (error) {
             console.error('Error loading saved city data:', error);
@@ -165,6 +211,53 @@ const CustomerForm = () => {
     loadCountries();
   }, []);
 
+  // Load all states initially
+  useEffect(() => {
+    const loadStates = async () => {
+      try {
+        const statesData = await stateApi.getAll();
+        setStates(statesData);
+      } catch (error) {
+        console.error('Erro ao carregar estados:', error);
+        toast.error('Não foi possível carregar a lista de estados');
+      }
+    };
+
+    loadStates();
+  }, []);
+
+  // Load cities when state is selected
+  useEffect(() => {
+    if (selectedStateId) {
+      const loadCities = async () => {
+        try {
+          const citiesData = await cityApi.getByState(selectedStateId);
+          setCities(citiesData);
+
+          // Clear city if state changes and current city doesn't belong to this state
+          const currentCityId = form.getValues('cidadeId');
+          if (
+            currentCityId &&
+            !citiesData.some((city) => city.id === currentCityId)
+          ) {
+            form.setValue('cidadeId', '');
+            setSelectedCity(null);
+          }
+        } catch (error) {
+          console.error('Erro ao carregar cidades:', error);
+          toast.error('Não foi possível carregar a lista de cidades');
+        }
+      };
+
+      loadCities();
+    } else {
+      // If no state is selected, clear cities
+      setCities([]);
+      setSelectedCity(null);
+      form.setValue('cidadeId', '');
+    }
+  }, [selectedStateId, form]);
+
   // Load customer data if editing
   useEffect(() => {
     if (!id) return;
@@ -190,11 +283,7 @@ const CustomerForm = () => {
               // Find the state to get its country
               const state = statesData.find((s) => s.id === city.estadoId);
               if (state && state.paisId) {
-                setSelectedCountryId(state.paisId);
-
-                // Load cities for this state
-                const citiesData = await cityApi.getByState(city.estadoId);
-                setCities(citiesData);
+                form.setValue('cidadeId', city.id);
               }
             }
           } catch (error) {
@@ -233,60 +322,6 @@ const CustomerForm = () => {
     loadCustomer();
   }, [id, navigate, form]);
 
-  // Load states when country is selected
-  useEffect(() => {
-    if (selectedCountryId) {
-      const loadStates = async () => {
-        try {
-          const statesData = await stateApi.getByCountry(selectedCountryId);
-          setStates(statesData);
-
-          // Clear state and city if country changes
-          if (
-            selectedStateId &&
-            !statesData.some((state) => state.id === selectedStateId)
-          ) {
-            setSelectedStateId('');
-            setCities([]);
-            setSelectedCity(null);
-            form.setValue('cidadeId', '');
-          }
-        } catch (error) {
-          console.error('Erro ao carregar estados:', error);
-          toast.error('Não foi possível carregar a lista de estados');
-        }
-      };
-
-      loadStates();
-    }
-  }, [selectedCountryId, selectedStateId, form]);
-
-  // Load cities when state is selected
-  useEffect(() => {
-    if (selectedStateId) {
-      const loadCities = async () => {
-        try {
-          const citiesData = await cityApi.getByState(selectedStateId);
-          setCities(citiesData);
-
-          // Clear city if state changes
-          if (
-            watchCidadeId &&
-            !citiesData.some((city) => city.id === watchCidadeId)
-          ) {
-            form.setValue('cidadeId', '');
-            setSelectedCity(null);
-          }
-        } catch (error) {
-          console.error('Erro ao carregar cidades:', error);
-          toast.error('Não foi possível carregar a lista de cidades');
-        }
-      };
-
-      loadCities();
-    }
-  }, [selectedStateId, watchCidadeId, form]);
-
   // Handle form submission
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
@@ -315,25 +350,6 @@ const CustomerForm = () => {
     }
   };
 
-  // Handle country selection
-  const onSelectCountry = (country: Country) => {
-    setSelectedCountryId(country.id);
-    setCountrySearchOpen(false);
-
-    // Clear state and city when country changes
-    setSelectedStateId('');
-    form.setValue('cidadeId', '');
-    setSelectedCity(null);
-  };
-
-  // Handle creating a new country
-  const onCreateNewCountry = () => {
-    saveFormState(formId, form.getValues());
-    navigate(
-      '/countries/new?returnUrl=' + encodeURIComponent(location.pathname),
-    );
-  };
-
   // Handle state selection
   const onSelectState = (state: State) => {
     setSelectedStateId(state.id);
@@ -346,15 +362,7 @@ const CustomerForm = () => {
 
   // Handle creating a new state
   const onCreateNewState = () => {
-    saveFormState(formId, form.getValues());
-
-    // Pass the selected country as a parameter
-    let url = '/states/new?returnUrl=' + encodeURIComponent(location.pathname);
-    if (selectedCountryId) {
-      url += '&countryId=' + selectedCountryId;
-    }
-
-    navigate(url);
+    setNewStateDialogOpen(true);
   };
 
   // Handle city selection
@@ -366,15 +374,7 @@ const CustomerForm = () => {
 
   // Handle creating a new city
   const onCreateNewCity = () => {
-    saveFormState(formId, form.getValues());
-
-    // Pass the selected state as a parameter
-    let url = '/cities/new?returnUrl=' + encodeURIComponent(location.pathname);
-    if (selectedStateId) {
-      url += '&stateId=' + selectedStateId;
-    }
-
-    navigate(url);
+    setNewCityDialogOpen(true);
   };
 
   return (
@@ -391,425 +391,421 @@ const CustomerForm = () => {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <Tabs defaultValue="general" className="w-full">
-            <TabsList>
-              <TabsTrigger value="general">Dados Gerais</TabsTrigger>
-              <TabsTrigger value="address">Endereço</TabsTrigger>
-              <TabsTrigger value="contact">Contato</TabsTrigger>
-            </TabsList>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Dados Gerais */}
+          <div className="rounded-md border p-6">
+            <h2 className="mb-6 text-lg font-semibold">Dados Gerais</h2>
 
-            {/* General Information Tab */}
-            <TabsContent value="general" className="space-y-4 pt-4">
-              <div className="rounded-md border p-4">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <FormField
-                    control={form.control}
-                    name="tipo"
-                    render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <FormLabel>Tipo de Pessoa</FormLabel>
-                        <div className="flex space-x-4">
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="radio"
-                              id="juridica"
-                              value="J"
-                              checked={field.value === 'J'}
-                              onChange={() => field.onChange('J')}
-                            />
-                            <label htmlFor="juridica">Jurídica</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="radio"
-                              id="fisica"
-                              value="F"
-                              checked={field.value === 'F'}
-                              onChange={() => field.onChange('F')}
-                            />
-                            <label htmlFor="fisica">Física</label>
-                          </div>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <FormField
+                control={form.control}
+                name="tipo"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel className="text-base font-medium">
+                      Tipo de Pessoa
+                    </FormLabel>
+                    <div className="flex space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          id="juridica"
+                          value="J"
+                          checked={field.value === 'J'}
+                          onChange={() => field.onChange('J')}
+                        />
+                        <label htmlFor="juridica" className="text-base">
+                          Jurídica
+                        </label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          id="fisica"
+                          value="F"
+                          checked={field.value === 'F'}
+                          onChange={() => field.onChange('F')}
+                        />
+                        <label htmlFor="fisica" className="text-base">
+                          Física
+                        </label>
+                      </div>
+                    </div>
+                    <FormMessage className="text-sm" />
+                  </FormItem>
+                )}
+              />
 
-                  <FormField
-                    control={form.control}
-                    name="isEstrangeiro"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 pt-6">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Cliente Estrangeiro</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <FormField
+                control={form.control}
+                name="isEstrangeiro"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 pt-6">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-base font-medium">
+                        Cliente Estrangeiro
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
 
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="cnpjCpf"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          {watchTipo === 'J' ? 'CNPJ' : 'CPF'}
-                          {watchIsEstrangeiro && ' / Documento'}
-                        </FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled={isLoading} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <FormField
+                control={form.control}
+                name="ativo"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 pt-6">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-base font-medium">
+                        Cliente Ativo
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
 
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="razaoSocial"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          {watchTipo === 'J' ? 'Razão Social' : 'Nome Completo'}
-                        </FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled={isLoading} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="cnpjCpf"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">
+                      {watchTipo === 'J' ? 'CNPJ' : 'CPF'}
+                      {watchIsEstrangeiro && ' / Documento'}
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        disabled={isLoading}
+                        className="h-11 text-base"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-sm" />
+                  </FormItem>
+                )}
+              />
 
-                  <FormField
-                    control={form.control}
-                    name="nomeFantasia"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          {watchTipo === 'J' ? 'Nome Fantasia' : 'Apelido'}
-                        </FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled={isLoading} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <FormField
+                control={form.control}
+                name="inscricaoEstadual"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">
+                      {watchIsEstrangeiro
+                        ? 'Documento adicional'
+                        : 'Inscrição Estadual / RG'}
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        disabled={isLoading}
+                        className="h-11 text-base"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-sm" />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="inscricaoEstadual"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          {watchIsEstrangeiro
-                            ? 'Documento adicional'
-                            : 'Inscrição Estadual / RG'}
-                        </FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled={isLoading} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="razaoSocial"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">
+                      {watchTipo === 'J' ? 'Razão Social' : 'Nome Completo'}
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        disabled={isLoading}
+                        className="h-11 text-base"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-sm" />
+                  </FormItem>
+                )}
+              />
 
-                  {watchTipo === 'J' && (
-                    <FormField
-                      control={form.control}
-                      name="inscricaoMunicipal"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {watchIsEstrangeiro
-                              ? 'Registro comercial'
-                              : 'Inscrição Municipal'}
-                          </FormLabel>
-                          <FormControl>
-                            <Input {...field} disabled={isLoading} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+              <FormField
+                control={form.control}
+                name="nomeFantasia"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">
+                      {watchTipo === 'J' ? 'Nome Fantasia' : 'Apelido'}
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        disabled={isLoading}
+                        className="h-11 text-base"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-sm" />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {watchTipo === 'J' && (
+              <div className="mt-6">
+                <FormField
+                  control={form.control}
+                  name="inscricaoMunicipal"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-medium">
+                        {watchIsEstrangeiro
+                          ? 'Registro comercial'
+                          : 'Inscrição Municipal'}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={isLoading}
+                          className="h-11 text-base"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-sm" />
+                    </FormItem>
                   )}
-                </div>
-
-                <div className="mt-4">
-                  <FormField
-                    control={form.control}
-                    name="ativo"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Cliente Ativo</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                />
               </div>
-            </TabsContent>
+            )}
+          </div>
 
-            {/* Address Tab */}
-            <TabsContent value="address" className="space-y-4 pt-4">
-              <div className="rounded-md border p-4">
-                {/* Cascading location selection */}
-                <div className="mb-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium">Localização</h3>
-                  </div>
+          {/* Endereço */}
+          <div className="rounded-md border p-6">
+            <h2 className="mb-6 text-lg font-semibold">Endereço</h2>
 
-                  {/* Country selection */}
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <label className="text-sm font-medium">País</label>
-                      <div className="flex gap-2 mt-1">
+            {/* Seleção de localização */}
+            <div className="mb-6">
+              <FormField
+                control={form.control}
+                name="cidadeId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">
+                      Cidade
+                    </FormLabel>
+                    <div className="flex gap-2">
+                      <FormControl>
                         <div className="flex w-full items-center gap-2">
                           <Input
-                            value={
-                              countries.find((c) => c.id === selectedCountryId)
-                                ?.nome || ''
-                            }
+                            value={selectedCity?.nome || ''}
                             readOnly
-                            placeholder="Selecione um país"
+                            placeholder="Selecione uma cidade"
+                            className="cursor-pointer h-11 text-base"
+                            onClick={() => setCitySearchOpen(true)}
                           />
                           <Button
                             type="button"
                             variant="outline"
                             size="icon"
-                            onClick={() => setCountrySearchOpen(true)}
+                            onClick={() => setCitySearchOpen(true)}
+                            className="h-11 w-11"
                           >
-                            <Search className="h-4 w-4" />
+                            <Search className="h-5 w-5" />
                           </Button>
                         </div>
-                      </div>
+                      </FormControl>
                     </div>
-
-                    {/* State selection - only enabled if country is selected */}
-                    <div>
-                      <label className="text-sm font-medium">Estado</label>
-                      <div className="flex gap-2 mt-1">
-                        <div className="flex w-full items-center gap-2">
-                          <Input
-                            value={
-                              states.find((s) => s.id === selectedStateId)
-                                ?.nome || ''
-                            }
-                            readOnly
-                            placeholder="Selecione um estado"
-                            disabled={!selectedCountryId}
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setStateSearchOpen(true)}
-                            disabled={!selectedCountryId}
-                          >
-                            <Search className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* City selection - only enabled if state is selected */}
-                  <FormField
-                    control={form.control}
-                    name="cidadeId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cidade</FormLabel>
-                        <div className="flex gap-2">
-                          <FormControl>
-                            <div className="flex w-full items-center gap-2">
-                              <Input
-                                value={selectedCity?.nome || ''}
-                                readOnly
-                                placeholder="Selecione uma cidade"
-                                disabled={!selectedStateId}
-                              />
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                onClick={() => setCitySearchOpen(true)}
-                                disabled={!selectedStateId}
-                              >
-                                <Search className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
+                    {selectedCity && (
+                      <FormDescription className="text-sm">
+                        {selectedCity.estadoNome} / {selectedCity.uf}{' '}
+                        {selectedCity.paisNome
+                          ? `- ${selectedCity.paisNome}`
+                          : ''}
+                      </FormDescription>
                     )}
-                  />
-                </div>
+                    <FormMessage className="text-sm" />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="endereco"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Endereço</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled={isLoading} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="endereco"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">
+                      Endereço
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        disabled={isLoading}
+                        className="h-11 text-base"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-sm" />
+                  </FormItem>
+                )}
+              />
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="numero"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Número</FormLabel>
-                          <FormControl>
-                            <Input {...field} disabled={isLoading} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+              <div className="grid grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="numero"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-medium">
+                        Número
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={isLoading}
+                          className="h-11 text-base"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-sm" />
+                    </FormItem>
+                  )}
+                />
 
-                    <FormField
-                      control={form.control}
-                      name="complemento"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Complemento</FormLabel>
-                          <FormControl>
-                            <Input {...field} disabled={isLoading} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="bairro"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Bairro</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled={isLoading} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="cep"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>CEP</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled={isLoading} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="complemento"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-medium">
+                        Complemento
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={isLoading}
+                          className="h-11 text-base"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-sm" />
+                    </FormItem>
+                  )}
+                />
               </div>
-            </TabsContent>
+            </div>
 
-            {/* Contact Tab */}
-            <TabsContent value="contact" className="space-y-4 pt-4">
-              <div className="rounded-md border p-4">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="telefone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Telefone</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled={isLoading} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="bairro"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">
+                      Bairro
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        disabled={isLoading}
+                        className="h-11 text-base"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-sm" />
+                  </FormItem>
+                )}
+              />
 
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input
-                            value={field.value || ''}
-                            onChange={(e) => field.onChange(e.target.value)}
-                            disabled={isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+              <FormField
+                control={form.control}
+                name="cep"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">CEP</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        disabled={isLoading}
+                        className="h-11 text-base"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-sm" />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
 
-          <div className="flex justify-end">
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Save className="mr-2 h-4 w-4" /> Salvar
+          {/* Contato */}
+          <div className="rounded-md border p-6">
+            <h2 className="mb-6 text-lg font-semibold">Contato</h2>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="telefone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">
+                      Telefone
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        disabled={isLoading}
+                        className="h-11 text-base"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-sm" />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">
+                      Email
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        disabled={isLoading}
+                        className="h-11 text-base"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-sm" />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="h-11 px-6 text-base"
+            >
+              {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+              <Save className="mr-2 h-5 w-5" /> Salvar
             </Button>
           </div>
         </form>
       </Form>
-
-      {/* Country Search Dialog */}
-      <SearchDialog
-        open={countrySearchOpen}
-        onOpenChange={setCountrySearchOpen}
-        title="Selecionar País"
-        entities={countries}
-        isLoading={isLoading}
-        onSelect={onSelectCountry}
-        onCreateNew={onCreateNewCountry}
-        displayColumns={[
-          { key: 'nome', header: 'Nome' },
-          { key: 'sigla', header: 'Sigla' },
-          { key: 'codigo', header: 'Código' },
-        ]}
-        searchKeys={['nome', 'sigla', 'codigo']}
-      />
 
       {/* State Search Dialog */}
       <SearchDialog
@@ -826,6 +822,7 @@ const CustomerForm = () => {
           { key: 'paisNome', header: 'País' },
         ]}
         searchKeys={['nome', 'uf', 'paisNome']}
+        entityType="estados"
       />
 
       {/* City Search Dialog */}
@@ -842,8 +839,79 @@ const CustomerForm = () => {
           { key: 'estadoNome', header: 'Estado' },
           { key: 'uf', header: 'UF' },
           { key: 'codigoIbge', header: 'Código IBGE' },
+          { key: 'paisNome', header: 'País' },
         ]}
-        searchKeys={['nome', 'estadoNome', 'uf', 'codigoIbge']}
+        searchKeys={['nome', 'estadoNome', 'uf', 'codigoIbge', 'paisNome']}
+        entityType="cidades"
+        extraActions={
+          <div className="flex gap-2">
+            {selectedStateId ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setStateSearchOpen(true);
+                  setCitySearchOpen(false);
+                }}
+              >
+                Estado:{' '}
+                {states.find((s) => s.id === selectedStateId)?.nome ||
+                  'Selecionado'}
+              </Button>
+            ) : (
+              <></>
+            )}
+
+            {selectedStateId && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSelectedStateId('');
+                  fetchCities();
+                }}
+              >
+                Limpar Filtro
+              </Button>
+            )}
+          </div>
+        }
+        description="Selecione uma cidade para o cadastro do cliente. Você pode filtrar por estado ou pesquisar pelo nome da cidade, código IBGE ou UF."
+      />
+
+      {/* New State Dialog */}
+      <StateCreationDialog
+        open={newStateDialogOpen}
+        onOpenChange={setNewStateDialogOpen}
+        onSuccess={(newState: State) => {
+          // Select the newly created state
+          setSelectedStateId(newState.id);
+
+          // Load cities for this state
+          loadCitiesForState(newState.id);
+
+          // Verify if we came from the city dialog
+          if (newCityDialogOpen) {
+            // We're creating a state from the city dialog
+            toast.success('Estado criado com sucesso!');
+          } else {
+            // We're creating a state from the state search dialog
+            setCitySearchOpen(true);
+            toast.success('Estado criado com sucesso!');
+          }
+        }}
+      />
+
+      {/* New City Dialog */}
+      <CityCreationDialog
+        open={newCityDialogOpen}
+        onOpenChange={setNewCityDialogOpen}
+        onSuccess={(newCity: City) => {
+          // Select the newly created city
+          onSelectCity(newCity);
+          toast.success('Cidade criada com sucesso!');
+        }}
+        selectedStateId={selectedStateId}
       />
     </div>
   );
