@@ -56,7 +56,7 @@ const CustomerForm = () => {
   const [states, setStates] = useState<State[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
-  const [countries, setCountries] = useState<Country[]>([]);
+  const [country, setCountries] = useState<Country[]>([]);
 
   const [stateSearchOpen, setStateSearchOpen] = useState(false);
   const [citySearchOpen, setCitySearchOpen] = useState(false);
@@ -118,8 +118,12 @@ const CustomerForm = () => {
   };
 
   useEffect(() => {
-    if (citySearchOpen && selectedStateId) {
-      loadCitiesForState(selectedStateId);
+    if (citySearchOpen) {
+      if (selectedStateId) {
+        loadCitiesForState(selectedStateId);
+      } else {
+        fetchCities();
+      }
     }
   }, [citySearchOpen, selectedStateId]);
 
