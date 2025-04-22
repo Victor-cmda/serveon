@@ -1,10 +1,7 @@
-import { useState } from 'react';
 import { useTheme } from 'next-themes';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
   Search,
-  Bell,
   User,
   Menu,
   Sun,
@@ -29,12 +26,10 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { SearchInputWithRouter } from './SearchInput';
 
 const Navbar = () => {
   const { theme, setTheme } = useTheme();
-  const [searchFocused, setSearchFocused] = useState(false);
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
@@ -68,26 +63,7 @@ const Navbar = () => {
           </div>
 
           <div className="hidden max-w-md flex-1 px-4 lg:block lg:px-6">
-            <div
-              className={cn(
-                'relative transition-all duration-200 ease-in-out',
-                searchFocused ? 'scale-105' : 'scale-100',
-              )}
-            >
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Buscar no sistema..."
-                className={cn(
-                  'w-full border-muted bg-muted/30 pl-10 pr-4 transition-all duration-200',
-                  searchFocused
-                    ? 'border-primary/50 ring-2 ring-primary/20'
-                    : 'hover:border-muted/80',
-                )}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
-              />
-            </div>
+            <SearchInputWithRouter />
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">
