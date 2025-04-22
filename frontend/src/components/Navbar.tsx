@@ -113,26 +113,6 @@ const Navbar = () => {
               </Tooltip>
             </TooltipProvider>
 
-            <TooltipProvider delayDuration={300}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative text-muted-foreground hover:text-foreground"
-                  >
-                    <Bell className="h-[1.2rem] w-[1.2rem]" />
-                    <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full bg-primary p-0 text-center text-[10px] leading-5 text-primary-foreground">
-                      3
-                    </Badge>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Notificações</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
             <Button
               variant="ghost"
               size="icon"

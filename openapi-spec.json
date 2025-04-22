@@ -181,7 +181,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "CNPJ/CPF do cliente",
+            "description": "ID do cliente (UUID)",
             "schema": {
               "type": "string"
             }
@@ -202,7 +202,7 @@
             "description": "Cliente não encontrado"
           }
         },
-        "summary": "Obter cliente por CNPJ/CPF",
+        "summary": "Obter cliente por ID",
         "tags": [
           "Customers"
         ]
@@ -214,7 +214,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "CNPJ/CPF do cliente",
+            "description": "ID do cliente (UUID)",
             "schema": {
               "type": "string"
             }
@@ -248,7 +248,7 @@
             "description": "Cliente não encontrado"
           }
         },
-        "summary": "Atualizar cliente por CNPJ/CPF",
+        "summary": "Atualizar cliente por ID",
         "tags": [
           "Customers"
         ]
@@ -260,7 +260,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "CNPJ/CPF do cliente",
+            "description": "ID do cliente (UUID)",
             "schema": {
               "type": "string"
             }
@@ -274,7 +274,42 @@
             "description": "Cliente não encontrado"
           }
         },
-        "summary": "Remover cliente por CNPJ/CPF",
+        "summary": "Remover cliente por ID",
+        "tags": [
+          "Customers"
+        ]
+      }
+    },
+    "/api/customers/by-document/{cnpjCpf}": {
+      "get": {
+        "operationId": "CustomersController_findByDocument",
+        "parameters": [
+          {
+            "name": "cnpjCpf",
+            "required": true,
+            "in": "path",
+            "description": "CNPJ/CPF do cliente",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cliente encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cliente não encontrado"
+          }
+        },
+        "summary": "Obter cliente por CNPJ/CPF",
         "tags": [
           "Customers"
         ]
@@ -1199,6 +1234,22 @@
             "description": "Status ativo/inativo do cliente",
             "example": true,
             "default": true
+          },
+          "isDestinatario": {
+            "type": "boolean",
+            "description": "Se o cliente também é um destinatário",
+            "example": true,
+            "default": true
+          },
+          "destinatariosIds": {
+            "description": "Lista de IDs de destinatários associados (quando o cliente não é o destinatário)",
+            "example": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -1206,15 +1257,18 @@
           "tipo",
           "isEstrangeiro",
           "razaoSocial",
-          "paisId",
-          "estadoId",
-          "cidadeId",
-          "ativo"
+          "ativo",
+          "isDestinatario"
         ]
       },
       "Customer": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID único do cliente (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
           "cnpjCpf": {
             "type": "string",
             "description": "CNPJ, CPF ou documento internacional do cliente",
@@ -1345,9 +1399,25 @@
             "type": "string",
             "description": "UF do estado",
             "example": "SP"
+          },
+          "destinatariosIds": {
+            "description": "Lista de IDs de destinatários associados ao cliente",
+            "example": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "isDestinatario": {
+            "type": "boolean",
+            "description": "Se o cliente é também um destinatário",
+            "example": true
           }
         },
         "required": [
+          "id",
           "cnpjCpf",
           "tipo",
           "isEstrangeiro",
@@ -1371,7 +1441,8 @@
           "updatedAt",
           "cidadeNome",
           "estadoNome",
-          "uf"
+          "uf",
+          "isDestinatario"
         ]
       },
       "UpdateCustomerDto": {
@@ -1381,6 +1452,21 @@
             "type": "boolean",
             "description": "Status ativo/inativo do cliente",
             "example": true
+          },
+          "isDestinatario": {
+            "type": "boolean",
+            "description": "Se o cliente também é um destinatário",
+            "example": true
+          },
+          "destinatariosIds": {
+            "description": "Lista de IDs de destinatários associados (quando o cliente não é o destinatário)",
+            "example": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },

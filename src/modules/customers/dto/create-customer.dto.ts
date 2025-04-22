@@ -1,5 +1,6 @@
-import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MaxLength, ValidateIf } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MaxLength, ValidateIf, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateCustomerDto {
   @ApiProperty({
@@ -79,27 +80,30 @@ export class CreateCustomerDto {
 
   @ApiProperty({
     description: 'ID do país (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000'
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    required: false
   })
-  @IsNotEmpty({ message: 'ID do país é obrigatório' })
+  @IsOptional()
   @IsUUID(4, { message: 'ID do país deve ser um UUID válido' })
-  paisId: string;
+  paisId?: string;
   
   @ApiProperty({
     description: 'ID do estado/província (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000'
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    required: false
   })
-  @IsNotEmpty({ message: 'ID do estado é obrigatório' })
+  @IsOptional()
   @IsUUID(4, { message: 'ID do estado deve ser um UUID válido' })
-  estadoId: string;
+  estadoId?: string;
 
   @ApiProperty({
     description: 'ID da cidade no sistema (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000'
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    required: false
   })
-  @IsNotEmpty({ message: 'ID da cidade é obrigatório' })
+  @IsOptional()
   @IsUUID(4, { message: 'ID da cidade deve ser um UUID válido' })
-  cidadeId: string;
+  cidadeId?: string;
 
   @ApiProperty({
     description: 'Endereço',
@@ -177,5 +181,26 @@ export class CreateCustomerDto {
     default: true
   })
   @IsOptional()
+  @IsBoolean({ message: 'ativo deve ser um valor booleano' })
   ativo?: boolean = true;
+  
+  @ApiProperty({
+    description: 'Se o cliente também é um destinatário',
+    example: true,
+    default: true
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'isDestinatario deve ser um valor booleano' })
+  isDestinatario?: boolean = true;
+  
+  @ApiProperty({
+    description: 'Lista de IDs de destinatários associados (quando o cliente não é o destinatário)',
+    example: ['550e8400-e29b-41d4-a716-446655440000'],
+    type: [String],
+    required: false
+  })
+  @IsOptional()
+  @IsArray({ message: 'destinatariosIds deve ser um array' })
+  @IsUUID(4, { each: true, message: 'Cada ID de destinatário deve ser um UUID válido' })
+  destinatariosIds?: string[];
 }

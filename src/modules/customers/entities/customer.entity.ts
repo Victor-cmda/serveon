@@ -2,6 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class Customer {
   @ApiProperty({
+    description: 'ID único do cliente (UUID)',
+    example: '550e8400-e29b-41d4-a716-446655440000'
+  })
+  id: string;
+
+  @ApiProperty({
     description: 'CNPJ, CPF ou documento internacional do cliente',
     example: '12345678901234'
   })
@@ -55,7 +61,7 @@ export class Customer {
     description: 'ID do país (UUID)',
     example: '550e8400-e29b-41d4-a716-446655440000'
   })
-  paisId: string;
+  paisId?: string;
   
   @ApiProperty({
     description: 'Nome do país',
@@ -67,7 +73,7 @@ export class Customer {
     description: 'ID do estado/província (UUID)',
     example: '550e8400-e29b-41d4-a716-446655440000'
   })
-  estadoId: string;
+  estadoId?: string;
 
   @ApiProperty({
     description: 'Endereço',
@@ -97,7 +103,7 @@ export class Customer {
     description: 'ID da cidade (UUID)',
     example: '550e8400-e29b-41d4-a716-446655440000'
   })
-  cidadeId: string;
+  cidadeId?: string;
 
   @ApiProperty({
     description: 'CEP ou código postal',
@@ -152,4 +158,18 @@ export class Customer {
     example: 'SP'
   })
   uf?: string;
+  
+  @ApiProperty({
+    description: 'Lista de IDs de destinatários associados ao cliente',
+    example: ['550e8400-e29b-41d4-a716-446655440000'],
+    type: [String],
+    required: false
+  })
+  destinatariosIds?: string[];
+  
+  @ApiProperty({
+    description: 'Se o cliente é também um destinatário',
+    example: true
+  })
+  isDestinatario: boolean;
 }

@@ -41,8 +41,8 @@ export class CustomersController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Obter cliente por CNPJ/CPF' })
-  @ApiParam({ name: 'id', description: 'CNPJ/CPF do cliente' })
+  @ApiOperation({ summary: 'Obter cliente por ID' })
+  @ApiParam({ name: 'id', description: 'ID do cliente (UUID)' })
   @ApiResponse({ 
     status: HttpStatus.OK, 
     description: 'Cliente encontrado',
@@ -56,9 +56,25 @@ export class CustomersController {
     return this.customersService.findOne(id);
   }
 
+  @Get('by-document/:cnpjCpf')
+  @ApiOperation({ summary: 'Obter cliente por CNPJ/CPF' })
+  @ApiParam({ name: 'cnpjCpf', description: 'CNPJ/CPF do cliente' })
+  @ApiResponse({ 
+    status: HttpStatus.OK, 
+    description: 'Cliente encontrado',
+    type: Customer
+  })
+  @ApiResponse({ 
+    status: HttpStatus.NOT_FOUND, 
+    description: 'Cliente não encontrado' 
+  })
+  findByDocument(@Param('cnpjCpf') cnpjCpf: string) {
+    return this.customersService.findByDocument(cnpjCpf);
+  }
+
   @Patch(':id')
-  @ApiOperation({ summary: 'Atualizar cliente por CNPJ/CPF' })
-  @ApiParam({ name: 'id', description: 'CNPJ/CPF do cliente' })
+  @ApiOperation({ summary: 'Atualizar cliente por ID' })
+  @ApiParam({ name: 'id', description: 'ID do cliente (UUID)' })
   @ApiResponse({ 
     status: HttpStatus.OK, 
     description: 'Cliente atualizado com sucesso',
@@ -78,8 +94,8 @@ export class CustomersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Remover cliente por CNPJ/CPF' })
-  @ApiParam({ name: 'id', description: 'CNPJ/CPF do cliente' })
+  @ApiOperation({ summary: 'Remover cliente por ID' })
+  @ApiParam({ name: 'id', description: 'ID do cliente (UUID)' })
   @ApiResponse({ 
     status: HttpStatus.NO_CONTENT, 
     description: 'Cliente removido com sucesso' 

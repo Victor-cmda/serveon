@@ -99,24 +99,19 @@ const StateForm = () => {
     try {
       let createdOrUpdatedId: string;
 
-      if (id) {
-        const updateData: UpdateStateDto = {
-          nome: data.nome,
-          uf: data.uf,
-          paisId: data.paisId,
-        };
+      // Format the data to handle empty strings
+      const formattedData = {
+        nome: data.nome.trim(),
+        uf: data.uf.trim(),
+        paisId: data.paisId
+      };
 
-        await stateApi.update(id, updateData);
+      if (id) {
+        await stateApi.update(id, formattedData);
         toast.success('Estado atualizado com sucesso!');
         createdOrUpdatedId = id;
       } else {
-        const createData: CreateStateDto = {
-          nome: data.nome,
-          uf: data.uf,
-          paisId: data.paisId,
-        };
-
-        const createdState = await stateApi.create(createData);
+        const createdState = await stateApi.create(formattedData);
         toast.success('Estado criado com sucesso!');
         createdOrUpdatedId = createdState.id;
       }

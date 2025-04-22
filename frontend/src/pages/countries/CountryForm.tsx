@@ -93,26 +93,21 @@ const CountryForm = () => {
     try {
       let createdOrUpdatedId: string;
 
-      if (id) {
-        const updateData: UpdateCountryDto = {
-          nome: data.nome,
-          sigla: data.sigla,
-          codigo: data.codigo,
-        };
+      // Format the data to handle empty strings
+      const formattedData = {
+        nome: data.nome.trim(),
+        sigla: data.sigla.trim(),
+        codigo: data.codigo.trim()
+      };
 
-        await countryApi.update(id, updateData);
+      if (id) {
+        await countryApi.update(id, formattedData);
         toast.success('Sucesso', {
           description: 'País atualizado com sucesso!',
         });
         createdOrUpdatedId = id;
       } else {
-        const createData: CreateCountryDto = {
-          nome: data.nome,
-          sigla: data.sigla,
-          codigo: data.codigo,
-        };
-
-        const createdCountry = await countryApi.create(createData);
+        const createdCountry = await countryApi.create(formattedData);
         toast.success('Sucesso', {
           description: 'País criado com sucesso!',
         });
