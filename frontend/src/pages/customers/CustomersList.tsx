@@ -178,7 +178,7 @@ const CustomersList = () => {
                   </TableCell>
                   <TableCell className="text-right space-x-2">
                     <Button variant="ghost" size="icon" asChild>
-                      <Link to={`/customers/${customer.cnpjCpf}`}>
+                      <Link to={`/customers/edit/${customer.cnpjCpf}`}>
                         <Edit className="h-4 w-4" />
                       </Link>
                     </Button>

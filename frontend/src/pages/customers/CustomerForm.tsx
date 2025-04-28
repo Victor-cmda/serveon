@@ -14,7 +14,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useFormState } from '@/contexts/FormStateContext';
 import { customerApi, cityApi, stateApi, countryApi } from '@/services/api';
 import { Country, State, City } from '@/types/location';
 import { toast } from 'sonner';
@@ -24,6 +23,111 @@ import { Badge } from '@/components/ui/badge';
 
 import StateCreationDialog from '@/components/dialogs/StateCreationDialog';
 import CityCreationDialog from '@/components/dialogs/CityCreationDialog';
+
+// Formatadores de texto
+const formatters = {
+  cpf: (value: string | undefined): string => {
+    // Se não houver valor, retorna string vazia
+    if (!value) return '';
+    
+    // Remove tudo que não é dígito
+    const digits = value.replace(/\D/g, '');
+    
+    // Limita a 11 dígitos
+    const cpf = digits.slice(0, 11);
+    
+    // Aplica a máscara do CPF: 000.000.000-00
+    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, (_, p1, p2, p3, p4) => {
+      if (p4) return `${p1}.${p2}.${p3}-${p4}`;
+      if (p3) return `${p1}.${p2}.${p3}`;
+      if (p2) return `${p1}.${p2}`;
+      return p1;
+    });
+  },
+  
+  cnpj: (value: string | undefined): string => {
+    // Se não houver valor, retorna string vazia
+    if (!value) return '';
+    
+    // Remove tudo que não é dígito
+    const digits = value.replace(/\D/g, '');
+    
+    // Limita a 14 dígitos
+    const cnpj = digits.slice(0, 14);
+    
+    // Aplica a máscara do CNPJ: 00.000.000/0000-00
+    return cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/, (_, p1, p2, p3, p4, p5) => {
+      if (p5) return `${p1}.${p2}.${p3}/${p4}-${p5}`;
+      if (p4) return `${p1}.${p2}.${p3}/${p4}`;
+      if (p3) return `${p1}.${p2}.${p3}`;
+      if (p2) return `${p1}.${p2}`;
+      return p1;
+    });
+  },
+  
+  telefone: (value: string | undefined): string => {
+    // Se não houver valor, retorna string vazia
+    if (!value) return '';
+    
+    // Remove tudo que não é dígito
+    const digits = value.replace(/\D/g, '');
+    
+    // Limita a 11 dígitos (com DDD)
+    const tel = digits.slice(0, 11);
+    
+    // Aplica a máscara de telefone: (00) 00000-0000 ou (00) 0000-0000
+    if (tel.length > 10) {
+      return tel.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    } else {
+      return tel.replace(/(\d{2})(\d{4})(\d{0,4})/, (_, p1, p2, p3) => {
+        if (p3) return `(${p1}) ${p2}-${p3}`;
+        if (p2) return `(${p1}) ${p2}`;
+        if (p1.length === 2) return `(${p1})`;
+        return p1;
+      });
+    }
+  },
+  
+  cep: (value: string | undefined): string => {
+    // Se não houver valor, retorna string vazia
+    if (!value) return '';
+    
+    // Remove tudo que não é dígito
+    const digits = value.replace(/\D/g, '');
+    
+    // Limita a 8 dígitos
+    const cep = digits.slice(0, 8);
+    
+    // Aplica a máscara de CEP: 00000-000
+    return cep.replace(/(\d{5})(\d{0,3})/, (_, p1, p2) => {
+      if (p2) return `${p1}-${p2}`;
+      return p1;
+    });
+  },
+  
+  numero: (value: string | undefined): string => {
+    // Se não houver valor, retorna string vazia
+    if (!value) return '';
+    
+    // Permite apenas números e letras (para casos como "123-A", "S/N", etc)
+    return value.replace(/[^0-9a-zA-Z/-]/g, '');
+  },
+  
+  inscricaoEstadual: (value: string | undefined): string => {
+    // Se não houver valor, retorna string vazia
+    if (!value) return '';
+    
+    // Remove caracteres especiais, mantendo apenas números e letras
+    // IE pode ter formato variável dependendo do estado
+    return value.replace(/[^\w]/g, '');
+  },
+  
+  // Função para limpar formatação e retornar apenas os dígitos
+  clearFormat: (value: string | undefined): string => {
+    if (!value) return '';
+    return value.replace(/\D/g, '');
+  }
+};
 
 const formSchema = z.object({
   cnpjCpf: z.string().min(1, 'Documento é obrigatório'),
@@ -47,8 +151,6 @@ const formSchema = z.object({
 const CustomerForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { saveFormState, getFormState } = useFormState();
-  const formId = id ? `customer-${id}` : 'customer-new';
 
   const [isLoading, setIsLoading] = useState(false);
   const [states, setStates] = useState<State[]>([]);
@@ -117,60 +219,35 @@ const CustomerForm = () => {
 
   useEffect(() => {
     const fetchCustomer = async () => {
-      if (id) {
-        try {
-          setIsLoading(true);
-          const customer = await customerApi.getById(id);
-          // Ensure all fields are controlled by setting them or using defaults
-          form.reset({
-            cnpjCpf: customer.cnpjCpf || '',
-            tipo: customer.tipo || 'J',
-            isEstrangeiro: Boolean(customer.isEstrangeiro),
-            razaoSocial: customer.razaoSocial || '',
-            nomeFantasia: customer.nomeFantasia || '',
-            inscricaoEstadual: customer.inscricaoEstadual || '',
-            inscricaoMunicipal: customer.inscricaoMunicipal || '',
-            endereco: customer.endereco || '',
-            numero: customer.numero || '',
-            complemento: customer.complemento || '',
-            bairro: customer.bairro || '',
-            cep: customer.cep || '',
-            telefone: customer.telefone || '',
-            email: customer.email || '',
-            cidadeId: customer.cidadeId || '',
-            ativo: Boolean(customer.ativo),
-          });
+      if (!id) return;
 
-          if (customer.cidadeId) {
-            // If we have a city, find its state to populate the appropriate dropdowns
-            try {
-              const cityData = await cityApi.getById(customer.cidadeId);
-              setSelectedCity(cityData);
-              
-              if (cityData.estadoId) {
-                setSelectedStateId(cityData.estadoId);
-                const citiesData = await cityApi.getByState(cityData.estadoId);
-                setCities(citiesData);
-              }
-            } catch (error) {
-              console.error('Error loading city data:', error);
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching customer:', error);
-          toast.error('Não foi possível carregar os dados do cliente');
-        } finally {
-          setIsLoading(false);
-        }
-      } else if (getFormState(formId) && Object.keys(getFormState(formId) || {}).length > 0) {
-        // If no ID but we have saved form state, reset with that data
-        const savedState = getFormState(formId) || {};
-        form.reset(savedState);
-        
-        // If we have city in the form state, load related location data
-        if (savedState.cidadeId) {
+      try {
+        setIsLoading(true);
+        const customer = await customerApi.getById(id);
+        // Ensure all fields are controlled by setting them or using defaults
+        form.reset({
+          cnpjCpf: customer.cnpjCpf || '',
+          tipo: customer.tipo || 'J',
+          isEstrangeiro: Boolean(customer.isEstrangeiro),
+          razaoSocial: customer.razaoSocial || '',
+          nomeFantasia: customer.nomeFantasia || '',
+          inscricaoEstadual: customer.inscricaoEstadual || '',
+          inscricaoMunicipal: customer.inscricaoMunicipal || '',
+          endereco: customer.endereco || '',
+          numero: customer.numero || '',
+          complemento: customer.complemento || '',
+          bairro: customer.bairro || '',
+          cep: customer.cep || '',
+          telefone: customer.telefone || '',
+          email: customer.email || '',
+          cidadeId: customer.cidadeId || '',
+          ativo: Boolean(customer.ativo),
+        });
+
+        if (customer.cidadeId) {
+          // If we have a city, find its state to populate the appropriate dropdowns
           try {
-            const cityData = await cityApi.getById(savedState.cidadeId);
+            const cityData = await cityApi.getById(customer.cidadeId);
             setSelectedCity(cityData);
             
             if (cityData.estadoId) {
@@ -182,24 +259,41 @@ const CustomerForm = () => {
             console.error('Error loading city data:', error);
           }
         }
-      } else {
-        // New customer, reset the form to defaults
-        form.reset();
+      } catch (error) {
+        console.error('Error fetching customer:', error);
+        toast.error('Não foi possível carregar os dados do cliente');
+        navigate('/customers');
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchCustomer();
-  }, [id, form.reset, getFormState, formId]);
-
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      if (id) {
-        saveFormState(formId, value);
-      }
-    });
-    
-    return () => subscription.unsubscribe();
-  }, [form, formId, saveFormState, id]);
+    if (id) {
+      fetchCustomer();
+    } else {
+      // Se não há ID, apenas reset o formulário com valores padrão
+      form.reset({
+        cnpjCpf: '',
+        tipo: 'J',
+        isEstrangeiro: false,
+        razaoSocial: '',
+        nomeFantasia: '',
+        inscricaoEstadual: '',
+        inscricaoMunicipal: '',
+        endereco: '',
+        numero: '',
+        complemento: '',
+        bairro: '',
+        cep: '',
+        telefone: '',
+        email: '',
+        cidadeId: '',
+        ativo: true,
+      });
+      setSelectedCity(null);
+      setSelectedStateId('');
+    }
+  }, [id, navigate, form]);
 
   useEffect(() => {
     if (selectedStateId) {
@@ -260,19 +354,20 @@ const CustomerForm = () => {
     setIsLoading(true);
 
     try {
-      // Convert empty strings to undefined for all optional fields
+      // Remover as máscaras/formatações antes de enviar para o servidor
       const formattedData = {
         ...data,
+        cnpjCpf: formatters.clearFormat(data.cnpjCpf),
         email: data.email?.trim() || undefined,
         nomeFantasia: data.nomeFantasia?.trim() || undefined,
-        inscricaoEstadual: data.inscricaoEstadual?.trim() || undefined,
-        inscricaoMunicipal: data.inscricaoMunicipal?.trim() || undefined,
+        inscricaoEstadual: formatters.inscricaoEstadual(data.inscricaoEstadual) || undefined,
+        inscricaoMunicipal: formatters.inscricaoEstadual(data.inscricaoMunicipal) || undefined,
         endereco: data.endereco?.trim() || undefined,
         numero: data.numero?.trim() || undefined,
         complemento: data.complemento?.trim() || undefined,
         bairro: data.bairro?.trim() || undefined,
-        cep: data.cep?.trim() || undefined,
-        telefone: data.telefone?.trim() || undefined,
+        cep: formatters.clearFormat(data.cep) || undefined,
+        telefone: formatters.clearFormat(data.telefone) || undefined,
         cidadeId: data.cidadeId, // Required field, always present
       };
 
@@ -304,9 +399,9 @@ const CustomerForm = () => {
         });
         setSelectedCity(null);
         setSelectedStateId('');
-        saveFormState(formId, {});
       }
 
+      // Navegar de volta para a listagem
       navigate('/customers');
     } catch (error: any) {
       console.error('Erro ao salvar cliente:', error);
@@ -377,7 +472,14 @@ const CustomerForm = () => {
         </div>
         <div className="flex items-center space-x-4">
           <Button variant="outline" asChild>
-            <Link to="/customers">
+            <Link 
+              to="/customers" 
+              onClick={() => {
+                if (!id) {
+                  // Não precisamos mais limpar o FormState
+                }
+              }}
+            >
               <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
             </Link>
           </Button>
@@ -501,6 +603,8 @@ const CustomerForm = () => {
                         <div className="relative">
                           <Input
                             {...field}
+                            value={watchTipo === 'J' ? formatters.cnpj(field.value) : formatters.cpf(field.value)}
+                            onChange={(e) => field.onChange(e.target.value)}
                             disabled={isLoading}
                             className="h-11 text-base pl-9"
                           />
@@ -525,6 +629,8 @@ const CustomerForm = () => {
                       <FormControl>
                         <Input
                           {...field}
+                          value={formatters.inscricaoEstadual(field.value)}
+                          onChange={(e) => field.onChange(e.target.value)}
                           disabled={isLoading}
                           className="h-11 text-base"
                         />
@@ -598,6 +704,8 @@ const CustomerForm = () => {
                         <FormControl>
                           <Input
                             {...field}
+                            value={formatters.inscricaoEstadual(field.value)}
+                            onChange={(e) => field.onChange(e.target.value)}
                             disabled={isLoading}
                             className="h-11 text-base"
                           />
@@ -730,6 +838,8 @@ const CustomerForm = () => {
                         <FormControl>
                           <Input
                             {...field}
+                            value={formatters.numero(field.value)}
+                            onChange={(e) => field.onChange(e.target.value)}
                             disabled={isLoading}
                             className="h-11 text-base"
                           />
@@ -791,6 +901,8 @@ const CustomerForm = () => {
                       <FormControl>
                         <Input
                           {...field}
+                          value={formatters.cep(field.value)}
+                          onChange={(e) => field.onChange(e.target.value)}
                           disabled={isLoading}
                           className="h-11 text-base"
                         />
@@ -828,6 +940,8 @@ const CustomerForm = () => {
                         <div className="relative">
                           <Input
                             {...field}
+                            value={formatters.telefone(field.value)}
+                            onChange={(e) => field.onChange(e.target.value)}
                             disabled={isLoading}
                             className="h-11 text-base pl-9"
                           />
