@@ -1039,6 +1039,171 @@
           "Cities"
         ]
       }
+    },
+    "/api/payment-methods": {
+      "post": {
+        "operationId": "PaymentMethodsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePaymentMethodDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The payment method has been successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentMethod"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data provided."
+          }
+        },
+        "summary": "Create a new payment method",
+        "tags": [
+          "payment-methods"
+        ]
+      },
+      "get": {
+        "operationId": "PaymentMethodsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns all payment methods",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentMethod"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all payment methods",
+        "tags": [
+          "payment-methods"
+        ]
+      }
+    },
+    "/api/payment-methods/{id}": {
+      "get": {
+        "operationId": "PaymentMethodsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Payment method ID (UUID)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the payment method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentMethod"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Payment method not found"
+          }
+        },
+        "summary": "Get a payment method by ID",
+        "tags": [
+          "payment-methods"
+        ]
+      },
+      "patch": {
+        "operationId": "PaymentMethodsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Payment method ID (UUID)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePaymentMethodDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The payment method has been successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentMethod"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data provided"
+          },
+          "404": {
+            "description": "Payment method not found"
+          }
+        },
+        "summary": "Update a payment method",
+        "tags": [
+          "payment-methods"
+        ]
+      },
+      "delete": {
+        "operationId": "PaymentMethodsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Payment method ID (UUID)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The payment method has been successfully deleted or inactivated"
+          },
+          "404": {
+            "description": "Payment method not found"
+          }
+        },
+        "summary": "Delete a payment method or mark as inactive if in use",
+        "tags": [
+          "payment-methods"
+        ]
+      }
     }
   },
   "info": {
@@ -1713,6 +1878,110 @@
       "UpdateCityDto": {
         "type": "object",
         "properties": {}
+      },
+      "CreatePaymentMethodDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Description of the payment method",
+            "example": "Credit Card"
+          },
+          "code": {
+            "type": "string",
+            "description": "Code of the payment method",
+            "example": "CC"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of payment method",
+            "example": "card"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Status of the payment method (active/inactive)",
+            "example": true,
+            "default": true
+          }
+        },
+        "required": [
+          "description"
+        ]
+      },
+      "PaymentMethod": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique ID of the payment method (UUID)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the payment method",
+            "example": "Credit Card"
+          },
+          "code": {
+            "type": "string",
+            "description": "Code of the payment method",
+            "example": "CC"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of payment method",
+            "example": "card"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Status of the payment method (active/inactive)",
+            "example": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Creation date",
+            "example": "2023-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Last update date",
+            "example": "2023-01-01T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "active",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdatePaymentMethodDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Description of the payment method",
+            "example": "Credit Card"
+          },
+          "code": {
+            "type": "string",
+            "description": "Code of the payment method",
+            "example": "CC"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of payment method",
+            "example": "card"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Status of the payment method (active/inactive)",
+            "example": true,
+            "default": true
+          }
+        }
       }
     }
   }

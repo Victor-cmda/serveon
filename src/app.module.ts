@@ -6,6 +6,7 @@ import { DatabaseModule } from './common/database/database.module';
 import { CountriesModule } from './modules/countries/countries.module';
 import { StatesModule } from './modules/states/states.module';
 import { CitiesModule } from './modules/cities/cities.module';
+import { PaymentMethodsModule } from './modules/payment-methods/payment-methods.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CitiesModule } from './modules/cities/cities.module';
     CountriesModule,
     StatesModule,
     CitiesModule,
+    PaymentMethodsModule,
   ],
 })
 export class AppModule { }

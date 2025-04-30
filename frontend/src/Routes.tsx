@@ -11,6 +11,8 @@ import CityForm from './pages/cities/CityForm';
 import NotFound from './pages/notfound/NotFound';
 import CustomersList from './pages/customers/CustomersList';
 import CustomerForm from './pages/customers/CustomerForm';
+import PaymentMethodsList from './pages/payment-methods/PaymentMethodsList';
+import PaymentMethodForm from './pages/payment-methods/PaymentMethodForm';
 import { FormStateProvider } from './contexts/FormStateContext';
 
 const router = createBrowserRouter([
@@ -34,6 +36,19 @@ const router = createBrowserRouter([
       {
         path: 'customers/edit/:id',
         element: <CustomerForm />,
+      },
+      // Métodos de Pagamento
+      {
+        path: 'payment-methods',
+        element: <PaymentMethodsList />,
+      },
+      {
+        path: 'payment-methods/new',
+        element: <PaymentMethodForm />,
+      },
+      {
+        path: 'payment-methods/edit/:id',
+        element: <PaymentMethodForm />,
       },
       // Países
       {

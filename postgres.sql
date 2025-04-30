@@ -52,7 +52,7 @@ CREATE TABLE CondicaoPagamento (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 -- Tabela FORMA DE PAGAMENTO
-CREATE TABLE FormaPagamento (
+CREATE TABLE formapagamento (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     descricao VARCHAR(100) NOT NULL,
     codigo VARCHAR(20),
@@ -282,7 +282,7 @@ CREATE TABLE Parcela (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_parcela_fatura FOREIGN KEY (fatura_id) REFERENCES Fatura (id),
-    CONSTRAINT fk_parcela_forma_pagamento FOREIGN KEY (forma_pagamento_id) REFERENCES FormaPagamento (id)
+    CONSTRAINT fk_parcela_forma_pagamento FOREIGN KEY (forma_pagamento_id) REFERENCES formapagamento (id)
 );
 -- Tabela VOLUME
 CREATE TABLE Volume (
@@ -344,7 +344,7 @@ UPDATE ON Cidade FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_condicao_pagamento_timestamp BEFORE
 UPDATE ON CondicaoPagamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_forma_pagamento_timestamp BEFORE
-UPDATE ON FormaPagamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON formapagamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_emitente_timestamp BEFORE
 UPDATE ON Emitente FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_cliente_timestamp BEFORE
@@ -370,7 +370,7 @@ UPDATE ON Volume FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 INSERT INTO Pais (nome, codigo, sigla)
 VALUES ('Brasil', '55', 'BR');
 -- Inserir formas de pagamento comuns
-INSERT INTO FormaPagamento (descricao, codigo, tipo)
+INSERT INTO formapagamento (descricao, codigo, tipo)
 VALUES ('Dinheiro', '01', 'À vista'),
     ('Cartão de Crédito', '03', 'Crédito'),
     ('Cartão de Débito', '04', 'Débito'),
@@ -389,7 +389,7 @@ COMMENT ON TABLE dbo.Pais IS 'Cadastro de países';
 COMMENT ON TABLE dbo.Estado IS 'Cadastro de estados/províncias';
 COMMENT ON TABLE dbo.Cidade IS 'Cadastro de cidades/municípios';
 COMMENT ON TABLE dbo.CondicaoPagamento IS 'Condições de pagamento para notas fiscais';
-COMMENT ON TABLE dbo.FormaPagamento IS 'Formas de pagamento das parcelas de notas fiscais';
+COMMENT ON TABLE dbo.formapagamento IS 'Formas de pagamento das parcelas de notas fiscais';
 COMMENT ON TABLE dbo.Emitente IS 'Cadastro de empresas emitentes de notas fiscais';
 COMMENT ON TABLE dbo.Cliente IS 'Cadastro de clientes';
 COMMENT ON TABLE dbo.Destinatario IS 'Cadastro de destinatários de notas fiscais';

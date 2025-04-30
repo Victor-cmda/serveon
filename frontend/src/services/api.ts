@@ -14,6 +14,11 @@ import {
   CreateCustomerDto,
   UpdateCustomerDto,
 } from '../types/customer';
+import {
+  PaymentMethod,
+  CreatePaymentMethodDto,
+  UpdatePaymentMethodDto,
+} from '../types/payment-method';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -213,6 +218,47 @@ export const customerApi = {
 
   delete: async (id: string): Promise<void> => {
     const response = await fetch(`${API_URL}/customers/${id}`, {
+      method: 'DELETE',
+    });
+    return handleResponse(response);
+  },
+};
+
+export const paymentMethodApi = {
+  getAll: async (): Promise<PaymentMethod[]> => {
+    const response = await fetch(`${API_URL}/payment-methods`);
+    return handleResponse(response);
+  },
+
+  getById: async (id: string): Promise<PaymentMethod> => {
+    const response = await fetch(`${API_URL}/payment-methods/${id}`);
+    return handleResponse(response);
+  },
+
+  create: async (paymentMethod: CreatePaymentMethodDto): Promise<PaymentMethod> => {
+    const response = await fetch(`${API_URL}/payment-methods`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(paymentMethod),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (id: string, paymentMethod: UpdatePaymentMethodDto): Promise<PaymentMethod> => {
+    const response = await fetch(`${API_URL}/payment-methods/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(paymentMethod),
+    });
+    return handleResponse(response);
+  },
+
+  delete: async (id: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/payment-methods/${id}`, {
       method: 'DELETE',
     });
     return handleResponse(response);

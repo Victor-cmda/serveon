@@ -10,6 +10,7 @@ import {
   MapPin,
   Globe,
   Map,
+  CreditCard,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -71,6 +72,12 @@ const Sidebar = () => {
   ];
 
   const settingsMenuItems: MenuItem[] = [
+    {
+      id: 'payment-methods',
+      title: 'Métodos de Pagamento',
+      icon: <CreditCard className="h-5 w-5" />,
+      path: '/payment-methods',
+    },
     {
       id: 'settings',
       title: 'Configurações',
