@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, Save, Loader2, Search, Building2, User, CreditCard, Phone, Mail, MapPin, Home } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Search, Building2, User, CreditCard, Phone, Mail, MapPin, Home, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -446,6 +446,14 @@ const CustomerForm = () => {
         setSelectedStateId(city.estadoId);
       }
       
+      // Define automaticamente se o cliente é estrangeiro com base no país da cidade
+      const isForeignCountry = city.paisNome !== 'Brasil' && city.paisNome !== 'Brazil';
+      form.setValue('isEstrangeiro', isForeignCountry, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true
+      });
+      
       // Fecha o diálogo
       setCitySearchOpen(false);
       
@@ -500,7 +508,7 @@ const CustomerForm = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="tipo"
@@ -544,29 +552,6 @@ const CustomerForm = () => {
 
                 <FormField
                   control={form.control}
-                  name="isEstrangeiro"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 pt-6">
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          id="isEstrangeiro"
-                          checked={field.value}
-                          onChange={(e) => field.onChange(e.target.checked)}
-                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary"
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel htmlFor="isEstrangeiro" className="text-base font-medium">
-                          Cliente Estrangeiro
-                        </FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="ativo"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 pt-6">
@@ -576,66 +561,23 @@ const CustomerForm = () => {
                           id="ativo"
                           checked={field.value}
                           onChange={(e) => field.onChange(e.target.checked)}
-                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary"
+                          disabled={!id}
+                          className={`h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary ${!id ? 'cursor-not-allowed opacity-60' : ''}`}
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel htmlFor="ativo" className="text-base font-medium">
+                        <FormLabel 
+                          htmlFor="ativo" 
+                          className={`text-base font-medium ${!id ? 'cursor-not-allowed opacity-60' : ''}`}
+                        >
                           Cliente Ativo
+                          {!id && (
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              (Disponível apenas na edição)
+                            </span>
+                          )}
                         </FormLabel>
                       </div>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="cnpjCpf"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-base font-medium">
-                        {watchTipo === 'J' ? 'CNPJ' : 'CPF'}
-                        {watchIsEstrangeiro && ' / Documento'}
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            {...field}
-                            value={watchTipo === 'J' ? formatters.cnpj(field.value) : formatters.cpf(field.value)}
-                            onChange={(e) => field.onChange(e.target.value)}
-                            disabled={isLoading}
-                            className="h-11 text-base pl-9"
-                          />
-                          <CreditCard className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-sm" />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="inscricaoEstadual"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-base font-medium">
-                        {watchIsEstrangeiro
-                          ? 'Documento adicional'
-                          : 'Inscrição Estadual / RG'}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          value={formatters.inscricaoEstadual(field.value)}
-                          onChange={(e) => field.onChange(e.target.value)}
-                          disabled={isLoading}
-                          className="h-11 text-base"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-sm" />
                     </FormItem>
                   )}
                 />
@@ -688,34 +630,6 @@ const CustomerForm = () => {
                   )}
                 />
               </div>
-
-              {watchTipo === 'J' && (
-                <div className="mt-6">
-                  <FormField
-                    control={form.control}
-                    name="inscricaoMunicipal"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-base font-medium">
-                          {watchIsEstrangeiro
-                            ? 'Registro comercial'
-                            : 'Inscrição Municipal'}
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            value={formatters.inscricaoEstadual(field.value)}
-                            onChange={(e) => field.onChange(e.target.value)}
-                            disabled={isLoading}
-                            className="h-11 text-base"
-                          />
-                        </FormControl>
-                        <FormMessage className="text-sm" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              )}
             </CardContent>
           </Card>
 
@@ -783,8 +697,9 @@ const CustomerForm = () => {
                             {selectedCity.estadoNome} / {selectedCity.uf}
                           </Badge>
                           {selectedCity.paisNome && (
-                            <Badge variant="outline">
+                            <Badge variant={watchIsEstrangeiro ? "secondary" : "outline"}>
                               {selectedCity.paisNome}
+                              {watchIsEstrangeiro && " (Estrangeiro)"}
                             </Badge>
                           )}
                         </div>
@@ -978,6 +893,100 @@ const CustomerForm = () => {
                   )}
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Documentos */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Documentos
+              </CardTitle>
+              <CardDescription>
+                Documentos e registros do cliente
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="cnpjCpf"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-medium">
+                        {watchTipo === 'J' ? 'CNPJ' : 'CPF'}
+                        {watchIsEstrangeiro && ' / Documento'}
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            value={watchTipo === 'J' ? formatters.cnpj(field.value) : formatters.cpf(field.value)}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            disabled={isLoading}
+                            className="h-11 text-base pl-9"
+                          />
+                          <CreditCard className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                        </div>
+                      </FormControl>
+                      <FormMessage className="text-sm" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="inscricaoEstadual"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-medium">
+                        {watchIsEstrangeiro
+                          ? 'Documento adicional'
+                          : 'Inscrição Estadual / RG'}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={formatters.inscricaoEstadual(field.value)}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          disabled={isLoading}
+                          className="h-11 text-base"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-sm" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {watchTipo === 'J' && (
+                <div className="mt-6">
+                  <FormField
+                    control={form.control}
+                    name="inscricaoMunicipal"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-medium">
+                          {watchIsEstrangeiro
+                            ? 'Registro comercial'
+                            : 'Inscrição Municipal'}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={formatters.inscricaoEstadual(field.value)}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            disabled={isLoading}
+                            className="h-11 text-base"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-sm" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
               
               <div className="mt-6 flex justify-end">
                 <Button

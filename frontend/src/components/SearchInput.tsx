@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { cn, toUpperCase } from '@/lib/utils';
 import { useNavigate, NavigateFunction } from 'react-router-dom';
 
 interface NavigationItem {
@@ -23,6 +23,7 @@ const navigationItems: NavigationItem[] = [
   { title: 'Países', path: '/countries', description: 'Gerenciamento de países' },
   { title: 'Estados', path: '/states', description: 'Gerenciamento de estados' },
   { title: 'Cidades', path: '/cities', description: 'Gerenciamento de cidades' },
+  { title: 'Métodos de Pagamentos', path: '/payment-methods', description: 'Gerênciamento de Métodos de pagamento' },
 ];
 
 // Componente interno que usa useNavigate
@@ -72,6 +73,12 @@ function SearchInputInternal({
     setSearchFocused(false);
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Transformar o valor para maiúsculas para exibição
+    const value = e.target.value;
+    setSearchValue(toUpperCase(value));
+  };
+
   return (
     <div className={cn('relative max-w-md flex-1', className)}>
       <div
@@ -96,7 +103,8 @@ function SearchInputInternal({
             // Pequeno atraso para permitir cliques nos resultados
             setTimeout(() => setSearchFocused(false), 150);
           }}
-          onChange={(e) => setSearchValue(e.target.value)}
+          onChange={handleSearchChange}
+          upperCase={true}
         />
       </div>
 
