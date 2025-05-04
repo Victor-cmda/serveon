@@ -7,6 +7,7 @@ import { CountriesModule } from './modules/countries/countries.module';
 import { StatesModule } from './modules/states/states.module';
 import { CitiesModule } from './modules/cities/cities.module';
 import { PaymentMethodsModule } from './modules/payment-methods/payment-methods.module';
+import { PaymentTermsModule } from './modules/payment-terms/payment-terms.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PaymentMethodsModule } from './modules/payment-methods/payment-methods.
     StatesModule,
     CitiesModule,
     PaymentMethodsModule,
+    PaymentTermsModule,
   ],
 })
 export class AppModule { }
