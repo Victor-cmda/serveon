@@ -13,6 +13,8 @@ import CustomersList from './pages/customers/CustomersList';
 import CustomerForm from './pages/customers/CustomerForm';
 import PaymentMethodsList from './pages/payment-methods/PaymentMethodsList';
 import PaymentMethodForm from './pages/payment-methods/PaymentMethodForm';
+import PaymentTermsList from './pages/payment-terms/PaymentTermsList';
+import PaymentTermForm from './pages/payment-terms/PaymentTermForm';
 import { FormStateProvider } from './contexts/FormStateContext';
 
 const router = createBrowserRouter([
@@ -49,6 +51,19 @@ const router = createBrowserRouter([
       {
         path: 'payment-methods/edit/:id',
         element: <PaymentMethodForm />,
+      },
+      // Condições de Pagamento
+      {
+        path: 'payment-terms',
+        element: <PaymentTermsList />,
+      },
+      {
+        path: 'payment-terms/new',
+        element: <PaymentTermForm />,
+      },
+      {
+        path: 'payment-terms/edit/:id',
+        element: <PaymentTermForm />,
       },
       // Países
       {

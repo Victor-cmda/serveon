@@ -79,6 +79,12 @@ const Sidebar = () => {
       path: '/payment-methods',
     },
     {
+      id: 'payment-terms',
+      title: 'Condições de Pagamento',
+      icon: <FileText className="h-5 w-5" />,
+      path: '/payment-terms',
+    },
+    {
       id: 'settings',
       title: 'Configurações',
       icon: <Settings className="h-5 w-5" />,

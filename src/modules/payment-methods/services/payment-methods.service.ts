@@ -14,7 +14,7 @@ export class PaymentMethodsService {
     const { description, code, type, active = true } = createPaymentMethodDto;
 
     const result = await this.databaseService.query(
-      `INSERT INTO dbo.formapagamento (descricao, codigo, tipo, ativo)
+      `INSERT INTO dbo.forma_pagamento (descricao, codigo, tipo, ativo)
         VALUES ($1, $2, $3, $4)
         RETURNING id, descricao as description, codigo as code, tipo as type, 
                 ativo as active, created_at as "createdAt", updated_at as "updatedAt"`,
@@ -28,7 +28,7 @@ export class PaymentMethodsService {
     const result = await this.databaseService.query(
       `SELECT id, descricao as description, codigo as code, tipo as type,
               ativo as active, created_at as "createdAt", updated_at as "updatedAt"
-      FROM dbo.formapagamento
+      FROM dbo.forma_pagamento
       ORDER BY description`,
     );
 
@@ -39,7 +39,7 @@ export class PaymentMethodsService {
     const result = await this.databaseService.query(
       `SELECT id, descricao as description, codigo as code, tipo as type,
               ativo as active, created_at as "createdAt", updated_at as "updatedAt"
-      FROM dbo.formapagamento
+      FROM dbo.forma_pagamento
       WHERE id = $1`,
       [id],
     );
@@ -96,7 +96,7 @@ export class PaymentMethodsService {
     values.push(id);
 
     const result = await this.databaseService.query(
-      `UPDATE dbo.formapagamento
+      `UPDATE dbo.forma_pagamento
         SET ${updates.join(', ')}
         WHERE id = $${paramCount}
         RETURNING id, descricao as description, codigo as code, tipo as type,
@@ -120,13 +120,13 @@ export class PaymentMethodsService {
     if (usageCheck.rowCount > 0) {
       // If it's in use, mark as inactive instead of deleting
       await this.databaseService.query(
-        `UPDATE dbo.formapagamento SET ativo = false WHERE id = $1`,
+        `UPDATE dbo.forma_pagamento SET ativo = false WHERE id = $1`,
         [id],
       );
     } else {
       // If not in use, delete the record
       await this.databaseService.query(
-        `DELETE FROM dbo.formapagamento WHERE id = $1`,
+        `DELETE FROM dbo.forma_pagamento WHERE id = $1`,
         [id],
       );
     }

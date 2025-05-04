@@ -40,19 +40,10 @@ CREATE TABLE Cidade (
     CONSTRAINT fk_cidade_estado FOREIGN KEY (estado_id) REFERENCES Estado (id),
     CONSTRAINT uk_cidade_codigo_ibge UNIQUE (codigo_ibge)
 );
+
 -- Tabelas de Pagamento
--- Tabela CONDIÇÃO DE PAGAMENTO
-CREATE TABLE CondicaoPagamento (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    descricao VARCHAR(100) NOT NULL,
-    dias INTEGER,
-    parcelas INTEGER,
-    ativo BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
--- Tabela FORMA DE PAGAMENTO
-CREATE TABLE formapagamento (
+-- Tabela FORMA DE PAGAMENTO (movida para antes da condição de pagamento)
+CREATE TABLE forma_pagamento (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     descricao VARCHAR(100) NOT NULL,
     codigo VARCHAR(20),
@@ -61,6 +52,32 @@ CREATE TABLE formapagamento (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Tabela CONDIÇÃO DE PAGAMENTO
+CREATE TABLE condicao_pagamento (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    descricao TEXT,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+-- Tabela de parcelas das condições de pagamento
+CREATE TABLE parcela_condicao_pagamento (
+    id SERIAL PRIMARY KEY,
+    condicao_pagamento_id INTEGER NOT NULL REFERENCES condicao_pagamento(id),
+    numero_parcela INTEGER NOT NULL,
+    forma_pagamento_id UUID NOT NULL REFERENCES forma_pagamento(id),
+    dias_para_pagamento INTEGER NOT NULL,
+    percentual_valor DECIMAL(5,2) NOT NULL,
+    taxa_juros DECIMAL(5,2) NOT NULL DEFAULT 0,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    CONSTRAINT uk_numero_parcela_por_condicao UNIQUE (condicao_pagamento_id, numero_parcela)
+);
+
 -- Tabelas Principais
 -- Tabela EMITENTE
 CREATE TABLE Emitente (
@@ -84,29 +101,64 @@ CREATE TABLE Emitente (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_emitente_cidade FOREIGN KEY (cidade_id) REFERENCES Cidade (id)
 );
--- Tabela DESTINATÁRIO
-CREATE TABLE Destinatario (
-    cnpj_cpf VARCHAR(18) PRIMARY KEY,
-    tipo CHAR(1) NOT NULL,
-    -- F = Física, J = Jurídica
+
+-- Tabela CLIENTE
+CREATE TABLE Cliente (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    cnpj_cpf VARCHAR(20) NOT NULL UNIQUE,
+    tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J')),
+    is_estrangeiro BOOLEAN NOT NULL DEFAULT FALSE,
+    tipo_documento VARCHAR(50),
     razao_social VARCHAR(100) NOT NULL,
     nome_fantasia VARCHAR(60),
-    inscricao_estadual VARCHAR(20),
+    inscricao_estadual VARCHAR(50),
     inscricao_municipal VARCHAR(20),
     endereco VARCHAR(100),
     numero VARCHAR(10),
     complemento VARCHAR(60),
     bairro VARCHAR(50),
-    cidade_id UUID NOT NULL,
-    cep VARCHAR(10),
+    cidade_id UUID REFERENCES Cidade(id),
+    cep VARCHAR(15),
+    telefone VARCHAR(20),
+    email VARCHAR(100),
+    is_destinatario BOOLEAN NOT NULL DEFAULT TRUE,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela DESTINATÁRIO
+CREATE TABLE Destinatario (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    cliente_id UUID REFERENCES Cliente(id),
+    cnpj_cpf VARCHAR(20) NOT NULL UNIQUE,
+    tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J')),
+    is_estrangeiro BOOLEAN NOT NULL DEFAULT FALSE,
+    tipo_documento VARCHAR(50),
+    razao_social VARCHAR(100) NOT NULL,
+    nome_fantasia VARCHAR(60),
+    inscricao_estadual VARCHAR(50),
+    inscricao_municipal VARCHAR(20),
+    endereco VARCHAR(100),
+    numero VARCHAR(10),
+    complemento VARCHAR(60),
+    bairro VARCHAR(50),
+    cidade_id UUID REFERENCES Cidade(id),
+    cep VARCHAR(15),
     telefone VARCHAR(20),
     email VARCHAR(100),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_destinatario_cidade FOREIGN KEY (cidade_id) REFERENCES Cidade (id),
-    CONSTRAINT ck_destinatario_tipo CHECK (tipo IN ('F', 'J'))
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Tabela de relacionamento entre Cliente e Destinatário
+CREATE TABLE Cliente_Destinatario (
+    cliente_id UUID NOT NULL REFERENCES Cliente(id),
+    destinatario_id UUID NOT NULL REFERENCES Destinatario(id),
+    PRIMARY KEY (cliente_id, destinatario_id)
+);
+
 -- Tabela TRANSPORTADOR
 CREATE TABLE Transportador (
     cnpj_cpf VARCHAR(18) PRIMARY KEY,
@@ -183,13 +235,14 @@ CREATE TABLE Nfe (
     cnpj_emitente VARCHAR(18) NOT NULL,
     cnpj_destinatario VARCHAR(18) NOT NULL,
     cnpj_transportador VARCHAR(18),
-    condicao_pagamento_id UUID NOT NULL,
+    condicao_pagamento_id INTEGER NOT NULL,
+    cliente_id UUID REFERENCES Cliente(id),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_nfe_emitente FOREIGN KEY (cnpj_emitente) REFERENCES Emitente (cnpj),
     CONSTRAINT fk_nfe_destinatario FOREIGN KEY (cnpj_destinatario) REFERENCES Destinatario (cnpj_cpf),
     CONSTRAINT fk_nfe_transportador FOREIGN KEY (cnpj_transportador) REFERENCES Transportador (cnpj_cpf),
-    CONSTRAINT fk_nfe_condicao_pagamento FOREIGN KEY (condicao_pagamento_id) REFERENCES CondicaoPagamento (id),
+    CONSTRAINT fk_nfe_condicao_pagamento FOREIGN KEY (condicao_pagamento_id) REFERENCES condicao_pagamento (id),
     CONSTRAINT uk_nfe_numero_serie_emissor UNIQUE (numero, serie, cnpj_emitente)
 );
 -- Tabela ITEM_NFE
@@ -246,7 +299,7 @@ CREATE TABLE Parcela (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_parcela_fatura FOREIGN KEY (fatura_id) REFERENCES Fatura (id),
-    CONSTRAINT fk_parcela_forma_pagamento FOREIGN KEY (forma_pagamento_id) REFERENCES formapagamento (id)
+    CONSTRAINT fk_parcela_forma_pagamento FOREIGN KEY (forma_pagamento_id) REFERENCES forma_pagamento (id)
 );
 -- Tabela VOLUME
 CREATE TABLE Volume (
@@ -268,10 +321,15 @@ CREATE INDEX idx_estado_pais_id ON Estado(pais_id);
 CREATE INDEX idx_cidade_estado_id ON Cidade(estado_id);
 CREATE INDEX idx_emitente_cidade_id ON Emitente(cidade_id);
 CREATE INDEX idx_destinatario_cidade_id ON Destinatario(cidade_id);
+CREATE INDEX idx_destinatario_cliente_id ON Destinatario(cliente_id);
+CREATE INDEX idx_cliente_destinatario_cliente_id ON Cliente_Destinatario(cliente_id);
+CREATE INDEX idx_cliente_destinatario_destinatario_id ON Cliente_Destinatario(destinatario_id);
+CREATE INDEX idx_cliente_cnpj_cpf ON Cliente(cnpj_cpf);
 CREATE INDEX idx_transportador_cidade_id ON Transportador(cidade_id);
 -- Índices para NFE
 CREATE INDEX idx_nfe_cnpj_emitente ON Nfe(cnpj_emitente);
 CREATE INDEX idx_nfe_cnpj_destinatario ON Nfe(cnpj_destinatario);
+CREATE INDEX idx_nfe_cliente_id ON Nfe(cliente_id);
 CREATE INDEX idx_nfe_data_emissao ON Nfe(data_emissao);
 CREATE INDEX idx_nfe_numero ON Nfe(numero);
 CREATE INDEX idx_nfe_situacao ON Nfe(situacao);
@@ -301,11 +359,13 @@ UPDATE ON Estado FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_cidade_timestamp BEFORE
 UPDATE ON Cidade FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_condicao_pagamento_timestamp BEFORE
-UPDATE ON CondicaoPagamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON condicao_pagamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_forma_pagamento_timestamp BEFORE
-UPDATE ON formapagamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON forma_pagamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_emitente_timestamp BEFORE
 UPDATE ON Emitente FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_cliente_timestamp BEFORE
+UPDATE ON Cliente FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_destinatario_timestamp BEFORE
 UPDATE ON Destinatario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_transportador_timestamp BEFORE
@@ -327,28 +387,30 @@ UPDATE ON Volume FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 INSERT INTO Pais (nome, codigo, sigla)
 VALUES ('Brasil', '55', 'BR');
 -- Inserir formas de pagamento comuns
-INSERT INTO formapagamento (descricao, codigo, tipo)
+INSERT INTO forma_pagamento (descricao, codigo, tipo)
 VALUES ('Dinheiro', '01', 'À vista'),
     ('Cartão de Crédito', '03', 'Crédito'),
     ('Cartão de Débito', '04', 'Débito'),
     ('PIX', '17', 'À vista'),
     ('Boleto Bancário', '15', 'À prazo');
 -- Inserir condições de pagamento comuns
-INSERT INTO CondicaoPagamento (descricao, dias, parcelas)
-VALUES ('À Vista', 0, 1),
-    ('30 Dias', 30, 1),
-    ('30/60', 30, 2),
-    ('30/60/90', 30, 3),
-    ('Entrada + 30 Dias', 30, 2);
+INSERT INTO condicao_pagamento (nome, descricao, ativo)
+VALUES ('À Vista', 'Pagamento à vista', true),
+    ('30 Dias', 'Pagamento em 30 dias', true),
+    ('30/60', 'Pagamento em duas parcelas de 30 e 60 dias', true),
+    ('30/60/90', 'Pagamento em três parcelas de 30, 60 e 90 dias', true),
+    ('Entrada + 30 Dias', 'Pagamento com entrada e mais 30 dias', true);
 -- Comentários
 COMMENT ON SCHEMA dbo IS 'Schema principal para o sistema de NF-e';
 COMMENT ON TABLE dbo.Pais IS 'Cadastro de países';
 COMMENT ON TABLE dbo.Estado IS 'Cadastro de estados/províncias';
 COMMENT ON TABLE dbo.Cidade IS 'Cadastro de cidades/municípios';
-COMMENT ON TABLE dbo.CondicaoPagamento IS 'Condições de pagamento para notas fiscais';
-COMMENT ON TABLE dbo.formapagamento IS 'Formas de pagamento das parcelas de notas fiscais';
+COMMENT ON TABLE dbo.condicao_pagamento IS 'Condições de pagamento para notas fiscais';
+COMMENT ON TABLE dbo.forma_pagamento IS 'Formas de pagamento das parcelas de notas fiscais';
 COMMENT ON TABLE dbo.Emitente IS 'Cadastro de empresas emitentes de notas fiscais';
+COMMENT ON TABLE dbo.Cliente IS 'Cadastro de clientes';
 COMMENT ON TABLE dbo.Destinatario IS 'Cadastro de destinatários de notas fiscais';
+COMMENT ON TABLE dbo.Cliente_Destinatario IS 'Relacionamento entre clientes e destinatários';
 COMMENT ON TABLE dbo.Transportador IS 'Cadastro de transportadores de mercadorias';
 COMMENT ON TABLE dbo.Produto IS 'Cadastro de produtos';
 COMMENT ON TABLE dbo.Nfe IS 'Notas fiscais eletrônicas';

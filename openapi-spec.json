@@ -1204,6 +1204,117 @@
           "payment-methods"
         ]
       }
+    },
+    "/api/payment-terms": {
+      "post": {
+        "operationId": "PaymentTermsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePaymentTermDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PaymentTerms"
+        ]
+      },
+      "get": {
+        "operationId": "PaymentTermsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PaymentTerms"
+        ]
+      }
+    },
+    "/api/payment-terms/{id}": {
+      "get": {
+        "operationId": "PaymentTermsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PaymentTerms"
+        ]
+      },
+      "patch": {
+        "operationId": "PaymentTermsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePaymentTermDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PaymentTerms"
+        ]
+      },
+      "delete": {
+        "operationId": "PaymentTermsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "PaymentTerms"
+        ]
+      }
     }
   },
   "info": {
@@ -1982,6 +2093,14 @@
             "default": true
           }
         }
+      },
+      "CreatePaymentTermDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdatePaymentTermDto": {
+        "type": "object",
+        "properties": {}
       }
     }
   }
