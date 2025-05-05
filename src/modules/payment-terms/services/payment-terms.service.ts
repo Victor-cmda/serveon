@@ -115,7 +115,7 @@ export class PaymentTermsService {
     return paymentTerms;
   }
 
-  async findOne(id: number): Promise<PaymentTerm> {
+  async findOne(id: string): Promise<PaymentTerm> {
     const result = await this.databaseService.query(
       `SELECT id, nome as name, descricao as description, ativo as "isActive", 
               created_at as "createdAt", updated_at as "updatedAt"
@@ -148,7 +148,7 @@ export class PaymentTermsService {
   }
 
   async update(
-    id: number,
+    id: string,
     updatePaymentTermDto: UpdatePaymentTermDto,
   ): Promise<PaymentTerm> {
     // First check if the payment term exists
@@ -210,11 +210,11 @@ export class PaymentTermsService {
         updatePaymentTermDto.installments &&
         updatePaymentTermDto.installments.length > 0
       ) {
-        // Soft delete existing installments
+        // DELETE existing installments instead of just marking them inactive
+        // This resolves unique constraint conflicts with installment numbers
         await this.databaseService.query(
-          `UPDATE dbo.parcela_condicao_pagamento 
-            SET ativo = false, updated_at = NOW() 
-            WHERE condicao_pagamento_id = $1 AND ativo = true`,
+          `DELETE FROM dbo.parcela_condicao_pagamento 
+            WHERE condicao_pagamento_id = $1`,
           [id],
         );
 
@@ -269,7 +269,7 @@ export class PaymentTermsService {
     }
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     // First check if the payment term exists
     await this.findOne(id);
 

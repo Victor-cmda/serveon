@@ -1,7 +1,7 @@
 import { PaymentTermInstallment } from "./payment-term-installment.entity";
 
 export class PaymentTerm {
-  id: number;
+  id: string;
   name: string;
   description: string;
   isActive: boolean;

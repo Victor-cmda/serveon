@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, Save, Plus, X } from 'lucide-react';
+import { ArrowLeft, Loader2, Save, Plus, X, Search } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -18,23 +18,18 @@ import {
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { paymentTermApi, paymentMethodApi } from '@/services/api';
 import { PaymentMethod } from '@/types/payment-method';
 import { CreatePaymentTermDto } from '@/types/payment-term';
 import { toast } from 'sonner';
+import { SearchDialog } from '@/components/SearchDialog';
+import PaymentMethodCreationDialog from '@/components/dialogs/PaymentMethodCreationDialog';
 
 // Schema para validação das parcelas
 const installmentSchema = z.object({
   installmentNumber: z.number().min(1, 'Número da parcela obrigatório'),
-  paymentMethodId: z.number().min(1, 'Método de pagamento obrigatório'),
+  paymentMethodId: z.string().min(1, 'Método de pagamento obrigatório'),
   daysToPayment: z
     .number()
     .min(0, 'Dias para pagamento deve ser maior ou igual a 0'),
@@ -77,6 +72,8 @@ const PaymentTermForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(id ? true : false);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [paymentMethodDialogOpen, setPaymentMethodDialogOpen] = useState(false);
+  const [paymentMethodSearchOpen, setPaymentMethodSearchOpen] = useState<number | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -87,7 +84,7 @@ const PaymentTermForm = () => {
       installments: [
         {
           installmentNumber: 1,
-          paymentMethodId: 0,
+          paymentMethodId: '',
           daysToPayment: 0,
           percentageValue: 100,
           interestRate: 0,
@@ -105,7 +102,7 @@ const PaymentTermForm = () => {
   useEffect(() => {
     fetchPaymentMethods();
     if (id) {
-      fetchPaymentTerm(parseInt(id));
+      fetchPaymentTerm(id);
     }
   }, [id]);
 
@@ -121,7 +118,7 @@ const PaymentTermForm = () => {
     }
   };
 
-  const fetchPaymentTerm = async (paymentTermId: number) => {
+  const fetchPaymentTerm = async (paymentTermId: string) => {
     setIsLoadingData(true);
     try {
       const data = await paymentTermApi.getById(paymentTermId);
@@ -164,7 +161,7 @@ const PaymentTermForm = () => {
 
     append({
       installmentNumber: nextNumber,
-      paymentMethodId: 0,
+      paymentMethodId: '',
       daysToPayment: lastInstallment ? lastInstallment.daysToPayment + 30 : 30,
       percentageValue: 0,
       interestRate: 0,
@@ -189,8 +186,21 @@ const PaymentTermForm = () => {
         })),
       };
 
+      // Verifica se existe algum método de pagamento não selecionado
+      const hasInvalidPaymentMethod = paymentTermData.installments.some(
+        (inst) => !inst.paymentMethodId
+      );
+      
+      if (hasInvalidPaymentMethod) {
+        toast.error('Erro', {
+          description: 'Selecione um método de pagamento válido para todas as parcelas.',
+        });
+        setIsLoading(false);
+        return;
+      }
+
       if (id) {
-        await paymentTermApi.update(parseInt(id), paymentTermData);
+        await paymentTermApi.update(id, paymentTermData);
         toast.success('Sucesso', {
           description: 'Condição de pagamento atualizada com sucesso!',
         });
@@ -210,6 +220,21 @@ const PaymentTermForm = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePaymentMethodCreated = (newPaymentMethod: PaymentMethod) => {
+    setPaymentMethods((prev) => [...prev, newPaymentMethod]);
+    
+    // Se houver um índice de parcela ativo, atualize o método de pagamento para essa parcela
+    if (paymentMethodSearchOpen !== null) {
+      form.setValue(`installments.${paymentMethodSearchOpen}.paymentMethodId`, newPaymentMethod.id);
+    }
+    
+    setPaymentMethodDialogOpen(false);
+  };
+
+  const openPaymentMethodSearch = (index: number) => {
+    setPaymentMethodSearchOpen(index);
   };
 
   if (isLoadingData) {
@@ -364,25 +389,31 @@ const PaymentTermForm = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Método de Pagamento</FormLabel>
-                          <Select
-                            onValueChange={(value) =>
-                              field.onChange(parseInt(value))
-                            }
-                            value={field.value.toString()}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Selecione um método" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {paymentMethods.map((method) => (
-                                <SelectItem key={method.id} value={method.id}>
-                                  {method.description}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <div className="flex gap-2">
+                            <div className="w-full flex-1">
+                              <Input
+                                value={
+                                  paymentMethods.find((m) => m.id === field.value)?.description ||
+                                  ''
+                                }
+                                readOnly
+                                placeholder="Selecione um método de pagamento"
+                                className="cursor-pointer h-11 text-base"
+                                onClick={() => openPaymentMethodSearch(index)}
+                              />
+                              <input type="hidden" {...field} />
+                            </div>
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="outline"
+                              onClick={() => openPaymentMethodSearch(index)}
+                              disabled={isLoading}
+                              className="h-11 w-11"
+                            >
+                              <Search className="h-5 w-5" />
+                            </Button>
+                          </div>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -496,6 +527,44 @@ const PaymentTermForm = () => {
           </div>
         </form>
       </Form>
+
+      {/* Diálogos */}
+      <PaymentMethodCreationDialog
+        open={paymentMethodDialogOpen}
+        onOpenChange={setPaymentMethodDialogOpen}
+        onSuccess={handlePaymentMethodCreated}
+      />
+
+      {paymentMethodSearchOpen !== null && (
+        <SearchDialog
+          open={paymentMethodSearchOpen !== null}
+          onOpenChange={(open) => {
+            if (!open) setPaymentMethodSearchOpen(null);
+          }}
+          title="Selecionar Método de Pagamento"
+          description="Selecione um método de pagamento para associar à parcela ou cadastre um novo."
+          entities={paymentMethods}
+          isLoading={isLoading}
+          onSelect={(method) => {
+            form.setValue(
+              `installments.${paymentMethodSearchOpen}.paymentMethodId`, 
+              method.id
+            );
+            setPaymentMethodSearchOpen(null);
+          }}
+          onCreateNew={() => {
+            setPaymentMethodSearchOpen(paymentMethodSearchOpen);
+            setPaymentMethodDialogOpen(true);
+          }}
+          displayColumns={[
+            { key: 'description', header: 'Descrição' },
+            { key: 'code', header: 'Código' },
+            { key: 'type', header: 'Tipo' }
+          ]}
+          searchKeys={['description', 'code', 'type']}
+          entityType="metodos-pagamento"
+        />
+      )}
     </div>
   );
 };

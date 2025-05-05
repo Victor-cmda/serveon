@@ -276,7 +276,7 @@ export const paymentTermApi = {
     return handleResponse(response);
   },
 
-  getById: async (id: number): Promise<PaymentTerm> => {
+  getById: async (id: string): Promise<PaymentTerm> => {
     const response = await fetch(`${API_URL}/payment-terms/${id}`);
     return handleResponse(response);
   },
@@ -292,7 +292,7 @@ export const paymentTermApi = {
     return handleResponse(response);
   },
 
-  update: async (id: number, paymentTerm: UpdatePaymentTermDto): Promise<PaymentTerm> => {
+  update: async (id: string, paymentTerm: UpdatePaymentTermDto): Promise<PaymentTerm> => {
     const response = await fetch(`${API_URL}/payment-terms/${id}`, {
       method: 'PATCH',
       headers: {
@@ -303,7 +303,7 @@ export const paymentTermApi = {
     return handleResponse(response);
   },
 
-  delete: async (id: number): Promise<void> => {
+  delete: async (id: string): Promise<void> => {
     const response = await fetch(`${API_URL}/payment-terms/${id}`, {
       method: 'DELETE',
     });

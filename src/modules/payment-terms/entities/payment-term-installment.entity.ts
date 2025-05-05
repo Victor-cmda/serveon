@@ -1,8 +1,8 @@
 export class PaymentTermInstallment {
-  id: number;
-  paymentTermId: number;
+  id: string;
+  paymentTermId: string;
   installmentNumber: number;
-  paymentMethodId: number;
+  paymentMethodId: string;
   daysToPayment: number;
   percentageValue: number;
   interestRate: number;

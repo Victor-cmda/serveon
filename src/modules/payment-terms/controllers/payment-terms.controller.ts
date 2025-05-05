@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { PaymentTermsService } from '../services/payment-terms.service';
 import { CreatePaymentTermDto } from '../dto/create-payment-term.dto';
 import { UpdatePaymentTermDto } from '../dto/update-payment-term.dto';
@@ -18,13 +28,13 @@ export class PaymentTermsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id') id: string) {
     return this.paymentTermsService.findOne(id);
   }
 
   @Patch(':id')
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body() updatePaymentTermDto: UpdatePaymentTermDto,
   ) {
     return this.paymentTermsService.update(id, updatePaymentTermDto);
@@ -32,7 +42,7 @@ export class PaymentTermsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id', ParseIntPipe) id: number) {
+  async remove(@Param('id') id: string) {
     await this.paymentTermsService.remove(id);
   }
 }

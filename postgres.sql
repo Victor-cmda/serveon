@@ -53,9 +53,9 @@ CREATE TABLE forma_pagamento (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela CONDIÇÃO DE PAGAMENTO
+-- Tabela CONDIÇÃO DE PAGAMENTO - ALTERADO DE SERIAL PARA UUID
 CREATE TABLE condicao_pagamento (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     nome VARCHAR(100) NOT NULL UNIQUE,
     descricao TEXT,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
@@ -63,10 +63,10 @@ CREATE TABLE condicao_pagamento (
     updated_at TIMESTAMP
 );
 
--- Tabela de parcelas das condições de pagamento
+-- Tabela de parcelas das condições de pagamento - ALTERADO DE SERIAL PARA UUID
 CREATE TABLE parcela_condicao_pagamento (
-    id SERIAL PRIMARY KEY,
-    condicao_pagamento_id INTEGER NOT NULL REFERENCES condicao_pagamento(id),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    condicao_pagamento_id UUID NOT NULL REFERENCES condicao_pagamento(id),
     numero_parcela INTEGER NOT NULL,
     forma_pagamento_id UUID NOT NULL REFERENCES forma_pagamento(id),
     dias_para_pagamento INTEGER NOT NULL,
@@ -199,7 +199,7 @@ CREATE TABLE Produto (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
--- Tabela NFE
+-- Tabela NFE - ALTERADO condicao_pagamento_id PARA UUID
 CREATE TABLE Nfe (
     chave_acesso VARCHAR(44) PRIMARY KEY,
     numero VARCHAR(10) NOT NULL,
@@ -235,7 +235,7 @@ CREATE TABLE Nfe (
     cnpj_emitente VARCHAR(18) NOT NULL,
     cnpj_destinatario VARCHAR(18) NOT NULL,
     cnpj_transportador VARCHAR(18),
-    condicao_pagamento_id INTEGER NOT NULL,
+    condicao_pagamento_id UUID NOT NULL,
     cliente_id UUID REFERENCES Cliente(id),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -345,6 +345,9 @@ CREATE INDEX idx_parcela_data_vencimento ON Parcela(data_vencimento);
 CREATE INDEX idx_parcela_status ON Parcela(status);
 -- Índices para VOLUME
 CREATE INDEX idx_volume_chave_acesso ON Volume(chave_acesso_nfe);
+-- Índices para CONDIÇÃO DE PAGAMENTO E PARCELAS - ADICIONADOS
+CREATE INDEX idx_parcela_condicao_pagamento_condicao_id ON parcela_condicao_pagamento(condicao_pagamento_id);
+CREATE INDEX idx_parcela_condicao_pagamento_forma_id ON parcela_condicao_pagamento(forma_pagamento_id);
 -- Triggers para atualizar o campo updated_at automaticamente
 -- Função para atualizar o timestamp
 CREATE OR REPLACE FUNCTION update_timestamp() RETURNS TRIGGER AS $$ BEGIN NEW.updated_at = CURRENT_TIMESTAMP;

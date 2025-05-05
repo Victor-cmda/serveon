@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsPositive, Min } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, IsUUID, Min } from 'class-validator';
 
 export class CreatePaymentTermInstallmentDto {
   @IsNotEmpty()
@@ -7,9 +7,9 @@ export class CreatePaymentTermInstallmentDto {
   installmentNumber: number;
 
   @IsNotEmpty()
-  @IsNumber()
-  @IsPositive()
-  paymentMethodId: number;
+  @IsString()
+  @IsUUID()
+  paymentMethodId: string;
 
   @IsNotEmpty()
   @IsNumber()
@@ -27,6 +27,6 @@ export class CreatePaymentTermInstallmentDto {
   interestRate: number = 0;
 
   @IsOptional()
-  @IsNumber()
+  @IsBoolean()
   isActive?: boolean = true;
 }
