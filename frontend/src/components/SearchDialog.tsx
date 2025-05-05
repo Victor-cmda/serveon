@@ -8,6 +8,7 @@ import {
   Star,
   Table,
   LayoutGrid,
+  Edit,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,6 +62,7 @@ export interface SearchDialogProps<T extends Entity = Entity> {
   isLoading?: boolean;
   onSelect: (entity: T) => void;
   onCreateNew?: () => void;
+  onEdit?: (entity: T) => void; // Nova propriedade para edição
   displayColumns: DisplayColumn<T>[];
   searchKeys: (keyof T)[];
   entityType?: string; // Identificador único para o tipo de entidade (usado para favoritos)
@@ -83,6 +85,7 @@ export function SearchDialog<T extends Entity = Entity>({
   isLoading = false,
   onSelect,
   onCreateNew,
+  onEdit,
   displayColumns,
   searchKeys,
   entityType = 'item',
@@ -489,6 +492,11 @@ export function SearchDialog<T extends Entity = Entity>({
                             {column.header}
                           </th>
                         ))}
+                        {onEdit && (
+                          <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">
+                            Ações
+                          </th>
+                        )}
                       </tr>
                     </thead>
                     <tbody>
@@ -544,6 +552,19 @@ export function SearchDialog<T extends Entity = Entity>({
                                 {renderCellValue(entity, column)}
                               </td>
                             ))}
+                            <td className="px-4 py-3">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onEdit?.(entity);
+                                }}
+                              >
+                                <Edit className="h-5 w-5 text-muted-foreground" />
+                              </Button>
+                            </td>
                           </tr>
                         ))
                       )}
@@ -589,23 +610,38 @@ export function SearchDialog<T extends Entity = Entity>({
                                 </CardDescription>
                               ))}
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 -mt-1 -mr-1"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleFavorite(entity.id);
-                              }}
-                            >
-                              <Star
-                                className={`h-5 w-5 ${
-                                  isFavorite(entity.id)
-                                    ? 'fill-yellow-400 text-yellow-400'
-                                    : 'text-muted-foreground'
-                                }`}
-                              />
-                            </Button>
+                            <div className="flex">
+                              {onEdit && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 -mt-1"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEdit(entity);
+                                  }}
+                                >
+                                  <Edit className="h-5 w-5 text-muted-foreground" />
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 -mt-1 -mr-1"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleFavorite(entity.id);
+                                }}
+                              >
+                                <Star
+                                  className={`h-5 w-5 ${
+                                    isFavorite(entity.id)
+                                      ? 'fill-yellow-400 text-yellow-400'
+                                      : 'text-muted-foreground'
+                                  }`}
+                                />
+                              </Button>
+                            </div>
                           </CardHeader>
                           <CardContent className="pb-3">
                             {/* Mostrar até 2 campos adicionais */}

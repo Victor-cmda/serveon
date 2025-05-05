@@ -40,12 +40,14 @@ interface PaymentMethodCreationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: (paymentMethod: PaymentMethod) => void;
+  paymentMethod?: PaymentMethod | null; // Método de pagamento para edição
 }
 
 const PaymentMethodCreationDialog = ({
   open,
   onOpenChange,
   onSuccess,
+  paymentMethod,
 }: PaymentMethodCreationDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -67,28 +69,44 @@ const PaymentMethodCreationDialog = ({
         type: '',
         active: true,
       });
+    } else if (paymentMethod) {
+      form.reset({
+        description: paymentMethod.description,
+        code: paymentMethod.code,
+        type: paymentMethod.type,
+        active: paymentMethod.active,
+      });
     }
-  }, [open, form]);
+  }, [open, form, paymentMethod]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
 
     try {
-      const createData: CreatePaymentMethodDto = {
+      const formData: CreatePaymentMethodDto = {
         description: data.description,
         code: data.code || undefined,
         type: data.type || undefined,
         active: data.active,
       };
 
-      const newPaymentMethod = await paymentMethodApi.create(createData);
-      toast.success(`Método de pagamento ${data.description} criado com sucesso!`);
+      let savedPaymentMethod;
 
-      onSuccess(newPaymentMethod);
+      if (paymentMethod) {
+        // Edição de método de pagamento existente
+        savedPaymentMethod = await paymentMethodApi.update(paymentMethod.id, formData);
+        toast.success(`Método de pagamento ${data.description} atualizado com sucesso!`);
+      } else {
+        // Criação de novo método de pagamento
+        savedPaymentMethod = await paymentMethodApi.create(formData);
+        toast.success(`Método de pagamento ${data.description} criado com sucesso!`);
+      }
+
+      onSuccess(savedPaymentMethod);
       onOpenChange(false);
     } catch (error: any) {
-      console.error('Erro ao criar método de pagamento:', error);
-      toast.error(error.message || 'Ocorreu um erro ao criar o método de pagamento.');
+      console.error('Erro ao salvar método de pagamento:', error);
+      toast.error(error.message || 'Ocorreu um erro ao salvar o método de pagamento.');
     } finally {
       setIsLoading(false);
     }
@@ -99,10 +117,12 @@ const PaymentMethodCreationDialog = ({
       <DialogContent className="sm:max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw] xl:max-w-[60vw] max-h-[90vh] p-6">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            Adicionar novo método de pagamento
+            {paymentMethod ? 'Editar método de pagamento' : 'Adicionar novo método de pagamento'}
           </DialogTitle>
           <DialogDescription className="text-base">
-            Preencha os campos abaixo para cadastrar um novo método de pagamento.
+            {paymentMethod
+              ? 'Altere os campos abaixo para atualizar o método de pagamento.'
+              : 'Preencha os campos abaixo para cadastrar um novo método de pagamento.'}
           </DialogDescription>
         </DialogHeader>
 

@@ -42,6 +42,7 @@ const CityForm = () => {
 
   const [stateDialogOpen, setStateDialogOpen] = useState(false);
   const [stateSearchOpen, setStateSearchOpen] = useState(false);
+  const [stateToEdit, setStateToEdit] = useState<State | null>(null);
 
   const location = useLocation();
 
@@ -148,6 +149,22 @@ const CityForm = () => {
     setStates((prev) => [...prev, newState]);
     form.setValue('estadoId', newState.id);
     setStateDialogOpen(false);
+  };
+
+  const handleStateUpdated = (updatedState: State) => {
+    // Atualiza o estado na lista de estados
+    setStates((prev) =>
+      prev.map((state) =>
+        state.id === updatedState.id ? updatedState : state,
+      ),
+    );
+    setStateToEdit(null);
+  };
+
+  const handleEditState = (state: State) => {
+    setStateToEdit(state);
+    setStateSearchOpen(false);
+    setStateDialogOpen(true);
   };
 
   return (
@@ -267,8 +284,9 @@ const CityForm = () => {
       <StateCreationDialog
         open={stateDialogOpen}
         onOpenChange={setStateDialogOpen}
-        onSuccess={handleStateCreated}
+        onSuccess={stateToEdit ? handleStateUpdated : handleStateCreated}
         selectedCountryId=""
+        state={stateToEdit}
       />
 
       <SearchDialog
@@ -285,6 +303,7 @@ const CityForm = () => {
           setStateSearchOpen(false);
           setStateDialogOpen(true);
         }}
+        onEdit={(state) => handleEditState(state)}
         displayColumns={[
           { key: 'nome', header: 'Nome' },
           { key: 'uf', header: 'UF' },

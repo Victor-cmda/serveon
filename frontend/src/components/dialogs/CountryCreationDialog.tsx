@@ -44,12 +44,14 @@ interface CountryCreationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: (country: Country) => void;
+  country?: Country | null; // País para edição
 }
 
 const CountryCreationDialog = ({
   open,
   onOpenChange,
   onSuccess,
+  country,
 }: CountryCreationDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -63,33 +65,52 @@ const CountryCreationDialog = ({
   });
 
   useEffect(() => {
-    if (!open) {
-      form.reset({
-        nome: '',
-        sigla: '',
-        codigo: '',
-      });
+    if (open) {
+      if (country) {
+        // Preenche o formulário com os dados do país para edição
+        form.reset({
+          nome: country.nome || '',
+          sigla: country.sigla || '',
+          codigo: country.codigo || '',
+        });
+      } else {
+        // Reset para valores padrão quando estiver criando novo país
+        form.reset({
+          nome: '',
+          sigla: '',
+          codigo: '',
+        });
+      }
     }
-  }, [open, form]);
+  }, [open, form, country]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
 
     try {
-      const createData: CreateCountryDto = {
+      const formData: CreateCountryDto = {
         nome: data.nome,
         sigla: data.sigla,
         codigo: data.codigo,
       };
 
-      const newCountry = await countryApi.create(createData);
-      toast.success(`País ${data.nome} criado com sucesso!`);
+      let savedCountry;
 
-      onSuccess(newCountry);
+      if (country) {
+        // Edição de país existente
+        savedCountry = await countryApi.update(country.id, formData);
+        toast.success(`País ${data.nome} atualizado com sucesso!`);
+      } else {
+        // Criação de novo país
+        savedCountry = await countryApi.create(formData);
+        toast.success(`País ${data.nome} criado com sucesso!`);
+      }
+
+      onSuccess(savedCountry);
       onOpenChange(false);
     } catch (error: any) {
-      console.error('Erro ao criar país:', error);
-      toast.error(error.message || 'Ocorreu um erro ao criar o país.');
+      console.error('Erro ao salvar país:', error);
+      toast.error(error.message || 'Ocorreu um erro ao salvar o país.');
     } finally {
       setIsLoading(false);
     }
@@ -100,10 +121,12 @@ const CountryCreationDialog = ({
       <DialogContent className="sm:max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw] xl:max-w-[60vw] max-h-[90vh] p-6">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            Adicionar novo país
+            {country ? 'Editar país' : 'Adicionar novo país'}
           </DialogTitle>
           <DialogDescription className="text-base">
-            Preencha os campos abaixo para cadastrar um novo país.
+            {country
+              ? 'Altere os campos abaixo para atualizar o país.'
+              : 'Preencha os campos abaixo para cadastrar um novo país.'}
           </DialogDescription>
         </DialogHeader>
 

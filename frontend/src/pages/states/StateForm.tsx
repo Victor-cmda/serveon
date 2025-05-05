@@ -35,6 +35,7 @@ const StateForm = () => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [countryDialogOpen, setCountryDialogOpen] = useState(false);
   const [countrySearchOpen, setCountrySearchOpen] = useState(false);
+  const [countryToEdit, setCountryToEdit] = useState<Country | null>(null);
   const location = useLocation();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -135,6 +136,22 @@ const StateForm = () => {
     setCountries((prev) => [...prev, newCountry]);
     form.setValue('paisId', newCountry.id);
     setCountryDialogOpen(false);
+  };
+
+  const handleCountryUpdated = (updatedCountry: Country) => {
+    // Atualiza o país na lista de países
+    setCountries((prev) => 
+      prev.map((country) => 
+        country.id === updatedCountry.id ? updatedCountry : country
+      )
+    );
+    setCountryToEdit(null);
+  };
+
+  const handleEditCountry = (country: Country) => {
+    setCountryToEdit(country);
+    setCountrySearchOpen(false);
+    setCountryDialogOpen(true);
   };
 
   return (
@@ -253,7 +270,8 @@ const StateForm = () => {
       <CountryCreationDialog
         open={countryDialogOpen}
         onOpenChange={setCountryDialogOpen}
-        onSuccess={handleCountryCreated}
+        onSuccess={countryToEdit ? handleCountryUpdated : handleCountryCreated}
+        country={countryToEdit}
       />
 
       <SearchDialog
@@ -270,12 +288,15 @@ const StateForm = () => {
           setCountrySearchOpen(false);
           setCountryDialogOpen(true);
         }}
+        onEdit={handleEditCountry}
         displayColumns={[
           { key: 'nome', header: 'Nome' },
           { key: 'sigla', header: 'Sigla' },
           { key: 'codigo', header: 'Código' },
         ]}
         searchKeys={['nome', 'sigla', 'codigo']}
+        entityType="paises"
+        description="Selecione um país para associar ao estado ou edite um país existente."
       />
     </div>
   );

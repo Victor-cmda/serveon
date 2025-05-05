@@ -163,8 +163,12 @@ const CustomerForm = () => {
 
   const [newCityDialogOpen, setNewCityDialogOpen] = useState(false);
   const [newStateDialogOpen, setNewStateDialogOpen] = useState(false);
-
+  
   const [selectedStateId, setSelectedStateId] = useState<string>('');
+  
+  // Estados para controlar a edição
+  const [stateToEdit, setStateToEdit] = useState<State | null>(null);
+  const [cityToEdit, setCityToEdit] = useState<City | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -447,7 +451,7 @@ const CustomerForm = () => {
       }
       
       // Define automaticamente se o cliente é estrangeiro com base no país da cidade
-      const isForeignCountry = city.paisNome !== 'Brasil' && city.paisNome !== 'Brazil';
+      const isForeignCountry = city.paisNome?.toUpperCase() !== 'BRASIL' && city.paisNome?.toUpperCase() !== 'BRAZIL';
       form.setValue('isEstrangeiro', isForeignCountry, {
         shouldValidate: true,
         shouldDirty: true,
@@ -465,6 +469,44 @@ const CustomerForm = () => {
 
   const onCreateNewCity = () => {
     setNewCityDialogOpen(true);
+  };
+
+  const handleEditCity = (city: City) => {
+    setCityToEdit(city);
+    setCitySearchOpen(false);
+    setNewCityDialogOpen(true);
+  };
+
+  const handleEditState = (state: State) => {
+    setStateToEdit(state);
+    setStateSearchOpen(false);
+    setNewStateDialogOpen(true);
+  };
+
+  const handleCityUpdated = (updatedCity: City) => {
+    // Atualiza a cidade na lista de cidades
+    setCities(prev => 
+      prev.map(city => 
+        city.id === updatedCity.id ? updatedCity : city
+      )
+    );
+    
+    // Se a cidade atualizada é a que está selecionada, atualize também a seleção
+    if (selectedCity && selectedCity.id === updatedCity.id) {
+      setSelectedCity(updatedCity);
+    }
+    
+    setCityToEdit(null);
+  };
+
+  const handleStateUpdated = (updatedState: State) => {
+    // Atualiza o estado na lista de estados
+    setStates(prev => 
+      prev.map(state => 
+        state.id === updatedState.id ? updatedState : state
+      )
+    );
+    setStateToEdit(null);
   };
 
   return (
@@ -1020,6 +1062,7 @@ const CustomerForm = () => {
         isLoading={isLoading}
         onSelect={onSelectState}
         onCreateNew={onCreateNewState}
+        onEdit={handleEditState}
         displayColumns={[
           { key: 'nome', header: 'Nome' },
           { key: 'uf', header: 'UF' },
@@ -1027,6 +1070,7 @@ const CustomerForm = () => {
         ]}
         searchKeys={['nome', 'uf', 'paisNome']}
         entityType="estados"
+        description="Selecione um estado para o cadastro do cliente ou edite um estado existente."
       />
 
       {/* City Search Dialog */}
@@ -1044,6 +1088,7 @@ const CustomerForm = () => {
           onSelectCity(city);
         }}
         onCreateNew={onCreateNewCity}
+        onEdit={handleEditCity}
         displayColumns={[
           { key: 'nome', header: 'Nome' },
           { key: 'estadoNome', header: 'Estado' },
@@ -1086,15 +1131,14 @@ const CustomerForm = () => {
             )}
           </div>
         }
-        description="Selecione uma cidade para o cadastro do cliente. Você pode filtrar por estado ou pesquisar pelo nome da cidade, código IBGE ou UF."
+        description="Selecione uma cidade para o cadastro do cliente ou edite uma cidade existente. Você pode filtrar por estado ou pesquisar pelo nome da cidade, código IBGE ou UF."
       />
 
       <StateCreationDialog
         open={newStateDialogOpen}
         onOpenChange={setNewStateDialogOpen}
-        onSuccess={(newState: State) => {
+        onSuccess={stateToEdit ? handleStateUpdated : (newState: State) => {
           setSelectedStateId(newState.id);
-
           loadCitiesForState(newState.id);
 
           if (newCityDialogOpen) {
@@ -1104,16 +1148,18 @@ const CustomerForm = () => {
             toast.success('Estado criado com sucesso!');
           }
         }}
+        state={stateToEdit}
       />
 
       <CityCreationDialog
         open={newCityDialogOpen}
         onOpenChange={setNewCityDialogOpen}
-        onSuccess={(newCity: City) => {
+        onSuccess={cityToEdit ? handleCityUpdated : (newCity: City) => {
           onSelectCity(newCity);
           toast.success('Cidade criada com sucesso!');
         }}
         selectedStateId={selectedStateId}
+        city={cityToEdit}
       />
     </div>
   );

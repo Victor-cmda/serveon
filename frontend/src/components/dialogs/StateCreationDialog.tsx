@@ -40,6 +40,7 @@ interface StateCreationDialogProps {
   onOpenChange: (open: boolean) => void;
   onSuccess: (state: State) => void;
   selectedCountryId?: string;
+  state?: State | null; // Estado para edição
 }
 
 const StateCreationDialog = ({
@@ -47,18 +48,20 @@ const StateCreationDialog = ({
   onOpenChange,
   onSuccess,
   selectedCountryId,
+  state, // Adicionado para edição de estado
 }: StateCreationDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [countries, setCountries] = useState<Country[]>([]);
   const [countryDialogOpen, setCountryDialogOpen] = useState(false);
   const [countrySearchOpen, setCountrySearchOpen] = useState(false);
+  const [countryToEdit, setCountryToEdit] = useState<Country | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nome: '',
-      uf: '',
-      paisId: selectedCountryId || '',
+      nome: state?.nome || '',
+      uf: state?.uf || '',
+      paisId: state?.paisId || selectedCountryId || '',
     },
   });
 
@@ -69,14 +72,24 @@ const StateCreationDialog = ({
   }, [selectedCountryId, form]);
 
   useEffect(() => {
-    if (!open) {
-      form.reset({
-        nome: '',
-        uf: '',
-        paisId: selectedCountryId || '',
-      });
+    if (open) {
+      if (state) {
+        // Preenche o formulário com os dados do estado para edição
+        form.reset({
+          nome: state.nome || '',
+          uf: state.uf || '',
+          paisId: state.paisId || selectedCountryId || '',
+        });
+      } else {
+        // Reset para valores padrão quando estiver criando novo estado
+        form.reset({
+          nome: '',
+          uf: '',
+          paisId: selectedCountryId || '',
+        });
+      }
     }
-  }, [open, form, selectedCountryId]);
+  }, [open, form, selectedCountryId, state]);
 
   useEffect(() => {
     if (open) {
@@ -104,14 +117,22 @@ const StateCreationDialog = ({
         paisId: data.paisId,
       };
 
-      const newState = await stateApi.create(createData);
-      toast.success(`Estado ${data.nome} criado com sucesso!`);
+      let newState;
+      if (state) {
+        // Edição de estado existente
+        newState = await stateApi.update(state.id, createData);
+        toast.success(`Estado ${data.nome} atualizado com sucesso!`);
+      } else {
+        // Criação de novo estado
+        newState = await stateApi.create(createData);
+        toast.success(`Estado ${data.nome} criado com sucesso!`);
+      }
 
       onSuccess(newState);
       onOpenChange(false);
     } catch (error: any) {
-      console.error('Erro ao criar estado:', error);
-      toast.error(error.message || 'Ocorreu um erro ao criar o estado.');
+      console.error('Erro ao salvar estado:', error);
+      toast.error(error.message || 'Ocorreu um erro ao salvar o estado.');
     } finally {
       setIsLoading(false);
     }
@@ -123,16 +144,34 @@ const StateCreationDialog = ({
     setCountryDialogOpen(false);
   };
 
+  const handleCountryUpdated = (updatedCountry: Country) => {
+    // Atualiza o país na lista de países
+    setCountries((prev) =>
+      prev.map((country) =>
+        country.id === updatedCountry.id ? updatedCountry : country
+      )
+    );
+    setCountryToEdit(null);
+  };
+
+  const handleEditCountry = (country: Country) => {
+    setCountryToEdit(country);
+    setCountrySearchOpen(false);
+    setCountryDialogOpen(true);
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[95vw] md:max-w-[90vw] lg:max-w-[80vw] xl:max-w-[70vw] 2xl:max-w-[60vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">
-              Adicionar novo estado
+              {state ? 'Editar estado' : 'Adicionar novo estado'}
             </DialogTitle>
             <DialogDescription className="text-base">
-              Preencha os campos abaixo para cadastrar um novo estado.
+              {state
+                ? 'Altere os campos abaixo para atualizar o estado.'
+                : 'Preencha os campos abaixo para cadastrar um novo estado.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -245,7 +284,7 @@ const StateCreationDialog = ({
                   {isLoading && (
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   )}
-                  Salvar
+                  {state ? 'Salvar alterações' : 'Salvar'}
                 </Button>
               </DialogFooter>
             </form>
@@ -256,7 +295,8 @@ const StateCreationDialog = ({
       <CountryCreationDialog
         open={countryDialogOpen}
         onOpenChange={setCountryDialogOpen}
-        onSuccess={handleCountryCreated}
+        onSuccess={countryToEdit ? handleCountryUpdated : handleCountryCreated}
+        country={countryToEdit}
       />
 
       <SearchDialog
@@ -281,6 +321,7 @@ const StateCreationDialog = ({
         searchKeys={['nome', 'sigla', 'codigo']}
         entityType="paises"
         description="Selecione um país para associar ao estado ou cadastre um novo país."
+        onEdit={handleEditCountry} // Adicionando a função de edição
       />
     </>
   );

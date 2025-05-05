@@ -74,6 +74,7 @@ const PaymentTermForm = () => {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [paymentMethodDialogOpen, setPaymentMethodDialogOpen] = useState(false);
   const [paymentMethodSearchOpen, setPaymentMethodSearchOpen] = useState<number | null>(null);
+  const [paymentMethodToEdit, setPaymentMethodToEdit] = useState<PaymentMethod | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -231,6 +232,22 @@ const PaymentTermForm = () => {
     }
     
     setPaymentMethodDialogOpen(false);
+  };
+
+  const handlePaymentMethodUpdated = (updatedPaymentMethod: PaymentMethod) => {
+    // Atualiza o método de pagamento na lista
+    setPaymentMethods((prev) => 
+      prev.map((method) => 
+        method.id === updatedPaymentMethod.id ? updatedPaymentMethod : method
+      )
+    );
+    setPaymentMethodToEdit(null);
+  };
+
+  const handleEditPaymentMethod = (method: PaymentMethod) => {
+    setPaymentMethodToEdit(method);
+    setPaymentMethodSearchOpen(null);
+    setPaymentMethodDialogOpen(true);
   };
 
   const openPaymentMethodSearch = (index: number) => {
@@ -532,7 +549,8 @@ const PaymentTermForm = () => {
       <PaymentMethodCreationDialog
         open={paymentMethodDialogOpen}
         onOpenChange={setPaymentMethodDialogOpen}
-        onSuccess={handlePaymentMethodCreated}
+        onSuccess={paymentMethodToEdit ? handlePaymentMethodUpdated : handlePaymentMethodCreated}
+        paymentMethod={paymentMethodToEdit}
       />
 
       {paymentMethodSearchOpen !== null && (
@@ -542,7 +560,7 @@ const PaymentTermForm = () => {
             if (!open) setPaymentMethodSearchOpen(null);
           }}
           title="Selecionar Método de Pagamento"
-          description="Selecione um método de pagamento para associar à parcela ou cadastre um novo."
+          description="Selecione um método de pagamento para associar à parcela, edite um existente ou cadastre um novo."
           entities={paymentMethods}
           isLoading={isLoading}
           onSelect={(method) => {
@@ -556,6 +574,7 @@ const PaymentTermForm = () => {
             setPaymentMethodSearchOpen(paymentMethodSearchOpen);
             setPaymentMethodDialogOpen(true);
           }}
+          onEdit={handleEditPaymentMethod}
           displayColumns={[
             { key: 'description', header: 'Descrição' },
             { key: 'code', header: 'Código' },
