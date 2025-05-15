@@ -388,21 +388,21 @@ UPDATE ON Volume FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 -- Inserir dados iniciais
 -- Inserir país padrão (Brasil)
 INSERT INTO Pais (nome, codigo, sigla)
-VALUES ('Brasil', '55', 'BR');
+VALUES ('BRASIL', '55', 'BR');
 -- Inserir formas de pagamento comuns
 INSERT INTO forma_pagamento (descricao, codigo, tipo)
-VALUES ('Dinheiro', '01', 'À vista'),
-    ('Cartão de Crédito', '03', 'Crédito'),
-    ('Cartão de Débito', '04', 'Débito'),
-    ('PIX', '17', 'À vista'),
-    ('Boleto Bancário', '15', 'À prazo');
+VALUES ('DINHEIRO', '01', 'À VISTA'),
+    ('CARTÃO DE CRÉDITO', '03', 'CRÉDITO'),
+    ('CARTÃO DE DÉBITO', '04', 'DÉBITO'),
+    ('PIX', '17', 'À VISTA'),
+    ('BOLETO BANCÁRIO', '15', 'À PRAZO');
 -- Inserir condições de pagamento comuns
 INSERT INTO condicao_pagamento (nome, descricao, ativo)
-VALUES ('À Vista', 'Pagamento à vista', true),
-    ('30 Dias', 'Pagamento em 30 dias', true),
-    ('30/60', 'Pagamento em duas parcelas de 30 e 60 dias', true),
-    ('30/60/90', 'Pagamento em três parcelas de 30, 60 e 90 dias', true),
-    ('Entrada + 30 Dias', 'Pagamento com entrada e mais 30 dias', true);
+VALUES ('À VISTA', 'PAGAMENTO À VISTA', true),
+    ('30 DIAS', 'PAGAMENTO EM 30 DIAS', true),
+    ('30/60', 'PAGAMENTO EM DUAS PARCELAS DE 30 E 60 DIAS', true),
+    ('30/60/90', 'PAGAMENTO EM TRÊS PARCELAS DE 30, 60 e 90 DIAS', true),
+    ('Entrada + 30 Dias', 'PAGAMENTO COM ENTRADA E MAIS 30 DIAS', true);
 -- Comentários
 COMMENT ON SCHEMA dbo IS 'Schema principal para o sistema de NF-e';
 COMMENT ON TABLE dbo.Pais IS 'Cadastro de países';
