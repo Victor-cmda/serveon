@@ -21,6 +21,8 @@ export interface Customer {
   updatedAt: string;
   isEstrangeiro?: boolean;
   tipoDocumento?: string; // Tipo de documento para estrangeiros (passaporte, id fiscal, etc)
+  condicaoPagamentoId?: string;
+  condicaoPagamentoNome?: string;
 }
 
 export interface CreateCustomerDto {
@@ -39,6 +41,7 @@ export interface CreateCustomerDto {
   telefone?: string;
   email?: string;
   ativo?: boolean;
+  condicaoPagamentoId?: string;
 }
 
 export interface UpdateCustomerDto {
@@ -56,4 +59,5 @@ export interface UpdateCustomerDto {
   telefone?: string;
   email?: string;
   ativo?: boolean;
+  condicaoPagamentoId?: string;
 }

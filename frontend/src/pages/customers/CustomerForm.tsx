@@ -3,22 +3,31 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { customerApi, cityApi, stateApi, countryApi } from '@/services/api';
+import {
+  customerApi,
+  cityApi,
+  stateApi,
+  countryApi,
+  paymentTermApi,
+} from '@/services/api';
 import { State, City } from '@/types/location';
+import { PaymentTerm } from '@/types/payment-term';
 import { toast } from 'sonner';
 import { SearchDialog } from '@/components/SearchDialog';
 import { Form } from '@/components/ui/form';
 
 import StateCreationDialog from '@/components/dialogs/StateCreationDialog';
 import CityCreationDialog from '@/components/dialogs/CityCreationDialog';
+import PaymentTermCreationDialog from '@/components/dialogs/PaymentTermCreationDialog';
 
 // Importa os componentes modulares
 import GeneralDataSection from './components/GeneralDataSection';
 import AddressSection from './components/AddressSection';
 import ContactSection from './components/ContactSection';
 import DocumentsSection from './components/DocumentsSection';
+import PaymentSection from './components/PaymentSection';
 
 // Formatadores de texto
 const formatters = {
@@ -106,28 +115,33 @@ const formSchema = z.object({
   email: z.string().email('Email inválido').optional(),
   cidadeId: z.string().uuid('Cidade é obrigatória'),
   ativo: z.boolean().default(true),
+  condicaoPagamentoId: z.string().optional(),
 });
 
 const CustomerForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-
   const [isLoading, setIsLoading] = useState(false);
   const [states, setStates] = useState<State[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
+  const [paymentTerms, setPaymentTerms] = useState<PaymentTerm[]>([]);
+  const [selectedPaymentTerm, setSelectedPaymentTerm] =
+    useState<PaymentTerm | null>(null);
 
   const [stateSearchOpen, setStateSearchOpen] = useState(false);
   const [citySearchOpen, setCitySearchOpen] = useState(false);
-
+  const [paymentTermSearchOpen, setPaymentTermSearchOpen] = useState(false);
   const [newCityDialogOpen, setNewCityDialogOpen] = useState(false);
   const [newStateDialogOpen, setNewStateDialogOpen] = useState(false);
+  const [paymentTermDialogOpen, setPaymentTermDialogOpen] = useState(false);
 
   const [selectedStateId, setSelectedStateId] = useState<string>('');
 
   const [stateToEdit, setStateToEdit] = useState<State | null>(null);
   const [cityToEdit, setCityToEdit] = useState<City | null>(null);
-
+  const [paymentTermToEdit, setPaymentTermToEdit] =
+    useState<PaymentTerm | null>(null);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -147,6 +161,7 @@ const CustomerForm = () => {
       email: '',
       cidadeId: '',
       ativo: true,
+      condicaoPagamentoId: '',
     },
   });
 
@@ -203,8 +218,10 @@ const CustomerForm = () => {
           email: customer.email || '',
           cidadeId: customer.cidadeId || '',
           ativo: Boolean(customer.ativo),
+          condicaoPagamentoId: customer.condicaoPagamentoId || '',
         });
 
+        // Load city data if available
         if (customer.cidadeId) {
           try {
             const cityData = await cityApi.getById(customer.cidadeId);
@@ -217,6 +234,18 @@ const CustomerForm = () => {
             }
           } catch (error) {
             console.error('Error loading city data:', error);
+          }
+        }
+
+        // Load payment term data if available
+        if (customer.condicaoPagamentoId) {
+          try {
+            const paymentTermData = await paymentTermApi.getById(
+              customer.condicaoPagamentoId,
+            );
+            setSelectedPaymentTerm(paymentTermData);
+          } catch (error) {
+            console.error('Error loading payment term data:', error);
           }
         }
       } catch (error) {
@@ -251,6 +280,7 @@ const CustomerForm = () => {
       });
       setSelectedCity(null);
       setSelectedStateId('');
+      setSelectedPaymentTerm(null);
     }
   }, [id, navigate, form]);
 
@@ -303,6 +333,62 @@ const CustomerForm = () => {
     loadStates();
   }, []);
 
+  // Carregar condições de pagamento
+  useEffect(() => {
+    const fetchPaymentTerms = async () => {
+      try {
+        const terms = await paymentTermApi.getAll();
+        setPaymentTerms(terms.filter((term) => term.isActive));
+      } catch (error) {
+        console.error('Erro ao carregar condições de pagamento:', error);
+        toast.error('Não foi possível carregar as condições de pagamento');
+      }
+    };
+
+    fetchPaymentTerms();
+  }, []);
+
+  // Funções para manipulação da condição de pagamento
+  const onCreateNewPaymentTerm = () => {
+    setPaymentTermToEdit(null);
+    setPaymentTermSearchOpen(false);
+    setPaymentTermDialogOpen(true);
+  };
+
+  const handleEditPaymentTerm = (paymentTerm: PaymentTerm) => {
+    setPaymentTermToEdit(paymentTerm);
+    setPaymentTermSearchOpen(false);
+    setPaymentTermDialogOpen(true);
+  };
+
+  const handlePaymentTermCreated = (newPaymentTerm: PaymentTerm) => {
+    setPaymentTerms((prev) => [...prev, newPaymentTerm]);
+    onSelectPaymentTerm(newPaymentTerm);
+    toast.success(
+      `Condição de pagamento ${newPaymentTerm.name} criada com sucesso!`,
+    );
+  };
+
+  const handlePaymentTermUpdated = (updatedPaymentTerm: PaymentTerm) => {
+    setPaymentTerms((prev) =>
+      prev.map((term) =>
+        term.id === updatedPaymentTerm.id ? updatedPaymentTerm : term,
+      ),
+    );
+
+    if (
+      selectedPaymentTerm &&
+      selectedPaymentTerm.id === updatedPaymentTerm.id
+    ) {
+      setSelectedPaymentTerm(updatedPaymentTerm);
+    }
+
+    setPaymentTermToEdit(null);
+    toast.success(
+      `Condição de pagamento ${updatedPaymentTerm.name} atualizada com sucesso!`,
+    );
+  };
+
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     if (!data.cidadeId) {
       toast.error('Por favor, selecione uma cidade antes de salvar');
@@ -328,6 +414,7 @@ const CustomerForm = () => {
         cep: formatters.clearFormat(data.cep) || undefined,
         telefone: formatters.clearFormat(data.telefone) || undefined,
         cidadeId: data.cidadeId,
+        condicaoPagamentoId: data.condicaoPagamentoId || undefined,
       };
 
       if (id) {
@@ -354,6 +441,7 @@ const CustomerForm = () => {
           email: '',
           cidadeId: '',
           ativo: true,
+          condicaoPagamentoId: '',
         });
         setSelectedCity(null);
         setSelectedStateId('');
@@ -451,6 +539,28 @@ const CustomerForm = () => {
     );
     setStateToEdit(null);
   };
+
+  const onSelectPaymentTerm = (paymentTerm: PaymentTerm) => {
+    if (!paymentTerm || !paymentTerm.id) {
+      toast.error('Condição de pagamento inválida selecionada');
+      return;
+    }
+
+    try {
+      form.setValue('condicaoPagamentoId', paymentTerm.id, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+
+      setSelectedPaymentTerm(paymentTerm);
+      setPaymentTermSearchOpen(false);
+    } catch (error) {
+      console.error('Erro ao selecionar condição de pagamento:', error);
+      toast.error('Ocorreu um erro ao selecionar a condição de pagamento');
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
@@ -512,6 +622,32 @@ const CustomerForm = () => {
                   watchTipo={watchTipo}
                   watchIsEstrangeiro={watchIsEstrangeiro}
                 />
+              </div>              <div>
+                <PaymentSection
+                  form={form}
+                  isLoading={isLoading}
+                  selectedPaymentTerm={selectedPaymentTerm}
+                  setPaymentTermSearchOpen={setPaymentTermSearchOpen}
+                />
+              </div>
+
+              <div className="flex justify-end pt-4 mt-2 border-t">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="h-10 px-6 text-base"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" /> Salvar Cliente
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
           </div>
@@ -627,6 +763,38 @@ const CustomerForm = () => {
         }
         selectedStateId={selectedStateId}
         city={cityToEdit}
+      />
+      {/* Payment Term Search Dialog */}
+      <SearchDialog
+        open={paymentTermSearchOpen}
+        onOpenChange={setPaymentTermSearchOpen}
+        title="Selecionar Condição de Pagamento"
+        entities={paymentTerms}
+        isLoading={isLoading}
+        onSelect={onSelectPaymentTerm}
+        onCreateNew={onCreateNewPaymentTerm}
+        onEdit={handleEditPaymentTerm}
+        displayColumns={[
+          { key: 'name', header: 'Nome' },
+          { key: 'description', header: 'Descrição' },
+          {
+            key: (term) => term.installments.length.toString(),
+            header: 'Parcelas',
+          },
+        ]}
+        searchKeys={['name', 'description']}
+        entityType="condicoes de pagamento"
+        description="Selecione uma condição de pagamento para o cadastro do cliente ou cadastre uma nova."
+      />
+      <PaymentTermCreationDialog
+        open={paymentTermDialogOpen}
+        onOpenChange={setPaymentTermDialogOpen}
+        onSuccess={
+          paymentTermToEdit
+            ? handlePaymentTermUpdated
+            : handlePaymentTermCreated
+        }
+        paymentTerm={paymentTermToEdit}
       />
     </div>
   );

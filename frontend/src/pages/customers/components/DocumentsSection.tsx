@@ -1,4 +1,4 @@
-import { CreditCard, Save, Loader2 } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import { 
   FormControl, 
   FormField, 
@@ -8,7 +8,6 @@ import {
 } from "../../../components/ui/form";
 import { Input } from "../../../components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { Button } from "../../../components/ui/button";
 
 interface DocumentsSectionProps {
   form: UseFormReturn<any>;
@@ -101,30 +100,11 @@ const DocumentsSection = ({
                     className="h-10 text-base"
                   />
                 </FormControl>
-                <FormMessage className="text-sm" />
-              </FormItem>
+                <FormMessage className="text-sm" />              </FormItem>
             )}
           />
         </div>
       )}
-        <div className="flex justify-end pt-4 mt-2 border-t">
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className="h-10 px-6 text-base"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Salvando...
-            </>
-          ) : (
-            <>
-              <Save className="mr-2 h-4 w-4" /> Salvar Cliente
-            </>
-          )}
-        </Button>
-      </div>
     </div>
   );
 };
