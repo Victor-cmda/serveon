@@ -11,6 +11,8 @@ import CityForm from './pages/cities/CityForm';
 import NotFound from './pages/notfound/NotFound';
 import CustomersList from './pages/customers/CustomersList';
 import CustomerForm from './pages/customers/CustomerForm';
+import SuppliersList from './pages/suppliers/SuppliersList';
+import SupplierForm from './pages/suppliers/SupplierForm';
 import PaymentMethodsList from './pages/payment-methods/PaymentMethodsList';
 import PaymentMethodForm from './pages/payment-methods/PaymentMethodForm';
 import PaymentTermsList from './pages/payment-terms/PaymentTermsList';
@@ -64,6 +66,19 @@ const router = createBrowserRouter([
       {
         path: 'payment-terms/edit/:id',
         element: <PaymentTermForm />,
+      },
+      // Fornecedores
+      {
+        path: 'suppliers',
+        element: <SuppliersList />,
+      },
+      {
+        path: 'suppliers/new',
+        element: <SupplierForm />,
+      },
+      {
+        path: 'suppliers/:id',
+        element: <SupplierForm />,
       },
       // Países
       {

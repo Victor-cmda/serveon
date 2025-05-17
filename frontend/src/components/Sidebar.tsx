@@ -11,6 +11,7 @@ import {
   Globe,
   Map,
   CreditCard,
+  Truck,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -22,7 +23,6 @@ interface MenuItem {
 
 const Sidebar = () => {
   const location = useLocation();
-
   const mainMenuItems: MenuItem[] = [
     {
       id: 'dashboard',
@@ -35,6 +35,12 @@ const Sidebar = () => {
       title: 'Clientes',
       icon: <Users className="h-5 w-5" />,
       path: '/customers',
+    },
+    {
+      id: 'suppliers',
+      title: 'Fornecedores',
+      icon: <Truck className="h-5 w-5" />,
+      path: '/suppliers',
     },
     {
       id: 'products',

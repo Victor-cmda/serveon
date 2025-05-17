@@ -24,6 +24,11 @@ import {
   CreatePaymentTermDto,
   UpdatePaymentTermDto,
 } from '../types/payment-term';
+import {
+  Supplier,
+  CreateSupplierDto,
+  UpdateSupplierDto,
+} from '../types/supplier';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -223,6 +228,50 @@ export const customerApi = {
 
   delete: async (id: string): Promise<void> => {
     const response = await fetch(`${API_URL}/customers/${id}`, {
+      method: 'DELETE',
+    });
+    return handleResponse(response);
+  },
+};
+
+export const supplierApi = {
+  getAll: async (): Promise<Supplier[]> => {
+    const response = await fetch(`${API_URL}/suppliers`);
+    return handleResponse(response);
+  },
+
+  getById: async (id: string): Promise<Supplier> => {
+    const response = await fetch(`${API_URL}/suppliers/${id}`);
+    return handleResponse(response);
+  },
+
+  create: async (supplier: CreateSupplierDto): Promise<Supplier> => {
+    const response = await fetch(`${API_URL}/suppliers`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(supplier),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (
+    id: string,
+    supplier: UpdateSupplierDto,
+  ): Promise<Supplier> => {
+    const response = await fetch(`${API_URL}/suppliers/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(supplier),
+    });
+    return handleResponse(response);
+  },
+
+  delete: async (id: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/suppliers/${id}`, {
       method: 'DELETE',
     });
     return handleResponse(response);
