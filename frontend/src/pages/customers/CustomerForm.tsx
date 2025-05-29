@@ -415,9 +415,7 @@ const CustomerForm = () => {
         telefone: formatters.clearFormat(data.telefone) || undefined,
         cidadeId: data.cidadeId,
         condicaoPagamentoId: data.condicaoPagamentoId || undefined,
-      };
-
-      if (id) {
+      };      if (id) {
         await customerApi.update(id, formattedData);
         toast.success('Cliente atualizado com sucesso!');
       } else {
@@ -447,7 +445,13 @@ const CustomerForm = () => {
         setSelectedStateId('');
       }
 
-      navigate('/customers');
+      // Check if we need to return to a parent form in a cascading scenario
+      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
+      if (returnUrl) {
+        navigate(returnUrl);
+      } else {
+        navigate('/customers');
+      }
     } catch (error: any) {
       console.error('Erro ao salvar cliente:', error);
       toast.error(error.message || 'Ocorreu um erro ao salvar o cliente');

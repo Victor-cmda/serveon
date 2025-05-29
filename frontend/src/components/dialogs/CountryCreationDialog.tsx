@@ -104,8 +104,7 @@ const CountryCreationDialog = ({
         // Criação de novo país
         savedCountry = await countryApi.create(formData);
         toast.success(`País ${data.nome} criado com sucesso!`);
-      }
-
+      }      // Return the saved country to the parent component and close dialog
       onSuccess(savedCountry);
       onOpenChange(false);
     } catch (error: any) {

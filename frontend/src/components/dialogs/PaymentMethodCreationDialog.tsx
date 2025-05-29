@@ -100,8 +100,7 @@ const PaymentMethodCreationDialog = ({
         // Criação de novo método de pagamento
         savedPaymentMethod = await paymentMethodApi.create(formData);
         toast.success(`Método de pagamento ${data.description} criado com sucesso!`);
-      }
-
+      }      // Return the saved payment method to the parent component and close dialog
       onSuccess(savedPaymentMethod);
       onOpenChange(false);
     } catch (error: any) {

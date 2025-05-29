@@ -131,13 +131,14 @@ const CityCreationDialog = ({
       if (city) {
         // Edição de cidade existente
         savedCity = await cityApi.update(city.id, formData);
-        toast.success(`Cidade ${data.nome} atualizada com sucesso!`);
-      } else {
+        toast.success(`Cidade ${data.nome} atualizada com sucesso!`);      } else {
         // Criação de nova cidade
         savedCity = await cityApi.create(formData);
         toast.success(`Cidade ${data.nome} criada com sucesso!`);
-      }
-
+      }      
+      // Return the saved city to the parent component and close dialog.
+      // This enables proper cascading form behavior where the created city 
+      // is passed back to the parent form without redirecting to a list view.
       onSuccess(savedCity);
       onOpenChange(false);
     } catch (error: any) {

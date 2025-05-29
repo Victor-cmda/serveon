@@ -198,9 +198,7 @@ const PaymentTermForm = () => {
         });
         setIsLoading(false);
         return;
-      }
-
-      if (id) {
+      }      if (id) {
         await paymentTermApi.update(id, paymentTermData);
         toast.success('Sucesso', {
           description: 'Condição de pagamento atualizada com sucesso!',
@@ -211,7 +209,14 @@ const PaymentTermForm = () => {
           description: 'Condição de pagamento criada com sucesso!',
         });
       }
-      navigate('/payment-terms');
+      
+      // Check if we need to return to a parent form in a cascading scenario
+      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
+      if (returnUrl) {
+        navigate(returnUrl);
+      } else {
+        navigate('/payment-terms');
+      }
     } catch (error: any) {
       console.error('Erro ao salvar condição de pagamento:', error);
       toast.error('Erro', {

@@ -9,7 +9,6 @@ import {
   supplierApi, 
   cityApi, 
   stateApi, 
-  countryApi, 
   paymentTermApi 
 } from '@/services/api';
 import { State, City } from '@/types/location';
@@ -208,57 +207,43 @@ export default function SupplierForm() {
     async function loadData() {
       try {
         setIsLoading(true);
-
+        // Carrega os estados
+        const statesData = await stateApi.getAll();
+        setStates(statesData);
         // Carrega as cidades
         const citiesData = await cityApi.getAll();
         setCities(citiesData);
-
         // Carrega as condições de pagamento
         const paymentTermsData = await paymentTermApi.getAll();
         setPaymentTerms(paymentTermsData);
-
         // Se estiver editando, carrega os dados do fornecedor
         if (id) {
           const supplier = await supplierApi.getById(id);
-          // Preenche o formulário com os dados do fornecedor
-          form.reset({
-            cnpjCpf: supplier.cnpjCpf,
-            tipo: supplier.tipo,
-            razaoSocial: supplier.razaoSocial,
-            nomeFantasia: supplier.nomeFantasia || '',
-            inscricaoEstadual: supplier.inscricaoEstadual || '',
-            inscricaoMunicipal: supplier.inscricaoMunicipal || '',
-            endereco: supplier.endereco || '',
-            numero: supplier.numero || '',
-            complemento: supplier.complemento || '',
-            bairro: supplier.bairro || '',
-            cidadeId: supplier.cidadeId || '',
-            cep: supplier.cep || '',
-            telefone: supplier.telefone || '',
-            email: supplier.email || '',
-            ativo: supplier.ativo,
-            website: supplier.website || '',
-            observacoes: supplier.observacoes || '',
-            responsavel: supplier.responsavel || '',
-            celularResponsavel: supplier.celularResponsavel || '',
-            condicaoPagamentoId: supplier.condicaoPagamentoId || '',
-          });
-
-          // Carrega a cidade selecionada se houver
-          if (supplier.cidadeId) {
-            const city = citiesData.find((c) => c.id === supplier.cidadeId);
-            if (city) {
-              setSelectedCity(city);
+          if (supplier) {
+            form.reset({
+              ...supplier,
+              tipo: supplier.tipo || 'J',
+              isEstrangeiro: supplier.isEstrangeiro || false,
+              cidadeId: supplier.cidadeId || '',
+              ativo: supplier.ativo !== undefined ? supplier.ativo : true,
+              condicaoPagamentoId: supplier.condicaoPagamentoId || '',
+            });
+            // Se tiver cidade, busca a cidade para exibir
+            if (supplier.cidadeId) {
+              const city = citiesData.find(c => c.id === supplier.cidadeId);
+              if (city) {
+                setSelectedCity(city);
+                if (city.estadoId) {
+                  setSelectedStateId(city.estadoId);
+                }
+              }
             }
-          }
-
-          // Carrega a condição de pagamento selecionada se houver
-          if (supplier.condicaoPagamentoId) {
-            const paymentTerm = paymentTermsData.find(
-              (pt) => pt.id === supplier.condicaoPagamentoId,
-            );
-            if (paymentTerm) {
-              setSelectedPaymentTerm(paymentTerm);
+            // Se tiver condição de pagamento, busca a condição para exibir
+            if (supplier.condicaoPagamentoId) {
+              const paymentTerm = paymentTermsData.find(pt => pt.id === supplier.condicaoPagamentoId);
+              if (paymentTerm) {
+                setSelectedPaymentTerm(paymentTerm);
+              }
             }
           }
         }
@@ -269,7 +254,6 @@ export default function SupplierForm() {
         setIsLoading(false);
       }
     }
-
     loadData();
   }, [id, form]);
 
@@ -284,9 +268,7 @@ export default function SupplierForm() {
         celularResponsavel: formatters.clearFormat(values.celularResponsavel),
         cep: formatters.clearFormat(values.cep),
         cidadeId: values.cidadeId ?? '',
-      };
-
-      if (isEditing) {
+      };      if (isEditing) {
         await supplierApi.update(id, formattedData);
         toast.success('Fornecedor atualizado com sucesso');
       } else {
@@ -294,7 +276,13 @@ export default function SupplierForm() {
         toast.success('Fornecedor criado com sucesso');
       }
 
-      navigate('/suppliers');
+      // Check if we need to return to a parent form in a cascading scenario
+      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
+      if (returnUrl) {
+        navigate(returnUrl);
+      } else {
+        navigate('/suppliers');
+      }
     } catch (error) {
       console.error('Erro ao salvar fornecedor:', error);
       toast.error('Erro ao salvar fornecedor');

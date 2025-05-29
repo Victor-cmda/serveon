@@ -89,9 +89,7 @@ const PaymentMethodForm = () => {
       
       if (values.type && values.type.trim() !== '') {
         paymentMethodData.type = values.type;
-      }
-
-      if (id) {
+      }      if (id) {
         await paymentMethodApi.update(id, paymentMethodData);
         toast.success('Sucesso', {
           description: 'Método de pagamento atualizado com sucesso!',
@@ -102,7 +100,14 @@ const PaymentMethodForm = () => {
           description: 'Método de pagamento criado com sucesso!',
         });
       }
-      navigate('/payment-methods');
+      
+      // Check if we need to return to a parent form in a cascading scenario
+      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
+      if (returnUrl) {
+        navigate(returnUrl);
+      } else {
+        navigate('/payment-methods');
+      }
     } catch (error: any) {
       console.error('Erro ao salvar método de pagamento:', error);
       toast.error('Erro', {

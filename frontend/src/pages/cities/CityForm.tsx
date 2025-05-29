@@ -128,13 +128,13 @@ const CityForm = () => {
         );
         toast.success('Cidade criada com sucesso!');
         createdOrUpdatedId = createdCity.id;
-      }
-
-      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
+      }      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
+        // Handle cascading form returns, pass the created/updated entity ID back to the parent form
         const returnWithParams = `${returnUrl}?createdEntity=city&createdId=${createdOrUpdatedId}`;
         navigate(returnWithParams);
       } else {
+        // Only navigate to list view if not part of a cascading form
         navigate('/cities');
       }
     } catch (error: any) {

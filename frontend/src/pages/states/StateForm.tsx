@@ -115,13 +115,13 @@ const StateForm = () => {
         const createdState = await stateApi.create(formattedData);
         toast.success('Estado criado com sucesso!');
         createdOrUpdatedId = createdState.id;
-      }
-
-      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
+      }      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
+        // Handle cascading form returns, pass the created/updated entity ID back to the parent form
         const returnWithParams = `${returnUrl}?createdEntity=state&createdId=${createdOrUpdatedId}`;
         navigate(returnWithParams);
       } else {
+        // Only navigate to list view if not part of a cascading form
         navigate('/states');
       }
     } catch (error: any) {

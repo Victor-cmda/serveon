@@ -181,13 +181,15 @@ const PaymentTermCreationDialog = ({
         );
         toast.success(
           `Condição de pagamento ${data.name} atualizada com sucesso!`,
-        );
-      } else {
+        );      } else {
         // Criação de nova condição de pagamento
         savedPaymentTerm = await paymentTermApi.create(formData);
         toast.success(`Condição de pagamento ${data.name} criada com sucesso!`);
       }
 
+      // Return the saved payment term to the parent component and close dialog.
+      // This enables proper cascading form behavior where the created payment term
+      // is passed back to the parent form without redirecting to a list view.
       onSuccess(savedPaymentTerm);
       onOpenChange(false);
     } catch (error: any) {

@@ -121,13 +121,14 @@ const StateCreationDialog = ({
       if (state) {
         // Edição de estado existente
         newState = await stateApi.update(state.id, createData);
-        toast.success(`Estado ${data.nome} atualizado com sucesso!`);
-      } else {
+        toast.success(`Estado ${data.nome} atualizado com sucesso!`);      } else {
         // Criação de novo estado
         newState = await stateApi.create(createData);
         toast.success(`Estado ${data.nome} criado com sucesso!`);
-      }
-
+      }      
+      // Return the new state to the parent component and close dialog.
+      // This enables proper cascading form behavior where the created state
+      // is passed back to the parent form without redirecting to a list view.
       onSuccess(newState);
       onOpenChange(false);
     } catch (error: any) {

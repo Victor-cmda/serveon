@@ -29,6 +29,7 @@ CREATE TABLE Estado (
     CONSTRAINT fk_estado_pais FOREIGN KEY (pais_id) REFERENCES Pais (id),
     CONSTRAINT uk_estado_uf_pais UNIQUE (uf, pais_id)
 );
+
 -- Tabela CIDADE
 CREATE TABLE Cidade (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -122,6 +123,34 @@ CREATE TABLE Cliente (
     telefone VARCHAR(20),
     email VARCHAR(100),
     is_destinatario BOOLEAN NOT NULL DEFAULT TRUE,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela FORNECEDOR
+CREATE TABLE Fornecedor (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    cnpj_cpf VARCHAR(20) NOT NULL UNIQUE,
+    tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J')),
+    is_estrangeiro BOOLEAN NOT NULL DEFAULT FALSE,
+    tipo_documento VARCHAR(50),
+    razao_social VARCHAR(100) NOT NULL,
+    nome_fantasia VARCHAR(60),
+    inscricao_estadual VARCHAR(50),
+    inscricao_municipal VARCHAR(20),
+    endereco VARCHAR(100),
+    numero VARCHAR(10),
+    complemento VARCHAR(60),
+    bairro VARCHAR(50),
+    cidade_id UUID REFERENCES Cidade(id),
+    cep VARCHAR(15),
+    telefone VARCHAR(20),
+    email VARCHAR(100),
+    website VARCHAR(100),
+    observacoes TEXT,
+    responsavel VARCHAR(100),
+    celular_responsavel VARCHAR(20),
+    condicao_pagamento_id UUID REFERENCES condicao_pagamento(id),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -325,6 +354,10 @@ CREATE INDEX idx_destinatario_cliente_id ON Destinatario(cliente_id);
 CREATE INDEX idx_cliente_destinatario_cliente_id ON Cliente_Destinatario(cliente_id);
 CREATE INDEX idx_cliente_destinatario_destinatario_id ON Cliente_Destinatario(destinatario_id);
 CREATE INDEX idx_cliente_cnpj_cpf ON Cliente(cnpj_cpf);
+CREATE INDEX idx_fornecedor_cnpj_cpf ON Fornecedor(cnpj_cpf);
+CREATE INDEX idx_fornecedor_razao_social ON Fornecedor(razao_social);
+CREATE INDEX idx_fornecedor_cidade_id ON Fornecedor(cidade_id);
+CREATE INDEX idx_fornecedor_condicao_pagamento_id ON Fornecedor(condicao_pagamento_id);
 CREATE INDEX idx_transportador_cidade_id ON Transportador(cidade_id);
 -- Índices para NFE
 CREATE INDEX idx_nfe_cnpj_emitente ON Nfe(cnpj_emitente);
@@ -369,6 +402,8 @@ CREATE TRIGGER update_emitente_timestamp BEFORE
 UPDATE ON Emitente FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_cliente_timestamp BEFORE
 UPDATE ON Cliente FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_fornecedor_timestamp BEFORE
+UPDATE ON Fornecedor FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_destinatario_timestamp BEFORE
 UPDATE ON Destinatario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_transportador_timestamp BEFORE
@@ -412,6 +447,7 @@ COMMENT ON TABLE dbo.condicao_pagamento IS 'Condições de pagamento para notas 
 COMMENT ON TABLE dbo.forma_pagamento IS 'Formas de pagamento das parcelas de notas fiscais';
 COMMENT ON TABLE dbo.Emitente IS 'Cadastro de empresas emitentes de notas fiscais';
 COMMENT ON TABLE dbo.Cliente IS 'Cadastro de clientes';
+COMMENT ON TABLE dbo.Fornecedor IS 'Cadastro de fornecedores';
 COMMENT ON TABLE dbo.Destinatario IS 'Cadastro de destinatários de notas fiscais';
 COMMENT ON TABLE dbo.Cliente_Destinatario IS 'Relacionamento entre clientes e destinatários';
 COMMENT ON TABLE dbo.Transportador IS 'Cadastro de transportadores de mercadorias';
