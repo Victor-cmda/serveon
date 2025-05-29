@@ -24,7 +24,7 @@ import {
   FormDescription,
 } from '@/components/ui/form';
 import { cityApi, stateApi } from '@/services/api';
-import { City, CreateCityDto, State } from '@/types/location';
+import { City, State } from '@/types/location';
 import StateCreationDialog from './StateCreationDialog';
 import { SearchDialog } from '@/components/SearchDialog';
 
@@ -33,19 +33,19 @@ const formSchema = z.object({
     .string()
     .min(2, 'Nome da cidade é obrigatório e deve ter pelo menos 2 caracteres'),
   codigoIbge: z
-    .string()
+  .string()
     .optional()
     .refine((val) => !val || /^[0-9]{7}$/.test(val), {
       message: 'O código IBGE deve ter exatamente 7 dígitos numéricos',
     }),
-  estadoId: z.string().uuid('Estado é obrigatório'),
+  estadoId: z.number().min(1, 'Estado é obrigatório'),
 });
 
 interface CityCreationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: (city: City) => void;
-  selectedStateId?: string;
+  selectedStateId?: number;
   city?: City | null; // Cidade para edição
 }
 
@@ -61,13 +61,12 @@ const CityCreationDialog = ({
   const [stateDialogOpen, setStateDialogOpen] = useState(false);
   const [stateSearchOpen, setStateSearchOpen] = useState(false);
   const [stateToEdit, setStateToEdit] = useState<State | null>(null);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       nome: city?.nome || '',
       codigoIbge: city?.codigoIbge || '',
-      estadoId: city?.estadoId || selectedStateId || '',
+      estadoId: city?.estadoId || selectedStateId || undefined,
     },
   });
 
@@ -78,20 +77,19 @@ const CityCreationDialog = ({
   }, [selectedStateId, form]);
 
   useEffect(() => {
-    if (open) {
-      if (city) {
+    if (open) {      if (city) {
         // Preenche o formulário com os dados da cidade para edição
         form.reset({
           nome: city.nome || '',
           codigoIbge: city.codigoIbge || '',
-          estadoId: city.estadoId || selectedStateId || '',
+          estadoId: city.estadoId || selectedStateId || undefined,
         });
       } else {
         // Reset para valores padrão quando estiver criando nova cidade
         form.reset({
           nome: '',
           codigoIbge: '',
-          estadoId: selectedStateId || '',
+          estadoId: selectedStateId || undefined,
         });
       }
     }
@@ -126,11 +124,9 @@ const CityCreationDialog = ({
         estadoId: data.estadoId,
       };
 
-      let savedCity;
-
-      if (city) {
+      let savedCity;      if (city) {
         // Edição de cidade existente
-        savedCity = await cityApi.update(city.id, formData);
+        savedCity = await cityApi.update(city.id.toString(), formData);
         toast.success(`Cidade ${data.nome} atualizada com sucesso!`);      } else {
         // Criação de nova cidade
         savedCity = await cityApi.create(formData);
@@ -300,13 +296,11 @@ const CityCreationDialog = ({
             </form>
           </Form>
         </DialogContent>
-      </Dialog>
-
-      <StateCreationDialog
+      </Dialog>      <StateCreationDialog
         open={stateDialogOpen}
         onOpenChange={setStateDialogOpen}
         onSuccess={stateToEdit ? handleStateUpdated : handleStateCreated}
-        selectedCountryId=""
+        selectedCountryId={undefined}
         state={stateToEdit}
       />
 

@@ -26,10 +26,9 @@ export class PaymentTermsController {
   async findAll() {
     return this.paymentTermsService.findAll();
   }
-
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return this.paymentTermsService.findOne(id);
+    return this.paymentTermsService.findOne(parseInt(id, 10));
   }
 
   @Patch(':id')
@@ -37,12 +36,12 @@ export class PaymentTermsController {
     @Param('id') id: string,
     @Body() updatePaymentTermDto: UpdatePaymentTermDto,
   ) {
-    return this.paymentTermsService.update(id, updatePaymentTermDto);
+    return this.paymentTermsService.update(parseInt(id, 10), updatePaymentTermDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    await this.paymentTermsService.remove(id);
+    await this.paymentTermsService.remove(parseInt(id, 10));
   }
 }

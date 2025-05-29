@@ -181,7 +181,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "ID do cliente (UUID)",
+            "description": "ID do cliente (número)",
             "schema": {
               "type": "string"
             }
@@ -214,7 +214,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "ID do cliente (UUID)",
+            "description": "ID do cliente (número)",
             "schema": {
               "type": "string"
             }
@@ -260,7 +260,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "ID do cliente (UUID)",
+            "description": "ID do cliente (número)",
             "schema": {
               "type": "string"
             }
@@ -1106,7 +1106,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Payment method ID (UUID)",
+            "description": "Payment method ID (número)",
             "schema": {
               "type": "string"
             }
@@ -1139,7 +1139,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Payment method ID (UUID)",
+            "description": "Payment method ID (número)",
             "schema": {
               "type": "string"
             }
@@ -1185,7 +1185,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Payment method ID (UUID)",
+            "description": "Payment method ID (número)",
             "schema": {
               "type": "string"
             }
@@ -1385,7 +1385,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "ID do fornecedor (UUID)",
+            "description": "ID do fornecedor",
             "schema": {
               "type": "string"
             }
@@ -1418,7 +1418,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "ID do fornecedor (UUID)",
+            "description": "ID do fornecedor",
             "schema": {
               "type": "string"
             }
@@ -1464,7 +1464,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "ID do fornecedor (UUID)",
+            "description": "ID do fornecedor",
             "schema": {
               "type": "string"
             }
@@ -1659,19 +1659,19 @@
             "example": "123456"
           },
           "paisId": {
-            "type": "string",
-            "description": "ID do país (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID do país",
+            "example": 1
           },
           "estadoId": {
-            "type": "string",
-            "description": "ID do estado/província (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID do estado/província",
+            "example": 1
           },
           "cidadeId": {
-            "type": "string",
-            "description": "ID da cidade no sistema (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID da cidade no sistema",
+            "example": 1
           },
           "endereco": {
             "type": "string",
@@ -1723,11 +1723,11 @@
           "destinatariosIds": {
             "description": "Lista de IDs de destinatários associados (quando o cliente não é o destinatário)",
             "example": [
-              "550e8400-e29b-41d4-a716-446655440000"
+              1
             ],
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "number"
             }
           }
         },
@@ -1744,9 +1744,9 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string",
-            "description": "ID único do cliente (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID único do cliente",
+            "example": 1
           },
           "cnpjCpf": {
             "type": "string",
@@ -1793,9 +1793,9 @@
             "example": "123456"
           },
           "paisId": {
-            "type": "string",
-            "description": "ID do país (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID do país",
+            "example": 1
           },
           "paisNome": {
             "type": "string",
@@ -1803,9 +1803,9 @@
             "example": "Brasil"
           },
           "estadoId": {
-            "type": "string",
-            "description": "ID do estado/província (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID do estado/província",
+            "example": 1
           },
           "endereco": {
             "type": "string",
@@ -1828,9 +1828,9 @@
             "example": "Centro"
           },
           "cidadeId": {
-            "type": "string",
-            "description": "ID da cidade (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID da cidade",
+            "example": 1
           },
           "cep": {
             "type": "string",
@@ -1882,11 +1882,13 @@
           "destinatariosIds": {
             "description": "Lista de IDs de destinatários associados ao cliente",
             "example": [
-              "550e8400-e29b-41d4-a716-446655440000"
+              1,
+              2,
+              3
             ],
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "number"
             }
           },
           "isDestinatario": {
@@ -1940,11 +1942,13 @@
           "destinatariosIds": {
             "description": "Lista de IDs de destinatários associados (quando o cliente não é o destinatário)",
             "example": [
-              "550e8400-e29b-41d4-a716-446655440000"
+              1,
+              2,
+              3
             ],
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "number"
             }
           }
         }
@@ -1978,9 +1982,9 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string",
-            "description": "ID único do país (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID único do país",
+            "example": 1
           },
           "nome": {
             "type": "string",
@@ -2037,9 +2041,9 @@
             "example": "SP"
           },
           "paisId": {
-            "type": "string",
-            "description": "ID do país ao qual o estado pertence (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID do país ao qual o estado pertence",
+            "example": 1
           }
         },
         "required": [
@@ -2052,9 +2056,9 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string",
-            "description": "ID único do estado (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID único do estado",
+            "example": 1
           },
           "nome": {
             "type": "string",
@@ -2067,9 +2071,9 @@
             "example": "SP"
           },
           "paisId": {
-            "type": "string",
-            "description": "ID do país ao qual o estado pertence (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID do país ao qual o estado pertence",
+            "example": 1
           },
           "paisNome": {
             "type": "string",
@@ -2117,9 +2121,9 @@
             "example": "3550308"
           },
           "estadoId": {
-            "type": "string",
-            "description": "ID do estado ao qual a cidade pertence (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID do estado ao qual a cidade pertence",
+            "example": 1
           }
         },
         "required": [
@@ -2131,9 +2135,9 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string",
-            "description": "ID único da cidade (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID único da cidade",
+            "example": 1
           },
           "nome": {
             "type": "string",
@@ -2146,9 +2150,9 @@
             "example": "3550308"
           },
           "estadoId": {
-            "type": "string",
-            "description": "ID do estado ao qual a cidade pertence (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID do estado ao qual a cidade pertence",
+            "example": 1
           },
           "createdAt": {
             "format": "date-time",
@@ -2226,9 +2230,9 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string",
-            "description": "Unique ID of the payment method (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "Unique ID of the payment method",
+            "example": 1
           },
           "description": {
             "type": "string",
@@ -2360,14 +2364,14 @@
             "example": "123456"
           },
           "paisId": {
-            "type": "string",
-            "description": "ID do país (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID do país",
+            "example": 1
           },
           "estadoId": {
-            "type": "string",
-            "description": "ID do estado/província (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID do estado/província",
+            "example": 1
           },
           "endereco": {
             "type": "string",
@@ -2390,9 +2394,9 @@
             "example": "Centro"
           },
           "cidadeId": {
-            "type": "string",
-            "description": "ID da cidade (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID da cidade",
+            "example": 1
           },
           "cep": {
             "type": "string",
@@ -2410,9 +2414,9 @@
             "example": "contato@empresa.com"
           },
           "condicaoPagamentoId": {
-            "type": "string",
-            "description": "ID da condição de pagamento (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID da condição de pagamento",
+            "example": 1
           },
           "website": {
             "type": "string",
@@ -2446,9 +2450,9 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string",
-            "description": "ID único do fornecedor (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID único do fornecedor",
+            "example": 1
           },
           "cnpjCpf": {
             "type": "string",
@@ -2495,9 +2499,9 @@
             "example": "123456"
           },
           "paisId": {
-            "type": "string",
-            "description": "ID do país (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID do país",
+            "example": 1
           },
           "paisNome": {
             "type": "string",
@@ -2505,9 +2509,9 @@
             "example": "Brasil"
           },
           "estadoId": {
-            "type": "string",
-            "description": "ID do estado/província (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID do estado/província",
+            "example": 1
           },
           "endereco": {
             "type": "string",
@@ -2530,9 +2534,9 @@
             "example": "Centro"
           },
           "cidadeId": {
-            "type": "string",
-            "description": "ID da cidade (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID da cidade",
+            "example": 1
           },
           "cidadeNome": {
             "type": "string",
@@ -2575,9 +2579,9 @@
             "example": "2023-01-01T00:00:00Z"
           },
           "condicaoPagamentoId": {
-            "type": "string",
-            "description": "ID da condição de pagamento (UUID)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "type": "number",
+            "description": "ID da condição de pagamento",
+            "example": 1
           },
           "condicaoPagamentoNome": {
             "type": "string",

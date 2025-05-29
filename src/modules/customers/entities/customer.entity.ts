@@ -2,10 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class Customer {
   @ApiProperty({
-    description: 'ID único do cliente (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000'
+    description: 'ID único do cliente',
+    example: 1
   })
-  id: string;
+  id: number;
 
   @ApiProperty({
     description: 'CNPJ, CPF ou documento internacional do cliente',
@@ -56,12 +56,11 @@ export class Customer {
     example: '123456'
   })
   inscricaoMunicipal?: string;
-
   @ApiProperty({
-    description: 'ID do país (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000'
+    description: 'ID do país',
+    example: 1
   })
-  paisId?: string;
+  paisId?: number;
   
   @ApiProperty({
     description: 'Nome do país',
@@ -70,10 +69,10 @@ export class Customer {
   paisNome?: string;
   
   @ApiProperty({
-    description: 'ID do estado/província (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000'
+    description: 'ID do estado/província',
+    example: 1
   })
-  estadoId?: string;
+  estadoId?: number;
 
   @ApiProperty({
     description: 'Endereço',
@@ -98,12 +97,11 @@ export class Customer {
     example: 'Centro'
   })
   bairro?: string;
-
   @ApiProperty({
-    description: 'ID da cidade (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000'
+    description: 'ID da cidade',
+    example: 1
   })
-  cidadeId?: string;
+  cidadeId?: number;
 
   @ApiProperty({
     description: 'CEP ou código postal',
@@ -158,14 +156,13 @@ export class Customer {
     example: 'SP'
   })
   uf?: string;
-  
-  @ApiProperty({
+    @ApiProperty({
     description: 'Lista de IDs de destinatários associados ao cliente',
-    example: ['550e8400-e29b-41d4-a716-446655440000'],
-    type: [String],
+    example: [1, 2, 3],
+    type: [Number],
     required: false
   })
-  destinatariosIds?: string[];
+  destinatariosIds?: number[];
   
   @ApiProperty({
     description: 'Se o cliente é também um destinatário',

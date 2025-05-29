@@ -3,9 +3,9 @@ import { ApiProperty } from '@nestjs/swagger';
 export class Employee {
   @ApiProperty({
     description: 'ID único do funcionário',
-    example: '550e8400-e29b-41d4-a716-446655440000'
+    example: 1
   })
-  id: string;
+  id: number;
 
   @ApiProperty({
     description: 'Nome completo do funcionário',

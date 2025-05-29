@@ -8,10 +8,9 @@ import { Button } from '@/components/ui/button';
 import { 
   supplierApi, 
   cityApi, 
-  stateApi, 
   paymentTermApi 
 } from '@/services/api';
-import { State, City } from '@/types/location';
+import { City } from '@/types/location';
 import { PaymentTerm } from '@/types/payment-term';
 import { toast } from 'sonner';
 import { SearchDialog } from '@/components/SearchDialog';
@@ -110,7 +109,7 @@ const formSchema = z.object({
   numero: z.string().optional(),
   complemento: z.string().optional(),
   bairro: z.string().optional(),
-  cidadeId: z.string().uuid('Cidade é obrigatória'),
+  cidadeId: z.number().optional(),
   cep: z.string().optional(),
   telefone: z.string().optional(),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
@@ -119,7 +118,7 @@ const formSchema = z.object({
   observacoes: z.string().optional(),
   responsavel: z.string().optional(),
   celularResponsavel: z.string().optional(),
-  condicaoPagamentoId: z.string().optional(),
+  condicaoPagamentoId: z.number().optional(),
 });
 
 export default function SupplierForm() {
@@ -127,30 +126,19 @@ export default function SupplierForm() {
   const { id } = useParams();
   const isEditing = !!id;
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [states, setStates] = useState<State[]>([]);
-  const [cities, setCities] = useState<City[]>([]);
+  const [isLoading, setIsLoading] = useState(false);  const [cities, setCities] = useState<City[]>([]);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
   const [paymentTerms, setPaymentTerms] = useState<PaymentTerm[]>([]);
   const [selectedPaymentTerm, setSelectedPaymentTerm] =
     useState<PaymentTerm | null>(null);
 
-  const [stateSearchOpen, setStateSearchOpen] = useState(false);
   const [citySearchOpen, setCitySearchOpen] = useState(false);
   const [paymentTermSearchOpen, setPaymentTermSearchOpen] = useState(false);
   const [cityCreationOpen, setCityCreationOpen] = useState(false);
-  const [stateCreationOpen, setStateCreationOpen] = useState(false);
-  const [paymentTermCreationOpen, setPaymentTermCreationOpen] = useState(false);
+  const [stateCreationOpen, setStateCreationOpen] = useState(false);  const [paymentTermCreationOpen, setPaymentTermCreationOpen] = useState(false);
 
-  const [selectedStateId, setSelectedStateId] = useState<string>('');
-
-  const [stateToEdit, setStateToEdit] = useState<State | null>(null);
-  const [cityToEdit, setCityToEdit] = useState<City | null>(null);
-  const [paymentTermToEdit, setPaymentTermToEdit] =
-    useState<PaymentTerm | null>(null);
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
+    resolver: zodResolver(formSchema),    defaultValues: {
       cnpjCpf: '',
       tipo: 'J' as const,
       isEstrangeiro: false,
@@ -162,7 +150,7 @@ export default function SupplierForm() {
       numero: '',
       complemento: '',
       bairro: '',
-      cidadeId: '',
+      cidadeId: undefined,
       cep: '',
       telefone: '',
       email: '',
@@ -171,45 +159,15 @@ export default function SupplierForm() {
       observacoes: '',
       responsavel: '',
       celularResponsavel: '',
-      condicaoPagamentoId: '',
-    },
-  });
+      condicaoPagamentoId: undefined,
+    },  });
   const watchTipo = form.watch('tipo');
   const watchIsEstrangeiro = form.watch('isEstrangeiro');
-
-  const fetchCities = async () => {
-    try {
-      setIsLoading(true);
-      const citiesData = await cityApi.getAll();
-      setCities(citiesData);
-    } catch (error) {
-      console.error('Erro ao carregar cidades:', error);
-      toast.error('Erro ao carregar cidades');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadCitiesForState = async (stateId: string) => {
-    try {
-      setIsLoading(true);
-      const citiesData = await cityApi.getByState(stateId);
-      setCities(citiesData);
-    } catch (error) {
-      console.error('Erro ao carregar cidades do estado:', error);
-      toast.error('Erro ao carregar cidades do estado');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   useEffect(() => {
     async function loadData() {
       try {
         setIsLoading(true);
-        // Carrega os estados
-        const statesData = await stateApi.getAll();
-        setStates(statesData);
         // Carrega as cidades
         const citiesData = await cityApi.getAll();
         setCities(citiesData);
@@ -219,23 +177,18 @@ export default function SupplierForm() {
         // Se estiver editando, carrega os dados do fornecedor
         if (id) {
           const supplier = await supplierApi.getById(id);
-          if (supplier) {
-            form.reset({
+          if (supplier) {            form.reset({
               ...supplier,
               tipo: supplier.tipo || 'J',
               isEstrangeiro: supplier.isEstrangeiro || false,
-              cidadeId: supplier.cidadeId || '',
+              cidadeId: supplier.cidadeId,
               ativo: supplier.ativo !== undefined ? supplier.ativo : true,
-              condicaoPagamentoId: supplier.condicaoPagamentoId || '',
+              condicaoPagamentoId: supplier.condicaoPagamentoId,
             });
             // Se tiver cidade, busca a cidade para exibir
-            if (supplier.cidadeId) {
-              const city = citiesData.find(c => c.id === supplier.cidadeId);
+            if (supplier.cidadeId) {              const city = citiesData.find(c => c.id === supplier.cidadeId);
               if (city) {
                 setSelectedCity(city);
-                if (city.estadoId) {
-                  setSelectedStateId(city.estadoId);
-                }
               }
             }
             // Se tiver condição de pagamento, busca a condição para exibir
@@ -259,16 +212,20 @@ export default function SupplierForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      setIsLoading(true);
-
-      const formattedData = {
+      setIsLoading(true);      const formattedData = {
         ...values,
         cnpjCpf: formatters.clearFormat(values.cnpjCpf),
         telefone: formatters.clearFormat(values.telefone),
         celularResponsavel: formatters.clearFormat(values.celularResponsavel),
         cep: formatters.clearFormat(values.cep),
-        cidadeId: values.cidadeId ?? '',
-      };      if (isEditing) {
+        cidadeId: values.cidadeId || undefined,
+        condicaoPagamentoId: values.condicaoPagamentoId || undefined,
+      };      // Remove undefined values to avoid sending them to the API
+      Object.keys(formattedData).forEach(key => {
+        if ((formattedData as any)[key] === undefined) {
+          delete (formattedData as any)[key];
+        }
+      });if (isEditing) {
         await supplierApi.update(id, formattedData);
         toast.success('Fornecedor atualizado com sucesso');
       } else {
@@ -478,18 +435,17 @@ export default function SupplierForm() {
           setPaymentTermCreationOpen(true);
         }}
       />
-      {/* Diálogos de criação */}{' '}
-      <StateCreationDialog
+      {/* Diálogos de criação */}{' '}      <StateCreationDialog
         open={stateCreationOpen}
         onOpenChange={setStateCreationOpen}
-        onSuccess={(state) => {
+        onSuccess={() => {
           onStateCreated();
         }}
       />
       <CityCreationDialog
         open={cityCreationOpen}
         onOpenChange={setCityCreationOpen}
-        onSuccess={(city) => {
+        onSuccess={() => {
           onCityCreated();
         }}
         selectedStateId={undefined}
@@ -497,7 +453,7 @@ export default function SupplierForm() {
       <PaymentTermCreationDialog
         open={paymentTermCreationOpen}
         onOpenChange={setPaymentTermCreationOpen}
-        onSuccess={(paymentTerm) => {
+        onSuccess={() => {
           onPaymentTermCreated();
         }}
       />

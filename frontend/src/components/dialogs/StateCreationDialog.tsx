@@ -32,14 +32,14 @@ const formSchema = z.object({
     .string()
     .min(2, 'Nome do estado é obrigatório e deve ter pelo menos 2 caracteres'),
   uf: z.string().length(2, 'UF deve ter exatamente 2 caracteres').toUpperCase(),
-  paisId: z.string().uuid('Selecione um país válido'),
+  paisId: z.number().min(1, 'Selecione um país válido'),
 });
 
 interface StateCreationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: (state: State) => void;
-  selectedCountryId?: string;
+  selectedCountryId?: number;
   state?: State | null; // Estado para edição
 }
 
@@ -55,16 +55,14 @@ const StateCreationDialog = ({
   const [countryDialogOpen, setCountryDialogOpen] = useState(false);
   const [countrySearchOpen, setCountrySearchOpen] = useState(false);
   const [countryToEdit, setCountryToEdit] = useState<Country | null>(null);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       nome: state?.nome || '',
       uf: state?.uf || '',
-      paisId: state?.paisId || selectedCountryId || '',
+      paisId: state?.paisId || selectedCountryId || undefined,
     },
   });
-
   useEffect(() => {
     if (selectedCountryId) {
       form.setValue('paisId', selectedCountryId);
@@ -72,20 +70,19 @@ const StateCreationDialog = ({
   }, [selectedCountryId, form]);
 
   useEffect(() => {
-    if (open) {
-      if (state) {
+    if (open) {      if (state) {
         // Preenche o formulário com os dados do estado para edição
         form.reset({
           nome: state.nome || '',
           uf: state.uf || '',
-          paisId: state.paisId || selectedCountryId || '',
+          paisId: state.paisId || selectedCountryId || undefined,
         });
       } else {
         // Reset para valores padrão quando estiver criando novo estado
         form.reset({
           nome: '',
           uf: '',
-          paisId: selectedCountryId || '',
+          paisId: selectedCountryId || undefined,
         });
       }
     }
@@ -115,12 +112,10 @@ const StateCreationDialog = ({
         nome: data.nome,
         uf: data.uf,
         paisId: data.paisId,
-      };
-
-      let newState;
+      };      let newState;
       if (state) {
         // Edição de estado existente
-        newState = await stateApi.update(state.id, createData);
+        newState = await stateApi.update(state.id.toString(), createData);
         toast.success(`Estado ${data.nome} atualizado com sucesso!`);      } else {
         // Criação de novo estado
         newState = await stateApi.create(createData);
@@ -190,8 +185,7 @@ const StateCreationDialog = ({
                       País
                     </FormLabel>
                     <div className="flex gap-2">
-                      <div className="w-full flex-1">
-                        <Input
+                      <div className="w-full flex-1">                        <Input
                           value={
                             countries.find((c) => c.id === field.value)?.nome ||
                             ''

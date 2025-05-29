@@ -81,9 +81,7 @@ export class CitiesService {
             console.error('Erro ao buscar cidades:', error);
             throw new InternalServerErrorException('Erro ao buscar cidades');
         }
-    }
-
-    async findByEstado(estadoId: string): Promise<City[]> {
+    }    async findByEstado(estadoId: number): Promise<City[]> {
         try {
             // Verificar se o estado existe
             const estadoExiste = await this.databaseService.query(
@@ -112,9 +110,7 @@ export class CitiesService {
             console.error(`Erro ao buscar cidades do estado ${estadoId}:`, error);
             throw new InternalServerErrorException(`Erro ao buscar cidades do estado ${estadoId}`);
         }
-    }
-
-    async findOne(id: string): Promise<City> {
+    }    async findOne(id: number): Promise<City> {
         try {
             const resultado = await this.databaseService.query(`
         SELECT c.*, e.nome as estado_nome, e.uf, p.nome as pais_nome
@@ -162,7 +158,7 @@ export class CitiesService {
         }
     }
 
-    async update(id: string, updateCityDto: UpdateCityDto): Promise<City> {
+    async update(id: number, updateCityDto: UpdateCityDto): Promise<City> {
         try {
             // Verificar se a cidade existe
             const cidadeExiste = await this.databaseService.query(
@@ -277,7 +273,7 @@ export class CitiesService {
         }
     }
 
-    async remove(id: string): Promise<void> {
+    async remove(id: number): Promise<void> {
         try {
             // Verificar se a cidade existe
             const cidadeExiste = await this.databaseService.query(

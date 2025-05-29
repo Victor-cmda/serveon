@@ -1,4 +1,4 @@
-import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MaxLength, ValidateIf, IsArray } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsNumber, Matches, MaxLength, ValidateIf, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -77,33 +77,32 @@ export class CreateCustomerDto {
   @IsString({ message: 'Inscrição Municipal deve ser uma string' })
   @MaxLength(20, { message: 'Inscrição Municipal deve ter no máximo 20 caracteres' })
   inscricaoMunicipal?: string;
-
   @ApiProperty({
-    description: 'ID do país (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID do país',
+    example: 1,
     required: false
   })
   @IsOptional()
-  @IsUUID(4, { message: 'ID do país deve ser um UUID válido' })
-  paisId?: string;
+  @IsNumber({}, { message: 'ID do país deve ser um número válido' })
+  paisId?: number;
   
   @ApiProperty({
-    description: 'ID do estado/província (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID do estado/província',
+    example: 1,
     required: false
   })
   @IsOptional()
-  @IsUUID(4, { message: 'ID do estado deve ser um UUID válido' })
-  estadoId?: string;
+  @IsNumber({}, { message: 'ID do estado deve ser um número válido' })
+  estadoId?: number;
 
   @ApiProperty({
-    description: 'ID da cidade no sistema (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID da cidade no sistema',
+    example: 1,
     required: false
   })
   @IsOptional()
-  @IsUUID(4, { message: 'ID da cidade deve ser um UUID válido' })
-  cidadeId?: string;
+  @IsNumber({}, { message: 'ID da cidade deve ser um número válido' })
+  cidadeId?: number;
 
   @ApiProperty({
     description: 'Endereço',
@@ -192,15 +191,13 @@ export class CreateCustomerDto {
   @IsOptional()
   @IsBoolean({ message: 'isDestinatario deve ser um valor booleano' })
   isDestinatario?: boolean = true;
-  
-  @ApiProperty({
+    @ApiProperty({
     description: 'Lista de IDs de destinatários associados (quando o cliente não é o destinatário)',
-    example: ['550e8400-e29b-41d4-a716-446655440000'],
-    type: [String],
+    example: [1],
+    type: [Number],
     required: false
-  })
-  @IsOptional()
+  })  @IsOptional()
   @IsArray({ message: 'destinatariosIds deve ser um array' })
-  @IsUUID(4, { each: true, message: 'Cada ID de destinatário deve ser um UUID válido' })
-  destinatariosIds?: string[];
+  @IsNumber({}, { each: true, message: 'Cada ID de destinatário deve ser um número válido' })
+  destinatariosIds?: number[];
 }

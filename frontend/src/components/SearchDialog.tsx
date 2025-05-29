@@ -44,7 +44,7 @@ import {
 import { debounce } from 'lodash';
 
 export interface Entity {
-  id: string;
+  id: number;
   [key: string]: any;
 }
 
@@ -99,8 +99,7 @@ export function SearchDialog<T extends Entity = Entity>({
   const [filterValue, setFilterValue] = useState('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
-  const [favorites, setFavorites] = useState<string[]>(() => {
+  const [viewMode, setViewMode] = useState<'table' | 'card'>('table');  const [favorites, setFavorites] = useState<number[]>(() => {
     const saved = localStorage.getItem(`favorites-${entityType}`);
     return saved ? JSON.parse(saved) : [];
   });
@@ -129,8 +128,7 @@ export function SearchDialog<T extends Entity = Entity>({
       }, 100);
     }
   }, [open]);
-
-  const toggleFavorite = (id: string) => {
+  const toggleFavorite = (id: number) => {
     setFavorites((prev) => {
       if (prev.includes(id)) {
         return prev.filter((favId) => favId !== id);
@@ -140,7 +138,7 @@ export function SearchDialog<T extends Entity = Entity>({
     });
   };
 
-  const isFavorite = (id: string) => favorites.includes(id);
+  const isFavorite = (id: number) => favorites.includes(id);
 
   const addFilter = (e?: React.MouseEvent) => {
     if (e) {

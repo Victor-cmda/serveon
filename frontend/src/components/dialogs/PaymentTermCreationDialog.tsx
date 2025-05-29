@@ -39,14 +39,12 @@ const formSchema = z.object({
     .string()
     .min(2, 'Nome é obrigatório e deve ter pelo menos 2 caracteres'),
   description: z.string().optional(),
-  isActive: z.boolean().default(true),
-  installments: z
+  isActive: z.boolean().default(true),  installments: z
     .array(
-      z.object({
-        installmentNumber: z
+      z.object({        installmentNumber: z
           .number()
           .min(1, 'Número da parcela deve ser maior que 0'),
-        paymentMethodId: z.string().uuid('Método de pagamento é obrigatório'),
+        paymentMethodId: z.number().min(1, 'Método de pagamento é obrigatório'),
         daysToPayment: z
           .number()
           .min(0, 'Dias para pagamento deve ser maior ou igual a 0'),
@@ -85,7 +83,6 @@ const PaymentTermCreationDialog = ({
     useState<PaymentMethod | null>(null);
   const [currentInstallmentIndex, setCurrentInstallmentIndex] =
     useState<number>(-1);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -95,7 +92,7 @@ const PaymentTermCreationDialog = ({
       installments: [
         {
           installmentNumber: 1,
-          paymentMethodId: '',
+          paymentMethodId: undefined,
           daysToPayment: 0,
           percentageValue: 100,
           interestRate: 0,
@@ -133,15 +130,14 @@ const PaymentTermCreationDialog = ({
             isActive: inst.isActive,
           })),
         });
-      } else {
-        form.reset({
+      } else {        form.reset({
           name: '',
           description: '',
           isActive: true,
           installments: [
             {
               installmentNumber: 1,
-              paymentMethodId: '',
+              paymentMethodId: undefined,
               daysToPayment: 0,
               percentageValue: 100,
               interestRate: 0,
@@ -173,10 +169,9 @@ const PaymentTermCreationDialog = ({
 
       let savedPaymentTerm;
 
-      if (paymentTerm) {
-        // Edição de condição de pagamento existente
+      if (paymentTerm) {        // Edição de condição de pagamento existente
         savedPaymentTerm = await paymentTermApi.update(
-          paymentTerm.id,
+          paymentTerm.id.toString(),
           formData,
         );
         toast.success(
@@ -293,8 +288,7 @@ const PaymentTermCreationDialog = ({
     setPaymentMethodToEdit(null);
     setPaymentMethodDialogOpen(true);
   };
-
-  const getPaymentMethodName = (methodId: string) => {
+  const getPaymentMethodName = (methodId: number) => {
     const method = paymentMethods.find((m) => m.id === methodId);
     return method ? method.description : '';
   };

@@ -3,13 +3,10 @@ BEGIN;
 -- Criar schema
 CREATE SCHEMA IF NOT EXISTS dbo;
 SET search_path TO dbo;
--- Habilitar extensões úteis
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- Tabelas de Localização
 -- Tabela PAÍS
 CREATE TABLE Pais (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     nome VARCHAR(60) NOT NULL,
     codigo VARCHAR(3) NOT NULL,
     sigla VARCHAR(2) NOT NULL,
@@ -20,10 +17,10 @@ CREATE TABLE Pais (
 );
 -- Tabela ESTADO
 CREATE TABLE Estado (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     nome VARCHAR(60) NOT NULL,
     uf CHAR(2) NOT NULL,
-    pais_id UUID NOT NULL,
+    pais_id INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_estado_pais FOREIGN KEY (pais_id) REFERENCES Pais (id),
@@ -31,10 +28,10 @@ CREATE TABLE Estado (
 );
 -- Tabela CIDADE
 CREATE TABLE Cidade (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     codigo_ibge VARCHAR(7),
-    estado_id UUID NOT NULL,
+    estado_id INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_cidade_estado FOREIGN KEY (estado_id) REFERENCES Estado (id),
@@ -44,7 +41,7 @@ CREATE TABLE Cidade (
 -- Tabelas de Pagamento
 -- Tabela FORMA DE PAGAMENTO (movida para antes da condição de pagamento)
 CREATE TABLE forma_pagamento (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     descricao VARCHAR(100) NOT NULL,
     codigo VARCHAR(20),
     tipo VARCHAR(30),
@@ -68,7 +65,7 @@ CREATE TABLE parcela_condicao_pagamento (
     id SERIAL PRIMARY KEY,
     condicao_pagamento_id INTEGER NOT NULL REFERENCES condicao_pagamento(id),
     numero_parcela INTEGER NOT NULL,
-    forma_pagamento_id UUID NOT NULL REFERENCES forma_pagamento(id),
+    forma_pagamento_id INTEGER NOT NULL REFERENCES forma_pagamento(id),
     dias_para_pagamento INTEGER NOT NULL,
     percentual_valor DECIMAL(5,2) NOT NULL,
     taxa_juros DECIMAL(5,2) NOT NULL DEFAULT 0,
@@ -91,7 +88,7 @@ CREATE TABLE Emitente (
     numero VARCHAR(10),
     complemento VARCHAR(60),
     bairro VARCHAR(50),
-    cidade_id UUID NOT NULL,
+    cidade_id INTEGER NOT NULL,
     cep VARCHAR(10),
     telefone VARCHAR(20),
     email VARCHAR(100),
@@ -104,7 +101,7 @@ CREATE TABLE Emitente (
 
 -- Tabela CLIENTE
 CREATE TABLE Cliente (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     cnpj_cpf VARCHAR(20) NOT NULL UNIQUE,
     tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J')),
     is_estrangeiro BOOLEAN NOT NULL DEFAULT FALSE,
@@ -117,7 +114,7 @@ CREATE TABLE Cliente (
     numero VARCHAR(10),
     complemento VARCHAR(60),
     bairro VARCHAR(50),
-    cidade_id UUID REFERENCES Cidade(id),
+    cidade_id INTEGER REFERENCES Cidade(id),
     cep VARCHAR(15),
     telefone VARCHAR(20),
     email VARCHAR(100),
@@ -129,8 +126,8 @@ CREATE TABLE Cliente (
 
 -- Tabela DESTINATÁRIO
 CREATE TABLE Destinatario (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    cliente_id UUID REFERENCES Cliente(id),
+    id SERIAL PRIMARY KEY,
+    cliente_id INTEGER REFERENCES Cliente(id),
     cnpj_cpf VARCHAR(20) NOT NULL UNIQUE,
     tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J')),
     is_estrangeiro BOOLEAN NOT NULL DEFAULT FALSE,
@@ -143,7 +140,7 @@ CREATE TABLE Destinatario (
     numero VARCHAR(10),
     complemento VARCHAR(60),
     bairro VARCHAR(50),
-    cidade_id UUID REFERENCES Cidade(id),
+    cidade_id INTEGER REFERENCES Cidade(id),
     cep VARCHAR(15),
     telefone VARCHAR(20),
     email VARCHAR(100),
@@ -154,8 +151,8 @@ CREATE TABLE Destinatario (
 
 -- Tabela de relacionamento entre Cliente e Destinatário
 CREATE TABLE Cliente_Destinatario (
-    cliente_id UUID NOT NULL REFERENCES Cliente(id),
-    destinatario_id UUID NOT NULL REFERENCES Destinatario(id),
+    cliente_id INTEGER NOT NULL REFERENCES Cliente(id),
+    destinatario_id INTEGER NOT NULL REFERENCES Destinatario(id),
     PRIMARY KEY (cliente_id, destinatario_id)
 );
 
@@ -171,7 +168,7 @@ CREATE TABLE Transportador (
     numero VARCHAR(10),
     complemento VARCHAR(60),
     bairro VARCHAR(50),
-    cidade_id UUID,
+    cidade_id INTEGER,
     cep VARCHAR(10),
     codigo_antt VARCHAR(20),
     placa_veiculo VARCHAR(10),
@@ -236,7 +233,7 @@ CREATE TABLE Nfe (
     cnpj_destinatario VARCHAR(18) NOT NULL,
     cnpj_transportador VARCHAR(18),
     condicao_pagamento_id INTEGER NOT NULL,
-    cliente_id UUID REFERENCES Cliente(id),
+    cliente_id INTEGER REFERENCES Cliente(id),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_nfe_emitente FOREIGN KEY (cnpj_emitente) REFERENCES Emitente (cnpj),
@@ -247,7 +244,7 @@ CREATE TABLE Nfe (
 );
 -- Tabela ITEM_NFE
 CREATE TABLE ItemNfe (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     chave_acesso_nfe VARCHAR(44) NOT NULL,
     codigo_produto VARCHAR(30) NOT NULL,
     cfop VARCHAR(5),
@@ -277,7 +274,7 @@ CREATE TABLE ItemNfe (
 );
 -- Tabela FATURA
 CREATE TABLE Fatura (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     chave_acesso_nfe VARCHAR(44) NOT NULL,
     numero VARCHAR(20),
     valor_total DECIMAL(15, 2) NOT NULL,
@@ -287,9 +284,9 @@ CREATE TABLE Fatura (
 );
 -- Tabela PARCELA
 CREATE TABLE Parcela (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    fatura_id UUID NOT NULL,
-    forma_pagamento_id UUID NOT NULL,
+    id SERIAL PRIMARY KEY,
+    fatura_id INTEGER NOT NULL,
+    forma_pagamento_id INTEGER NOT NULL,
     numero INTEGER NOT NULL,
     data_vencimento DATE NOT NULL,
     valor DECIMAL(15, 2) NOT NULL,
@@ -303,7 +300,7 @@ CREATE TABLE Parcela (
 );
 -- Tabela VOLUME
 CREATE TABLE Volume (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     chave_acesso_nfe VARCHAR(44) NOT NULL,
     quantidade DECIMAL(15, 3),
     especie VARCHAR(30),

@@ -31,7 +31,7 @@ const formSchema = z.object({
     .refine((val) => !val || /^[0-9]{7}$/.test(val), {
       message: 'O código IBGE deve ter exatamente 7 dígitos numéricos',
     }),
-  estadoId: z.string().uuid('Selecione um estado válido'),
+  estadoId: z.number().optional(),
 });
 
 const CityForm = () => {
@@ -47,11 +47,10 @@ const CityForm = () => {
   const location = useLocation();
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
+    resolver: zodResolver(formSchema),    defaultValues: {
       nome: '',
       codigoIbge: '',
-      estadoId: '',
+      estadoId: undefined,
     },
   });
 
@@ -73,15 +72,14 @@ const CityForm = () => {
     const fetchCity = async () => {
       if (!id) return;
 
-      setIsLoading(true);
-      try {
+      setIsLoading(true);      try {
         const city = await cityApi.getById(id);
         form.reset({
           nome: city.nome,
           codigoIbge: city.codigoIbge || '',
           estadoId: city.estadoId,
         });
-      } catch (error) {
+      }catch (error) {
         console.error('Erro ao buscar cidade:', error);
         toast.error('Não foi possível carregar os dados da cidade.');
         navigate('/cities');
@@ -94,17 +92,23 @@ const CityForm = () => {
       fetchCity();
     }
   }, [id, navigate, form]);
-
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const stateId = params.get('stateId');
 
     if (stateId) {
-      form.setValue('estadoId', stateId);
+      const stateIdNumber = parseInt(stateId, 10);
+      if (!isNaN(stateIdNumber)) {
+        form.setValue('estadoId', stateIdNumber);
+      }
     }
   }, [location.search, form]);
-
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (!data.estadoId) {
+      toast.error('Por favor, selecione um estado antes de salvar');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -114,21 +118,21 @@ const CityForm = () => {
           data.codigoIbge && data.codigoIbge.trim() !== ''
             ? data.codigoIbge
             : undefined,
-      };
-
-      let createdOrUpdatedId: string;
+      };      let createdOrUpdatedId: number;
 
       if (id) {
         await cityApi.update(id, formattedData as UpdateCityDto);
         toast.success('Cidade atualizada com sucesso!');
-        createdOrUpdatedId = id;
+        createdOrUpdatedId = parseInt(id, 10);
       } else {
         const createdCity = await cityApi.create(
           formattedData as CreateCityDto,
         );
         toast.success('Cidade criada com sucesso!');
         createdOrUpdatedId = createdCity.id;
-      }      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
+      }
+
+      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
         // Handle cascading form returns, pass the created/updated entity ID back to the parent form
         const returnWithParams = `${returnUrl}?createdEntity=city&createdId=${createdOrUpdatedId}`;
@@ -280,12 +284,11 @@ const CityForm = () => {
         </Form>
       </div>
 
-      {/* Dialogs */}
-      <StateCreationDialog
+      {/* Dialogs */}      <StateCreationDialog
         open={stateDialogOpen}
         onOpenChange={setStateDialogOpen}
         onSuccess={stateToEdit ? handleStateUpdated : handleStateCreated}
-        selectedCountryId=""
+        selectedCountryId={undefined}
         state={stateToEdit}
       />
 

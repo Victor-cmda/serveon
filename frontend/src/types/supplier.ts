@@ -1,5 +1,5 @@
 export interface Supplier {
-  id: string;
+  id: number;
   cnpjCpf: string;
   tipo: 'F' | 'J';
   razaoSocial: string;
@@ -10,7 +10,7 @@ export interface Supplier {
   numero?: string;
   complemento?: string;
   bairro?: string;
-  cidadeId?: string;
+  cidadeId?: number;
   cidadeNome?: string;
   estadoNome?: string;
   uf?: string;
@@ -22,7 +22,7 @@ export interface Supplier {
   updatedAt: string;
   isEstrangeiro?: boolean;
   tipoDocumento?: string; // Tipo de documento para estrangeiros (passaporte, id fiscal, etc)
-  condicaoPagamentoId?: string;
+  condicaoPagamentoId?: number;
   condicaoPagamentoNome?: string;
   // Campos específicos para fornecedores
   website?: string;
@@ -42,12 +42,12 @@ export interface CreateSupplierDto {
   numero?: string;
   complemento?: string;
   bairro?: string;
-  cidadeId: string;
+  cidadeId?: number;
   cep?: string;
   telefone?: string;
   email?: string;
   ativo?: boolean;
-  condicaoPagamentoId?: string;
+  condicaoPagamentoId?: number;
   // Campos específicos para fornecedores
   website?: string;
   observacoes?: string;
@@ -64,13 +64,12 @@ export interface UpdateSupplierDto {
   endereco?: string;
   numero?: string;
   complemento?: string;
-  bairro?: string;
-  cidadeId?: string;
+  bairro?: string;  cidadeId?: number;
   cep?: string;
   telefone?: string;
   email?: string;
   ativo?: boolean;
-  condicaoPagamentoId?: string;
+  condicaoPagamentoId?: number;
   // Campos específicos para fornecedores
   website?: string;
   observacoes?: string;

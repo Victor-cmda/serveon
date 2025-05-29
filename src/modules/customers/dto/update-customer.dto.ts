@@ -1,7 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateCustomerDto } from './create-customer.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsArray, IsUUID, IsOptional } from 'class-validator';
+import { IsBoolean, IsArray, IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateCustomerDto extends PartialType(CreateCustomerDto) {
   @ApiProperty({
@@ -21,15 +21,14 @@ export class UpdateCustomerDto extends PartialType(CreateCustomerDto) {
   @IsOptional()
   @IsBoolean({ message: 'isDestinatario deve ser um valor booleano' })
   isDestinatario?: boolean;
-  
-  @ApiProperty({
+    @ApiProperty({
     description: 'Lista de IDs de destinatários associados (quando o cliente não é o destinatário)',
-    example: ['550e8400-e29b-41d4-a716-446655440000'],
-    type: [String],
+    example: [1, 2, 3],
+    type: [Number],
     required: false
   })
   @IsOptional()
   @IsArray({ message: 'destinatariosIds deve ser um array' })
-  @IsUUID(4, { each: true, message: 'Cada ID de destinatário deve ser um UUID válido' })
-  destinatariosIds?: string[];
+  @IsNumber({}, { each: true, message: 'Cada ID de destinatário deve ser um número válido' })
+  destinatariosIds?: number[];
 }

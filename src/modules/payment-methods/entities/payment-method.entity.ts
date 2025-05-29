@@ -2,10 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class PaymentMethod {
   @ApiProperty({
-    description: 'Unique ID of the payment method (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000'
+    description: 'Unique ID of the payment method',
+    example: 1
   })
-  id: string;
+  id: number;
 
   @ApiProperty({
     description: 'Description of the payment method',

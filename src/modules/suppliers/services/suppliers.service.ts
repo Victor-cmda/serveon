@@ -3,7 +3,6 @@ import { CreateSupplierDto } from '../dto/create-supplier.dto';
 import { UpdateSupplierDto } from '../dto/update-supplier.dto';
 import { DatabaseService } from '../../../common/database/database.service';
 import { Supplier } from '../entities/supplier.entity';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class SuppliersService {
@@ -25,24 +24,20 @@ export class SuppliersService {
         if (existingSupplier.rowCount > 0) {
           throw new ConflictException(`Fornecedor com CNPJ/CPF ${createSupplierDto.cnpjCpf} já existe`);
         }
-        
-        // Gerar um UUID para o fornecedor se não for fornecido
-        const fornecedorId = uuidv4();
+          // Inserir o novo fornecedor (ID será gerado automaticamente)
         
         // Inserir o novo fornecedor
         const result = await client.query(
           `INSERT INTO dbo.fornecedor
-            (id, cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
+            (cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
             nome_fantasia, inscricao_estadual, inscricao_municipal, 
             endereco, numero, complemento, bairro, 
             cidade_id, cep, telefone, email, website, responsavel, 
             celular_responsavel, observacoes, condicao_pagamento_id, ativo)
           VALUES
             ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 
-            $15, $16, $17, $18, $19, $20, $21, $22, $23)
-          RETURNING *`,
-          [
-            fornecedorId,
+            $15, $16, $17, $18, $19, $20, $21, $22)
+          RETURNING *`,          [
             createSupplierDto.cnpjCpf,
             createSupplierDto.tipo,
             createSupplierDto.isEstrangeiro || false,
@@ -119,8 +114,7 @@ export class SuppliersService {
       throw new InternalServerErrorException('Erro ao buscar fornecedores');
     }
   }
-
-  async findOne(id: string): Promise<Supplier> {
+  async findOne(id: number): Promise<Supplier> {
     try {
       const client = await this.databaseService.getClient();
       try {
@@ -191,8 +185,7 @@ export class SuppliersService {
       throw new InternalServerErrorException(`Erro ao buscar fornecedor com documento ${cnpjCpf}`);
     }
   }
-
-  async update(id: string, updateSupplierDto: UpdateSupplierDto): Promise<Supplier> {
+  async update(id: number, updateSupplierDto: UpdateSupplierDto): Promise<Supplier> {
     try {
       const client = await this.databaseService.getClient();
       
@@ -297,8 +290,7 @@ export class SuppliersService {
       throw new InternalServerErrorException(`Erro ao atualizar fornecedor com ID ${id}`);
     }
   }
-
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     try {
       const client = await this.databaseService.getClient();
       

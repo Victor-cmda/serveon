@@ -1,5 +1,5 @@
 export interface Country {
-  id: string;
+  id: number;
   nome: string;
   codigo: string;
   sigla: string;
@@ -8,20 +8,20 @@ export interface Country {
 }
 
 export interface State {
-  id: string;
+  id: number;
   nome: string;
   uf: string;
-  paisId: string;
+  paisId: number;
   paisNome?: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface City {
-  id: string;
+  id: number;
   nome: string;
   codigoIbge?: string;
-  estadoId: string;
+  estadoId: number;
   estadoNome?: string;
   uf?: string;
   paisNome?: string;
@@ -44,23 +44,23 @@ export interface UpdateCountryDto {
 export interface CreateStateDto {
   nome: string;
   uf: string;
-  paisId: string;
+  paisId: number;
 }
 
 export interface UpdateStateDto {
   nome?: string;
   uf?: string;
-  paisId?: string;
+  paisId?: number;
 }
 
 export interface CreateCityDto {
   nome: string;
   codigoIbge?: string;
-  estadoId: string;
+  estadoId: number;
 }
 
 export interface UpdateCityDto {
   nome?: string;
   codigoIbge?: string;
-  estadoId?: string;
+  estadoId?: number;
 }

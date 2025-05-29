@@ -34,8 +34,7 @@ export class PaymentMethodsService {
 
     return result.rows;
   }
-
-  async findOne(id: string): Promise<PaymentMethod> {
+  async findOne(id: number): Promise<PaymentMethod> {
     const result = await this.databaseService.query(
       `SELECT id, descricao as description, codigo as code, tipo as type,
               ativo as active, created_at as "createdAt", updated_at as "updatedAt"
@@ -50,9 +49,8 @@ export class PaymentMethodsService {
 
     return result.rows[0];
   }
-
   async update(
-    id: string,
+    id: number,
     updatePaymentMethodDto: UpdatePaymentMethodDto,
   ): Promise<PaymentMethod> {
     // First check if payment method exists
@@ -106,8 +104,7 @@ export class PaymentMethodsService {
 
     return result.rows[0];
   }
-
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     // First check if payment method exists
     await this.findOne(id);
 

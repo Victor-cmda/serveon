@@ -1,4 +1,4 @@
-import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MaxLength, ValidateIf, IsUrl } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Matches, MaxLength, ValidateIf, IsUrl } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -77,24 +77,22 @@ export class CreateSupplierDto {
   @IsString({ message: 'Inscrição Municipal deve ser uma string' })
   @MaxLength(20, { message: 'Inscrição Municipal deve ter no máximo 20 caracteres' })
   inscricaoMunicipal?: string;
-
   @ApiProperty({
-    description: 'ID do país (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID do país',
+    example: 1,
     required: false
   })
   @IsOptional()
-  @IsUUID(4, { message: 'ID do país deve ser um UUID válido' })
-  paisId?: string;
-  
-  @ApiProperty({
-    description: 'ID do estado/província (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000',
+  @IsNumber({}, { message: 'ID do país deve ser um número válido' })
+  paisId?: number;
+    @ApiProperty({
+    description: 'ID do estado/província',
+    example: 1,
     required: false
   })
   @IsOptional()
-  @IsUUID(4, { message: 'ID do estado deve ser um UUID válido' })
-  estadoId?: string;
+  @IsNumber({}, { message: 'ID do estado deve ser um número válido' })
+  estadoId?: number;
 
   @ApiProperty({
     description: 'Endereço',
@@ -135,15 +133,14 @@ export class CreateSupplierDto {
   @IsString({ message: 'Bairro deve ser uma string' })
   @MaxLength(50, { message: 'Bairro deve ter no máximo 50 caracteres' })
   bairro?: string;
-
   @ApiProperty({
-    description: 'ID da cidade (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID da cidade',
+    example: 1,
     required: false
   })
   @IsOptional()
-  @IsUUID(4, { message: 'ID da cidade deve ser um UUID válido' })
-  cidadeId?: string;
+  @IsNumber({}, { message: 'ID da cidade deve ser um número válido' })
+  cidadeId?: number;
 
   @ApiProperty({
     description: 'CEP',
@@ -174,15 +171,14 @@ export class CreateSupplierDto {
   @IsEmail({}, { message: 'Email deve ser um endereço de email válido' })
   @MaxLength(100, { message: 'Email deve ter no máximo 100 caracteres' })
   email?: string;
-
   @ApiProperty({
-    description: 'ID da condição de pagamento (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID da condição de pagamento',
+    example: 1,
     required: false
   })
   @IsOptional()
-  @IsUUID(4, { message: 'ID da condição de pagamento deve ser um UUID válido' })
-  condicaoPagamentoId?: string;
+  @IsNumber({}, { message: 'ID da condição de pagamento deve ser um número válido' })
+  condicaoPagamentoId?: number;
 
   @ApiProperty({
     description: 'Website do fornecedor',

@@ -44,10 +44,9 @@ export class StatesController {
         name: 'paisId',
         required: false,
         description: 'Filtrar estados por país'
-    })
-    findAll(@Query('paisId') paisId?: string) {
+    })    findAll(@Query('paisId') paisId?: string) {
         if (paisId) {
-            return this.statesService.findAllByCountry(paisId);
+            return this.statesService.findAllByCountry(parseInt(paisId, 10));
         }
         return this.statesService.findAll();
     }
@@ -64,9 +63,8 @@ export class StatesController {
     @ApiResponse({
         status: HttpStatus.NOT_FOUND,
         description: 'Estado não encontrado'
-    })
-    findByUf(@Param('uf') uf: string, @Param('paisId') paisId: string) {
-        return this.statesService.findByUf(uf, paisId);
+    })    findByUf(@Param('uf') uf: string, @Param('paisId') paisId: string) {
+        return this.statesService.findByUf(uf, parseInt(paisId, 10));
     }
 
     @Get(':id')
@@ -80,9 +78,8 @@ export class StatesController {
     @ApiResponse({
         status: HttpStatus.NOT_FOUND,
         description: 'Estado não encontrado'
-    })
-    findOne(@Param('id') id: string) {
-        return this.statesService.findOne(id);
+    })    findOne(@Param('id') id: string) {
+        return this.statesService.findOne(parseInt(id, 10));
     }
 
     @Patch(':id')
@@ -104,9 +101,8 @@ export class StatesController {
     @ApiResponse({
         status: HttpStatus.CONFLICT,
         description: 'Estado com mesma UF já existe para o país informado'
-    })
-    update(@Param('id') id: string, @Body() updateStateDto: UpdateStateDto) {
-        return this.statesService.update(id, updateStateDto);
+    })    update(@Param('id') id: string, @Body() updateStateDto: UpdateStateDto) {
+        return this.statesService.update(parseInt(id, 10), updateStateDto);
     }
 
     @Delete(':id')
@@ -124,8 +120,7 @@ export class StatesController {
     @ApiResponse({
         status: HttpStatus.CONFLICT,
         description: 'Não é possível excluir o estado pois ele possui cidades vinculadas'
-    })
-    async remove(@Param('id') id: string) {
-        await this.statesService.remove(id);
+    })    async remove(@Param('id') id: string) {
+        await this.statesService.remove(parseInt(id, 10));
     }
 }

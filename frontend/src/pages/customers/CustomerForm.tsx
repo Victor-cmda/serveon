@@ -112,10 +112,9 @@ const formSchema = z.object({
   bairro: z.string().optional(),
   cep: z.string().optional(),
   telefone: z.string().optional(),
-  email: z.string().email('Email inválido').optional(),
-  cidadeId: z.string().uuid('Cidade é obrigatória'),
+  email: z.string().email('Email inválido').optional(),  cidadeId: z.number().optional(),
   ativo: z.boolean().default(true),
-  condicaoPagamentoId: z.string().optional(),
+  condicaoPagamentoId: z.number().optional(),
 });
 
 const CustomerForm = () => {
@@ -136,13 +135,12 @@ const CustomerForm = () => {
   const [newStateDialogOpen, setNewStateDialogOpen] = useState(false);
   const [paymentTermDialogOpen, setPaymentTermDialogOpen] = useState(false);
 
-  const [selectedStateId, setSelectedStateId] = useState<string>('');
+  const [selectedStateId, setSelectedStateId] = useState<number>();
 
   const [stateToEdit, setStateToEdit] = useState<State | null>(null);
   const [cityToEdit, setCityToEdit] = useState<City | null>(null);
   const [paymentTermToEdit, setPaymentTermToEdit] =
-    useState<PaymentTerm | null>(null);
-  const form = useForm<z.infer<typeof formSchema>>({
+    useState<PaymentTerm | null>(null);  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       cnpjCpf: '',
@@ -159,9 +157,9 @@ const CustomerForm = () => {
       cep: '',
       telefone: '',
       email: '',
-      cidadeId: '',
+      cidadeId: undefined,
       ativo: true,
-      condicaoPagamentoId: '',
+      condicaoPagamentoId: undefined,
     },
   });
 
@@ -180,11 +178,10 @@ const CustomerForm = () => {
       setIsLoading(false);
     }
   };
-
-  const loadCitiesForState = async (stateId: string) => {
+  const loadCitiesForState = async (stateId: number) => {
     try {
       setIsLoading(true);
-      const citiesData = await cityApi.getByState(stateId);
+      const citiesData = await cityApi.getByState(stateId.toString());
       setCities(citiesData);
     } catch (error) {
       console.error('Erro ao carregar cidades:', error);
@@ -200,8 +197,7 @@ const CustomerForm = () => {
 
       try {
         setIsLoading(true);
-        const customer = await customerApi.getById(id);
-        form.reset({
+        const customer = await customerApi.getById(id);        form.reset({
           cnpjCpf: customer.cnpjCpf || '',
           tipo: customer.tipo || 'J',
           isEstrangeiro: Boolean(customer.isEstrangeiro),
@@ -216,20 +212,18 @@ const CustomerForm = () => {
           cep: customer.cep || '',
           telefone: customer.telefone || '',
           email: customer.email || '',
-          cidadeId: customer.cidadeId || '',
+          cidadeId: customer.cidadeId || undefined,
           ativo: Boolean(customer.ativo),
-          condicaoPagamentoId: customer.condicaoPagamentoId || '',
-        });
-
-        // Load city data if available
+          condicaoPagamentoId: customer.condicaoPagamentoId || undefined,
+        });        // Load city data if available
         if (customer.cidadeId) {
           try {
-            const cityData = await cityApi.getById(customer.cidadeId);
+            const cityData = await cityApi.getById(customer.cidadeId.toString());
             setSelectedCity(cityData);
 
             if (cityData.estadoId) {
               setSelectedStateId(cityData.estadoId);
-              const citiesData = await cityApi.getByState(cityData.estadoId);
+              const citiesData = await cityApi.getByState(cityData.estadoId.toString());
               setCities(citiesData);
             }
           } catch (error) {
@@ -241,7 +235,7 @@ const CustomerForm = () => {
         if (customer.condicaoPagamentoId) {
           try {
             const paymentTermData = await paymentTermApi.getById(
-              customer.condicaoPagamentoId,
+              customer.condicaoPagamentoId.toString(),
             );
             setSelectedPaymentTerm(paymentTermData);
           } catch (error) {
@@ -258,8 +252,7 @@ const CustomerForm = () => {
     };
 
     if (id) {
-      fetchCustomer();
-    } else {
+      fetchCustomer();    } else {
       form.reset({
         cnpjCpf: '',
         tipo: 'J',
@@ -275,21 +268,21 @@ const CustomerForm = () => {
         cep: '',
         telefone: '',
         email: '',
-        cidadeId: '',
+        cidadeId: undefined,
         ativo: true,
+        condicaoPagamentoId: undefined,
       });
       setSelectedCity(null);
-      setSelectedStateId('');
+      setSelectedStateId(undefined);
       setSelectedPaymentTerm(null);
     }
   }, [id, navigate, form]);
-
   useEffect(() => {
     if (selectedStateId) {
       const loadCities = async () => {
         try {
           setIsLoading(true);
-          const citiesData = await cityApi.getByState(selectedStateId);
+          const citiesData = await cityApi.getByState(selectedStateId.toString());
           setCities(citiesData);
         } catch (error) {
           console.error('Erro ao carregar cidades:', error);
@@ -420,9 +413,7 @@ const CustomerForm = () => {
         toast.success('Cliente atualizado com sucesso!');
       } else {
         await customerApi.create(formattedData);
-        toast.success('Cliente criado com sucesso!');
-
-        form.reset({
+        toast.success('Cliente criado com sucesso!');        form.reset({
           cnpjCpf: '',
           tipo: 'J',
           isEstrangeiro: false,
@@ -437,12 +428,12 @@ const CustomerForm = () => {
           cep: '',
           telefone: '',
           email: '',
-          cidadeId: '',
+          cidadeId: undefined,
           ativo: true,
-          condicaoPagamentoId: '',
+          condicaoPagamentoId: undefined,
         });
         setSelectedCity(null);
-        setSelectedStateId('');
+        setSelectedStateId(undefined);
       }
 
       // Check if we need to return to a parent form in a cascading scenario
@@ -459,12 +450,11 @@ const CustomerForm = () => {
       setIsLoading(false);
     }
   };
-
   const onSelectState = (state: State) => {
     setSelectedStateId(state.id);
     setStateSearchOpen(false);
 
-    form.setValue('cidadeId', '');
+    form.setValue('cidadeId', undefined);
     setSelectedCity(null);
   };
 
@@ -716,14 +706,12 @@ const CustomerForm = () => {
               </Button>
             ) : (
               <></>
-            )}
-
-            {selectedStateId && (
+            )}            {selectedStateId && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setSelectedStateId('');
+                  setSelectedStateId(undefined);
                   fetchCities();
                 }}
               >
@@ -736,8 +724,7 @@ const CustomerForm = () => {
       />
       <StateCreationDialog
         open={newStateDialogOpen}
-        onOpenChange={setNewStateDialogOpen}
-        onSuccess={
+        onOpenChange={setNewStateDialogOpen}        onSuccess={
           stateToEdit
             ? handleStateUpdated
             : (newState: State) => {

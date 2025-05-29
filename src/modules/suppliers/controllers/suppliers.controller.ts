@@ -39,10 +39,9 @@ export class SuppliersController {
   findAll() {
     return this.suppliersService.findAll();
   }
-
   @Get(':id')
   @ApiOperation({ summary: 'Obter fornecedor por ID' })
-  @ApiParam({ name: 'id', description: 'ID do fornecedor (UUID)' })
+  @ApiParam({ name: 'id', description: 'ID do fornecedor' })
   @ApiResponse({ 
     status: HttpStatus.OK, 
     description: 'Fornecedor encontrado',
@@ -53,7 +52,7 @@ export class SuppliersController {
     description: 'Fornecedor não encontrado' 
   })
   findOne(@Param('id') id: string) {
-    return this.suppliersService.findOne(id);
+    return this.suppliersService.findOne(parseInt(id, 10));
   }
 
   @Get('by-document/:cnpjCpf')
@@ -71,10 +70,9 @@ export class SuppliersController {
   findByDocument(@Param('cnpjCpf') cnpjCpf: string) {
     return this.suppliersService.findByDocument(cnpjCpf);
   }
-
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar fornecedor por ID' })
-  @ApiParam({ name: 'id', description: 'ID do fornecedor (UUID)' })
+  @ApiParam({ name: 'id', description: 'ID do fornecedor' })
   @ApiResponse({ 
     status: HttpStatus.OK, 
     description: 'Fornecedor atualizado com sucesso',
@@ -89,13 +87,12 @@ export class SuppliersController {
     description: 'Fornecedor não encontrado' 
   })
   update(@Param('id') id: string, @Body() updateSupplierDto: UpdateSupplierDto) {
-    return this.suppliersService.update(id, updateSupplierDto);
+    return this.suppliersService.update(parseInt(id, 10), updateSupplierDto);
   }
-
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remover fornecedor por ID' })
-  @ApiParam({ name: 'id', description: 'ID do fornecedor (UUID)' })
+  @ApiParam({ name: 'id', description: 'ID do fornecedor' })
   @ApiResponse({ 
     status: HttpStatus.NO_CONTENT, 
     description: 'Fornecedor removido com sucesso' 
@@ -105,6 +102,6 @@ export class SuppliersController {
     description: 'Fornecedor não encontrado' 
   })
   async remove(@Param('id') id: string) {
-    await this.suppliersService.remove(id);
+    await this.suppliersService.remove(parseInt(id, 10));
   }
 }

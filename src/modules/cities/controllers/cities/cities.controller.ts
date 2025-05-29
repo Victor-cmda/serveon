@@ -55,9 +55,8 @@ export class CitiesController {
     @ApiResponse({
         status: HttpStatus.NOT_FOUND,
         description: 'Estado não encontrado'
-    })
-    findByEstado(@Param('estadoId') estadoId: string) {
-        return this.citiesService.findByEstado(estadoId);
+    })    findByEstado(@Param('estadoId') estadoId: string) {
+        return this.citiesService.findByEstado(parseInt(estadoId, 10));
     }
 
     @Get('ibge/:codigoIbge')
@@ -87,9 +86,8 @@ export class CitiesController {
     @ApiResponse({
         status: HttpStatus.NOT_FOUND,
         description: 'Cidade não encontrada'
-    })
-    findOne(@Param('id') id: string) {
-        return this.citiesService.findOne(id);
+    })    findOne(@Param('id') id: string) {
+        return this.citiesService.findOne(parseInt(id, 10));
     }
 
     @Patch(':id')
@@ -111,9 +109,8 @@ export class CitiesController {
     @ApiResponse({
         status: HttpStatus.CONFLICT,
         description: 'Cidade com mesmo nome ou código IBGE já existe'
-    })
-    update(@Param('id') id: string, @Body() updateCityDto: UpdateCityDto) {
-        return this.citiesService.update(id, updateCityDto);
+    })    update(@Param('id') id: string, @Body() updateCityDto: UpdateCityDto) {
+        return this.citiesService.update(parseInt(id, 10), updateCityDto);
     }
 
     @Delete(':id')
@@ -131,8 +128,7 @@ export class CitiesController {
     @ApiResponse({
         status: HttpStatus.CONFLICT,
         description: 'Não é possível excluir a cidade pois ela está sendo referenciada'
-    })
-    async remove(@Param('id') id: string) {
-        await this.citiesService.remove(id);
+    })    async remove(@Param('id') id: string) {
+        await this.citiesService.remove(parseInt(id, 10));
     }
 }

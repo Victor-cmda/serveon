@@ -29,7 +29,7 @@ import PaymentMethodCreationDialog from '@/components/dialogs/PaymentMethodCreat
 // Schema para validação das parcelas
 const installmentSchema = z.object({
   installmentNumber: z.number().min(1, 'Número da parcela obrigatório'),
-  paymentMethodId: z.string().min(1, 'Método de pagamento obrigatório'),
+  paymentMethodId: z.number().min(1, 'Método de pagamento obrigatório'),
   daysToPayment: z
     .number()
     .min(0, 'Dias para pagamento deve ser maior ou igual a 0'),
@@ -81,11 +81,10 @@ const PaymentTermForm = () => {
     defaultValues: {
       name: '',
       description: '',
-      isActive: true,
-      installments: [
+      isActive: true,      installments: [
         {
           installmentNumber: 1,
-          paymentMethodId: '',
+          paymentMethodId: 0,
           daysToPayment: 0,
           percentageValue: 100,
           interestRate: 0,
@@ -158,11 +157,9 @@ const PaymentTermForm = () => {
     const lastInstallment = form.getValues('installments').slice(-1)[0];
     const nextNumber = lastInstallment
       ? lastInstallment.installmentNumber + 1
-      : 1;
-
-    append({
+      : 1;    append({
       installmentNumber: nextNumber,
-      paymentMethodId: '',
+      paymentMethodId: 0,
       daysToPayment: lastInstallment ? lastInstallment.daysToPayment + 30 : 30,
       percentageValue: 0,
       interestRate: 0,
@@ -185,11 +182,9 @@ const PaymentTermForm = () => {
           interestRate: inst.interestRate,
           isActive: inst.isActive,
         })),
-      };
-
-      // Verifica se existe algum método de pagamento não selecionado
+      };      // Verifica se existe algum método de pagamento não selecionado
       const hasInvalidPaymentMethod = paymentTermData.installments.some(
-        (inst) => !inst.paymentMethodId
+        (inst) => !inst.paymentMethodId || inst.paymentMethodId <= 0
       );
       
       if (hasInvalidPaymentMethod) {

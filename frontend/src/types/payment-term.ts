@@ -1,5 +1,5 @@
 export interface PaymentTerm {
-  id: string;
+  id: number;
   name: string;
   description?: string;
   isActive: boolean;
@@ -9,10 +9,10 @@ export interface PaymentTerm {
 }
 
 export interface PaymentTermInstallment {
-  id: string;
-  paymentTermId: string;
+  id: number;
+  paymentTermId: number;
   installmentNumber: number;
-  paymentMethodId: string;
+  paymentMethodId: number;
   daysToPayment: number;
   percentageValue: number;
   interestRate: number;
@@ -30,7 +30,7 @@ export interface CreatePaymentTermDto {
 
 export interface CreatePaymentTermInstallmentDto {
   installmentNumber: number;
-  paymentMethodId: string;
+  paymentMethodId: number;
   daysToPayment: number;
   percentageValue: number;
   interestRate?: number;

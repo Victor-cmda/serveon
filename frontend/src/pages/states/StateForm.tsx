@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { stateApi, countryApi } from '@/services/api';
-import { CreateStateDto, UpdateStateDto, Country } from '@/types/location';
+import { Country } from '@/types/location';
 import { toast } from 'sonner';
 import CountryCreationDialog from '@/components/dialogs/CountryCreationDialog';
 import { SearchDialog } from '@/components/SearchDialog';
@@ -25,7 +25,7 @@ const formSchema = z.object({
     .string()
     .min(2, 'Nome do estado é obrigatório e deve ter pelo menos 2 caracteres'),
   uf: z.string().length(2, 'UF deve ter exatamente 2 caracteres').toUpperCase(),
-  paisId: z.string().uuid('Selecione um país válido'),
+  paisId: z.number().min(1, 'Selecione um país válido'),
 });
 
 const StateForm = () => {
@@ -43,7 +43,7 @@ const StateForm = () => {
     defaultValues: {
       nome: '',
       uf: '',
-      paisId: '',
+      paisId: 0,
     },
   });
 
@@ -90,7 +90,7 @@ const StateForm = () => {
     const countryId = params.get('countryId');
 
     if (countryId) {
-      form.setValue('paisId', countryId);
+      form.setValue('paisId', Number(countryId));
     }
   }, [location.search, form]);
 
@@ -98,24 +98,23 @@ const StateForm = () => {
     setIsLoading(true);
 
     try {
-      let createdOrUpdatedId: string;
+      let createdOrUpdatedId: number | undefined;
 
       // Format the data to handle empty strings
       const formattedData = {
         nome: data.nome.trim(),
         uf: data.uf.trim(),
-        paisId: data.paisId
-      };
-
-      if (id) {
+        paisId: data.paisId,
+      };      if (id) {
         await stateApi.update(id, formattedData);
         toast.success('Estado atualizado com sucesso!');
-        createdOrUpdatedId = id;
+        createdOrUpdatedId = Number(id);
       } else {
         const createdState = await stateApi.create(formattedData);
         toast.success('Estado criado com sucesso!');
         createdOrUpdatedId = createdState.id;
-      }      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
+      }
+      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
         // Handle cascading form returns, pass the created/updated entity ID back to the parent form
         const returnWithParams = `${returnUrl}?createdEntity=state&createdId=${createdOrUpdatedId}`;
@@ -140,10 +139,10 @@ const StateForm = () => {
 
   const handleCountryUpdated = (updatedCountry: Country) => {
     // Atualiza o país na lista de países
-    setCountries((prev) => 
-      prev.map((country) => 
-        country.id === updatedCountry.id ? updatedCountry : country
-      )
+    setCountries((prev) =>
+      prev.map((country) =>
+        country.id === updatedCountry.id ? updatedCountry : country,
+      ),
     );
     setCountryToEdit(null);
   };

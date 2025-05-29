@@ -114,8 +114,7 @@ export class PaymentTermsService {
 
     return paymentTerms;
   }
-
-  async findOne(id: string): Promise<PaymentTerm> {
+  async findOne(id: number): Promise<PaymentTerm> {
     const result = await this.databaseService.query(
       `SELECT id, nome as name, descricao as description, ativo as "isActive", 
               created_at as "createdAt", updated_at as "updatedAt"
@@ -146,9 +145,8 @@ export class PaymentTermsService {
 
     return paymentTerm;
   }
-
   async update(
-    id: string,
+    id: number,
     updatePaymentTermDto: UpdatePaymentTermDto,
   ): Promise<PaymentTerm> {
     // First check if the payment term exists
@@ -268,8 +266,7 @@ export class PaymentTermsService {
       throw error;
     }
   }
-
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     // First check if the payment term exists
     await this.findOne(id);
 
