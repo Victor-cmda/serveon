@@ -48,16 +48,15 @@ const CitiesList = () => {
     fetchStates();
     fetchCities();
   }, []);
-
   useEffect(() => {
     if (selectedCountry) {
       const filtered = states.filter(
-        (state) => state.paisId === selectedCountry,
+        (state) => state.paisId === Number(selectedCountry),
       );
       setFilteredStates(filtered);
       if (
         selectedState &&
-        !filtered.some((state) => state.id === selectedState)
+        !filtered.some((state) => state.id === Number(selectedState))
       ) {
         setSelectedState('');
       }
@@ -65,16 +64,15 @@ const CitiesList = () => {
       setFilteredStates(states);
     }
   }, [selectedCountry, states, selectedState]);
-
   useEffect(() => {
     let filtered = cities;
 
     if (selectedState) {
-      filtered = filtered.filter((city) => city.estadoId === selectedState);
+      filtered = filtered.filter((city) => city.estadoId === Number(selectedState));
     } else if (selectedCountry) {
       filtered = filtered.filter((city) => {
         const cityState = states.find((state) => state.id === city.estadoId);
-        return cityState && cityState.paisId === selectedCountry;
+        return cityState && cityState.paisId === Number(selectedCountry);
       });
     }
 
@@ -204,10 +202,9 @@ const CitiesList = () => {
           <Select value={selectedCountry} onValueChange={handleCountryFilter}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filtrar por país" />
-            </SelectTrigger>
-            <SelectContent>
+            </SelectTrigger>            <SelectContent>
               {countries.map((country) => (
-                <SelectItem key={country.id} value={country.id}>
+                <SelectItem key={country.id} value={country.id.toString()}>
                   {country.nome}
                 </SelectItem>
               ))}
@@ -221,10 +218,9 @@ const CitiesList = () => {
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filtrar por estado" />
-            </SelectTrigger>
-            <SelectContent>
+            </SelectTrigger>            <SelectContent>
               {filteredStates.map((state) => (
-                <SelectItem key={state.id} value={state.id}>
+                <SelectItem key={state.id} value={state.id.toString()}>
                   {state.nome} ({state.uf})
                 </SelectItem>
               ))}

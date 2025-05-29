@@ -46,10 +46,8 @@ const StatesList = () => {
   }, []);
 
   useEffect(() => {
-    let filtered = states;
-
-    if (selectedCountry) {
-      filtered = filtered.filter((state) => state.paisId === selectedCountry);
+    let filtered = states;    if (selectedCountry) {
+      filtered = filtered.filter((state) => state.paisId === Number(selectedCountry));
     }
 
     if (search) {
@@ -157,10 +155,9 @@ const StatesList = () => {
           <Select value={selectedCountry} onValueChange={handleCountryFilter}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filtrar por país" />
-            </SelectTrigger>
-            <SelectContent>
+            </SelectTrigger>            <SelectContent>
               {countries.map((country) => (
-                <SelectItem key={country.id} value={country.id}>
+                <SelectItem key={country.id} value={country.id.toString()}>
                   {country.nome}
                 </SelectItem>
               ))}

@@ -60,14 +60,13 @@ const StateForm = () => {
 
     fetchCountries();
   }, []);
-
   useEffect(() => {
     const fetchState = async () => {
       if (!id) return;
 
       setIsLoading(true);
       try {
-        const state = await stateApi.getById(id);
+        const state = await stateApi.getById(Number(id));
         form.reset({
           nome: state.nome,
           uf: state.uf,
@@ -104,9 +103,8 @@ const StateForm = () => {
       const formattedData = {
         nome: data.nome.trim(),
         uf: data.uf.trim(),
-        paisId: data.paisId,
-      };      if (id) {
-        await stateApi.update(id, formattedData);
+        paisId: data.paisId,      };      if (id) {
+        await stateApi.update(Number(id), formattedData);
         toast.success('Estado atualizado com sucesso!');
         createdOrUpdatedId = Number(id);
       } else {

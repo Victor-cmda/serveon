@@ -53,7 +53,7 @@ export const countryApi = {
     return handleResponse(response);
   },
 
-  getById: async (id: string): Promise<Country> => {
+  getById: async (id: number): Promise<Country> => {
     const response = await fetch(`${API_URL}/countries/${id}`);
     return handleResponse(response);
   },
@@ -69,7 +69,7 @@ export const countryApi = {
     return handleResponse(response);
   },
 
-  update: async (id: string, country: UpdateCountryDto): Promise<Country> => {
+  update: async (id: number, country: UpdateCountryDto): Promise<Country> => {
     const response = await fetch(`${API_URL}/countries/${id}`, {
       method: 'PATCH',
       headers: {
@@ -80,7 +80,7 @@ export const countryApi = {
     return handleResponse(response);
   },
 
-  delete: async (id: string): Promise<void> => {
+  delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_URL}/countries/${id}`, {
       method: 'DELETE',
     });
@@ -94,12 +94,12 @@ export const stateApi = {
     return handleResponse(response);
   },
 
-  getByCountry: async (countryId: string): Promise<State[]> => {
+  getByCountry: async (countryId: number): Promise<State[]> => {
     const response = await fetch(`${API_URL}/states?paisId=${countryId}`);
     return handleResponse(response);
   },
 
-  getById: async (id: string): Promise<State> => {
+  getById: async (id: number): Promise<State> => {
     const response = await fetch(`${API_URL}/states/${id}`);
     return handleResponse(response);
   },
@@ -115,7 +115,7 @@ export const stateApi = {
     return handleResponse(response);
   },
 
-  update: async (id: string, state: UpdateStateDto): Promise<State> => {
+  update: async (id: number, state: UpdateStateDto): Promise<State> => {
     const response = await fetch(`${API_URL}/states/${id}`, {
       method: 'PATCH',
       headers: {
@@ -126,7 +126,7 @@ export const stateApi = {
     return handleResponse(response);
   },
 
-  delete: async (id: string): Promise<void> => {
+  delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_URL}/states/${id}`, {
       method: 'DELETE',
     });
@@ -140,12 +140,12 @@ export const cityApi = {
     return handleResponse(response);
   },
 
-  getByState: async (stateId: string): Promise<City[]> => {
+  getByState: async (stateId: number): Promise<City[]> => {
     const response = await fetch(`${API_URL}/cities/estado/${stateId}`);
     return handleResponse(response);
   },
 
-  getById: async (id: string): Promise<City> => {
+  getById: async (id: number): Promise<City> => {
     const response = await fetch(`${API_URL}/cities/${id}`);
     return handleResponse(response);
   },
@@ -166,7 +166,7 @@ export const cityApi = {
     return handleResponse(response);
   },
 
-  update: async (id: string, city: UpdateCityDto): Promise<City> => {
+  update: async (id: number, city: UpdateCityDto): Promise<City> => {
     const response = await fetch(`${API_URL}/cities/${id}`, {
       method: 'PATCH',
       headers: {
@@ -177,7 +177,7 @@ export const cityApi = {
     return handleResponse(response);
   },
 
-  delete: async (id: string): Promise<void> => {
+  delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_URL}/cities/${id}`, {
       method: 'DELETE',
     });
@@ -191,12 +191,12 @@ export const customerApi = {
     return handleResponse(response);
   },
 
-  getById: async (id: string): Promise<Customer> => {
+  getById: async (id: number): Promise<Customer> => {
     const response = await fetch(`${API_URL}/customers/${id}`);
     return handleResponse(response);
   },
 
-  getByCountry: async (countryId: string): Promise<Customer[]> => {
+  getByCountry: async (countryId: number): Promise<Customer[]> => {
     const response = await fetch(`${API_URL}/customers/country/${countryId}`);
     return handleResponse(response);
   },
@@ -213,7 +213,7 @@ export const customerApi = {
   },
 
   update: async (
-    id: string,
+    id: number,
     customer: UpdateCustomerDto,
   ): Promise<Customer> => {
     const response = await fetch(`${API_URL}/customers/${id}`, {
@@ -226,7 +226,7 @@ export const customerApi = {
     return handleResponse(response);
   },
 
-  delete: async (id: string): Promise<void> => {
+  delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_URL}/customers/${id}`, {
       method: 'DELETE',
     });
@@ -240,7 +240,7 @@ export const supplierApi = {
     return handleResponse(response);
   },
 
-  getById: async (id: string): Promise<Supplier> => {
+  getById: async (id: number): Promise<Supplier> => {
     const response = await fetch(`${API_URL}/suppliers/${id}`);
     return handleResponse(response);
   },
@@ -257,7 +257,7 @@ export const supplierApi = {
   },
 
   update: async (
-    id: string,
+    id: number,
     supplier: UpdateSupplierDto,
   ): Promise<Supplier> => {
     const response = await fetch(`${API_URL}/suppliers/${id}`, {
@@ -270,7 +270,7 @@ export const supplierApi = {
     return handleResponse(response);
   },
 
-  delete: async (id: string): Promise<void> => {
+  delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_URL}/suppliers/${id}`, {
       method: 'DELETE',
     });
@@ -284,7 +284,7 @@ export const paymentMethodApi = {
     return handleResponse(response);
   },
 
-  getById: async (id: string): Promise<PaymentMethod> => {
+  getById: async (id: number): Promise<PaymentMethod> => {
     const response = await fetch(`${API_URL}/payment-methods/${id}`);
     return handleResponse(response);
   },
@@ -300,7 +300,7 @@ export const paymentMethodApi = {
     return handleResponse(response);
   },
 
-  update: async (id: string, paymentMethod: UpdatePaymentMethodDto): Promise<PaymentMethod> => {
+  update: async (id: number, paymentMethod: UpdatePaymentMethodDto): Promise<PaymentMethod> => {
     const response = await fetch(`${API_URL}/payment-methods/${id}`, {
       method: 'PATCH',
       headers: {
@@ -311,7 +311,7 @@ export const paymentMethodApi = {
     return handleResponse(response);
   },
 
-  delete: async (id: string): Promise<void> => {
+  delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_URL}/payment-methods/${id}`, {
       method: 'DELETE',
     });
@@ -325,7 +325,7 @@ export const paymentTermApi = {
     return handleResponse(response);
   },
 
-  getById: async (id: string): Promise<PaymentTerm> => {
+  getById: async (id: number): Promise<PaymentTerm> => {
     const response = await fetch(`${API_URL}/payment-terms/${id}`);
     return handleResponse(response);
   },
@@ -341,7 +341,7 @@ export const paymentTermApi = {
     return handleResponse(response);
   },
 
-  update: async (id: string, paymentTerm: UpdatePaymentTermDto): Promise<PaymentTerm> => {
+  update: async (id: number, paymentTerm: UpdatePaymentTermDto): Promise<PaymentTerm> => {
     const response = await fetch(`${API_URL}/payment-terms/${id}`, {
       method: 'PATCH',
       headers: {
@@ -352,7 +352,7 @@ export const paymentTermApi = {
     return handleResponse(response);
   },
 
-  delete: async (id: string): Promise<void> => {
+  delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_URL}/payment-terms/${id}`, {
       method: 'DELETE',
     });

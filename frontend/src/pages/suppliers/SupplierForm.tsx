@@ -173,10 +173,9 @@ export default function SupplierForm() {
         setCities(citiesData);
         // Carrega as condições de pagamento
         const paymentTermsData = await paymentTermApi.getAll();
-        setPaymentTerms(paymentTermsData);
-        // Se estiver editando, carrega os dados do fornecedor
+        setPaymentTerms(paymentTermsData);        // Se estiver editando, carrega os dados do fornecedor
         if (id) {
-          const supplier = await supplierApi.getById(id);
+          const supplier = await supplierApi.getById(Number(id));
           if (supplier) {            form.reset({
               ...supplier,
               tipo: supplier.tipo || 'J',
@@ -225,8 +224,8 @@ export default function SupplierForm() {
         if ((formattedData as any)[key] === undefined) {
           delete (formattedData as any)[key];
         }
-      });if (isEditing) {
-        await supplierApi.update(id, formattedData);
+      });      if (isEditing) {
+        await supplierApi.update(Number(id), formattedData);
         toast.success('Fornecedor atualizado com sucesso');
       } else {
         await supplierApi.create(formattedData);

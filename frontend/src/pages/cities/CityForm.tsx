@@ -73,7 +73,7 @@ const CityForm = () => {
       if (!id) return;
 
       setIsLoading(true);      try {
-        const city = await cityApi.getById(id);
+        const city = await cityApi.getById(Number(id));
         form.reset({
           nome: city.nome,
           codigoIbge: city.codigoIbge || '',
@@ -121,7 +121,7 @@ const CityForm = () => {
       };      let createdOrUpdatedId: number;
 
       if (id) {
-        await cityApi.update(id, formattedData as UpdateCityDto);
+        await cityApi.update(Number(id), formattedData as UpdateCityDto);
         toast.success('Cidade atualizada com sucesso!');
         createdOrUpdatedId = parseInt(id, 10);
       } else {

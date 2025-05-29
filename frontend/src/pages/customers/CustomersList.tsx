@@ -80,7 +80,7 @@ const CustomersList = () => {
     if (!customerToDelete) return;
 
     try {
-      await customerApi.delete(customerToDelete.cnpjCpf);
+      await customerApi.delete(Number(customerToDelete.cnpjCpf));
       setCustomers(
         customers.filter((c) => c.cnpjCpf !== customerToDelete.cnpjCpf),
       );

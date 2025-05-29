@@ -112,7 +112,8 @@ const formSchema = z.object({
   bairro: z.string().optional(),
   cep: z.string().optional(),
   telefone: z.string().optional(),
-  email: z.string().email('Email inválido').optional(),  cidadeId: z.number().optional(),
+  email: z.string().email('Email inválido').optional(),
+  cidadeId: z.number().optional(),
   ativo: z.boolean().default(true),
   condicaoPagamentoId: z.number().optional(),
 });
@@ -140,7 +141,8 @@ const CustomerForm = () => {
   const [stateToEdit, setStateToEdit] = useState<State | null>(null);
   const [cityToEdit, setCityToEdit] = useState<City | null>(null);
   const [paymentTermToEdit, setPaymentTermToEdit] =
-    useState<PaymentTerm | null>(null);  const form = useForm<z.infer<typeof formSchema>>({
+    useState<PaymentTerm | null>(null);
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       cnpjCpf: '',
@@ -181,7 +183,7 @@ const CustomerForm = () => {
   const loadCitiesForState = async (stateId: number) => {
     try {
       setIsLoading(true);
-      const citiesData = await cityApi.getByState(stateId.toString());
+      const citiesData = await cityApi.getByState(stateId);
       setCities(citiesData);
     } catch (error) {
       console.error('Erro ao carregar cidades:', error);
@@ -197,7 +199,8 @@ const CustomerForm = () => {
 
       try {
         setIsLoading(true);
-        const customer = await customerApi.getById(id);        form.reset({
+        const customer = await customerApi.getById(Number(id));
+        form.reset({
           cnpjCpf: customer.cnpjCpf || '',
           tipo: customer.tipo || 'J',
           isEstrangeiro: Boolean(customer.isEstrangeiro),
@@ -215,15 +218,19 @@ const CustomerForm = () => {
           cidadeId: customer.cidadeId || undefined,
           ativo: Boolean(customer.ativo),
           condicaoPagamentoId: customer.condicaoPagamentoId || undefined,
-        });        // Load city data if available
+        }); // Load city data if available
         if (customer.cidadeId) {
           try {
-            const cityData = await cityApi.getById(customer.cidadeId.toString());
+            const cityData = await cityApi.getById(
+              customer.cidadeId,
+            );
             setSelectedCity(cityData);
 
             if (cityData.estadoId) {
               setSelectedStateId(cityData.estadoId);
-              const citiesData = await cityApi.getByState(cityData.estadoId.toString());
+              const citiesData = await cityApi.getByState(
+                cityData.estadoId,
+              );
               setCities(citiesData);
             }
           } catch (error) {
@@ -235,7 +242,7 @@ const CustomerForm = () => {
         if (customer.condicaoPagamentoId) {
           try {
             const paymentTermData = await paymentTermApi.getById(
-              customer.condicaoPagamentoId.toString(),
+              customer.condicaoPagamentoId,
             );
             setSelectedPaymentTerm(paymentTermData);
           } catch (error) {
@@ -252,7 +259,8 @@ const CustomerForm = () => {
     };
 
     if (id) {
-      fetchCustomer();    } else {
+      fetchCustomer();
+    } else {
       form.reset({
         cnpjCpf: '',
         tipo: 'J',
@@ -282,7 +290,9 @@ const CustomerForm = () => {
       const loadCities = async () => {
         try {
           setIsLoading(true);
-          const citiesData = await cityApi.getByState(selectedStateId.toString());
+          const citiesData = await cityApi.getByState(
+            selectedStateId,
+          );
           setCities(citiesData);
         } catch (error) {
           console.error('Erro ao carregar cidades:', error);
@@ -408,12 +418,14 @@ const CustomerForm = () => {
         telefone: formatters.clearFormat(data.telefone) || undefined,
         cidadeId: data.cidadeId,
         condicaoPagamentoId: data.condicaoPagamentoId || undefined,
-      };      if (id) {
-        await customerApi.update(id, formattedData);
+      };
+      if (id) {
+        await customerApi.update(Number(id), formattedData);
         toast.success('Cliente atualizado com sucesso!');
       } else {
         await customerApi.create(formattedData);
-        toast.success('Cliente criado com sucesso!');        form.reset({
+        toast.success('Cliente criado com sucesso!');
+        form.reset({
           cnpjCpf: '',
           tipo: 'J',
           isEstrangeiro: false,
@@ -588,7 +600,6 @@ const CustomerForm = () => {
                   id={id}
                 />
               </div>
-
               <div>
                 <AddressSection
                   form={form}
@@ -599,7 +610,6 @@ const CustomerForm = () => {
                   setCitySearchOpen={setCitySearchOpen}
                 />
               </div>
-
               <div>
                 <ContactSection
                   form={form}
@@ -607,7 +617,6 @@ const CustomerForm = () => {
                   formatters={formatters}
                 />
               </div>
-
               <div>
                 <DocumentsSection
                   form={form}
@@ -616,7 +625,8 @@ const CustomerForm = () => {
                   watchTipo={watchTipo}
                   watchIsEstrangeiro={watchIsEstrangeiro}
                 />
-              </div>              <div>
+              </div>{' '}
+              <div>
                 <PaymentSection
                   form={form}
                   isLoading={isLoading}
@@ -624,7 +634,6 @@ const CustomerForm = () => {
                   setPaymentTermSearchOpen={setPaymentTermSearchOpen}
                 />
               </div>
-
               <div className="flex justify-end pt-4 mt-2 border-t">
                 <Button
                   type="submit"
@@ -706,7 +715,8 @@ const CustomerForm = () => {
               </Button>
             ) : (
               <></>
-            )}            {selectedStateId && (
+            )}{' '}
+            {selectedStateId && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -724,7 +734,8 @@ const CustomerForm = () => {
       />
       <StateCreationDialog
         open={newStateDialogOpen}
-        onOpenChange={setNewStateDialogOpen}        onSuccess={
+        onOpenChange={setNewStateDialogOpen}
+        onSuccess={
           stateToEdit
             ? handleStateUpdated
             : (newState: State) => {

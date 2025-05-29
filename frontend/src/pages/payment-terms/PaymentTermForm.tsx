@@ -121,7 +121,7 @@ const PaymentTermForm = () => {
   const fetchPaymentTerm = async (paymentTermId: string) => {
     setIsLoadingData(true);
     try {
-      const data = await paymentTermApi.getById(paymentTermId);
+      const data = await paymentTermApi.getById(Number(paymentTermId));
 
       // Ordenar parcelas por número
       const sortedInstallments = [...data.installments].sort(
@@ -194,7 +194,7 @@ const PaymentTermForm = () => {
         setIsLoading(false);
         return;
       }      if (id) {
-        await paymentTermApi.update(id, paymentTermData);
+        await paymentTermApi.update(Number(id), paymentTermData);
         toast.success('Sucesso', {
           description: 'Condição de pagamento atualizada com sucesso!',
         });

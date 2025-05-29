@@ -56,7 +56,7 @@ const PaymentMethodForm = () => {
   const fetchPaymentMethod = async (paymentMethodId: string) => {
     setIsLoadingData(true);
     try {
-      const data = await paymentMethodApi.getById(paymentMethodId);
+      const data = await paymentMethodApi.getById(Number(paymentMethodId));
       form.reset({
         description: data.description,
         code: data.code || '',
@@ -90,7 +90,7 @@ const PaymentMethodForm = () => {
       if (values.type && values.type.trim() !== '') {
         paymentMethodData.type = values.type;
       }      if (id) {
-        await paymentMethodApi.update(id, paymentMethodData);
+        await paymentMethodApi.update(Number(id), paymentMethodData);
         toast.success('Sucesso', {
           description: 'Método de pagamento atualizado com sucesso!',
         });
