@@ -1,4 +1,5 @@
 export interface Customer {
+  id: number;
   cnpjCpf: string;
   tipo: 'F' | 'J';
   razaoSocial: string;
