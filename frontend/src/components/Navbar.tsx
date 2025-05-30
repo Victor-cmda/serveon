@@ -36,27 +36,24 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 z-30 w-full border-b border-border bg-background backdrop-blur-sm supports-[backdrop-filter]:bg-background/60">
+    <nav className="fixed top-0 z-30 w-full backdrop-blur-md bg-card/80 shadow-lg supports-[backdrop-filter]:bg-card/60">
       <div className="px-4 py-3 lg:px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
+            {' '}
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="lg:hidden transition-colors"
               aria-label="Toggle Menu"
             >
               <Menu className="h-5 w-5" />
-            </Button>
-
-            <a
-              href="/"
-              className="flex items-center gap-2 transition-opacity hover:opacity-80"
-            >
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
-                <span className="font-bold">S</span>
+            </Button>{' '}
+            <a href="/" className="flex items-center gap-2 transition-colors">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg">
+                <span className="font-bold">✨</span>
               </div>
-              <span className="hidden text-xl font-semibold tracking-tight sm:inline-block">
+              <span className="hidden text-xl font-semibold tracking-tight sm:inline-block bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                 Serveon
               </span>
             </a>
@@ -67,6 +64,7 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">
+            {' '}
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -74,7 +72,7 @@ const Navbar = () => {
                     variant="ghost"
                     size="icon"
                     onClick={toggleTheme}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground hover:scale-110 transition-all"
                   >
                     {theme === 'light' ? (
                       <Moon className="h-[1.2rem] w-[1.2rem]" />
@@ -88,15 +86,13 @@ const Navbar = () => {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-
             <Button
               variant="ghost"
               size="icon"
               className="text-muted-foreground hover:text-foreground lg:hidden"
             >
               <Search className="h-[1.2rem] w-[1.2rem]" />
-            </Button>
-
+            </Button>{' '}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button

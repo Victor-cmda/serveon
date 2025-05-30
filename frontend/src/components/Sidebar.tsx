@@ -12,6 +12,7 @@ import {
   Map,
   CreditCard,
   Truck,
+  Sparkles,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -103,78 +104,86 @@ const Sidebar = () => {
       location.pathname === path || location.pathname.startsWith(`${path}/`)
     );
   };
-
   return (
     <aside
       id="sidebar"
-      className="fixed left-0 top-0 z-20 flex h-full w-64 flex-shrink-0 flex-col pt-16 transition-all duration-200 ease-in-out lg:flex"
+      className="fixed left-0 top-0 z-20 flex h-full w-64 flex-shrink-0 flex-col pt-16 transition-all duration-300 ease-in-out lg:flex"
       aria-label="Sidebar"
     >
-      <div className="relative flex min-h-0 flex-1 flex-col border-r border-border bg-background pt-0">
-        <div className="flex flex-1 flex-col overflow-y-auto pb-4 pt-5">
-          <div className="flex-1 space-y-1 px-3">
-            {mainMenuItems.map((item) => (
+      <div className="relative flex min-h-0 flex-1 flex-col backdrop-blur-md bg-card/80 shadow-lg pt-0">
+        <div className="flex flex-1 flex-col overflow-y-auto pb-4 pt-6">
+          <div className="px-4 mb-4">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <span className="text-sm font-medium">Menu Principal</span>
+            </div>
+          </div>
+
+          <div className="flex-1 space-y-2 px-4">
+            {' '}            {mainMenuItems.map((item) => (
               <Button
                 key={item.id}
                 variant="ghost"
                 className={cn(
-                  'w-full justify-start px-3',
+                  'w-full justify-start px-4 py-3 rounded-xl transition-all duration-300 hover:scale-105',
                   isActive(item.path)
-                    ? 'bg-accent text-accent-foreground'
-                    : 'hover:bg-accent hover:text-accent-foreground',
+                    ? 'bg-primary/20 text-primary shadow-lg'
+                    : 'hover:bg-accent/50 hover:text-accent-foreground hover:shadow-md',
                 )}
                 asChild
               >
-                <NavLink to={item.path}>
+                <NavLink to={item.path} className="flex items-center gap-3">
                   {item.icon}
-                  <span className="ml-3">{item.title}</span>
+                  <span className="font-medium">{item.title}</span>
                 </NavLink>
               </Button>
             ))}
-
-            <div className="pt-5 mt-5 space-y-2 border-t border-border">
-              <h3 className="px-3 text-xs font-semibold uppercase text-muted-foreground">
-                Localização
-              </h3>
-              {locationMenuItems.map((item) => (
+            <div className="pt-6 mt-6 space-y-2">
+              <div className="flex items-center gap-2 px-3 py-2">
+                <Globe className="h-4 w-4 text-primary" />
+                <h3 className="text-xs font-semibold uppercase text-muted-foreground">
+                  🗺️ Localização
+                </h3>
+              </div>{' '}              {locationMenuItems.map((item) => (
                 <Button
                   key={item.id}
                   variant="ghost"
                   className={cn(
-                    'w-full justify-start px-3',
+                    'w-full justify-start px-4 py-3 rounded-xl transition-all duration-300 hover:scale-105',
                     isActive(item.path)
-                      ? 'bg-accent text-accent-foreground'
-                      : 'hover:bg-accent hover:text-accent-foreground',
+                      ? 'bg-primary/20 text-primary shadow-lg'
+                      : 'hover:bg-accent/50 hover:text-accent-foreground hover:shadow-md',
                   )}
                   asChild
                 >
-                  <NavLink to={item.path}>
+                  <NavLink to={item.path} className="flex items-center gap-3">
                     {item.icon}
-                    <span className="ml-3">{item.title}</span>
+                    <span className="font-medium">{item.title}</span>
                   </NavLink>
                 </Button>
               ))}
             </div>
-
-            <div className="pt-5 mt-5 space-y-2 border-t border-border">
-              <h3 className="px-3 text-xs font-semibold uppercase text-muted-foreground">
-                Administração
-              </h3>
-              {settingsMenuItems.map((item) => (
+            <div className="pt-6 mt-6 space-y-2">
+              <div className="flex items-center gap-2 px-3 py-2">
+                <Settings className="h-4 w-4 text-primary" />
+                <h3 className="text-xs font-semibold uppercase text-muted-foreground">
+                  ⚙️ Administração
+                </h3>
+              </div>{' '}              {settingsMenuItems.map((item) => (
                 <Button
                   key={item.id}
                   variant="ghost"
                   className={cn(
-                    'w-full justify-start px-3',
+                    'w-full justify-start px-4 py-3 rounded-xl transition-all duration-300 hover:scale-105',
                     isActive(item.path)
-                      ? 'bg-accent text-accent-foreground'
-                      : 'hover:bg-accent hover:text-accent-foreground',
+                      ? 'bg-primary/20 text-primary shadow-lg'
+                      : 'hover:bg-accent/50 hover:text-accent-foreground hover:shadow-md',
                   )}
                   asChild
                 >
-                  <NavLink to={item.path}>
+                  <NavLink to={item.path} className="flex items-center gap-3">
                     {item.icon}
-                    <span className="ml-3">{item.title}</span>
+                    <span className="font-medium">{item.title}</span>
                   </NavLink>
                 </Button>
               ))}
