@@ -3,6 +3,19 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Smooth theme transition */
+* {
+  transition: 
+    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    fill 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    stroke 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -117,4 +130,49 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Transição suave para mudança de tema */
+html {
+  color-scheme: light dark;
+}
+
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, fill 0.2s ease, stroke 0.2s ease;
+}
+
+/* Prevent layout shifts during theme transition */
+body {
+  overflow-anchor: none;
+}
+
+/* Animação melhorada para overlay de tema */
+@keyframes themeTransitionEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes themeTransitionExit {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+}
+
+.theme-overlay-enter {
+  animation: themeTransitionEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-overlay-exit {
+  animation: themeTransitionExit 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }

@@ -107,7 +107,7 @@ const Sidebar = () => {
   return (
     <aside
       id="sidebar"
-      className="fixed left-0 top-0 z-20 flex h-full w-64 flex-shrink-0 flex-col pt-16 transition-all duration-200 ease-in-out lg:flex"
+      className="fixed left-0 top-0 z-20 flex h-full w-64 flex-shrink-0 flex-col pt-16 transition-all duration-200 ease-in-out lg:flex animate-fade-in-right animate-duration-500"
       aria-label="Sidebar"
     >
       <div className="relative flex min-h-0 flex-1 flex-col border-r border-border bg-background pt-0">
@@ -118,7 +118,7 @@ const Sidebar = () => {
                 key={item.id}
                 variant="ghost"
                 className={cn(
-                  'w-full justify-start px-3',
+                  'w-full justify-start px-3 transition-transform hover:scale-105',
                   isActive(item.path)
                     ? 'bg-accent text-accent-foreground'
                     : 'hover:bg-accent hover:text-accent-foreground',
@@ -141,7 +141,7 @@ const Sidebar = () => {
                   key={item.id}
                   variant="ghost"
                   className={cn(
-                    'w-full justify-start px-3',
+                    'w-full justify-start px-3 transition-transform hover:scale-105',
                     isActive(item.path)
                       ? 'bg-accent text-accent-foreground'
                       : 'hover:bg-accent hover:text-accent-foreground',
@@ -165,7 +165,7 @@ const Sidebar = () => {
                   key={item.id}
                   variant="ghost"
                   className={cn(
-                    'w-full justify-start px-3',
+                    'w-full justify-start px-3 transition-transform hover:scale-105',
                     isActive(item.path)
                       ? 'bg-accent text-accent-foreground'
                       : 'hover:bg-accent hover:text-accent-foreground',
