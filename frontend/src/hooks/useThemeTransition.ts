@@ -1,39 +1,52 @@
 import { useState, useCallback } from 'react';
 import { useTheme } from 'next-themes';
 
+type WaveDirection = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+
 export const useThemeTransition = () => {
   const { theme, setTheme } = useTheme();
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [overlayPhase, setOverlayPhase] = useState<'enter' | 'exit' | null>(null);
+  const [waveDirection, setWaveDirection] = useState<WaveDirection>('top-left');
 
   const toggleTheme = useCallback(() => {
-    if (isTransitioning) return; // Previne múltiplos cliques
+    if (isTransitioning) return;
+    
+    // Escolhe uma direção aleatória para a onda
+    const directions: WaveDirection[] = ['top-right'];
+    const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+    setWaveDirection(randomDirection);
     
     setIsTransitioning(true);
-    setOverlayPhase('enter');
     
-    // Fase 1: Overlay cobre a tela completamente
+    // Adiciona classes ao body para o efeito de onda
+    const body = document.body;
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    
+    body.classList.add('theme-wave-transition', 'transitioning');
+    body.classList.add(`wave-${randomDirection}`);
+    body.classList.add(theme === 'light' ? 'light-to-dark' : 'dark-to-light');
     setTimeout(() => {
-      // Mudança de tema acontece quando o overlay está no máximo
-      setTheme(theme === 'light' ? 'dark' : 'light');
-      
-      // Pequeno delay para garantir que o tema mudou no DOM
-      setTimeout(() => {
-        setOverlayPhase('exit');
-        
-        // Fase 2: Overlay sai suavemente
-        setTimeout(() => {
-          setIsTransitioning(false);
-          setOverlayPhase(null);
-        }, 400);
-      }, 100);
-    }, 400);
+      setTheme(newTheme);
+    }, 300);
+    
+    // Remove as classes após a animação completa (1 segundo total)
+    setTimeout(() => {
+      body.classList.remove(
+        'theme-wave-transition', 
+        'transitioning',
+        `wave-${randomDirection}`,
+        'light-to-dark',
+        'dark-to-light'
+      );
+      setIsTransitioning(false);
+    }, 2000);
+    
   }, [theme, setTheme, isTransitioning]);
 
   return {
     theme,
     isTransitioning,
-    overlayPhase,
+    waveDirection,
     toggleTheme,
   };
 };

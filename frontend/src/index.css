@@ -176,3 +176,248 @@ body {
 .theme-overlay-exit {
   animation: themeTransitionExit 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Animações de transição de tema - Fade Corner */
+@keyframes fadeCornerTopLeftEnter {
+  0% {
+    clip-path: circle(0% at 0% 0%);
+    opacity: 0;
+  }
+  100% {
+    clip-path: circle(150% at 0% 0%);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeCornerTopLeftExit {
+  0% {
+    clip-path: circle(150% at 0% 0%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 0% 0%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeCornerTopRightEnter {
+  0% {
+    clip-path: circle(0% at 100% 0%);
+    opacity: 0;
+  }
+  100% {
+    clip-path: circle(150% at 100% 0%);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeCornerTopRightExit {
+  0% {
+    clip-path: circle(150% at 100% 0%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 100% 0%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeCornerBottomLeftEnter {
+  0% {
+    clip-path: circle(0% at 0% 100%);
+    opacity: 0;
+  }
+  100% {
+    clip-path: circle(150% at 0% 100%);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeCornerBottomLeftExit {
+  0% {
+    clip-path: circle(150% at 0% 100%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 0% 100%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeCornerBottomRightEnter {
+  0% {
+    clip-path: circle(0% at 100% 100%);
+    opacity: 0;
+  }
+  100% {
+    clip-path: circle(150% at 100% 100%);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeCornerBottomRightExit {
+  0% {
+    clip-path: circle(150% at 100% 100%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 100% 100%);
+    opacity: 0;
+  }
+}
+
+/* Classes de transição para fade corner */
+.theme-transition-fade-corner-top-left-enter {
+  animation: fadeCornerTopLeftEnter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-transition-fade-corner-top-left-exit {
+  animation: fadeCornerTopLeftExit 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-transition-fade-corner-top-right-enter {
+  animation: fadeCornerTopRightEnter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-transition-fade-corner-top-right-exit {
+  animation: fadeCornerTopRightExit 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-transition-fade-corner-bottom-left-enter {
+  animation: fadeCornerBottomLeftEnter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-transition-fade-corner-bottom-left-exit {
+  animation: fadeCornerBottomLeftExit 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-transition-fade-corner-bottom-right-enter {
+  animation: fadeCornerBottomRightEnter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-transition-fade-corner-bottom-right-exit {
+  animation: fadeCornerBottomRightExit 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Efeito de transição de tema tipo onda - sem overlay */
+.theme-wave-transition {
+  position: relative;
+}
+
+.theme-wave-transition::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+
+.theme-wave-transition.transitioning::before {
+  opacity: 1;
+}
+
+/* Animações de onda circular de diferentes cantos */
+@keyframes waveFromTopLeft {
+  0% {
+    clip-path: circle(0% at 0% 0%);
+    opacity: 1;
+  }
+  50% {
+    clip-path: circle(150% at 0% 0%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 100% 100%);
+    opacity: 1;
+  }
+}
+
+@keyframes waveFromTopRight {
+  0% {
+    clip-path: circle(0% at 100% 0%);
+    opacity: 1;
+  }
+  50% {
+    clip-path: circle(150% at 100% 0%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 0% 100%);
+    opacity: 1;
+  }
+}
+
+@keyframes waveFromBottomLeft {
+  0% {
+    clip-path: circle(0% at 0% 100%);
+    opacity: 1;
+  }
+  50% {
+    clip-path: circle(150% at 0% 100%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 100% 0%);
+    opacity: 1;
+  }
+}
+
+@keyframes waveFromBottomRight {
+  0% {
+    clip-path: circle(0% at 100% 100%);
+    opacity: 1;
+  }
+  50% {
+    clip-path: circle(150% at 100% 100%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 0% 0%);
+    opacity: 1;
+  }
+}
+
+/* Classes de transição para onda */
+.wave-top-left::before {
+  background: var(--new-theme-background);
+  animation: waveFromTopLeft 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.wave-top-right::before {
+  background: var(--new-theme-background);
+  animation: waveFromTopRight 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.wave-bottom-left::before {
+  background: var(--new-theme-background);
+  animation: waveFromBottomLeft 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.wave-bottom-right::before {
+  background: var(--new-theme-background);
+  animation: waveFromBottomRight 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* CSS Variables para temas */
+:root {
+  --new-theme-background: var(--background);
+}
+
+.dark {
+  --new-theme-background: var(--background);
+}
+
+/* Tema claro -> escuro */
+.light-to-dark {
+  --new-theme-background: oklch(0.145 0 0);
+}
+
+/* Tema escuro -> claro */
+.dark-to-light {
+  --new-theme-background: oklch(1 0 0);
+}
