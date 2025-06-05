@@ -101,171 +101,106 @@ const SuppliersList = () => {
       setDeleteDialogOpen(false);
       setSupplierToDelete(null);
     }
-  };
-
-  const formatCnpjCpf = (cnpjCpf: string) => {
-    if (!cnpjCpf) return '';
-    cnpjCpf = cnpjCpf.replace(/[^\d]/g, '');
-    if (cnpjCpf.length <= 11) {
-      return cnpjCpf.replace(
-        /(\d{3})(\d{3})(\d{3})(\d{2})/,
-        '$1.$2.$3-$4',
-      );
+  };  const formatCpfCnpj = (doc: string, tipo: 'F' | 'J') => {
+    if (tipo === 'F') {
+      if (doc.length === 11) {
+        return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+      }
     } else {
-      return cnpjCpf.replace(
-        /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
-        '$1.$2.$3/$4-$5',
-      );
+      if (doc.length === 14) {
+        return doc.replace(
+          /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
+          '$1.$2.$3/$4-$5',
+        );
+      }
     }
+    return doc;
   };
-
-  const formatPhoneNumber = (phone: string) => {
-    if (!phone) return '';
-    phone = phone.replace(/[^\d]/g, '');
-    if (phone.length === 11) {
-      return phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-    } else if (phone.length === 10) {
-      return phone.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
-    }
-    return phone;
-  };
-
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-gray-200 px-8 py-4">
-        <h1 className="text-xl font-semibold">Fornecedores</h1>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight">Fornecedores</h1>
         <Button asChild>
           <Link to="/suppliers/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Fornecedor
+            <Plus className="mr-2 h-4 w-4" /> Novo Fornecedor
           </Link>
         </Button>
       </div>
 
-      <div className="flex-1 overflow-auto p-8">
-        <div className="mb-6">
+      <div className="flex items-center py-4">
+        <div className="relative max-w-sm">
           <Input
-            placeholder="Buscar fornecedor..."
-            className="max-w-md"
+            type="search"
+            placeholder="Buscar fornecedores..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Razão Social / Nome</TableHead>
-                <TableHead>CNPJ / CPF</TableHead>
-                <TableHead>Cidade</TableHead>
-                <TableHead>Telefone</TableHead>
-                <TableHead>Responsável</TableHead>
-                <TableHead className="text-center">Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={7}
-                    className="h-24 text-center"
-                  >
-                    Carregando...
-                  </TableCell>
-                </TableRow>
-              ) : filteredSuppliers.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={7}
-                    className="h-24 text-center"
-                  >
-                    Nenhum fornecedor encontrado.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredSuppliers.map((supplier) => (
-                  <TableRow key={supplier.id}>
-                    <TableCell>
-                      <div className="font-medium">{supplier.razaoSocial}</div>
-                      {supplier.nomeFantasia && (
-                        <div className="text-sm text-muted-foreground">
-                          {supplier.nomeFantasia}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {formatCnpjCpf(supplier.cnpjCpf)}
-                    </TableCell>
-                    <TableCell>
-                      {supplier.cidadeNome}
-                      {supplier.uf && (
-                        <span className="text-sm text-muted-foreground">
-                          {' '}
-                          ({supplier.uf})
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {formatPhoneNumber(supplier.telefone || '')}
-                    </TableCell>
-                    <TableCell>
-                      {supplier.responsavel}
-                      {supplier.celularResponsavel && (
-                        <div className="text-sm text-muted-foreground">
-                          {formatPhoneNumber(supplier.celularResponsavel)}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {supplier.ativo ? (
-                        <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
-                          Ativo
-                        </span>
-                      ) : (
-                        <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800">
-                          Inativo
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          asChild
-                        >
-                          <Link to={`/suppliers/${supplier.id}`}>
-                            <Edit className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteClick(supplier)}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
       </div>
 
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome/Razão Social</TableHead>
+              <TableHead>Nome Fantasia</TableHead>
+              <TableHead>CPF/CNPJ</TableHead>
+              <TableHead>Tipo</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center">
+                  Carregando...
+                </TableCell>
+              </TableRow>
+            ) : filteredSuppliers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center">
+                  Nenhum fornecedor encontrado.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredSuppliers.map((supplier) => (
+                <TableRow key={supplier.id}>
+                  <TableCell className="font-medium">
+                    {supplier.razaoSocial}
+                  </TableCell>
+                  <TableCell>{supplier.nomeFantasia || '-'}</TableCell>
+                  <TableCell>
+                    {formatCpfCnpj(supplier.cnpjCpf, supplier.tipo)}
+                  </TableCell>
+                  <TableCell>
+                    {supplier.tipo === 'F' ? 'Física' : 'Jurídica'}
+                  </TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Button variant="ghost" size="icon" asChild>
+                      <Link to={`/suppliers/edit/${supplier.id}`}>
+                        <Edit className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDeleteClick(supplier)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirmar exclusão</DialogTitle>
             <DialogDescription>
               Tem certeza que deseja excluir o fornecedor{' '}
-              <strong>{supplierToDelete?.razaoSocial}</strong>?
-              <br />
-              Esta ação não poderá ser desfeita.
+              {supplierToDelete?.razaoSocial}? Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -275,10 +210,7 @@ const SuppliersList = () => {
             >
               Cancelar
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteConfirm}
-            >
+            <Button variant="destructive" onClick={handleDeleteConfirm}>
               Excluir
             </Button>
           </DialogFooter>

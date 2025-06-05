@@ -293,114 +293,114 @@ export default function SupplierForm() {
       );
       toast.error('Erro ao atualizar condições de pagamento após criação');
     }
-  }
-
-  return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-gray-200 px-8 py-4">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            asChild
-            className="h-8 w-8"
-            onClick={() => navigate('/suppliers')}
-          >
-            <Link to="/suppliers">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <h1 className="text-xl font-semibold">
+  }  return (
+    <div className="space-y-4">
+      <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">
             {isEditing ? 'Editar Fornecedor' : 'Novo Fornecedor'}
           </h1>
+          <p className="text-muted-foreground text-sm">
+            {isEditing
+              ? 'Atualize as informações do fornecedor conforme necessário'
+              : 'Preencha as informações para cadastrar um novo fornecedor'}
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            type="submit"
-            form="supplierForm"
-            disabled={isLoading}
-            className="h-9 px-4"
-          >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="mr-2 h-4 w-4" />
-            )}
-            Salvar
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" asChild>
+            <Link to="/suppliers">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+            </Link>
           </Button>
         </div>
       </div>
-      <div className="flex-1 overflow-auto p-8">
-        <Form {...form}>
-          <form
-            id="supplierForm"
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8"
-          >
-            <div className="space-y-6 rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-medium">Dados Gerais</h2>
-              <GeneralDataSection
-                form={form}
-                isLoading={isLoading}
-                watchTipo={watchTipo}
-                id={id}
-              />
-            </div>
 
-            <div className="space-y-6 rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-medium">Documentos</h2>
-              <DocumentsSection
-                form={form}
-                isLoading={isLoading}
-                formatters={formatters}
-                watchTipo={watchTipo}
-                watchIsEstrangeiro={watchIsEstrangeiro}
-              />
-            </div>
+      <Form {...form}>        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="border rounded-lg p-5 shadow-sm">
+            <div className="grid grid-cols-1 gap-y-6">
+              <div>
+                <h2 className="text-lg font-medium mb-4">Dados Gerais</h2>
+                <GeneralDataSection
+                  form={form}
+                  isLoading={isLoading}
+                  watchTipo={watchTipo}
+                  id={id}
+                />
+              </div>
 
-            <div className="space-y-6 rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-medium">Endereço</h2>
-              <AddressSection
-                form={form}
-                isLoading={isLoading}
-                formatters={formatters}
-                selectedCity={selectedCity}
-                watchIsEstrangeiro={watchIsEstrangeiro}
-                setCitySearchOpen={setCitySearchOpen}
-              />
-            </div>
+              <div>
+                <h2 className="text-lg font-medium mb-4">Documentos</h2>
+                <DocumentsSection
+                  form={form}
+                  isLoading={isLoading}
+                  formatters={formatters}
+                  watchTipo={watchTipo}
+                  watchIsEstrangeiro={watchIsEstrangeiro}
+                />
+              </div>
 
-            <div className="space-y-6 rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-medium">Contato</h2>
-              <ContactSection
-                form={form}
-                isLoading={isLoading}
-                formatters={formatters}
-              />
-            </div>
+              <div>
+                <h2 className="text-lg font-medium mb-4">Endereço</h2>
+                <AddressSection
+                  form={form}
+                  isLoading={isLoading}
+                  formatters={formatters}
+                  selectedCity={selectedCity}
+                  watchIsEstrangeiro={watchIsEstrangeiro}
+                  setCitySearchOpen={setCitySearchOpen}
+                />
+              </div>
 
-            <div className="space-y-6 rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-medium">Informações Adicionais</h2>
-              <SupplierSpecificSection
-                form={form}
-                isLoading={isLoading}
-                formatters={formatters}
-              />
-            </div>
+              <div>
+                <h2 className="text-lg font-medium mb-4">Contato</h2>
+                <ContactSection
+                  form={form}
+                  isLoading={isLoading}
+                  formatters={formatters}
+                />
+              </div>
 
-            <div className="space-y-6 rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-medium">Pagamento</h2>
-              <PaymentSection
-                form={form}
-                isLoading={isLoading}
-                selectedPaymentTerm={selectedPaymentTerm}
-                setPaymentTermSearchOpen={setPaymentTermSearchOpen}
-              />
+              <div>
+                <h2 className="text-lg font-medium mb-4">Informações Adicionais</h2>
+                <SupplierSpecificSection
+                  form={form}
+                  isLoading={isLoading}
+                  formatters={formatters}
+                />
+              </div>
+
+              <div>
+                <h2 className="text-lg font-medium mb-4">Pagamento</h2>
+                <PaymentSection
+                  form={form}
+                  isLoading={isLoading}
+                  selectedPaymentTerm={selectedPaymentTerm}
+                  setPaymentTermSearchOpen={setPaymentTermSearchOpen}
+                />
+              </div>
+
+              <div className="flex justify-end pt-4 mt-2 border-t">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="h-10 px-6 text-base"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" /> Salvar Fornecedor
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
-          </form>
-        </Form>
-      </div>
-      {/* Diálogos de pesquisa */}{' '}
+          </div>
+        </form>
+        </Form>      {/* Diálogos de pesquisa */}
       <SearchDialog
         title="Selecione uma cidade"
         open={citySearchOpen}
@@ -416,8 +416,7 @@ export default function SupplierForm() {
         onCreateNew={() => {
           setCitySearchOpen(false);
           setCityCreationOpen(true);
-        }}
-      />{' '}
+        }}      />
       <SearchDialog
         title="Selecione uma condição de pagamento"
         open={paymentTermSearchOpen}
@@ -432,9 +431,10 @@ export default function SupplierForm() {
         onCreateNew={() => {
           setPaymentTermSearchOpen(false);
           setPaymentTermCreationOpen(true);
-        }}
-      />
-      {/* Diálogos de criação */}{' '}      <StateCreationDialog
+        }}      />
+
+      {/* Diálogos de criação */}
+      <StateCreationDialog
         open={stateCreationOpen}
         onOpenChange={setStateCreationOpen}
         onSuccess={() => {
