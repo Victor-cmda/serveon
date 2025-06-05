@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sun, Moon } from 'lucide-react';
 import {
@@ -14,7 +14,12 @@ interface ThemeToggleProps {
 }
 
 export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className }) => {
-  const { theme, isTransitioning, toggleTheme } = useThemeTransition();
+  const { theme, isTransitioning, toggleTheme, cleanup } = useThemeTransition();
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return cleanup;
+  }, [cleanup]);
 
   return (
     <TooltipProvider delayDuration={300}>

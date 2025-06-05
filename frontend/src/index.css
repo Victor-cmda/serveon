@@ -3,17 +3,33 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Smooth theme transition */
+/* Smooth theme transition - optimized */
 * {
   transition: 
-    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    fill 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    stroke 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color 0.25s ease-out,
+    border-color 0.25s ease-out,
+    color 0.25s ease-out,
+    fill 0.25s ease-out,
+    stroke 0.25s ease-out,
+    opacity 0.25s ease-out,
+    box-shadow 0.25s ease-out;
+}
+
+/* Disable transitions during theme wave animation to prevent conflicts */
+.theme-wave-transition.transitioning * {
+  transition: none !important;
+}
+
+/* Re-enable transitions after wave animation */
+.theme-wave-transition:not(.transitioning) * {
+  transition: 
+    background-color 0.25s ease-out,
+    border-color 0.25s ease-out,
+    color 0.25s ease-out,
+    fill 0.25s ease-out,
+    stroke 0.25s ease-out,
+    opacity 0.25s ease-out,
+    box-shadow 0.25s ease-out;
 }
 
 :root {
@@ -132,18 +148,16 @@
   }
 }
 
-/* Transição suave para mudança de tema */
+/* Transição suave para mudança de tema - otimizada */
 html {
   color-scheme: light dark;
 }
 
-* {
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, fill 0.2s ease, stroke 0.2s ease;
-}
-
-/* Prevent layout shifts during theme transition */
+/* Remove duplicate transition - keep only one optimized version */
 body {
   overflow-anchor: none;
+  transform: translateZ(0); /* Force hardware acceleration */
+  backface-visibility: hidden; /* Prevent flicker */
 }
 
 /* Animação melhorada para overlay de tema */
@@ -299,7 +313,7 @@ body {
   animation: fadeCornerBottomRightExit 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* Efeito de transição de tema tipo onda - sem overlay */
+/* Efeito de transição de tema tipo onda - otimizado */
 .theme-wave-transition {
   position: relative;
 }
@@ -314,14 +328,17 @@ body {
   z-index: 9999;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.1s ease;
+  transition: opacity 0.15s ease;
+  will-change: opacity, clip-path;
+  transform: translateZ(0); /* Force hardware acceleration */
+  backface-visibility: hidden; /* Prevent flicker */
 }
 
 .theme-wave-transition.transitioning::before {
   opacity: 1;
 }
 
-/* Animações de onda circular de diferentes cantos */
+/* Animações de onda circular de diferentes cantos - otimizadas */
 @keyframes waveFromTopLeft {
   0% {
     clip-path: circle(0% at 0% 0%);
@@ -382,25 +399,25 @@ body {
   }
 }
 
-/* Classes de transição para onda */
+/* Classes de transição para onda - otimizadas */
 .wave-top-left::before {
   background: var(--new-theme-background);
-  animation: waveFromTopLeft 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: waveFromTopLeft 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
 .wave-top-right::before {
   background: var(--new-theme-background);
-  animation: waveFromTopRight 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: waveFromTopRight 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
 .wave-bottom-left::before {
   background: var(--new-theme-background);
-  animation: waveFromBottomLeft 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: waveFromBottomLeft 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
 .wave-bottom-right::before {
   background: var(--new-theme-background);
-  animation: waveFromBottomRight 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: waveFromBottomRight 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
 /* CSS Variables para temas */
