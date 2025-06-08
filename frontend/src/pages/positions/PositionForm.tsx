@@ -134,123 +134,124 @@ const PositionForm: React.FC = () => {
       setLoading(false);
     }
   };
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4">
+      <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Briefcase className="h-8 w-8" />
+          <h1 className="text-xl font-bold tracking-tight flex items-center gap-2">
+            <Briefcase className="h-6 w-6" />
             {id ? 'Editar Cargo' : 'Novo Cargo'}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {id ? 'Edite as informações do cargo' : 'Adicione um novo cargo ao sistema'}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="rounded-lg border p-6 space-y-4">
-                <h3 className="text-lg font-medium">Informações do Cargo</h3>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="border rounded-lg p-5 shadow-sm">
+            <div className="grid grid-cols-1 gap-y-6">
+              <div>
+                <h3 className="text-lg font-medium mb-4">Informações do Cargo</h3>
                 
-                <FormField
-                  control={form.control}
-                  name="nome"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome *</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Digite o nome do cargo" 
-                          {...field} 
-                          disabled={loading}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="departamentoId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Departamento</FormLabel>
-                      <Select 
-                        onValueChange={(value) => {
-                          const numValue = value ? parseInt(value) : undefined;
-                          field.onChange(numValue);
-                        }} 
-                        value={field.value?.toString()} 
-                        disabled={loading}
-                      >
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="nome"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome *</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o departamento (opcional)" />
-                          </SelectTrigger>
+                          <Input 
+                            placeholder="Digite o nome do cargo" 
+                            {...field} 
+                            disabled={loading}
+                          />
                         </FormControl>
-                        <SelectContent>
-                          {departments.map((department) => (
-                            <SelectItem key={department.id} value={department.id.toString()}>
-                              {department.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="descricao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Digite uma descrição opcional para o cargo"
-                          className="resize-none"
-                          {...field}
+                  <FormField
+                    control={form.control}
+                    name="departamentoId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Departamento</FormLabel>
+                        <Select 
+                          onValueChange={(value) => {
+                            const numValue = value ? parseInt(value) : undefined;
+                            field.onChange(numValue);
+                          }} 
+                          value={field.value?.toString()} 
                           disabled={loading}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o departamento (opcional)" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {departments.map((department) => (
+                              <SelectItem key={department.id} value={department.id.toString()}>
+                                {department.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="ativo"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                      <div className="space-y-0.5">
-                        <FormLabel>Cargo Ativo</FormLabel>
-                        <div className="text-sm text-muted-foreground">
-                          Indica se o cargo está ativo no sistema
+                  <FormField
+                    control={form.control}
+                    name="descricao"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descrição</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Digite uma descrição opcional para o cargo"
+                            className="resize-none"
+                            {...field}
+                            disabled={loading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="ativo"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel>Cargo Ativo</FormLabel>
+                          <div className="text-sm text-muted-foreground">
+                            Indica se o cargo está ativo no sistema
+                          </div>
                         </div>
-                      </div>
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          checked={field.value}
-                          onChange={field.onChange}
-                          disabled={loading}
-                          className="h-4 w-4"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            disabled={loading}
+                            className="h-4 w-4"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
-              <div className="flex justify-end space-x-4">
+              <div className="flex justify-end pt-4 mt-2 border-t space-x-4">
                 <Button
                   type="button"
                   variant="outline"
@@ -265,23 +266,10 @@ const PositionForm: React.FC = () => {
                   {loading ? 'Salvando...' : 'Salvar'}
                 </Button>
               </div>
-            </form>
-          </Form>
-        </div>
-
-        <div className="lg:col-span-1">
-          <div className="rounded-lg border p-6 space-y-4">
-            <h3 className="text-lg font-medium">Informações</h3>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>• O nome deve ser único no sistema</p>
-              <p>• Todos os campos com * são obrigatórios</p>
-              <p>• O departamento é opcional</p>
-              <p>• A descrição é opcional</p>
-              <p>• Cargos inativos não aparecerão na seleção de funcionários</p>
             </div>
           </div>
-        </div>
-      </div>
+        </form>
+      </Form>
     </div>
   );
 };

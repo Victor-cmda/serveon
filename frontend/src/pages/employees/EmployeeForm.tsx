@@ -201,206 +201,190 @@ const EmployeeForm: React.FC = () => {
   const formatPhone = (value: string) => {
     return value.replace(/\D/g, '').slice(0, 11);
   };
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4">
+      <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Users className="h-8 w-8" />
+          <h1 className="text-xl font-bold tracking-tight flex items-center gap-2">
+            <Users className="h-6 w-6" />
             {id ? 'Editar Funcionário' : 'Novo Funcionário'}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {id ? 'Edite as informações do funcionário' : 'Adicione um novo funcionário ao sistema'}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="rounded-lg border p-6 space-y-4">
-                <h3 className="text-lg font-medium">Informações Pessoais</h3>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="border rounded-lg p-5 shadow-sm">
+            <div className="grid grid-cols-1 gap-y-6">
+              <div>
+                <h3 className="text-lg font-medium mb-4">Informações Pessoais</h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="nome"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome Completo *</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Digite o nome completo" 
-                            {...field} 
-                            disabled={loading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="nome"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome Completo *</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Digite o nome completo" 
+                              {...field} 
+                              disabled={loading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="cpf"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>CPF *</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="12345678901"
-                            {...field}
-                            disabled={loading || !!id} // CPF não pode ser editado
-                            onChange={(e) => field.onChange(formatCPF(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                    <FormField
+                      control={form.control}
+                      name="cpf"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>CPF *</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="12345678901"
+                              {...field}
+                              disabled={loading || !!id} // CPF não pode ser editado
+                              onChange={(e) => field.onChange(formatCPF(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email *</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="funcionario@empresa.com"
-                            {...field}
-                            disabled={loading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email *</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="email"
+                              placeholder="funcionario@empresa.com"
+                              {...field}
+                              disabled={loading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="telefone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Telefone</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="11987654321"
-                            {...field}
-                            disabled={loading}
-                            onChange={(e) => field.onChange(formatPhone(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="telefone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Telefone</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="11987654321"
+                              {...field}
+                              disabled={loading}
+                              onChange={(e) => field.onChange(formatPhone(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="rounded-lg border p-6 space-y-4">
-                <h3 className="text-lg font-medium">Informações Profissionais</h3>
+              <div>
+                <h3 className="text-lg font-medium mb-4">Informações Profissionais</h3>
+                
+                <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="departamentoId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Departamento *</FormLabel>
-                        <Select 
-                          onValueChange={(value) => {
-                            const numValue = value ? parseInt(value) : undefined;
-                            field.onChange(numValue);
-                            setSelectedDepartmentId(numValue);
-                            // Limpar cargo quando departamento muda
-                            form.setValue('cargoId', undefined);
-                          }} 
-                          value={field.value?.toString()} 
-                          disabled={loading}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o departamento" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {departments.map((department) => (
-                              <SelectItem key={department.id} value={department.id.toString()}>
-                                {department.nome}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="cargoId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cargo *</FormLabel>
-                        <Select 
-                          onValueChange={(value) => {
-                            const numValue = value ? parseInt(value) : undefined;
-                            field.onChange(numValue);
-                          }} 
-                          value={field.value?.toString()} 
-                          disabled={loading}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o cargo" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {positions.map((position) => (
-                              <SelectItem key={position.id} value={position.id.toString()}>
-                                {position.nome}
-                                {position.departamentoNome && ` (${position.departamentoNome})`}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="dataAdmissao"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data de Admissão *</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="date"
-                            {...field}
-                            disabled={loading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {id && (
                     <FormField
                       control={form.control}
-                      name="dataDemissao"
+                      name="departamentoId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Data de Demissão</FormLabel>
+                          <FormLabel>Departamento *</FormLabel>
+                          <Select 
+                            onValueChange={(value) => {
+                              const numValue = value ? parseInt(value) : undefined;
+                              field.onChange(numValue);
+                              setSelectedDepartmentId(numValue);
+                              // Limpar cargo quando departamento muda
+                              form.setValue('cargoId', undefined);
+                            }} 
+                            value={field.value?.toString()} 
+                            disabled={loading}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o departamento" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {departments.map((department) => (
+                                <SelectItem key={department.id} value={department.id.toString()}>
+                                  {department.nome}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="cargoId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Cargo *</FormLabel>
+                          <Select 
+                            onValueChange={(value) => {
+                              const numValue = value ? parseInt(value) : undefined;
+                              field.onChange(numValue);
+                            }} 
+                            value={field.value?.toString()} 
+                            disabled={loading}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o cargo" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {positions.map((position) => (
+                                <SelectItem key={position.id} value={position.id.toString()}>
+                                  {position.nome}
+                                  {position.departamentoNome && ` (${position.departamentoNome})`}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="dataAdmissao"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Data de Admissão *</FormLabel>
                           <FormControl>
                             <Input
                               type="date"
@@ -412,35 +396,55 @@ const EmployeeForm: React.FC = () => {
                         </FormItem>
                       )}
                     />
-                  )}
-                </div>
 
-                <FormField
-                  control={form.control}
-                  name="ativo"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                      <div className="space-y-0.5">
-                        <FormLabel>Funcionário Ativo</FormLabel>
-                        <div className="text-sm text-muted-foreground">
-                          Indica se o funcionário está ativo no sistema
+                    {id && (
+                      <FormField
+                        control={form.control}
+                        name="dataDemissao"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Data de Demissão</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="date"
+                                {...field}
+                                disabled={loading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="ativo"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel>Funcionário Ativo</FormLabel>
+                          <div className="text-sm text-muted-foreground">
+                            Indica se o funcionário está ativo no sistema
+                          </div>
                         </div>
-                      </div>
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          checked={field.value}
-                          onChange={field.onChange}
-                          disabled={loading}
-                          className="h-4 w-4"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            disabled={loading}
+                            className="h-4 w-4"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
-              <div className="flex justify-end space-x-4">
+              <div className="flex justify-end pt-4 mt-2 border-t space-x-4">
                 <Button
                   type="button"
                   variant="outline"
@@ -455,23 +459,10 @@ const EmployeeForm: React.FC = () => {
                   {loading ? 'Salvando...' : 'Salvar'}
                 </Button>
               </div>
-            </form>
-          </Form>
-        </div>
-
-        <div className="lg:col-span-1">
-          <div className="rounded-lg border p-6 space-y-4">
-            <h3 className="text-lg font-medium">Informações</h3>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>• O CPF deve conter exatamente 11 dígitos</p>
-              <p>• O email deve ser único no sistema</p>
-              <p>• Todos os campos com * são obrigatórios</p>
-              <p>• A data de demissão é opcional</p>
-              {id && <p>• O CPF não pode ser alterado após o cadastro</p>}
             </div>
           </div>
-        </div>
-      </div>
+        </form>
+      </Form>
     </div>
   );
 };
