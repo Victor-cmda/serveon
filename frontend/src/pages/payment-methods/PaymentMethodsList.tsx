@@ -1,205 +1,184 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit, Trash2, Search, CreditCard } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Plus, Edit, Trash, Search, CreditCard } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { paymentMethodApi } from '@/services/api';
-import { PaymentMethod } from '@/types/payment-method';
-import { toast } from 'sonner';
+import { paymentMethodApi } from '../../services/api';
+import { PaymentMethod } from '../../types/payment-method';
+import { toast } from '../../lib/toast';
 
-const PaymentMethodsList = () => {
+const PaymentMethodsList: React.FC = () => {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [filteredPaymentMethods, setFilteredPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [methodToDelete, setMethodToDelete] = useState<PaymentMethod | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    fetchPaymentMethods();
+    loadPaymentMethods();
   }, []);
 
-  useEffect(() => {
-    if (search) {
-      const filtered = paymentMethods.filter(
-        (method) =>
-          method.description.toLowerCase().includes(search.toLowerCase()) ||
-          (method.code && method.code.toLowerCase().includes(search.toLowerCase())) ||
-          (method.type && method.type.toLowerCase().includes(search.toLowerCase()))
-      );
-      setFilteredPaymentMethods(filtered);
-    } else {
-      setFilteredPaymentMethods(paymentMethods);
-    }
-  }, [search, paymentMethods]);
-
-  const fetchPaymentMethods = async () => {
-    setIsLoading(true);
+  const loadPaymentMethods = async () => {
     try {
+      setLoading(true);
       const data = await paymentMethodApi.getAll();
       setPaymentMethods(data);
-      setFilteredPaymentMethods(data);
     } catch (error) {
-      console.error('Erro ao buscar métodos de pagamento:', error);
+      console.error('Erro ao carregar formas de pagamento:', error);
       toast.error('Erro', {
-        description: 'Não foi possível carregar a lista de métodos de pagamento.',
+        description: 'Não foi possível carregar as formas de pagamento',
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleDeleteClick = (method: PaymentMethod) => {
-    setMethodToDelete(method);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!methodToDelete) return;
-
-    try {
-      await paymentMethodApi.delete(methodToDelete.id);
-      setPaymentMethods(paymentMethods.filter((m) => m.id !== methodToDelete.id));
-      toast.success('Sucesso', {
-        description: `Método de pagamento "${methodToDelete.description}" removido com sucesso.`,
-      });
-    } catch (error: any) {
-      console.error('Erro ao excluir método de pagamento:', error);
-      toast.error('Erro', {
-        description:
-          error.message ||
-          'Não foi possível excluir o método de pagamento. Verifique se não está sendo usado em parcelas.',
-      });
-    } finally {
-      setDeleteDialogOpen(false);
-      setMethodToDelete(null);
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Tem certeza que deseja excluir esta forma de pagamento?')) {
+      try {
+        await paymentMethodApi.delete(id);
+        toast.success('Sucesso', {
+          description: 'Forma de pagamento excluída com sucesso',
+        });
+        loadPaymentMethods();
+      } catch (error) {
+        console.error('Erro ao excluir forma de pagamento:', error);
+        toast.error('Erro', {
+          description: 'Não foi possível excluir a forma de pagamento',
+        });
+      }
     }
   };
+  const filteredPaymentMethods = paymentMethods.filter(
+    paymentMethod =>
+      paymentMethod.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (paymentMethod.code && paymentMethod.code.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (paymentMethod.type && paymentMethod.type.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Métodos de Pagamento</h1>
-        <Button asChild>
-          <Link to="/payment-methods/new">
-            <Plus className="mr-2 h-4 w-4" /> Novo Método
-          </Link>
-        </Button>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+            <CreditCard className="h-8 w-8" />
+            Formas de Pagamento
+          </h1>
+          <p className="text-muted-foreground">
+            Gerencie as formas de pagamento do sistema
+          </p>
+        </div>
+        <Link
+          to="/payment-methods/new"
+          className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+        >
+          <Plus className="h-4 w-4" />
+          Nova Forma de Pagamento
+        </Link>
       </div>
 
-      <div className="flex items-center py-4">
-        <div className="relative max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Buscar métodos de pagamento..."
-            className="pl-8"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+      <div className="flex items-center space-x-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <input
+            placeholder="Pesquisar formas de pagamento..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-8 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
       </div>
 
       <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Descrição</TableHead>
-              <TableHead>Código</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center">
-                  Carregando...
-                </TableCell>
-              </TableRow>
-            ) : filteredPaymentMethods.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center">
-                  Nenhum método de pagamento encontrado.
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredPaymentMethods.map((method) => (
-                <TableRow key={method.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center">
-                      <CreditCard className="mr-2 h-4 w-4 text-muted-foreground" />
-                      {method.description}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b bg-muted/50">                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Descrição
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Código
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Tipo
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Status
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Ações
+                </th>
+              </tr>
+            </thead>            <tbody>
+              {filteredPaymentMethods.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="h-24 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <CreditCard className="h-8 w-8 text-muted-foreground" />
+                      <p className="text-muted-foreground">
+                        {searchTerm ? 'Nenhuma forma de pagamento encontrada.' : 'Nenhuma forma de pagamento cadastrada.'}
+                      </p>
                     </div>
-                  </TableCell>
-                  <TableCell>{method.code || "-"}</TableCell>
-                  <TableCell>{method.type || "-"}</TableCell>
-                  <TableCell>
-                    <Badge className={method.active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
-                      {method.active ? "Ativo" : "Inativo"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link to={`/payment-methods/edit/${method.id}`}>
-                        <Edit className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteClick(method)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                  </td>
+                </tr>
+              ) : (
+                filteredPaymentMethods.map((paymentMethod) => (
+                  <tr key={paymentMethod.id} className="border-b">
+                    <td className="p-4">
+                      <div className="font-medium">{paymentMethod.description}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm">{paymentMethod.code || '-'}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm">{paymentMethod.type || '-'}</div>
+                    </td>
+                    <td className="p-4">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                          paymentMethod.active
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {paymentMethod.active ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center space-x-2">
+                        <Link
+                          to={`/payment-methods/edit/${paymentMethod.id}`}
+                          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(paymentMethod.id)}
+                          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmar exclusão</DialogTitle>
-            <DialogDescription>
-              Tem certeza que deseja excluir o método de pagamento "{methodToDelete?.description}"?
-              Esta ação não pode ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteConfirm}>
-              Excluir
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {filteredPaymentMethods.length > 0 && (
+        <div className="flex items-center justify-between px-2">
+          <div className="text-sm text-muted-foreground">
+            Mostrando {filteredPaymentMethods.length} de {paymentMethods.length} forma(s) de pagamento
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,94 +1,50 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Edit, Trash, Search, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
+import { Plus, Edit, Trash2, Search, FileText } from 'lucide-react';
 import { paymentTermApi } from '@/services/api';
 import { PaymentTerm } from '@/types/payment-term';
-import { toast } from 'sonner';
+import { toast } from '../../lib/toast';
 
 const PaymentTermsList = () => {
   const [paymentTerms, setPaymentTerms] = useState<PaymentTerm[]>([]);
-  const [filteredPaymentTerms, setFilteredPaymentTerms] = useState<PaymentTerm[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [termToDelete, setTermToDelete] = useState<PaymentTerm | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchPaymentTerms();
   }, []);
 
-  useEffect(() => {
-    if (search) {
-      const filtered = paymentTerms.filter(
-        (term) =>
-          term.name.toLowerCase().includes(search.toLowerCase()) ||
-          (term.description && term.description.toLowerCase().includes(search.toLowerCase()))
-      );
-      setFilteredPaymentTerms(filtered);
-    } else {
-      setFilteredPaymentTerms(paymentTerms);
-    }
-  }, [search, paymentTerms]);
-
   const fetchPaymentTerms = async () => {
-    setIsLoading(true);
+    setLoading(true);
     try {
       const data = await paymentTermApi.getAll();
       setPaymentTerms(data);
-      setFilteredPaymentTerms(data);
     } catch (error) {
       console.error('Erro ao buscar condições de pagamento:', error);
       toast.error('Erro', {
         description: 'Não foi possível carregar a lista de condições de pagamento.',
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleDeleteClick = (term: PaymentTerm) => {
-    setTermToDelete(term);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!termToDelete) return;
-
-    try {
-      await paymentTermApi.delete(termToDelete.id);
-      setPaymentTerms(paymentTerms.filter((t) => t.id !== termToDelete.id));
-      toast.success('Sucesso', {
-        description: `Condição de pagamento "${termToDelete.name}" removida com sucesso.`,
-      });
-    } catch (error: any) {
-      console.error('Erro ao excluir condição de pagamento:', error);
-      toast.error('Erro', {
-        description:
-          error.message ||
-          'Não foi possível excluir a condição de pagamento. Verifique se não está sendo usada em pedidos.',
-      });
-    } finally {
-      setDeleteDialogOpen(false);
-      setTermToDelete(null);
+  const handleDelete = async (term: PaymentTerm) => {
+    if (window.confirm(`Tem certeza que deseja excluir a condição de pagamento "${term.name}"?`)) {
+      try {
+        await paymentTermApi.delete(term.id);
+        setPaymentTerms(paymentTerms.filter((t) => t.id !== term.id));
+        toast.success('Sucesso', {
+          description: `Condição de pagamento "${term.name}" removida com sucesso.`,
+        });
+      } catch (error: any) {
+        console.error('Erro ao excluir condição de pagamento:', error);
+        toast.error('Erro', {
+          description:
+            error.message ||
+            'Não foi possível excluir a condição de pagamento. Verifique se não está sendo usada em pedidos.',
+        });
+      }
     }
   };
 
@@ -96,113 +52,143 @@ const PaymentTermsList = () => {
     return term.installments.length;
   };
 
+  const filteredPaymentTerms = paymentTerms.filter(
+    (term) =>
+      term.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (term.description && term.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Condições de Pagamento</h1>
-        <Button asChild>
-          <Link to="/payment-terms/new">
-            <Plus className="mr-2 h-4 w-4" /> Nova Condição
-          </Link>
-        </Button>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+            <FileText className="h-8 w-8" />
+            Condições de Pagamento
+          </h1>
+          <p className="text-muted-foreground">
+            Gerencie as condições de pagamento da empresa
+          </p>
+        </div>
+        <Link
+          to="/payment-terms/new"
+          className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+        >
+          <Plus className="h-4 w-4" />
+          Nova Condição
+        </Link>
       </div>
 
-      <div className="flex items-center py-4">
-        <div className="relative max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
+      <div className="flex items-center space-x-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <input
             placeholder="Buscar condições de pagamento..."
-            className="pl-8"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-8 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
       </div>
 
       <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Descrição</TableHead>
-              <TableHead>Parcelas</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center">
-                  Carregando...
-                </TableCell>
-              </TableRow>
-            ) : filteredPaymentTerms.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center">
-                  Nenhuma condição de pagamento encontrada.
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredPaymentTerms.map((term) => (
-                <TableRow key={term.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center">
-                      <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
-                      {term.name}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b bg-muted/50">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Nome
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Descrição
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Parcelas
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Status
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Ações
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredPaymentTerms.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="h-24 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <FileText className="h-8 w-8 text-muted-foreground" />
+                      <p className="text-muted-foreground">
+                        {searchTerm ? 'Nenhuma condição de pagamento encontrada.' : 'Nenhuma condição de pagamento cadastrada.'}
+                      </p>
                     </div>
-                  </TableCell>
-                  <TableCell>{term.description || "-"}</TableCell>
-                  <TableCell>{calculateTotalInstallments(term)}</TableCell>
-                  <TableCell>
-                    <Badge className={term.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
-                      {term.isActive ? "Ativo" : "Inativo"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link to={`/payment-terms/edit/${term.id}`}>
-                        <Edit className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteClick(term)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                  </td>
+                </tr>
+              ) : (
+                filteredPaymentTerms.map((term) => (
+                  <tr key={term.id} className="border-b">
+                    <td className="p-4">
+                      <div className="font-medium">{term.name}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm text-muted-foreground">
+                        {term.description || '-'}
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm">{calculateTotalInstallments(term)}</div>
+                    </td>
+                    <td className="p-4">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                          term.isActive
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {term.isActive ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center space-x-2">
+                        <Link
+                          to={`/payment-terms/edit/${term.id}`}
+                          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(term)}
+                          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmar exclusão</DialogTitle>
-            <DialogDescription>
-              Tem certeza que deseja excluir a condição de pagamento "{termToDelete?.name}"?
-              Esta ação não pode ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteConfirm}>
-              Excluir
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {filteredPaymentTerms.length > 0 && (
+        <div className="flex items-center justify-between px-2">
+          <div className="text-sm text-muted-foreground">
+            Mostrando {filteredPaymentTerms.length} de {paymentTerms.length} condição(ões) de pagamento
+          </div>
+        </div>
+      )}
     </div>
   );
 };
