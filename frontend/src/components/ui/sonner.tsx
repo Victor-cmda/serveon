@@ -11,6 +11,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
       position="bottom-right"
       offset={32}
       swipeDirections={["right"]}
+      closeButton={true}
+      visibleToasts={4}
+      gap={8}
       style={
         {
           "--normal-bg": "var(--popover)",
