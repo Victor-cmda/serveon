@@ -294,16 +294,20 @@ export default function SupplierForm() {
   const handleCityCreated = (newCity: City) => {
     setCities((prev) => [...prev, newCity]);
     setCityCreationOpen(false);
+    setCitySearchOpen(true);
     toast.success(`Cidade ${newCity.nome} criada com sucesso! Selecione-a na lista.`);
   };
+
   // Funções para edição de condições de pagamento
   const handleEditPaymentTerm = (paymentTerm: PaymentTerm) => {
     setPaymentTermToEdit(paymentTerm);
+    setPaymentTermSearchOpen(false);
     setPaymentTermCreationOpen(true);
   };
   const handlePaymentTermCreated = (newPaymentTerm: PaymentTerm) => {
     setPaymentTerms((prev) => [...prev, newPaymentTerm]);
     setPaymentTermCreationOpen(false);
+    setPaymentTermSearchOpen(true);
     toast.success(`Condição de pagamento ${newPaymentTerm.name} criada com sucesso! Selecione-a na lista.`);
   };
 

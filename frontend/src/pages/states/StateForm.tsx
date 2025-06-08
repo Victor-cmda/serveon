@@ -130,6 +130,7 @@ const StateForm = () => {
   };  const handleCountryCreated = (newCountry: Country) => {
     setCountries((prev) => [...prev, newCountry]);
     setCountryDialogOpen(false);
+    setCountrySearchOpen(true);
     toast.success(`País ${newCountry.nome} criado com sucesso! Selecione-o na lista.`);
   };
 
@@ -142,8 +143,10 @@ const StateForm = () => {
     );
     setCountryToEdit(null);
   };
+
   const handleEditCountry = (country: Country) => {
     setCountryToEdit(country);
+    setCountrySearchOpen(false);
     setCountryDialogOpen(true);
   };
 
@@ -276,7 +279,9 @@ const StateForm = () => {
         onSelect={(country) => {
           form.setValue('paisId', country.id);
           setCountrySearchOpen(false);
-        }}        onCreateNew={() => {
+        }}
+        onCreateNew={() => {
+          setCountrySearchOpen(false);
           setCountryDialogOpen(true);
         }}
         onEdit={handleEditCountry}

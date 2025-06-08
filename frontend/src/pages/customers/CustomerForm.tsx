@@ -357,12 +357,16 @@ const CustomerForm = () => {
     setPaymentTermSearchOpen(false);
     setPaymentTermDialogOpen(true);
   };
+
   const handleEditPaymentTerm = (paymentTerm: PaymentTerm) => {
     setPaymentTermToEdit(paymentTerm);
+    setPaymentTermSearchOpen(false);
     setPaymentTermDialogOpen(true);
-  };const handlePaymentTermCreated = (newPaymentTerm: PaymentTerm) => {
+  };
+  const handlePaymentTermCreated = (newPaymentTerm: PaymentTerm) => {
     setPaymentTerms((prev) => [...prev, newPaymentTerm]);
     setPaymentTermDialogOpen(false);
+    setPaymentTermSearchOpen(true);
     toast.success(
       `Condição de pagamento ${newPaymentTerm.name} criada com sucesso! Selecione-o na lista.`,
     );
@@ -508,12 +512,16 @@ const CustomerForm = () => {
   const onCreateNewCity = () => {
     setNewCityDialogOpen(true);
   };
+
   const handleEditCity = (city: City) => {
     setCityToEdit(city);
+    setCitySearchOpen(false);
     setNewCityDialogOpen(true);
   };
+
   const handleEditState = (state: State) => {
     setStateToEdit(state);
+    setStateSearchOpen(false);
     setNewStateDialogOpen(true);
   };
 
@@ -729,14 +737,16 @@ const CustomerForm = () => {
         onOpenChange={setNewStateDialogOpen}
         onSuccess={
           stateToEdit
-            ? handleStateUpdated            : (newState: State) => {
+            ? handleStateUpdated
+            : (newState: State) => {
                 setSelectedStateId(newState.id);
                 loadCitiesForState(newState.id);
 
                 if (newCityDialogOpen) {
-                  toast.success('Estado criado com sucesso! Selecione-o na lista.');
+                  toast.success('Estado criado com sucesso!');
                 } else {
-                  toast.success('Estado criado com sucesso! Selecione-o na lista.');
+                  setCitySearchOpen(true);
+                  toast.success('Estado criado com sucesso!');
                 }
               }
         }
@@ -750,6 +760,7 @@ const CustomerForm = () => {
             : (newCity: City) => {
                 setCities((prev) => [...prev, newCity]);
                 setNewCityDialogOpen(false);
+                setCitySearchOpen(true);
                 toast.success(`Cidade ${newCity.nome} criada com sucesso! Selecione-a na lista.`);
               }
         }

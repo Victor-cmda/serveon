@@ -243,8 +243,10 @@ const PaymentTermForm = () => {
     );
     setPaymentMethodToEdit(null);
   };
+
   const handleEditPaymentMethod = (method: PaymentMethod) => {
     setPaymentMethodToEdit(method);
+    setPaymentMethodSearchOpen(null);
     setPaymentMethodDialogOpen(true);
   };
 

@@ -143,9 +143,11 @@ const CityCreationDialog = ({
     } finally {
       setIsLoading(false);
     }
-  };  const handleStateCreated = (newState: State) => {
+  };
+  const handleStateCreated = (newState: State) => {
     setStates((prevStates) => [...prevStates, newState]);
     setStateDialogOpen(false);
+    setStateSearchOpen(true);
     toast.success(`Estado ${newState.nome} criado com sucesso! Selecione-o na lista.`);
   };
 
@@ -158,8 +160,10 @@ const CityCreationDialog = ({
     );
     setStateToEdit(null);
   };
+
   const handleEditState = (state: State) => {
     setStateToEdit(state);
+    setStateSearchOpen(false);
     setStateDialogOpen(true);
   };
 
@@ -309,7 +313,9 @@ const CityCreationDialog = ({
         onSelect={(state) => {
           form.setValue('estadoId', state.id);
           setStateSearchOpen(false);
-        }}        onCreateNew={() => {
+        }}
+        onCreateNew={() => {
+          setStateSearchOpen(false);
           setStateDialogOpen(true);
         }}
         onEdit={handleEditState}

@@ -263,8 +263,10 @@ const PaymentTermCreationDialog = ({
     setPaymentMethodDialogOpen(false);
     setCurrentInstallmentIndex(-1);
   };
+
   const handleEditPaymentMethod = (method: PaymentMethod) => {
     setPaymentMethodToEdit(method);
+    setPaymentMethodSearchOpen(false);
     setPaymentMethodDialogOpen(true);
   };
 
