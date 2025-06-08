@@ -18,6 +18,7 @@ import {
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
+import { Switch } from '../../components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -223,9 +224,7 @@ const PositionForm: React.FC = () => {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
-
-                  <FormField
+                  />                  <FormField
                     control={form.control}
                     name="ativo"
                     render={({ field }) => (
@@ -237,12 +236,10 @@ const PositionForm: React.FC = () => {
                           </div>
                         </div>
                         <FormControl>
-                          <input
-                            type="checkbox"
+                          <Switch
                             checked={field.value}
-                            onChange={field.onChange}
+                            onCheckedChange={field.onChange}
                             disabled={loading}
-                            className="h-4 w-4"
                           />
                         </FormControl>
                       </FormItem>

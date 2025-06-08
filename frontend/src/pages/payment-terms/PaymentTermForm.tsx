@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { paymentTermApi, paymentMethodApi } from '@/services/api';
@@ -297,15 +297,13 @@ const PaymentTermForm = () => {
                   <FormMessage />
                 </FormItem>
               )}
-            />
-
-            <FormField
+            />            <FormField
               control={form.control}
               name="isActive"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox
+                    <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
@@ -500,15 +498,13 @@ const PaymentTermForm = () => {
                           <FormMessage />
                         </FormItem>
                       )}
-                    />
-
-                    <FormField
+                    />                    <FormField
                       control={form.control}
                       name={`installments.${index}.isActive`}
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                           <FormControl>
-                            <Checkbox
+                            <Switch
                               checked={field.value}
                               onCheckedChange={field.onChange}
                             />

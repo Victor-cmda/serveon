@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { paymentMethodApi } from '@/services/api';
 import { toast } from 'sonner';
 import { CreatePaymentMethodDto, UpdatePaymentMethodDto } from '@/types/payment-method';
@@ -191,15 +191,13 @@ const PaymentMethodForm = () => {
                   <FormMessage />
                 </FormItem>
               )}
-            />
-
-            <FormField
+            />            <FormField
               control={form.control}
               name="active"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox
+                    <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />

@@ -7,6 +7,7 @@ import {
   FormMessage 
 } from "../../../components/ui/form";
 import { Input } from "../../../components/ui/input";
+import { Switch } from "../../../components/ui/switch";
 import { UseFormReturn } from "react-hook-form";
 
 interface GeneralDataSectionProps {
@@ -64,21 +65,16 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSecti
         <FormField
           control={form.control}
           name="ativo"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 sm:pt-8">
+          render={({ field }) => (            <FormItem className="flex flex-row items-start space-x-3 space-y-0 sm:pt-8">
               <FormControl>
-                <input
-                  type="checkbox"
-                  id="ativo"
+                <Switch
                   checked={field.value}
-                  onChange={(e) => field.onChange(e.target.checked)}
+                  onCheckedChange={field.onChange}
                   disabled={!id}
-                  className={`h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary ${!id ? 'cursor-not-allowed opacity-60' : ''}`}
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel 
-                  htmlFor="ativo" 
                   className={`text-base font-medium ${!id ? 'cursor-not-allowed opacity-60' : ''}`}
                 >
                   Fornecedor Ativo

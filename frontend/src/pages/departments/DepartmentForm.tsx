@@ -17,6 +17,7 @@ import {
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
+import { Switch } from '../../components/ui/switch';
 
 const departmentSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório').max(100, 'Nome deve ter no máximo 100 caracteres'),
@@ -166,9 +167,7 @@ const DepartmentForm: React.FC = () => {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
-
-                  <FormField
+                  />                  <FormField
                     control={form.control}
                     name="ativo"
                     render={({ field }) => (
@@ -180,12 +179,10 @@ const DepartmentForm: React.FC = () => {
                           </div>
                         </div>
                         <FormControl>
-                          <input
-                            type="checkbox"
+                          <Switch
                             checked={field.value}
-                            onChange={field.onChange}
+                            onCheckedChange={field.onChange}
                             disabled={loading}
-                            className="h-4 w-4"
                           />
                         </FormControl>
                       </FormItem>
