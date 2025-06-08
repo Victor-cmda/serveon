@@ -357,18 +357,14 @@ const CustomerForm = () => {
     setPaymentTermSearchOpen(false);
     setPaymentTermDialogOpen(true);
   };
-
   const handleEditPaymentTerm = (paymentTerm: PaymentTerm) => {
     setPaymentTermToEdit(paymentTerm);
-    setPaymentTermSearchOpen(false);
     setPaymentTermDialogOpen(true);
-  };
-
-  const handlePaymentTermCreated = (newPaymentTerm: PaymentTerm) => {
+  };const handlePaymentTermCreated = (newPaymentTerm: PaymentTerm) => {
     setPaymentTerms((prev) => [...prev, newPaymentTerm]);
-    onSelectPaymentTerm(newPaymentTerm);
+    setPaymentTermDialogOpen(false);
     toast.success(
-      `Condição de pagamento ${newPaymentTerm.name} criada com sucesso!`,
+      `Condição de pagamento ${newPaymentTerm.name} criada com sucesso! Selecione-o na lista.`,
     );
   };
 
@@ -512,16 +508,12 @@ const CustomerForm = () => {
   const onCreateNewCity = () => {
     setNewCityDialogOpen(true);
   };
-
   const handleEditCity = (city: City) => {
     setCityToEdit(city);
-    setCitySearchOpen(false);
     setNewCityDialogOpen(true);
   };
-
   const handleEditState = (state: State) => {
     setStateToEdit(state);
-    setStateSearchOpen(false);
     setNewStateDialogOpen(true);
   };
 
@@ -737,16 +729,14 @@ const CustomerForm = () => {
         onOpenChange={setNewStateDialogOpen}
         onSuccess={
           stateToEdit
-            ? handleStateUpdated
-            : (newState: State) => {
+            ? handleStateUpdated            : (newState: State) => {
                 setSelectedStateId(newState.id);
                 loadCitiesForState(newState.id);
 
                 if (newCityDialogOpen) {
-                  toast.success('Estado criado com sucesso!');
+                  toast.success('Estado criado com sucesso! Selecione-o na lista.');
                 } else {
-                  setCitySearchOpen(true);
-                  toast.success('Estado criado com sucesso!');
+                  toast.success('Estado criado com sucesso! Selecione-o na lista.');
                 }
               }
         }
@@ -754,13 +744,13 @@ const CustomerForm = () => {
       />
       <CityCreationDialog
         open={newCityDialogOpen}
-        onOpenChange={setNewCityDialogOpen}
-        onSuccess={
+        onOpenChange={setNewCityDialogOpen}        onSuccess={
           cityToEdit
             ? handleCityUpdated
             : (newCity: City) => {
-                onSelectCity(newCity);
-                toast.success('Cidade criada com sucesso!');
+                setCities((prev) => [...prev, newCity]);
+                setNewCityDialogOpen(false);
+                toast.success(`Cidade ${newCity.nome} criada com sucesso! Selecione-a na lista.`);
               }
         }
         selectedStateId={selectedStateId}

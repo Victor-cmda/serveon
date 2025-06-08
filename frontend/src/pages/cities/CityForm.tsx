@@ -147,12 +147,10 @@ const CityForm = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleStateCreated = (newState: State) => {
+  };  const handleStateCreated = (newState: State) => {
     setStates((prev) => [...prev, newState]);
-    form.setValue('estadoId', newState.id);
     setStateDialogOpen(false);
+    toast.success(`Estado ${newState.nome} criado com sucesso! Selecione-o na lista.`);
   };
 
   const handleStateUpdated = (updatedState: State) => {
@@ -164,10 +162,8 @@ const CityForm = () => {
     );
     setStateToEdit(null);
   };
-
   const handleEditState = (state: State) => {
     setStateToEdit(state);
-    setStateSearchOpen(false);
     setStateDialogOpen(true);
   };
 
@@ -301,9 +297,7 @@ const CityForm = () => {
         onSelect={(state) => {
           form.setValue('estadoId', state.id);
           setStateSearchOpen(false);
-        }}
-        onCreateNew={() => {
-          setStateSearchOpen(false);
+        }}        onCreateNew={() => {
           setStateDialogOpen(true);
         }}
         onEdit={(state) => handleEditState(state)}

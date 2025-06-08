@@ -70,7 +70,8 @@ const StateCreationDialog = ({
   }, [selectedCountryId, form]);
 
   useEffect(() => {
-    if (open) {      if (state) {
+    if (open) {
+      if (state) {
         // Preenche o formulário com os dados do estado para edição
         form.reset({
           nome: state.nome || '',
@@ -112,15 +113,17 @@ const StateCreationDialog = ({
         nome: data.nome,
         uf: data.uf,
         paisId: data.paisId,
-      };      let newState;
+      };
+      let newState;
       if (state) {
         // Edição de estado existente
-        newState = await stateApi.update(state.id.toString(), createData);
-        toast.success(`Estado ${data.nome} atualizado com sucesso!`);      } else {
+        newState = await stateApi.update(state.id, createData);
+        toast.success(`Estado ${data.nome} atualizado com sucesso!`);
+      } else {
         // Criação de novo estado
         newState = await stateApi.create(createData);
         toast.success(`Estado ${data.nome} criado com sucesso!`);
-      }      
+      }
       // Return the new state to the parent component and close dialog.
       // This enables proper cascading form behavior where the created state
       // is passed back to the parent form without redirecting to a list view.
@@ -133,26 +136,25 @@ const StateCreationDialog = ({
       setIsLoading(false);
     }
   };
-
   const handleCountryCreated = (newCountry: Country) => {
     setCountries((prevCountries) => [...prevCountries, newCountry]);
-    form.setValue('paisId', newCountry.id);
     setCountryDialogOpen(false);
+    toast.success(
+      `País ${newCountry.nome} criado com sucesso! Selecione-o na lista.`,
+    );
   };
 
   const handleCountryUpdated = (updatedCountry: Country) => {
     // Atualiza o país na lista de países
     setCountries((prev) =>
       prev.map((country) =>
-        country.id === updatedCountry.id ? updatedCountry : country
-      )
+        country.id === updatedCountry.id ? updatedCountry : country,
+      ),
     );
     setCountryToEdit(null);
   };
-
   const handleEditCountry = (country: Country) => {
     setCountryToEdit(country);
-    setCountrySearchOpen(false);
     setCountryDialogOpen(true);
   };
 
@@ -185,7 +187,9 @@ const StateCreationDialog = ({
                       País
                     </FormLabel>
                     <div className="flex gap-2">
-                      <div className="w-full flex-1">                        <Input
+                      <div className="w-full flex-1">
+                        {' '}
+                        <Input
                           value={
                             countries.find((c) => c.id === field.value)?.nome ||
                             ''
@@ -305,7 +309,6 @@ const StateCreationDialog = ({
           setCountrySearchOpen(false);
         }}
         onCreateNew={() => {
-          setCountrySearchOpen(false);
           setCountryDialogOpen(true);
         }}
         displayColumns={[

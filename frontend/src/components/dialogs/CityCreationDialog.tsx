@@ -126,7 +126,7 @@ const CityCreationDialog = ({
 
       let savedCity;      if (city) {
         // Edição de cidade existente
-        savedCity = await cityApi.update(city.id.toString(), formData);
+        savedCity = await cityApi.update(city.id, formData);
         toast.success(`Cidade ${data.nome} atualizada com sucesso!`);      } else {
         // Criação de nova cidade
         savedCity = await cityApi.create(formData);
@@ -143,12 +143,10 @@ const CityCreationDialog = ({
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleStateCreated = (newState: State) => {
+  };  const handleStateCreated = (newState: State) => {
     setStates((prevStates) => [...prevStates, newState]);
-    form.setValue('estadoId', newState.id);
     setStateDialogOpen(false);
+    toast.success(`Estado ${newState.nome} criado com sucesso! Selecione-o na lista.`);
   };
 
   const handleStateUpdated = (updatedState: State) => {
@@ -160,10 +158,8 @@ const CityCreationDialog = ({
     );
     setStateToEdit(null);
   };
-
   const handleEditState = (state: State) => {
     setStateToEdit(state);
-    setStateSearchOpen(false);
     setStateDialogOpen(true);
   };
 
@@ -313,9 +309,7 @@ const CityCreationDialog = ({
         onSelect={(state) => {
           form.setValue('estadoId', state.id);
           setStateSearchOpen(false);
-        }}
-        onCreateNew={() => {
-          setStateSearchOpen(false);
+        }}        onCreateNew={() => {
           setStateDialogOpen(true);
         }}
         onEdit={handleEditState}

@@ -127,12 +127,10 @@ const StateForm = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleCountryCreated = (newCountry: Country) => {
+  };  const handleCountryCreated = (newCountry: Country) => {
     setCountries((prev) => [...prev, newCountry]);
-    form.setValue('paisId', newCountry.id);
     setCountryDialogOpen(false);
+    toast.success(`País ${newCountry.nome} criado com sucesso! Selecione-o na lista.`);
   };
 
   const handleCountryUpdated = (updatedCountry: Country) => {
@@ -144,10 +142,8 @@ const StateForm = () => {
     );
     setCountryToEdit(null);
   };
-
   const handleEditCountry = (country: Country) => {
     setCountryToEdit(country);
-    setCountrySearchOpen(false);
     setCountryDialogOpen(true);
   };
 
@@ -280,9 +276,7 @@ const StateForm = () => {
         onSelect={(country) => {
           form.setValue('paisId', country.id);
           setCountrySearchOpen(false);
-        }}
-        onCreateNew={() => {
-          setCountrySearchOpen(false);
+        }}        onCreateNew={() => {
           setCountryDialogOpen(true);
         }}
         onEdit={handleEditCountry}

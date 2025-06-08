@@ -291,24 +291,20 @@ export default function SupplierForm() {
     setCityToEdit(null);
     toast.success(`Cidade ${updatedCity.nome} atualizada com sucesso!`);
   };
-
   const handleCityCreated = (newCity: City) => {
     setCities((prev) => [...prev, newCity]);
-    onCitySelected(newCity);
-    toast.success(`Cidade ${newCity.nome} criada com sucesso!`);
+    setCityCreationOpen(false);
+    toast.success(`Cidade ${newCity.nome} criada com sucesso! Selecione-a na lista.`);
   };
-
   // Funções para edição de condições de pagamento
   const handleEditPaymentTerm = (paymentTerm: PaymentTerm) => {
     setPaymentTermToEdit(paymentTerm);
-    setPaymentTermSearchOpen(false);
     setPaymentTermCreationOpen(true);
   };
-
   const handlePaymentTermCreated = (newPaymentTerm: PaymentTerm) => {
     setPaymentTerms((prev) => [...prev, newPaymentTerm]);
-    onPaymentTermSelected(newPaymentTerm);
-    toast.success(`Condição de pagamento ${newPaymentTerm.name} criada com sucesso!`);
+    setPaymentTermCreationOpen(false);
+    toast.success(`Condição de pagamento ${newPaymentTerm.name} criada com sucesso! Selecione-a na lista.`);
   };
 
   const handlePaymentTermUpdated = (updatedPaymentTerm: PaymentTerm) => {

@@ -171,7 +171,7 @@ const PaymentTermCreationDialog = ({
 
       if (paymentTerm) {        // Edição de condição de pagamento existente
         savedPaymentTerm = await paymentTermApi.update(
-          paymentTerm.id.toString(),
+          paymentTerm.id,
           formData,
         );
         toast.success(
@@ -263,10 +263,8 @@ const PaymentTermCreationDialog = ({
     setPaymentMethodDialogOpen(false);
     setCurrentInstallmentIndex(-1);
   };
-
   const handleEditPaymentMethod = (method: PaymentMethod) => {
     setPaymentMethodToEdit(method);
-    setPaymentMethodSearchOpen(false);
     setPaymentMethodDialogOpen(true);
   };
 
