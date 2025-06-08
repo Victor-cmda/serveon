@@ -10,10 +10,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       position="bottom-right"
       offset={32}
-      swipeDirections={["right"]}
       closeButton={true}
-      visibleToasts={4}
-      gap={8}
+      visibleToasts={6}
+      gap={12}
+      expand={true}
       style={
         {
           "--normal-bg": "var(--popover)",

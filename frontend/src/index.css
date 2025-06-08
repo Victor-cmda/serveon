@@ -470,6 +470,9 @@ body {
   position: fixed !important;
   z-index: 999999 !important;
   pointer-events: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
 }
 
 [data-sonner-toaster] * {
@@ -479,7 +482,8 @@ body {
 /* Prevent toasts from affecting document flow */
 [data-sonner-toast] {
   position: relative !important;
-  transform: translateX(0) !important;
+  width: 100% !important;
+  margin-bottom: 0 !important;
   will-change: transform, opacity !important;
 }
 
@@ -504,6 +508,11 @@ body:has([data-sonner-toast][data-swiping="true"]) {
 .layout-container:has([data-sonner-toast][data-swiping="true"]) {
   overflow-x: hidden !important;
   max-width: 100vw !important;
+}
+
+/* Ensure toaster is always on top */
+.toaster {
+  z-index: 999999 !important;
 }
 
 /* Close button styling - Modern and elegant */
@@ -576,6 +585,8 @@ body:has([data-sonner-toast][data-swiping="true"]) {
 /* Ensure toast animations don't cause scroll */
 [data-sonner-toast][data-mounted="true"] {
   animation: none !important;
+  opacity: 1 !important;
+  transform: translateX(0) !important;
 }
 
 [data-sonner-toast][data-removed="true"] {
@@ -615,6 +626,17 @@ html, body {
   max-width: 356px !important;
   word-wrap: break-word !important;
   overflow: hidden !important;
+  position: relative !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Ensure all toasts are visible */
+[data-sonner-toast]:not([data-removed="true"]) {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
 }
 
 .dark [data-sonner-toast] {
