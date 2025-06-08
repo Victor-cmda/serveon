@@ -464,3 +464,41 @@ body {
 .scrollbar-thumb-primary\/20::-webkit-scrollbar-thumb {
   background: hsl(var(--primary) / 0.2);
 }
+
+/* Sonner Toaster Fixes */
+[data-sonner-toaster] {
+  position: fixed !important;
+  z-index: 9999 !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+}
+
+[data-sonner-toaster] [data-sonner-toast] {
+  pointer-events: auto !important;
+  will-change: transform, opacity !important;
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+}
+
+/* Previne que o arrasto do toast cause overflow na página */
+[data-sonner-toaster] [data-sonner-toast][data-swiping="true"] {
+  contain: layout style paint !important;
+  transform: translateZ(0) !important;
+}
+
+/* Garante que o toast fique dentro dos limites da viewport durante o arrasto */
+[data-sonner-toaster] [data-sonner-toast][data-swiping="true"] {
+  max-width: calc(100vw - 32px) !important;
+  transform: translateZ(0) translateX(var(--swipe-amount, 0px)) !important;
+}
+
+/* Previne overflow do body quando toasts são arrastados */
+body:has([data-sonner-toast][data-swiping="true"]) {
+  overflow-x: hidden !important;
+}
+
+/* Controla o container do layout quando há toasts sendo arrastados */
+.layout-container:has([data-sonner-toast][data-swiping="true"]) {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+}
