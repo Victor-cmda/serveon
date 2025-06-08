@@ -5,11 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { 
-  supplierApi, 
-  cityApi, 
-  paymentTermApi 
-} from '@/services/api';
+import { supplierApi, cityApi, paymentTermApi } from '@/services/api';
 import { City } from '@/types/location';
 import { PaymentTerm } from '@/types/payment-term';
 import { toast } from 'sonner';
@@ -125,8 +121,8 @@ export default function SupplierForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditing = !!id;
-
-  const [isLoading, setIsLoading] = useState(false);  const [cities, setCities] = useState<City[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [cities, setCities] = useState<City[]>([]);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
   const [paymentTerms, setPaymentTerms] = useState<PaymentTerm[]>([]);
   const [selectedPaymentTerm, setSelectedPaymentTerm] =
@@ -135,10 +131,16 @@ export default function SupplierForm() {
   const [citySearchOpen, setCitySearchOpen] = useState(false);
   const [paymentTermSearchOpen, setPaymentTermSearchOpen] = useState(false);
   const [cityCreationOpen, setCityCreationOpen] = useState(false);
-  const [stateCreationOpen, setStateCreationOpen] = useState(false);  const [paymentTermCreationOpen, setPaymentTermCreationOpen] = useState(false);
+  const [stateCreationOpen, setStateCreationOpen] = useState(false);
+  const [paymentTermCreationOpen, setPaymentTermCreationOpen] = useState(false);
+
+  // Estados para edição de cidades e condições de pagamento
+  const [cityToEdit, setCityToEdit] = useState<City | null>(null);
+  const [paymentTermToEdit, setPaymentTermToEdit] = useState<PaymentTerm | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),    defaultValues: {
+    resolver: zodResolver(formSchema),
+    defaultValues: {
       cnpjCpf: '',
       tipo: 'J' as const,
       isEstrangeiro: false,
@@ -160,7 +162,8 @@ export default function SupplierForm() {
       responsavel: '',
       celularResponsavel: '',
       condicaoPagamentoId: undefined,
-    },  });
+    },
+  });
   const watchTipo = form.watch('tipo');
   const watchIsEstrangeiro = form.watch('isEstrangeiro');
 
@@ -168,15 +171,14 @@ export default function SupplierForm() {
     async function loadData() {
       try {
         setIsLoading(true);
-        // Carrega as cidades
         const citiesData = await cityApi.getAll();
         setCities(citiesData);
-        // Carrega as condições de pagamento
         const paymentTermsData = await paymentTermApi.getAll();
-        setPaymentTerms(paymentTermsData);        // Se estiver editando, carrega os dados do fornecedor
+        setPaymentTerms(paymentTermsData);
         if (id) {
           const supplier = await supplierApi.getById(Number(id));
-          if (supplier) {            form.reset({
+          if (supplier) {
+            form.reset({
               ...supplier,
               tipo: supplier.tipo || 'J',
               isEstrangeiro: supplier.isEstrangeiro || false,
@@ -184,15 +186,16 @@ export default function SupplierForm() {
               ativo: supplier.ativo !== undefined ? supplier.ativo : true,
               condicaoPagamentoId: supplier.condicaoPagamentoId,
             });
-            // Se tiver cidade, busca a cidade para exibir
-            if (supplier.cidadeId) {              const city = citiesData.find(c => c.id === supplier.cidadeId);
+            if (supplier.cidadeId) {
+              const city = citiesData.find((c) => c.id === supplier.cidadeId);
               if (city) {
                 setSelectedCity(city);
               }
             }
-            // Se tiver condição de pagamento, busca a condição para exibir
             if (supplier.condicaoPagamentoId) {
-              const paymentTerm = paymentTermsData.find(pt => pt.id === supplier.condicaoPagamentoId);
+              const paymentTerm = paymentTermsData.find(
+                (pt) => pt.id === supplier.condicaoPagamentoId,
+              );
               if (paymentTerm) {
                 setSelectedPaymentTerm(paymentTerm);
               }
@@ -211,7 +214,8 @@ export default function SupplierForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      setIsLoading(true);      const formattedData = {
+      setIsLoading(true);
+      const formattedData = {
         ...values,
         cnpjCpf: formatters.clearFormat(values.cnpjCpf),
         telefone: formatters.clearFormat(values.telefone),
@@ -219,12 +223,13 @@ export default function SupplierForm() {
         cep: formatters.clearFormat(values.cep),
         cidadeId: values.cidadeId || undefined,
         condicaoPagamentoId: values.condicaoPagamentoId || undefined,
-      };      // Remove undefined values to avoid sending them to the API
-      Object.keys(formattedData).forEach(key => {
+      };
+      Object.keys(formattedData).forEach((key) => {
         if ((formattedData as any)[key] === undefined) {
           delete (formattedData as any)[key];
         }
-      });      if (isEditing) {
+      });
+      if (isEditing) {
         await supplierApi.update(Number(id), formattedData);
         toast.success('Fornecedor atualizado com sucesso');
       } else {
@@ -232,7 +237,6 @@ export default function SupplierForm() {
         toast.success('Fornecedor criado com sucesso');
       }
 
-      // Check if we need to return to a parent form in a cascading scenario
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
         navigate(returnUrl);
@@ -260,40 +264,71 @@ export default function SupplierForm() {
 
   async function onStateCreated() {
     try {
-      // Atualiza as cidades após criar um novo estado
       const citiesData = await cityApi.getAll();
       setCities(citiesData);
       setStateCreationOpen(false);
     } catch (error) {
       console.error('Erro ao atualizar estados após criação:', error);
-      toast.error('Erro ao atualizar estados após criação');
-    }
+      toast.error('Erro ao atualizar estados após criação');    }
   }
 
-  async function onCityCreated() {
-    try {
-      const citiesData = await cityApi.getAll();
-      setCities(citiesData);
-      setCityCreationOpen(false);
-    } catch (error) {
-      console.error('Erro ao atualizar cidades após criação:', error);
-      toast.error('Erro ao atualizar cidades após criação');
-    }
-  }
+  // Funções para edição de cidades
+  const handleEditCity = (city: City) => {
+    setCityToEdit(city);
+    setCitySearchOpen(false);
+    setCityCreationOpen(true);
+  };
 
-  async function onPaymentTermCreated() {
-    try {
-      const paymentTermsData = await paymentTermApi.getAll();
-      setPaymentTerms(paymentTermsData);
-      setPaymentTermCreationOpen(false);
-    } catch (error) {
-      console.error(
-        'Erro ao atualizar condições de pagamento após criação:',
-        error,
-      );
-      toast.error('Erro ao atualizar condições de pagamento após criação');
+  const handleCityUpdated = (updatedCity: City) => {
+    setCities((prev) =>
+      prev.map((city) => (city.id === updatedCity.id ? updatedCity : city)),
+    );
+
+    if (selectedCity && selectedCity.id === updatedCity.id) {
+      setSelectedCity(updatedCity);
     }
-  }  return (
+
+    setCityToEdit(null);
+    toast.success(`Cidade ${updatedCity.nome} atualizada com sucesso!`);
+  };
+
+  const handleCityCreated = (newCity: City) => {
+    setCities((prev) => [...prev, newCity]);
+    onCitySelected(newCity);
+    toast.success(`Cidade ${newCity.nome} criada com sucesso!`);
+  };
+
+  // Funções para edição de condições de pagamento
+  const handleEditPaymentTerm = (paymentTerm: PaymentTerm) => {
+    setPaymentTermToEdit(paymentTerm);
+    setPaymentTermSearchOpen(false);
+    setPaymentTermCreationOpen(true);
+  };
+
+  const handlePaymentTermCreated = (newPaymentTerm: PaymentTerm) => {
+    setPaymentTerms((prev) => [...prev, newPaymentTerm]);
+    onPaymentTermSelected(newPaymentTerm);
+    toast.success(`Condição de pagamento ${newPaymentTerm.name} criada com sucesso!`);
+  };
+
+  const handlePaymentTermUpdated = (updatedPaymentTerm: PaymentTerm) => {
+    setPaymentTerms((prev) =>
+      prev.map((term) =>
+        term.id === updatedPaymentTerm.id ? updatedPaymentTerm : term,
+      ),
+    );
+
+    if (
+      selectedPaymentTerm &&
+      selectedPaymentTerm.id === updatedPaymentTerm.id
+    ) {
+      setSelectedPaymentTerm(updatedPaymentTerm);
+    }
+
+    setPaymentTermToEdit(null);
+    toast.success(`Condição de pagamento ${updatedPaymentTerm.name} atualizada com sucesso!`);
+  };
+  return (
     <div className="space-y-4">
       <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div>
@@ -314,8 +349,9 @@ export default function SupplierForm() {
           </Button>
         </div>
       </div>
-
-      <Form {...form}>        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <Form {...form}>
+        {' '}
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="border rounded-lg p-5 shadow-sm">
             <div className="grid grid-cols-1 gap-y-6">
               <div>
@@ -361,7 +397,9 @@ export default function SupplierForm() {
               </div>
 
               <div>
-                <h2 className="text-lg font-medium mb-4">Informações Adicionais</h2>
+                <h2 className="text-lg font-medium mb-4">
+                  Informações Adicionais
+                </h2>
                 <SupplierSpecificSection
                   form={form}
                   isLoading={isLoading}
@@ -400,39 +438,52 @@ export default function SupplierForm() {
             </div>
           </div>
         </form>
-        </Form>      {/* Diálogos de pesquisa */}
-      <SearchDialog
+      </Form>{' '}      <SearchDialog
         title="Selecione uma cidade"
         open={citySearchOpen}
         onOpenChange={setCitySearchOpen}
         entities={cities}
+        isLoading={isLoading}
         onSelect={onCitySelected}
+        onCreateNew={() => {
+          setCityToEdit(null);
+          setCitySearchOpen(false);
+          setCityCreationOpen(true);
+        }}
+        onEdit={handleEditCity}
         searchKeys={['nome', 'uf', 'estadoNome']}
         displayColumns={[
           { key: 'nome', header: 'Nome' },
           { key: 'estadoNome', header: 'Estado' },
           { key: 'uf', header: 'UF' },
         ]}
-        onCreateNew={() => {
-          setCitySearchOpen(false);
-          setCityCreationOpen(true);
-        }}      />
-      <SearchDialog
+        entityType="cidades"
+        description="Selecione uma cidade para o cadastro do fornecedor ou edite uma cidade existente."
+      />      <SearchDialog
         title="Selecione uma condição de pagamento"
         open={paymentTermSearchOpen}
         onOpenChange={setPaymentTermSearchOpen}
         entities={paymentTerms}
+        isLoading={isLoading}
         onSelect={onPaymentTermSelected}
+        onCreateNew={() => {
+          setPaymentTermToEdit(null);
+          setPaymentTermSearchOpen(false);
+          setPaymentTermCreationOpen(true);
+        }}
+        onEdit={handleEditPaymentTerm}
         searchKeys={['name', 'description']}
         displayColumns={[
           { key: 'name', header: 'Nome' },
           { key: 'description', header: 'Descrição' },
+          {
+            key: (term) => term.installments?.length?.toString() || '0',
+            header: 'Parcelas',
+          },
         ]}
-        onCreateNew={() => {
-          setPaymentTermSearchOpen(false);
-          setPaymentTermCreationOpen(true);
-        }}      />
-
+        entityType="condições de pagamento"
+        description="Selecione uma condição de pagamento para o cadastro do fornecedor ou cadastre uma nova."
+      />
       {/* Diálogos de criação */}
       <StateCreationDialog
         open={stateCreationOpen}
@@ -440,21 +491,26 @@ export default function SupplierForm() {
         onSuccess={() => {
           onStateCreated();
         }}
-      />
-      <CityCreationDialog
+      />      <CityCreationDialog
         open={cityCreationOpen}
         onOpenChange={setCityCreationOpen}
-        onSuccess={() => {
-          onCityCreated();
-        }}
+        onSuccess={
+          cityToEdit
+            ? handleCityUpdated
+            : handleCityCreated
+        }
         selectedStateId={undefined}
+        city={cityToEdit}
       />
       <PaymentTermCreationDialog
         open={paymentTermCreationOpen}
         onOpenChange={setPaymentTermCreationOpen}
-        onSuccess={() => {
-          onPaymentTermCreated();
-        }}
+        onSuccess={
+          paymentTermToEdit
+            ? handlePaymentTermUpdated
+            : handlePaymentTermCreated
+        }
+        paymentTerm={paymentTermToEdit}
       />
     </div>
   );
