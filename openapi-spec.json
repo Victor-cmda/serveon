@@ -17,11 +17,25 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "Funcionário criado com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Employee"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos."
+          },
+          "409": {
+            "description": "CPF ou email já existem."
           }
         },
+        "summary": "Criar novo funcionário",
         "tags": [
-          "Employees"
+          "Funcionários"
         ]
       },
       "get": {
@@ -29,11 +43,22 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Lista de funcionários retornada com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Employee"
+                  }
+                }
+              }
+            }
           }
         },
+        "summary": "Listar todos os funcionários",
         "tags": [
-          "Employees"
+          "Funcionários"
         ]
       }
     },
@@ -45,6 +70,7 @@
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "ID do funcionário",
             "schema": {
               "type": "string"
             }
@@ -52,11 +78,22 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Funcionário encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Employee"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Funcionário não encontrado."
           }
         },
+        "summary": "Buscar funcionário por ID",
         "tags": [
-          "Employees"
+          "Funcionários"
         ]
       },
       "patch": {
@@ -66,6 +103,7 @@
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "ID do funcionário",
             "schema": {
               "type": "string"
             }
@@ -83,11 +121,25 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "Funcionário atualizado com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Employee"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Funcionário não encontrado."
+          },
+          "409": {
+            "description": "Email já existe."
           }
         },
+        "summary": "Atualizar funcionário",
         "tags": [
-          "Employees"
+          "Funcionários"
         ]
       },
       "delete": {
@@ -97,6 +149,65 @@
             "name": "id",
             "required": true,
             "in": "path",
+            "description": "ID do funcionário",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Funcionário removido com sucesso."
+          },
+          "404": {
+            "description": "Funcionário não encontrado."
+          }
+        },
+        "summary": "Remover funcionário",
+        "tags": [
+          "Funcionários"
+        ]
+      }
+    },
+    "/api/employees/departments/active": {
+      "get": {
+        "operationId": "EmployeesController_getActiveDepartments",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de departamentos ativos."
+          }
+        },
+        "summary": "Listar departamentos ativos para seleção",
+        "tags": [
+          "Funcionários"
+        ]
+      }
+    },
+    "/api/employees/positions/active": {
+      "get": {
+        "operationId": "EmployeesController_getActivePositions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de cargos ativos."
+          }
+        },
+        "summary": "Listar cargos ativos para seleção",
+        "tags": [
+          "Funcionários"
+        ]
+      }
+    },
+    "/api/employees/positions/by-department/{departmentId}": {
+      "get": {
+        "operationId": "EmployeesController_getPositionsByDepartment",
+        "parameters": [
+          {
+            "name": "departmentId",
+            "required": true,
+            "in": "path",
+            "description": "ID do departamento",
             "schema": {
               "type": "string"
             }
@@ -104,11 +215,389 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Lista de cargos do departamento."
           }
         },
+        "summary": "Listar cargos ativos por departamento",
         "tags": [
-          "Employees"
+          "Funcionários"
+        ]
+      }
+    },
+    "/api/departments": {
+      "post": {
+        "operationId": "DepartmentsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDepartmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Departamento criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Department"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "409": {
+            "description": "Departamento com mesmo nome já existe"
+          }
+        },
+        "summary": "Criar novo departamento",
+        "tags": [
+          "Departments"
+        ]
+      },
+      "get": {
+        "operationId": "DepartmentsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de departamentos retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Department"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todos os departamentos",
+        "tags": [
+          "Departments"
+        ]
+      }
+    },
+    "/api/departments/{id}": {
+      "get": {
+        "operationId": "DepartmentsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do departamento",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Departamento encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Department"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Departamento não encontrado"
+          }
+        },
+        "summary": "Buscar departamento por ID",
+        "tags": [
+          "Departments"
+        ]
+      },
+      "patch": {
+        "operationId": "DepartmentsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do departamento",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDepartmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Departamento atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Department"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "404": {
+            "description": "Departamento não encontrado"
+          }
+        },
+        "summary": "Atualizar departamento por ID",
+        "tags": [
+          "Departments"
+        ]
+      },
+      "delete": {
+        "operationId": "DepartmentsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do departamento",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Departamento removido com sucesso"
+          },
+          "404": {
+            "description": "Departamento não encontrado"
+          },
+          "409": {
+            "description": "Departamento está sendo usado por funcionários"
+          }
+        },
+        "summary": "Remover departamento por ID",
+        "tags": [
+          "Departments"
+        ]
+      }
+    },
+    "/api/positions": {
+      "post": {
+        "operationId": "PositionsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePositionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cargo criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Position"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "409": {
+            "description": "Cargo com mesmo nome já existe"
+          }
+        },
+        "summary": "Criar novo cargo",
+        "tags": [
+          "Positions"
+        ]
+      },
+      "get": {
+        "operationId": "PositionsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de cargos retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Position"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todos os cargos",
+        "tags": [
+          "Positions"
+        ]
+      }
+    },
+    "/api/positions/{id}": {
+      "get": {
+        "operationId": "PositionsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do cargo",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cargo encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Position"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cargo não encontrado"
+          }
+        },
+        "summary": "Buscar cargo por ID",
+        "tags": [
+          "Positions"
+        ]
+      },
+      "patch": {
+        "operationId": "PositionsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do cargo",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePositionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cargo atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Position"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "404": {
+            "description": "Cargo não encontrado"
+          }
+        },
+        "summary": "Atualizar cargo por ID",
+        "tags": [
+          "Positions"
+        ]
+      },
+      "delete": {
+        "operationId": "PositionsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do cargo",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Cargo removido com sucesso"
+          },
+          "404": {
+            "description": "Cargo não encontrado"
+          },
+          "409": {
+            "description": "Cargo está sendo usado por funcionários"
+          }
+        },
+        "summary": "Remover cargo por ID",
+        "tags": [
+          "Positions"
+        ]
+      }
+    },
+    "/api/positions/department/{departmentId}": {
+      "get": {
+        "operationId": "PositionsController_findByDepartment",
+        "parameters": [
+          {
+            "name": "departmentId",
+            "required": true,
+            "in": "path",
+            "description": "ID do departamento",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cargos do departamento encontrados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Position"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Buscar cargos por departamento",
+        "tags": [
+          "Positions"
         ]
       }
     },
@@ -1560,15 +2049,15 @@
             "description": "Telefone de contato",
             "example": "11987654321"
           },
-          "cargo": {
-            "type": "string",
-            "description": "Cargo do funcionário",
-            "example": "Vendedor"
+          "cargoId": {
+            "type": "number",
+            "description": "ID do cargo do funcionário",
+            "example": 1
           },
-          "departamento": {
-            "type": "string",
-            "description": "Departamento do funcionário",
-            "example": "Comercial"
+          "departamentoId": {
+            "type": "number",
+            "description": "ID do departamento do funcionário",
+            "example": 1
           },
           "dataAdmissao": {
             "format": "date-time",
@@ -1587,10 +2076,103 @@
           "nome",
           "cpf",
           "email",
-          "cargo",
-          "departamento",
           "dataAdmissao",
           "ativo"
+        ]
+      },
+      "Employee": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID único do funcionário",
+            "example": 1
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome completo do funcionário",
+            "example": "João da Silva"
+          },
+          "cpf": {
+            "type": "string",
+            "description": "CPF do funcionário (apenas números)",
+            "example": "12345678901"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email profissional do funcionário",
+            "example": "joao.silva@empresa.com"
+          },
+          "telefone": {
+            "type": "string",
+            "description": "Telefone de contato",
+            "example": "11987654321"
+          },
+          "cargoId": {
+            "type": "number",
+            "description": "ID do cargo do funcionário",
+            "example": 1
+          },
+          "cargoNome": {
+            "type": "string",
+            "description": "Nome do cargo do funcionário",
+            "example": "Vendedor"
+          },
+          "departamentoId": {
+            "type": "number",
+            "description": "ID do departamento do funcionário",
+            "example": 1
+          },
+          "departamentoNome": {
+            "type": "string",
+            "description": "Nome do departamento do funcionário",
+            "example": "Comercial"
+          },
+          "dataAdmissao": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de admissão",
+            "example": "2023-01-15"
+          },
+          "dataDemissao": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de demissão (se aplicável)",
+            "example": null
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status ativo/inativo do funcionário",
+            "example": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de criação do registro",
+            "example": "2023-01-15T12:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data da última atualização do registro",
+            "example": "2023-01-15T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "cpf",
+          "email",
+          "telefone",
+          "cargoId",
+          "cargoNome",
+          "departamentoId",
+          "departamentoNome",
+          "dataAdmissao",
+          "dataDemissao",
+          "ativo",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "UpdateEmployeeDto": {
@@ -1601,6 +2183,169 @@
             "type": "string",
             "description": "Data de demissão no formato YYYY-MM-DD",
             "example": "2023-12-31"
+          }
+        }
+      },
+      "CreateDepartmentDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome do departamento",
+            "example": "Tecnologia da Informação",
+            "maxLength": 100
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição do departamento",
+            "example": "Departamento responsável pela infraestrutura e desenvolvimento de sistemas",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "nome"
+        ]
+      },
+      "Department": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID único do departamento",
+            "example": 1
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome do departamento",
+            "example": "Recursos Humanos",
+            "maxLength": 100
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição do departamento",
+            "example": "Departamento responsável pela gestão de pessoas"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Indica se o departamento está ativo",
+            "example": true,
+            "default": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Data de criação do registro",
+            "example": "2024-06-08T10:30:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Data da última atualização do registro",
+            "example": "2024-06-08T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "ativo",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateDepartmentDto": {
+        "type": "object",
+        "properties": {
+          "ativo": {
+            "type": "boolean",
+            "description": "Status ativo/inativo do departamento",
+            "example": true
+          }
+        }
+      },
+      "CreatePositionDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome do cargo",
+            "example": "Desenvolvedor Full Stack",
+            "maxLength": 100
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição do cargo",
+            "example": "Responsável pelo desenvolvimento de aplicações web front-end e back-end",
+            "maxLength": 500
+          },
+          "departamentoId": {
+            "type": "number",
+            "description": "ID do departamento ao qual o cargo pertence",
+            "example": 1
+          }
+        },
+        "required": [
+          "nome"
+        ]
+      },
+      "Position": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID único do cargo",
+            "example": 1
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome do cargo",
+            "example": "Analista de Sistemas",
+            "maxLength": 100
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição do cargo",
+            "example": "Responsável por desenvolver e manter sistemas"
+          },
+          "departamentoId": {
+            "type": "number",
+            "description": "ID do departamento ao qual o cargo pertence",
+            "example": 1
+          },
+          "departamentoNome": {
+            "type": "string",
+            "description": "Nome do departamento ao qual o cargo pertence",
+            "example": "Tecnologia da Informação"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Indica se o cargo está ativo",
+            "example": true,
+            "default": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Data de criação do registro",
+            "example": "2024-06-08T10:30:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Data da última atualização do registro",
+            "example": "2024-06-08T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "ativo",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdatePositionDto": {
+        "type": "object",
+        "properties": {
+          "ativo": {
+            "type": "boolean",
+            "description": "Status ativo/inativo do cargo",
+            "example": true
           }
         }
       },

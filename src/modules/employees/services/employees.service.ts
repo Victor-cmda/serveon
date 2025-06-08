@@ -26,11 +26,9 @@ export class EmployeesService {
 
       if (existingEmail.rowCount > 0) {
         throw new ConflictException(`Email ${createEmployeeDto.email} já está em uso`);
-      }
-
-      const result = await this.databaseService.query(
+      }      const result = await this.databaseService.query(
         `INSERT INTO dbo.funcionario
-          (nome, cpf, email, telefone, cargo, departamento, data_admissao, ativo)
+          (nome, cpf, email, telefone, cargo_id, departamento_id, data_admissao, ativo)
          VALUES
           ($1, $2, $3, $4, $5, $6, $7, $8)
          RETURNING *`,
@@ -39,8 +37,8 @@ export class EmployeesService {
           createEmployeeDto.cpf,
           createEmployeeDto.email,
           createEmployeeDto.telefone || null,
-          createEmployeeDto.cargo,
-          createEmployeeDto.departamento,
+          createEmployeeDto.cargoId || null,
+          createEmployeeDto.departamentoId || null,
           createEmployeeDto.dataAdmissao,
           createEmployeeDto.ativo
         ]
@@ -55,12 +53,17 @@ export class EmployeesService {
       throw new InternalServerErrorException('Erro ao criar funcionário');
     }
   }
-
   async findAll(): Promise<Employee[]> {
     try {
       const result = await this.databaseService.query(`
-        SELECT * FROM dbo.funcionario
-        ORDER BY nome
+        SELECT 
+          f.*,
+          c.nome as cargo_nome,
+          d.nome as departamento_nome
+        FROM dbo.funcionario f
+        LEFT JOIN dbo.cargo c ON f.cargo_id = c.id
+        LEFT JOIN dbo.departamento d ON f.departamento_id = d.id
+        ORDER BY f.nome
       `);
 
       return result.rows.map(row => this.mapToEmployeeEntity(row));
@@ -69,13 +72,18 @@ export class EmployeesService {
       throw new InternalServerErrorException('Erro ao buscar funcionários');
     }
   }
-
   async findOne(id: number): Promise<Employee> {
     try {
-      const result = await this.databaseService.query(
-        'SELECT * FROM dbo.funcionario WHERE id = $1',
-        [id]
-      );
+      const result = await this.databaseService.query(`
+        SELECT 
+          f.*,
+          c.nome as cargo_nome,
+          d.nome as departamento_nome
+        FROM dbo.funcionario f
+        LEFT JOIN dbo.cargo c ON f.cargo_id = c.id
+        LEFT JOIN dbo.departamento d ON f.departamento_id = d.id
+        WHERE f.id = $1
+      `, [id]);
 
       if (result.rowCount === 0) {
         throw new NotFoundException(`Funcionário com ID ${id} não encontrado`);
@@ -146,16 +154,14 @@ export class EmployeesService {
       if (updateEmployeeDto.telefone !== undefined) {
         updates.push(`telefone = $${paramCounter++}`);
         values.push(updateEmployeeDto.telefone);
+      }      if (updateEmployeeDto.cargoId !== undefined) {
+        updates.push(`cargo_id = $${paramCounter++}`);
+        values.push(updateEmployeeDto.cargoId);
       }
 
-      if (updateEmployeeDto.cargo !== undefined) {
-        updates.push(`cargo = $${paramCounter++}`);
-        values.push(updateEmployeeDto.cargo);
-      }
-
-      if (updateEmployeeDto.departamento !== undefined) {
-        updates.push(`departamento = $${paramCounter++}`);
-        values.push(updateEmployeeDto.departamento);
+      if (updateEmployeeDto.departamentoId !== undefined) {
+        updates.push(`departamento_id = $${paramCounter++}`);
+        values.push(updateEmployeeDto.departamentoId);
       }
 
       if (updateEmployeeDto.dataAdmissao !== undefined) {
@@ -230,7 +236,6 @@ export class EmployeesService {
     }
   }
 
-
   private mapToEmployeeEntity(dbRecord: any): Employee {
     return {
       id: dbRecord.id,
@@ -238,8 +243,10 @@ export class EmployeesService {
       cpf: dbRecord.cpf,
       email: dbRecord.email,
       telefone: dbRecord.telefone,
-      cargo: dbRecord.cargo,
-      departamento: dbRecord.departamento,
+      cargoId: dbRecord.cargo_id,
+      cargoNome: dbRecord.cargo_nome,
+      departamentoId: dbRecord.departamento_id,
+      departamentoNome: dbRecord.departamento_nome,
       dataAdmissao: dbRecord.data_admissao,
       dataDemissao: dbRecord.data_demissao,
       ativo: dbRecord.ativo,

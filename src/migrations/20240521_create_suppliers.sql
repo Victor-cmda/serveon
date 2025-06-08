@@ -1,6 +1,6 @@
 
 CREATE TABLE dbo.fornecedor (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     cnpj_cpf VARCHAR(20) NOT NULL UNIQUE,
     tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J')),
     is_estrangeiro BOOLEAN NOT NULL DEFAULT FALSE,
@@ -13,7 +13,7 @@ CREATE TABLE dbo.fornecedor (
     numero VARCHAR(10),
     complemento VARCHAR(60),
     bairro VARCHAR(50),
-    cidade_id UUID REFERENCES dbo.cidade(id),
+    cidade_id INTEGER REFERENCES dbo.cidade(id),
     cep VARCHAR(15),
     telefone VARCHAR(20),
     email VARCHAR(100),
@@ -21,7 +21,7 @@ CREATE TABLE dbo.fornecedor (
     observacoes TEXT,
     responsavel VARCHAR(100),
     celular_responsavel VARCHAR(20),
-    condicao_pagamento_id UUID REFERENCES dbo.condicao_pagamento(id),
+    condicao_pagamento_id INTEGER REFERENCES dbo.condicao_pagamento(id),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

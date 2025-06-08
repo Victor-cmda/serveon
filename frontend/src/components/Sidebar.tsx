@@ -13,6 +13,8 @@ import {
   CreditCard,
   Truck,
   ChevronRight,
+  Building2,
+  Briefcase,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -61,9 +63,7 @@ const Sidebar = () => {
       id: 'main',
       title: 'Gestão Principal',
       icon: <Package className="h-4 w-4" />,
-      color: 'blue',
-      items: [
-        {
+      color: 'blue',      items: [        {
           id: 'customers',
           title: 'Clientes',
           icon: <Users className="h-4 w-4" />,
@@ -86,6 +86,31 @@ const Sidebar = () => {
           title: 'Notas Fiscais',
           icon: <FileText className="h-4 w-4" />,
           path: '/invoices',
+        },      ],
+    },
+    {
+      id: 'hr',
+      title: 'Recursos Humanos',
+      icon: <Users className="h-4 w-4" />,
+      color: 'orange',
+      items: [
+        {
+          id: 'employees',
+          title: 'Funcionários',
+          icon: <Users className="h-4 w-4" />,
+          path: '/employees',
+        },
+        {
+          id: 'departments',
+          title: 'Departamentos',
+          icon: <Building2 className="h-4 w-4" />,
+          path: '/departments',
+        },
+        {
+          id: 'positions',
+          title: 'Cargos',
+          icon: <Briefcase className="h-4 w-4" />,
+          path: '/positions',
         },
       ],
     },
@@ -146,7 +171,6 @@ const Sidebar = () => {
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
-
   const getColorClasses = (color: string, variant: 'light' | 'medium' | 'dark' = 'medium') => {
     const colors = {
       blue: {
@@ -158,6 +182,11 @@ const Sidebar = () => {
         light: 'bg-green-50 text-green-600 border-green-200',
         medium: 'bg-green-500 text-white',
         dark: 'bg-green-600 text-white',
+      },
+      orange: {
+        light: 'bg-orange-50 text-orange-600 border-orange-200',
+        medium: 'bg-orange-500 text-white',
+        dark: 'bg-orange-600 text-white',
       },
       purple: {
         light: 'bg-purple-50 text-purple-600 border-purple-200',

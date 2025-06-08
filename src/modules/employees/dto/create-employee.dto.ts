@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString, IsDate, Matches, MaxLength, IsBoolean } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsDate, Matches, MaxLength, IsBoolean, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateEmployeeDto {
@@ -35,27 +35,26 @@ export class CreateEmployeeDto {
     required: false
   })
   @IsOptional()
-  @IsString({ message: 'Telefone deve ser uma string' })
-  @MaxLength(20, { message: 'Telefone deve ter no máximo 20 caracteres' })
+  @IsString({ message: 'Telefone deve ser uma string' })  @MaxLength(20, { message: 'Telefone deve ter no máximo 20 caracteres' })
   telefone?: string;
 
   @ApiProperty({
-    description: 'Cargo do funcionário',
-    example: 'Vendedor'
+    description: 'ID do cargo do funcionário',
+    example: 1,
+    required: false
   })
-  @IsNotEmpty({ message: 'Cargo é obrigatório' })
-  @IsString({ message: 'Cargo deve ser uma string' })
-  @MaxLength(50, { message: 'Cargo deve ter no máximo 50 caracteres' })
-  cargo: string;
+  @IsOptional()
+  @IsNumber({}, { message: 'ID do cargo deve ser um número' })
+  cargoId?: number;
 
   @ApiProperty({
-    description: 'Departamento do funcionário',
-    example: 'Comercial'
+    description: 'ID do departamento do funcionário',
+    example: 1,
+    required: false
   })
-  @IsNotEmpty({ message: 'Departamento é obrigatório' })
-  @IsString({ message: 'Departamento deve ser uma string' })
-  @MaxLength(50, { message: 'Departamento deve ter no máximo 50 caracteres' })
-  departamento: string;
+  @IsOptional()
+  @IsNumber({}, { message: 'ID do departamento deve ser um número' })
+  departamentoId?: number;
 
   @ApiProperty({
     description: 'Data de admissão no formato YYYY-MM-DD',

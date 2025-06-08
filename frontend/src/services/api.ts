@@ -29,6 +29,21 @@ import {
   CreateSupplierDto,
   UpdateSupplierDto,
 } from '../types/supplier';
+import {
+  Department,
+  CreateDepartmentDto,
+  UpdateDepartmentDto,
+} from '../types/department';
+import {
+  Position,
+  CreatePositionDto,
+  UpdatePositionDto,
+} from '../types/position';
+import {
+  Employee,
+  CreateEmployeeDto,
+  UpdateEmployeeDto,
+} from '../types/employee';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -351,9 +366,163 @@ export const paymentTermApi = {
     });
     return handleResponse(response);
   },
-
   delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_URL}/payment-terms/${id}`, {
+      method: 'DELETE',
+    });
+    return handleResponse(response);
+  },
+};
+
+export const employeeApi = {
+  getAll: async (): Promise<Employee[]> => {
+    const response = await fetch(`${API_URL}/employees`);
+    return handleResponse(response);
+  },
+
+  getById: async (id: number): Promise<Employee> => {
+    const response = await fetch(`${API_URL}/employees/${id}`);
+    return handleResponse(response);
+  },
+
+  create: async (employee: CreateEmployeeDto): Promise<Employee> => {
+    const response = await fetch(`${API_URL}/employees`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(employee),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (
+    id: number,
+    employee: UpdateEmployeeDto,
+  ): Promise<Employee> => {
+    const response = await fetch(`${API_URL}/employees/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(employee),
+    });
+    return handleResponse(response);
+  },
+
+  delete: async (id: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/employees/${id}`, {
+      method: 'DELETE',
+    });
+    return handleResponse(response);
+  },
+
+  // Novos métodos para buscar departamentos e cargos
+  getActiveDepartments: async (): Promise<Department[]> => {
+    const response = await fetch(`${API_URL}/employees/departments/active`);
+    return handleResponse(response);
+  },
+
+  getActivePositions: async (): Promise<Position[]> => {
+    const response = await fetch(`${API_URL}/employees/positions/active`);
+    return handleResponse(response);
+  },
+
+  getPositionsByDepartment: async (departmentId: number): Promise<Position[]> => {
+    const response = await fetch(`${API_URL}/employees/positions/by-department/${departmentId}`);
+    return handleResponse(response);
+  },
+};
+
+// API para Departamentos
+export const departmentApi = {
+  getAll: async (): Promise<Department[]> => {
+    const response = await fetch(`${API_URL}/departments`);
+    return handleResponse(response);
+  },
+
+  getById: async (id: number): Promise<Department> => {
+    const response = await fetch(`${API_URL}/departments/${id}`);
+    return handleResponse(response);
+  },
+
+  create: async (department: CreateDepartmentDto): Promise<Department> => {
+    const response = await fetch(`${API_URL}/departments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(department),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (
+    id: number,
+    department: UpdateDepartmentDto,
+  ): Promise<Department> => {
+    const response = await fetch(`${API_URL}/departments/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(department),
+    });
+    return handleResponse(response);
+  },
+
+  delete: async (id: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/departments/${id}`, {
+      method: 'DELETE',
+    });
+    return handleResponse(response);
+  },
+};
+
+// API para Cargos
+export const positionApi = {
+  getAll: async (): Promise<Position[]> => {
+    const response = await fetch(`${API_URL}/positions`);
+    return handleResponse(response);
+  },
+
+  getById: async (id: number): Promise<Position> => {
+    const response = await fetch(`${API_URL}/positions/${id}`);
+    return handleResponse(response);
+  },
+
+  getByDepartment: async (departmentId: number): Promise<Position[]> => {
+    const response = await fetch(`${API_URL}/positions/by-department/${departmentId}`);
+    return handleResponse(response);
+  },
+
+  create: async (position: CreatePositionDto): Promise<Position> => {
+    const response = await fetch(`${API_URL}/positions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(position),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (
+    id: number,
+    position: UpdatePositionDto,
+  ): Promise<Position> => {
+    const response = await fetch(`${API_URL}/positions/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(position),
+    });
+    return handleResponse(response);
+  },
+
+  delete: async (id: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/positions/${id}`, {
       method: 'DELETE',
     });
     return handleResponse(response);

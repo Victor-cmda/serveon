@@ -10,6 +10,8 @@ export interface Supplier {
   numero?: string;
   complemento?: string;
   bairro?: string;
+  paisId?: number;
+  estadoId?: number;
   cidadeId?: number;
   cidadeNome?: string;
   estadoNome?: string;
@@ -42,11 +44,15 @@ export interface CreateSupplierDto {
   numero?: string;
   complemento?: string;
   bairro?: string;
+  paisId?: number;
+  estadoId?: number;
   cidadeId?: number;
   cep?: string;
   telefone?: string;
   email?: string;
   ativo?: boolean;
+  isEstrangeiro?: boolean;
+  tipoDocumento?: string;
   condicaoPagamentoId?: number;
   // Campos específicos para fornecedores
   website?: string;
@@ -64,11 +70,16 @@ export interface UpdateSupplierDto {
   endereco?: string;
   numero?: string;
   complemento?: string;
-  bairro?: string;  cidadeId?: number;
+  bairro?: string;
+  paisId?: number;
+  estadoId?: number;
+  cidadeId?: number;
   cep?: string;
   telefone?: string;
   email?: string;
   ativo?: boolean;
+  isEstrangeiro?: boolean;
+  tipoDocumento?: string;
   condicaoPagamentoId?: number;
   // Campos específicos para fornecedores
   website?: string;

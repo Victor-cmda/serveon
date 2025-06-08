@@ -30,18 +30,29 @@ export class Employee {
     example: '11987654321'
   })
   telefone?: string;
+  @ApiProperty({
+    description: 'ID do cargo do funcionário',
+    example: 1
+  })
+  cargoId?: number;
 
   @ApiProperty({
-    description: 'Cargo do funcionário',
+    description: 'Nome do cargo do funcionário',
     example: 'Vendedor'
   })
-  cargo: string;
+  cargoNome?: string;
 
   @ApiProperty({
-    description: 'Departamento do funcionário',
+    description: 'ID do departamento do funcionário',
+    example: 1
+  })
+  departamentoId?: number;
+
+  @ApiProperty({
+    description: 'Nome do departamento do funcionário',
     example: 'Comercial'
   })
-  departamento: string;
+  departamentoNome?: string;
 
   @ApiProperty({
     description: 'Data de admissão',

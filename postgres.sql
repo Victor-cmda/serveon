@@ -207,9 +207,31 @@ CREATE TABLE transportador (
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_transportador_cidade FOREIGN KEY (cidade_id) REFERENCES cidade (id),
-    CONSTRAINT ck_transportador_tipo CHECK (tipo IN ('F', 'J'))
+    CONSTRAINT fk_transportador_cidade FOREIGN KEY (cidade_id) REFERENCES cidade (id),    CONSTRAINT ck_transportador_tipo CHECK (tipo IN ('F', 'J'))
 );
+
+-- Tabelas de RH
+-- Tabela departamento
+CREATE TABLE departamento (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    descricao TEXT,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela cargo
+CREATE TABLE cargo (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    descricao TEXT,
+    departamento_id INTEGER REFERENCES departamento(id),
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Tabela produto
 CREATE TABLE produto (
     codigo VARCHAR(30) PRIMARY KEY,
@@ -223,10 +245,26 @@ CREATE TABLE produto (
     gtin VARCHAR(14),
     -- Código de barras
     gtin_tributavel VARCHAR(14),
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela funcionario
+CREATE TABLE funcionario (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    cpf VARCHAR(11) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    telefone VARCHAR(20),
+    cargo_id INTEGER REFERENCES cargo(id),
+    departamento_id INTEGER REFERENCES departamento(id),
+    data_admissao DATE NOT NULL,
+    data_demissao DATE,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
 -- Tabela nfe
 CREATE TABLE nfe (
     chave_acesso VARCHAR(44) PRIMARY KEY,
@@ -357,6 +395,10 @@ CREATE INDEX idx_fornecedor_cnpj_cpf ON fornecedor(cnpj_cpf);
 CREATE INDEX idx_fornecedor_razao_social ON fornecedor(razao_social);
 CREATE INDEX idx_fornecedor_cidade_id ON fornecedor(cidade_id);
 CREATE INDEX idx_fornecedor_condicao_pagamento_id ON fornecedor(condicao_pagamento_id);
+CREATE INDEX idx_funcionario_cpf ON funcionario(cpf);
+CREATE INDEX idx_funcionario_email ON funcionario(email);
+CREATE INDEX idx_funcionario_cargo ON funcionario(cargo);
+CREATE INDEX idx_funcionario_departamento ON funcionario(departamento);
 CREATE INDEX idx_transportador_cidade_id ON transportador(cidade_id);
 -- Índices para nfe
 CREATE INDEX idx_nfe_cnpj_emitente ON nfe(cnpj_emitente);
@@ -403,6 +445,8 @@ CREATE TRIGGER update_cliente_timestamp BEFORE
 UPDATE ON cliente FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_fornecedor_timestamp BEFORE
 UPDATE ON fornecedor FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_funcionario_timestamp BEFORE
+UPDATE ON funcionario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_destinatario_timestamp BEFORE
 UPDATE ON destinatario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_transportador_timestamp BEFORE
@@ -447,6 +491,44 @@ COMMENT ON TABLE dbo.forma_pagamento IS 'Formas de pagamento das parcelas de not
 COMMENT ON TABLE dbo.emitente IS 'Cadastro de empresas emitentes de notas fiscais';
 COMMENT ON TABLE dbo.cliente IS 'Cadastro de clientes';
 COMMENT ON TABLE dbo.fornecedor IS 'Cadastro de fornecedores';
+COMMENT ON COLUMN dbo.fornecedor.id IS 'ID único do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.cnpj_cpf IS 'CNPJ ou CPF do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.tipo IS 'Tipo de fornecedor: F=Física, J=Jurídica';
+COMMENT ON COLUMN dbo.fornecedor.is_estrangeiro IS 'Indica se é um fornecedor estrangeiro';
+COMMENT ON COLUMN dbo.fornecedor.tipo_documento IS 'Tipo de documento para fornecedores estrangeiros';
+COMMENT ON COLUMN dbo.fornecedor.razao_social IS 'Razão social ou nome completo do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.nome_fantasia IS 'Nome fantasia do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.inscricao_estadual IS 'Inscrição estadual do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.inscricao_municipal IS 'Inscrição municipal do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.endereco IS 'Endereço do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.numero IS 'Número do endereço do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.complemento IS 'Complemento do endereço do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.bairro IS 'Bairro do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.cidade_id IS 'ID da cidade do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.cep IS 'CEP do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.telefone IS 'Telefone do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.email IS 'Email do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.website IS 'Website do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.observacoes IS 'Observações sobre o fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.responsavel IS 'Nome do responsável pelo fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.celular_responsavel IS 'Celular do responsável pelo fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.condicao_pagamento_id IS 'ID da condição de pagamento do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.ativo IS 'Indica se o fornecedor está ativo';
+COMMENT ON COLUMN dbo.fornecedor.created_at IS 'Data de criação do registro';
+COMMENT ON COLUMN dbo.fornecedor.updated_at IS 'Data da última atualização do registro';
+COMMENT ON TABLE dbo.funcionario IS 'Cadastro de funcionários';
+COMMENT ON COLUMN dbo.funcionario.id IS 'ID único do funcionário';
+COMMENT ON COLUMN dbo.funcionario.nome IS 'Nome completo do funcionário';
+COMMENT ON COLUMN dbo.funcionario.cpf IS 'CPF do funcionário (apenas números)';
+COMMENT ON COLUMN dbo.funcionario.email IS 'Email profissional do funcionário';
+COMMENT ON COLUMN dbo.funcionario.telefone IS 'Telefone de contato do funcionário';
+COMMENT ON COLUMN dbo.funcionario.cargo IS 'Cargo do funcionário';
+COMMENT ON COLUMN dbo.funcionario.departamento IS 'Departamento do funcionário';
+COMMENT ON COLUMN dbo.funcionario.data_admissao IS 'Data de admissão do funcionário';
+COMMENT ON COLUMN dbo.funcionario.data_demissao IS 'Data de demissão do funcionário (se aplicável)';
+COMMENT ON COLUMN dbo.funcionario.ativo IS 'Indica se o funcionário está ativo';
+COMMENT ON COLUMN dbo.funcionario.created_at IS 'Data de criação do registro';
+COMMENT ON COLUMN dbo.funcionario.updated_at IS 'Data da última atualização do registro';
 COMMENT ON TABLE dbo.destinatario IS 'Cadastro de destinatários de notas fiscais';
 COMMENT ON TABLE dbo.cliente_destinatario IS 'Relacionamento entre clientes e destinatários';
 COMMENT ON TABLE dbo.transportador IS 'Cadastro de transportadores de mercadorias';

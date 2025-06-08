@@ -17,6 +17,12 @@ import PaymentMethodsList from './pages/payment-methods/PaymentMethodsList';
 import PaymentMethodForm from './pages/payment-methods/PaymentMethodForm';
 import PaymentTermsList from './pages/payment-terms/PaymentTermsList';
 import PaymentTermForm from './pages/payment-terms/PaymentTermForm';
+import EmployeesList from './pages/employees/EmployeesList';
+import EmployeeForm from './pages/employees/EmployeeForm';
+import DepartmentsList from './pages/departments/DepartmentsList';
+import DepartmentForm from './pages/departments/DepartmentForm';
+import PositionsList from './pages/positions/PositionsList';
+import PositionForm from './pages/positions/PositionForm';
 import { FormStateProvider } from './contexts/FormStateContext';
 
 const router = createBrowserRouter([
@@ -75,9 +81,8 @@ const router = createBrowserRouter([
       {
         path: 'suppliers/new',
         element: <SupplierForm />,
-      },
-      {
-        path: 'suppliers/:id',
+      },      {
+        path: 'suppliers/edit/:id',
         element: <SupplierForm />,
       },
       // Países
@@ -114,10 +119,47 @@ const router = createBrowserRouter([
       {
         path: 'cities/new',
         element: <CityForm />,
-      },
-      {
+      },      {
         path: 'cities/edit/:id',
         element: <CityForm />,
+      },      // Funcionários
+      {
+        path: 'employees',
+        element: <EmployeesList />,
+      },
+      {
+        path: 'employees/new',
+        element: <EmployeeForm />,
+      },
+      {
+        path: 'employees/edit/:id',
+        element: <EmployeeForm />,
+      },
+      // Departamentos
+      {
+        path: 'departments',
+        element: <DepartmentsList />,
+      },
+      {
+        path: 'departments/new',
+        element: <DepartmentForm />,
+      },
+      {
+        path: 'departments/edit/:id',
+        element: <DepartmentForm />,
+      },
+      // Cargos
+      {
+        path: 'positions',
+        element: <PositionsList />,
+      },
+      {
+        path: 'positions/new',
+        element: <PositionForm />,
+      },
+      {
+        path: 'positions/edit/:id',
+        element: <PositionForm />,
       },
       // Rota de fallback
       {
