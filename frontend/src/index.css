@@ -3,73 +3,102 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Smooth theme transition - optimized */
+* {
+  transition: 
+    background-color 0.25s ease-out,
+    border-color 0.25s ease-out,
+    color 0.25s ease-out,
+    fill 0.25s ease-out,
+    stroke 0.25s ease-out,
+    opacity 0.25s ease-out,
+    box-shadow 0.25s ease-out;
+}
+
+/* Disable transitions during theme wave animation to prevent conflicts */
+.theme-wave-transition.transitioning * {
+  transition: none !important;
+}
+
+/* Re-enable transitions after wave animation */
+.theme-wave-transition:not(.transitioning) * {
+  transition: 
+    background-color 0.25s ease-out,
+    border-color 0.25s ease-out,
+    color 0.25s ease-out,
+    fill 0.25s ease-out,
+    stroke 0.25s ease-out,
+    opacity 0.25s ease-out,
+    box-shadow 0.25s ease-out;
+}
+
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --background: oklch(0.95 0.02 85); /* Beige background */
+  --foreground: oklch(0.2 0 0);
+  --card: oklch(0.97 0.015 85); /* Slightly lighter beige for cards */
+  --card-foreground: oklch(0.2 0 0);
+  --popover: oklch(0.97 0.015 85);
+  --popover-foreground: oklch(0.2 0 0);
+  --primary: oklch(0.3 0.05 85); /* Darker beige for primary */
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.92 0.025 85); /* Beige secondary */
+  --secondary-foreground: oklch(0.25 0 0);
+  --muted: oklch(0.92 0.025 85);
+  --muted-foreground: oklch(0.5 0.01 85);
+  --accent: oklch(0.92 0.025 85);
+  --accent-foreground: oklch(0.25 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: oklch(0.88 0.03 85); /* Beige border */
+  --input: oklch(0.88 0.03 85);
+  --ring: oklch(0.6 0.04 85);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar: oklch(0.98 0.01 85); /* Light beige sidebar */
+  --sidebar-foreground: oklch(0.2 0 0);
+  --sidebar-primary: oklch(0.3 0.05 85);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-accent: oklch(0.92 0.025 85);
+  --sidebar-accent-foreground: oklch(0.25 0 0);
+  --sidebar-border: oklch(0.88 0.03 85);
+  --sidebar-ring: oklch(0.6 0.04 85);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: oklch(0.18 0.04 280); /* Purplish-gray background */
+  --foreground: oklch(0.95 0.01 280);
+  --card: oklch(0.22 0.035 280); /* Slightly lighter purplish-gray for cards */
+  --card-foreground: oklch(0.95 0.01 280);
+  --popover: oklch(0.22 0.035 280);
+  --popover-foreground: oklch(0.95 0.01 280);
+  --primary: oklch(0.7 0.08 280); /* Lighter purple for primary */
+  --primary-foreground: oklch(0.15 0.02 280);
+  --secondary: oklch(0.28 0.04 280); /* Medium purplish-gray secondary */
+  --secondary-foreground: oklch(0.95 0.01 280);
+  --muted: oklch(0.28 0.04 280);
+  --muted-foreground: oklch(0.65 0.03 280);
+  --accent: oklch(0.28 0.04 280);
+  --accent-foreground: oklch(0.95 0.01 280);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --border: oklch(0.3 0.04 280); /* Purplish-gray border */
+  --input: oklch(0.25 0.035 280);
+  --ring: oklch(0.5 0.05 280);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: oklch(0.2 0.04 280); /* Dark purplish-gray sidebar */
+  --sidebar-foreground: oklch(0.95 0.01 280);
+  --sidebar-primary: oklch(0.6 0.08 280);
+  --sidebar-primary-foreground: oklch(0.95 0.01 280);
+  --sidebar-accent: oklch(0.28 0.04 280);
+  --sidebar-accent-foreground: oklch(0.95 0.01 280);
+  --sidebar-border: oklch(0.3 0.04 280);
+  --sidebar-ring: oklch(0.5 0.05 280);
 }
 
 @theme inline {
@@ -117,4 +146,499 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Transição suave para mudança de tema - otimizada */
+html {
+  color-scheme: light dark;
+}
+
+/* Remove duplicate transition - keep only one optimized version */
+body {
+  overflow-anchor: none;
+  transform: translateZ(0); /* Force hardware acceleration */
+  backface-visibility: hidden; /* Prevent flicker */
+}
+
+/* Animação melhorada para overlay de tema */
+@keyframes themeTransitionEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes themeTransitionExit {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+}
+
+.theme-overlay-enter {
+  animation: themeTransitionEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-overlay-exit {
+  animation: themeTransitionExit 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animações de transição de tema - Fade Corner */
+@keyframes fadeCornerTopLeftEnter {
+  0% {
+    clip-path: circle(0% at 0% 0%);
+    opacity: 0;
+  }
+  100% {
+    clip-path: circle(150% at 0% 0%);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeCornerTopLeftExit {
+  0% {
+    clip-path: circle(150% at 0% 0%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 0% 0%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeCornerTopRightEnter {
+  0% {
+    clip-path: circle(0% at 100% 0%);
+    opacity: 0;
+  }
+  100% {
+    clip-path: circle(150% at 100% 0%);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeCornerTopRightExit {
+  0% {
+    clip-path: circle(150% at 100% 0%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 100% 0%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeCornerBottomLeftEnter {
+  0% {
+    clip-path: circle(0% at 0% 100%);
+    opacity: 0;
+  }
+  100% {
+    clip-path: circle(150% at 0% 100%);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeCornerBottomLeftExit {
+  0% {
+    clip-path: circle(150% at 0% 100%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 0% 100%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeCornerBottomRightEnter {
+  0% {
+    clip-path: circle(0% at 100% 100%);
+    opacity: 0;
+  }
+  100% {
+    clip-path: circle(150% at 100% 100%);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeCornerBottomRightExit {
+  0% {
+    clip-path: circle(150% at 100% 100%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 100% 100%);
+    opacity: 0;
+  }
+}
+
+/* Classes de transição para fade corner */
+.theme-transition-fade-corner-top-left-enter {
+  animation: fadeCornerTopLeftEnter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-transition-fade-corner-top-left-exit {
+  animation: fadeCornerTopLeftExit 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-transition-fade-corner-top-right-enter {
+  animation: fadeCornerTopRightEnter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-transition-fade-corner-top-right-exit {
+  animation: fadeCornerTopRightExit 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-transition-fade-corner-bottom-left-enter {
+  animation: fadeCornerBottomLeftEnter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-transition-fade-corner-bottom-left-exit {
+  animation: fadeCornerBottomLeftExit 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-transition-fade-corner-bottom-right-enter {
+  animation: fadeCornerBottomRightEnter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.theme-transition-fade-corner-bottom-right-exit {
+  animation: fadeCornerBottomRightExit 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Efeito de transição de tema tipo onda - otimizado */
+.theme-wave-transition {
+  position: relative;
+}
+
+.theme-wave-transition::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  will-change: opacity, clip-path;
+  transform: translateZ(0); /* Force hardware acceleration */
+  backface-visibility: hidden; /* Prevent flicker */
+}
+
+.theme-wave-transition.transitioning::before {
+  opacity: 1;
+}
+
+/* Animações de onda circular de diferentes cantos - otimizadas */
+@keyframes waveFromTopLeft {
+  0% {
+    clip-path: circle(0% at 0% 0%);
+    opacity: 1;
+  }
+  50% {
+    clip-path: circle(150% at 0% 0%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 100% 100%);
+    opacity: 1;
+  }
+}
+
+@keyframes waveFromTopRight {
+  0% {
+    clip-path: circle(0% at 100% 0%);
+    opacity: 1;
+  }
+  50% {
+    clip-path: circle(150% at 100% 0%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 0% 100%);
+    opacity: 1;
+  }
+}
+
+@keyframes waveFromBottomLeft {
+  0% {
+    clip-path: circle(0% at 0% 100%);
+    opacity: 1;
+  }
+  50% {
+    clip-path: circle(150% at 0% 100%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 100% 0%);
+    opacity: 1;
+  }
+}
+
+@keyframes waveFromBottomRight {
+  0% {
+    clip-path: circle(0% at 100% 100%);
+    opacity: 1;
+  }
+  50% {
+    clip-path: circle(150% at 100% 100%);
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(0% at 0% 0%);
+    opacity: 1;
+  }
+}
+
+/* Classes de transição para onda - otimizadas */
+.wave-top-left::before {
+  background: var(--new-theme-background);
+  animation: waveFromTopLeft 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.wave-top-right::before {
+  background: var(--new-theme-background);
+  animation: waveFromTopRight 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.wave-bottom-left::before {
+  background: var(--new-theme-background);
+  animation: waveFromBottomLeft 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.wave-bottom-right::before {
+  background: var(--new-theme-background);
+  animation: waveFromBottomRight 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+/* CSS Variables para temas */
+:root {
+  --new-theme-background: var(--background);
+}
+
+.dark {
+  --new-theme-background: var(--background);
+}
+
+/* Tema claro -> escuro */
+.light-to-dark {
+  --new-theme-background: oklch(0.18 0.04 280); /* Purplish-gray dark background */
+}
+
+/* Tema escuro -> claro */
+.dark-to-light {
+  --new-theme-background: oklch(0.95 0.02 85); /* Beige light background */
+}
+
+/* Custom scrollbar styles for sidebar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.2);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.3);
+}
+
+.scrollbar-track-transparent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thumb-primary\/20::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.2);
+}
+
+/* Sonner Toaster Fixes */
+[data-sonner-toaster] {
+  position: fixed !important;
+  z-index: 999999 !important;
+  pointer-events: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+[data-sonner-toaster] * {
+  pointer-events: auto !important;
+}
+
+/* Prevent toasts from affecting document flow */
+[data-sonner-toast] {
+  position: relative !important;
+  width: 100% !important;
+  margin-bottom: 0 !important;
+  will-change: transform, opacity !important;
+}
+
+/* Ensure toasts stay within viewport bounds */
+[data-sonner-toaster][data-theme] {
+  max-width: calc(100vw - 32px) !important;
+  max-height: calc(100vh - 32px) !important;
+  overflow: visible !important;
+}
+
+/* Prevent body scroll when toasts are being swiped */
+body:has([data-sonner-toast][data-swiping="true"]) {
+  overflow-x: hidden !important;
+}
+
+/* Layout container overflow control */
+.layout-container {
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.layout-container:has([data-sonner-toast][data-swiping="true"]) {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+}
+
+/* Ensure toaster is always on top */
+.toaster {
+  z-index: 999999 !important;
+}
+
+/* Close button styling - Modern and elegant */
+[data-sonner-toast] [data-close-button] {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  left: 8px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 6px !important;
+  width: 20px !important;
+  height: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  color: var(--muted-foreground) !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  opacity: 0.6 !important;
+  transition: all 0.2s ease !important;
+  z-index: 10 !important;
+  font-weight: 500 !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  opacity: 1 !important;
+  background: var(--muted) !important;
+  color: var(--foreground) !important;
+  transform: scale(1.1) !important;
+}
+
+[data-sonner-toast] [data-close-button]:focus {
+  outline: 2px solid var(--ring) !important;
+  outline-offset: 1px !important;
+  opacity: 1 !important;
+}
+
+[data-sonner-toast] [data-close-button]:active {
+  transform: scale(0.95) !important;
+}
+
+/* Toast content padding to accommodate close button */
+[data-sonner-toast]:has([data-close-button]) [data-content] {
+  padding-right: 44px !important;
+}
+
+/* Toast title and description styling */
+[data-sonner-toast] [data-title] {
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  margin-bottom: 4px !important;
+}
+
+[data-sonner-toast] [data-description] {
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+  color: var(--muted-foreground) !important;
+}
+
+/* Toast icon styling */
+[data-sonner-toast] [data-icon] {
+  margin-right: 12px !important;
+  margin-top: 2px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Ensure toast animations don't cause scroll */
+[data-sonner-toast][data-mounted="true"] {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+}
+
+[data-sonner-toast][data-removed="true"] {
+  animation: none !important;
+  opacity: 0 !important;
+  transform: translateX(100%) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Prevent horizontal overflow during swipe */
+[data-sonner-toast][data-swiping="true"] {
+  transform: translateX(var(--swipe-amount, 0)) !important;
+  transition: none !important;
+}
+
+/* Ensure toaster doesn't create scrollbars */
+html, body {
+  overflow-x: hidden !important;
+}
+
+/* Additional safeguards for toast positioning */
+[data-sonner-toaster]:not([data-theme]) {
+  position: fixed !important;
+  top: auto !important;
+  bottom: 32px !important;
+  right: 32px !important;
+  left: auto !important;
+}
+
+/* Custom toast styling for better appearance */
+[data-sonner-toast] {
+  background: var(--popover) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--popover-foreground) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  max-width: 356px !important;
+  word-wrap: break-word !important;
+  overflow: hidden !important;
+  position: relative !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Ensure all toasts are visible */
+[data-sonner-toast]:not([data-removed="true"]) {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+.dark [data-sonner-toast] {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }

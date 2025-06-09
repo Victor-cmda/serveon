@@ -63,9 +63,7 @@ export class CountriesService {
             console.error('Erro ao buscar países:', error);
             throw new InternalServerErrorException('Erro ao buscar países');
         }
-    }
-
-    async findOne(id: string): Promise<Country> {
+    }    async findOne(id: number): Promise<Country> {
         try {
             const result = await this.databaseService.query(
                 'SELECT * FROM dbo.pais WHERE id = $1',
@@ -128,7 +126,7 @@ export class CountriesService {
         }
     }
 
-    async update(id: string, updateCountryDto: UpdateCountryDto): Promise<Country> {
+    async update(id: number, updateCountryDto: UpdateCountryDto): Promise<Country> {
         try {
             const existingCountry = await this.databaseService.query(
                 'SELECT id FROM dbo.pais WHERE id = $1',
@@ -204,7 +202,7 @@ export class CountriesService {
         }
     }
 
-    async remove(id: string): Promise<void> {
+    async remove(id: number): Promise<void> {
         try {
             const existingCountry = await this.databaseService.query(
                 'SELECT id FROM dbo.pais WHERE id = $1',

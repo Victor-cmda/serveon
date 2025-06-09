@@ -39,10 +39,9 @@ export class CustomersController {
   findAll() {
     return this.customersService.findAll();
   }
-
   @Get(':id')
   @ApiOperation({ summary: 'Obter cliente por ID' })
-  @ApiParam({ name: 'id', description: 'ID do cliente (UUID)' })
+  @ApiParam({ name: 'id', description: 'ID do cliente (número)' })
   @ApiResponse({ 
     status: HttpStatus.OK, 
     description: 'Cliente encontrado',
@@ -53,7 +52,7 @@ export class CustomersController {
     description: 'Cliente não encontrado' 
   })
   findOne(@Param('id') id: string) {
-    return this.customersService.findOne(id);
+    return this.customersService.findOne(parseInt(id, 10));
   }
 
   @Get('by-document/:cnpjCpf')
@@ -71,10 +70,9 @@ export class CustomersController {
   findByDocument(@Param('cnpjCpf') cnpjCpf: string) {
     return this.customersService.findByDocument(cnpjCpf);
   }
-
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar cliente por ID' })
-  @ApiParam({ name: 'id', description: 'ID do cliente (UUID)' })
+  @ApiParam({ name: 'id', description: 'ID do cliente (número)' })
   @ApiResponse({ 
     status: HttpStatus.OK, 
     description: 'Cliente atualizado com sucesso',
@@ -89,13 +87,12 @@ export class CustomersController {
     description: 'Cliente não encontrado' 
   })
   update(@Param('id') id: string, @Body() updateCustomerDto: UpdateCustomerDto) {
-    return this.customersService.update(id, updateCustomerDto);
+    return this.customersService.update(parseInt(id, 10), updateCustomerDto);
   }
-
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remover cliente por ID' })
-  @ApiParam({ name: 'id', description: 'ID do cliente (UUID)' })
+  @ApiParam({ name: 'id', description: 'ID do cliente (número)' })
   @ApiResponse({ 
     status: HttpStatus.NO_CONTENT, 
     description: 'Cliente removido com sucesso' 
@@ -105,6 +102,6 @@ export class CustomersController {
     description: 'Cliente não encontrado' 
   })
   async remove(@Param('id') id: string) {
-    await this.customersService.remove(id);
+    await this.customersService.remove(parseInt(id, 10));
   }
 }

@@ -65,9 +65,7 @@ export class StatesService {
             console.error('Erro ao buscar estados:', error);
             throw new InternalServerErrorException('Erro ao buscar estados');
         }
-    }
-
-    async findAllByCountry(paisId: string): Promise<State[]> {
+    }    async findAllByCountry(paisId: number): Promise<State[]> {
         try {
             const existingCountry = await this.databaseService.query(
                 'SELECT id FROM dbo.pais WHERE id = $1',
@@ -94,9 +92,7 @@ export class StatesService {
             console.error(`Erro ao buscar estados do país ${paisId}:`, error);
             throw new InternalServerErrorException(`Erro ao buscar estados do país ${paisId}`);
         }
-    }
-
-    async findOne(id: string): Promise<State> {
+    }    async findOne(id: number): Promise<State> {
         try {
             const result = await this.databaseService.query(`
                 SELECT e.*, p.nome as pais_nome
@@ -117,9 +113,7 @@ export class StatesService {
             console.error(`Erro ao buscar estado ${id}:`, error);
             throw new InternalServerErrorException(`Erro ao buscar estado ${id}`);
         }
-    }
-
-    async findByUf(uf: string, paisId: string): Promise<State> {
+    }    async findByUf(uf: string, paisId: number): Promise<State> {
         try {
             const result = await this.databaseService.query(`
                 SELECT e.*, p.nome as pais_nome
@@ -140,9 +134,7 @@ export class StatesService {
             console.error(`Erro ao buscar estado com UF ${uf}:`, error);
             throw new InternalServerErrorException(`Erro ao buscar estado com UF ${uf}`);
         }
-    }
-
-    async update(id: string, updateStateDto: UpdateStateDto): Promise<State> {
+    }    async update(id: number, updateStateDto: UpdateStateDto): Promise<State> {
         try {
             const existingState = await this.databaseService.query(
                 'SELECT id FROM dbo.estado WHERE id = $1',
@@ -249,9 +241,7 @@ export class StatesService {
             console.error(`Erro ao atualizar estado ${id}:`, error);
             throw new InternalServerErrorException(`Erro ao atualizar estado ${id}`);
         }
-    }
-
-    async remove(id: string): Promise<void> {
+    }    async remove(id: number): Promise<void> {
         try {
             const existingState = await this.databaseService.query(
                 'SELECT id FROM dbo.estado WHERE id = $1',

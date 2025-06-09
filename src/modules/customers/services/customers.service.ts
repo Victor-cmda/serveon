@@ -3,7 +3,6 @@ import { CreateCustomerDto } from '../dto/create-customer.dto';
 import { UpdateCustomerDto } from '../dto/update-customer.dto';
 import { DatabaseService } from '../../../common/database/database.service';
 import { Customer } from '../entities/customer.entity';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class CustomersService {
@@ -20,27 +19,21 @@ export class CustomersService {
         const existingCustomer = await client.query(
           'SELECT id FROM dbo.cliente WHERE cnpj_cpf = $1',
           [createCustomerDto.cnpjCpf]
-        );
-
-        if (existingCustomer.rowCount > 0) {
+        );        if (existingCustomer.rowCount > 0) {
           throw new ConflictException(`Cliente com CNPJ/CPF ${createCustomerDto.cnpjCpf} já existe`);
         }
         
-        // Gerar um UUID para o cliente se não for fornecido
-        const clienteId = uuidv4();
-        
-        // Inserir o novo cliente
+        // Inserir o novo cliente (ID será gerado automaticamente)
         const result = await client.query(
           `INSERT INTO dbo.cliente
-            (id, cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
+            (cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
             nome_fantasia, inscricao_estadual, inscricao_municipal, 
             endereco, numero, complemento, bairro, 
             cidade_id, cep, telefone, email, is_destinatario, ativo)
           VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
           RETURNING *`,
           [
-            clienteId,
             createCustomerDto.cnpjCpf,
             createCustomerDto.tipo,
             createCustomerDto.isEstrangeiro || false,
@@ -61,20 +54,18 @@ export class CustomersService {
             createCustomerDto.ativo !== undefined ? createCustomerDto.ativo : true
           ]
         );
-        
-        // Se o cliente é também destinatário, adiciona na tabela de destinatários
+          // Se o cliente é também destinatário, adiciona na tabela de destinatários
         if (createCustomerDto.isDestinatario !== false) {
           await client.query(
             `INSERT INTO dbo.destinatario
-              (id, cliente_id, cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
+              (cliente_id, cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
               nome_fantasia, inscricao_estadual, inscricao_municipal, 
               endereco, numero, complemento, bairro, 
               cidade_id, cep, telefone, email, ativo)
             VALUES
-              ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
+              ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
             [
-              uuidv4(),
-              clienteId,
+              result.rows[0].id,
               createCustomerDto.cnpjCpf,
               createCustomerDto.tipo,
               createCustomerDto.isEstrangeiro || false,
@@ -95,8 +86,7 @@ export class CustomersService {
             ]
           );
         }
-        
-        // Se tiver destinatários associados, criar relações
+          // Se tiver destinatários associados, criar relações
         if (createCustomerDto.destinatariosIds && createCustomerDto.destinatariosIds.length > 0) {
           for (const destinatarioId of createCustomerDto.destinatariosIds) {
             // Verificar se o destinatário existe
@@ -113,7 +103,7 @@ export class CustomersService {
             await client.query(
               `INSERT INTO dbo.cliente_destinatario (cliente_id, destinatario_id)
               VALUES ($1, $2)`,
-              [clienteId, destinatarioId]
+              [result.rows[0].id, destinatarioId]
             );
           }
         }
@@ -121,7 +111,7 @@ export class CustomersService {
         await client.query('COMMIT');
         
         // Buscar dados completos do cliente para retornar
-        return this.findOne(createCustomerDto.cnpjCpf);
+        return this.findOne(result.rows[0].id);
         
       } catch (error) {
         await client.query('ROLLBACK');
@@ -176,45 +166,19 @@ export class CustomersService {
       throw new InternalServerErrorException('Erro ao buscar clientes');
     }
   }
-
-  async findOne(id: string): Promise<Customer> {
+  async findOne(id: number): Promise<Customer> {
     try {
-      // Tentar buscar pelo ID primeiro
-      let result;
-      let isUUID = false;
-      
-      try {
-        // Verificar se o ID é um UUID válido
-        const uuid = id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
-        if (uuid) {
-          isUUID = true;
-          result = await this.databaseService.query(`
-            SELECT c.*, cidade.nome as cidade_nome, estado.nome as estado_nome, estado.uf,
-                  c.is_destinatario
-            FROM dbo.cliente c
-            LEFT JOIN dbo.cidade ON c.cidade_id = cidade.id
-            LEFT JOIN dbo.estado ON cidade.estado_id = estado.id
-            WHERE c.id = $1
-          `, [id]);
-        }
-      } catch (e) {
-        isUUID = false;
-      }
-      
-      // Se não é UUID ou não encontrou pelo ID, busca pelo CNPJ/CPF
-      if (!isUUID || result.rowCount === 0) {
-        result = await this.databaseService.query(`
-          SELECT c.*, cidade.nome as cidade_nome, estado.nome as estado_nome, estado.uf,
-                c.is_destinatario
-          FROM dbo.cliente c
-          LEFT JOIN dbo.cidade ON c.cidade_id = cidade.id
-          LEFT JOIN dbo.estado ON cidade.estado_id = estado.id
-          WHERE c.cnpj_cpf = $1
-        `, [id]);
-      }
+      const result = await this.databaseService.query(`
+        SELECT c.*, cidade.nome as cidade_nome, estado.nome as estado_nome, estado.uf,
+               c.is_destinatario
+        FROM dbo.cliente c
+        LEFT JOIN dbo.cidade ON c.cidade_id = cidade.id
+        LEFT JOIN dbo.estado ON cidade.estado_id = estado.id
+        WHERE c.id = $1
+      `, [id]);
 
       if (result.rowCount === 0) {
-        throw new NotFoundException(`Cliente não encontrado`);
+        throw new NotFoundException(`Cliente com ID ${id} não encontrado`);
       }
 
       const clientEntity = this.mapToCustomerEntity(result.rows[0]);
@@ -281,8 +245,7 @@ export class CustomersService {
       throw new InternalServerErrorException(`Erro ao buscar cliente por CNPJ/CPF`);
     }
   }
-
-  async update(id: string, updateCustomerDto: UpdateCustomerDto): Promise<Customer> {
+  async update(id: number, updateCustomerDto: UpdateCustomerDto): Promise<Customer> {
     try {
       const client = await this.databaseService.getClient();
       
@@ -290,27 +253,10 @@ export class CustomersService {
         await client.query('BEGIN');
         
         // Buscar cliente atual para verificar alterações
-        let clienteResult;
-        let isUUID = false;
-        
-        try {
-          // Verificar se o ID é um UUID válido
-          const uuid = id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
-          if (uuid) {
-            isUUID = true;
-            clienteResult = await client.query('SELECT * FROM dbo.cliente WHERE id = $1', [id]);
-          }
-        } catch (e) {
-          isUUID = false;
-        }
-        
-        // Se não é UUID ou não encontrou pelo ID, busca pelo CNPJ/CPF
-        if (!isUUID || clienteResult.rowCount === 0) {
-          clienteResult = await client.query('SELECT * FROM dbo.cliente WHERE cnpj_cpf = $1', [id]);
-        }
+        const clienteResult = await client.query('SELECT * FROM dbo.cliente WHERE id = $1', [id]);
         
         if (clienteResult.rowCount === 0) {
-          throw new NotFoundException(`Cliente não encontrado`);
+          throw new NotFoundException(`Cliente com ID ${id} não encontrado`);
         }
         
         const clienteAtual = clienteResult.rows[0];
@@ -577,36 +523,18 @@ export class CustomersService {
       throw new InternalServerErrorException(`Erro ao atualizar cliente`);
     }
   }
-
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     try {
       const client = await this.databaseService.getClient();
       
       try {
         await client.query('BEGIN');
         
-        // Buscar cliente por ID ou CNPJ/CPF
-        let clienteResult;
-        let isUUID = false;
-        
-        try {
-          // Verificar se o ID é um UUID válido
-          const uuid = id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
-          if (uuid) {
-            isUUID = true;
-            clienteResult = await client.query('SELECT * FROM dbo.cliente WHERE id = $1', [id]);
-          }
-        } catch (e) {
-          isUUID = false;
-        }
-        
-        // Se não é UUID ou não encontrou pelo ID, busca pelo CNPJ/CPF
-        if (!isUUID || clienteResult.rowCount === 0) {
-          clienteResult = await client.query('SELECT * FROM dbo.cliente WHERE cnpj_cpf = $1', [id]);
-        }
+        // Buscar cliente por ID
+        const clienteResult = await client.query('SELECT * FROM dbo.cliente WHERE id = $1', [id]);
         
         if (clienteResult.rowCount === 0) {
-          throw new NotFoundException(`Cliente não encontrado`);
+          throw new NotFoundException(`Cliente com ID ${id} não encontrado`);
         }
         
         const clienteId = clienteResult.rows[0].id;

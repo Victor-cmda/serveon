@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsNumber, Matches, MaxLength } from 'class-validator';
 
 export class CreateCityDto {
     @ApiProperty({
@@ -22,10 +22,10 @@ export class CreateCityDto {
     codigoIbge?: string;
 
     @ApiProperty({
-        description: 'ID do estado ao qual a cidade pertence (UUID)',
-        example: '550e8400-e29b-41d4-a716-446655440000'
+        description: 'ID do estado ao qual a cidade pertence',
+        example: 1
     })
     @IsNotEmpty({ message: 'ID do estado é obrigatório' })
-    @IsUUID(4, { message: 'ID do estado deve ser um UUID válido' })
-    estadoId: string;
+    @IsNumber({}, { message: 'ID do estado deve ser um número válido' })
+    estadoId: number;
 }

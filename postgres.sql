@@ -3,13 +3,11 @@ BEGIN;
 -- Criar schema
 CREATE SCHEMA IF NOT EXISTS dbo;
 SET search_path TO dbo;
--- Habilitar extensões úteis
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
 -- Tabelas de Localização
 -- Tabela PAÍS
-CREATE TABLE Pais (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE pais (
+    id SERIAL PRIMARY KEY,
     nome VARCHAR(60) NOT NULL,
     codigo VARCHAR(3) NOT NULL,
     sigla VARCHAR(2) NOT NULL,
@@ -18,42 +16,34 @@ CREATE TABLE Pais (
     CONSTRAINT uk_pais_codigo UNIQUE (codigo),
     CONSTRAINT uk_pais_sigla UNIQUE (sigla)
 );
--- Tabela ESTADO
-CREATE TABLE Estado (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+-- Tabela estado
+CREATE TABLE estado (
+    id SERIAL PRIMARY KEY,
     nome VARCHAR(60) NOT NULL,
     uf CHAR(2) NOT NULL,
-    pais_id UUID NOT NULL,
+    pais_id INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_estado_pais FOREIGN KEY (pais_id) REFERENCES Pais (id),
+    CONSTRAINT fk_estado_pais FOREIGN KEY (pais_id) REFERENCES pais (id),
     CONSTRAINT uk_estado_uf_pais UNIQUE (uf, pais_id)
 );
--- Tabela CIDADE
-CREATE TABLE Cidade (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+-- Tabela cidade
+CREATE TABLE cidade (
+    id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     codigo_ibge VARCHAR(7),
-    estado_id UUID NOT NULL,
+    estado_id INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_cidade_estado FOREIGN KEY (estado_id) REFERENCES Estado (id),
+    CONSTRAINT fk_cidade_estado FOREIGN KEY (estado_id) REFERENCES estado (id),
     CONSTRAINT uk_cidade_codigo_ibge UNIQUE (codigo_ibge)
 );
+
 -- Tabelas de Pagamento
--- Tabela CONDIÇÃO DE PAGAMENTO
-CREATE TABLE CondicaoPagamento (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    descricao VARCHAR(100) NOT NULL,
-    dias INTEGER,
-    parcelas INTEGER,
-    ativo BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
--- Tabela FORMA DE PAGAMENTO
-CREATE TABLE formapagamento (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+-- Tabela FORMA DE PAGAMENTO (movida para antes da condição de pagamento)
+CREATE TABLE forma_pagamento (
+    id SERIAL PRIMARY KEY,
     descricao VARCHAR(100) NOT NULL,
     codigo VARCHAR(20),
     tipo VARCHAR(30),
@@ -61,9 +51,35 @@ CREATE TABLE formapagamento (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Tabela CONDIÇÃO DE PAGAMENTO
+CREATE TABLE condicao_pagamento (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    descricao TEXT,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+-- Tabela de parcelas das condições de pagamento
+CREATE TABLE parcela_condicao_pagamento (
+    id SERIAL PRIMARY KEY,
+    condicao_pagamento_id INTEGER NOT NULL REFERENCES condicao_pagamento(id),
+    numero_parcela INTEGER NOT NULL,
+    forma_pagamento_id INTEGER NOT NULL REFERENCES forma_pagamento(id),
+    dias_para_pagamento INTEGER NOT NULL,
+    percentual_valor DECIMAL(5,2) NOT NULL,
+    taxa_juros DECIMAL(5,2) NOT NULL DEFAULT 0,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    CONSTRAINT uk_numero_parcela_por_condicao UNIQUE (condicao_pagamento_id, numero_parcela)
+);
+
 -- Tabelas Principais
--- Tabela EMITENTE
-CREATE TABLE Emitente (
+-- Tabela emitente
+CREATE TABLE emitente (
     cnpj VARCHAR(18) PRIMARY KEY,
     razao_social VARCHAR(100) NOT NULL,
     nome_fantasia VARCHAR(60),
@@ -74,7 +90,7 @@ CREATE TABLE Emitente (
     numero VARCHAR(10),
     complemento VARCHAR(60),
     bairro VARCHAR(50),
-    cidade_id UUID NOT NULL,
+    cidade_id INTEGER NOT NULL,
     cep VARCHAR(10),
     telefone VARCHAR(20),
     email VARCHAR(100),
@@ -82,12 +98,12 @@ CREATE TABLE Emitente (
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_emitente_cidade FOREIGN KEY (cidade_id) REFERENCES Cidade (id)
+    CONSTRAINT fk_emitente_cidade FOREIGN KEY (cidade_id) REFERENCES cidade (id)
 );
 
--- Tabela CLIENTE
-CREATE TABLE Cliente (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+-- Tabela cliente
+CREATE TABLE cliente (
+    id SERIAL PRIMARY KEY,
     cnpj_cpf VARCHAR(20) NOT NULL UNIQUE,
     tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J')),
     is_estrangeiro BOOLEAN NOT NULL DEFAULT FALSE,
@@ -100,7 +116,7 @@ CREATE TABLE Cliente (
     numero VARCHAR(10),
     complemento VARCHAR(60),
     bairro VARCHAR(50),
-    cidade_id UUID REFERENCES Cidade(id),
+    cidade_id INTEGER REFERENCES cidade(id),
     cep VARCHAR(15),
     telefone VARCHAR(20),
     email VARCHAR(100),
@@ -110,10 +126,9 @@ CREATE TABLE Cliente (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela DESTINATÁRIO
-CREATE TABLE Destinatario (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    cliente_id UUID REFERENCES Cliente(id),
+-- Tabela fornecedor
+CREATE TABLE fornecedor (
+    id SERIAL PRIMARY KEY,
     cnpj_cpf VARCHAR(20) NOT NULL UNIQUE,
     tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J')),
     is_estrangeiro BOOLEAN NOT NULL DEFAULT FALSE,
@@ -126,7 +141,37 @@ CREATE TABLE Destinatario (
     numero VARCHAR(10),
     complemento VARCHAR(60),
     bairro VARCHAR(50),
-    cidade_id UUID REFERENCES Cidade(id),
+    cidade_id INTEGER REFERENCES cidade(id),
+    cep VARCHAR(15),
+    telefone VARCHAR(20),
+    email VARCHAR(100),
+    website VARCHAR(100),
+    observacoes TEXT,
+    responsavel VARCHAR(100),
+    celular_responsavel VARCHAR(20),
+    condicao_pagamento_id INTEGER REFERENCES condicao_pagamento(id),
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela DESTINATÁRIO
+CREATE TABLE destinatario (
+    id SERIAL PRIMARY KEY,
+    cliente_id INTEGER REFERENCES cliente(id),
+    cnpj_cpf VARCHAR(20) NOT NULL UNIQUE,
+    tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J')),
+    is_estrangeiro BOOLEAN NOT NULL DEFAULT FALSE,
+    tipo_documento VARCHAR(50),
+    razao_social VARCHAR(100) NOT NULL,
+    nome_fantasia VARCHAR(60),
+    inscricao_estadual VARCHAR(50),
+    inscricao_municipal VARCHAR(20),
+    endereco VARCHAR(100),
+    numero VARCHAR(10),
+    complemento VARCHAR(60),
+    bairro VARCHAR(50),
+    cidade_id INTEGER REFERENCES cidade(id),
     cep VARCHAR(15),
     telefone VARCHAR(20),
     email VARCHAR(100),
@@ -135,15 +180,15 @@ CREATE TABLE Destinatario (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de relacionamento entre Cliente e Destinatário
-CREATE TABLE Cliente_Destinatario (
-    cliente_id UUID NOT NULL REFERENCES Cliente(id),
-    destinatario_id UUID NOT NULL REFERENCES Destinatario(id),
+-- Tabela de relacionamento entre cliente e Destinatário
+CREATE TABLE cliente_destinatario (
+    cliente_id INTEGER NOT NULL REFERENCES cliente(id),
+    destinatario_id INTEGER NOT NULL REFERENCES destinatario(id),
     PRIMARY KEY (cliente_id, destinatario_id)
 );
 
--- Tabela TRANSPORTADOR
-CREATE TABLE Transportador (
+-- Tabela transportador
+CREATE TABLE transportador (
     cnpj_cpf VARCHAR(18) PRIMARY KEY,
     tipo CHAR(1) NOT NULL,
     -- F = Física, J = Jurídica
@@ -154,7 +199,7 @@ CREATE TABLE Transportador (
     numero VARCHAR(10),
     complemento VARCHAR(60),
     bairro VARCHAR(50),
-    cidade_id UUID,
+    cidade_id INTEGER,
     cep VARCHAR(10),
     codigo_antt VARCHAR(20),
     placa_veiculo VARCHAR(10),
@@ -162,11 +207,33 @@ CREATE TABLE Transportador (
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_transportador_cidade FOREIGN KEY (cidade_id) REFERENCES Cidade (id),
-    CONSTRAINT ck_transportador_tipo CHECK (tipo IN ('F', 'J'))
+    CONSTRAINT fk_transportador_cidade FOREIGN KEY (cidade_id) REFERENCES cidade (id),    CONSTRAINT ck_transportador_tipo CHECK (tipo IN ('F', 'J'))
 );
--- Tabela PRODUTO
-CREATE TABLE Produto (
+
+-- Tabelas de RH
+-- Tabela departamento
+CREATE TABLE departamento (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    descricao TEXT,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela cargo
+CREATE TABLE cargo (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    descricao TEXT,
+    departamento_id INTEGER REFERENCES departamento(id),
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela produto
+CREATE TABLE produto (
     codigo VARCHAR(30) PRIMARY KEY,
     descricao VARCHAR(150) NOT NULL,
     ncm VARCHAR(10),
@@ -178,12 +245,28 @@ CREATE TABLE Produto (
     gtin VARCHAR(14),
     -- Código de barras
     gtin_tributavel VARCHAR(14),
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela funcionario
+CREATE TABLE funcionario (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    cpf VARCHAR(11) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    telefone VARCHAR(20),
+    cargo_id INTEGER REFERENCES cargo(id),
+    departamento_id INTEGER REFERENCES departamento(id),
+    data_admissao DATE NOT NULL,
+    data_demissao DATE,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
--- Tabela NFE
-CREATE TABLE Nfe (
+
+-- Tabela nfe
+CREATE TABLE nfe (
     chave_acesso VARCHAR(44) PRIMARY KEY,
     numero VARCHAR(10) NOT NULL,
     serie VARCHAR(3) NOT NULL,
@@ -213,24 +296,24 @@ CREATE TABLE Nfe (
     situacao CHAR(1) NOT NULL DEFAULT 'P',
     -- P=Pendente, A=Autorizada, C=Cancelada, D=Denegada, I=Inutilizada
     frete_por_conta CHAR(1),
-    -- 0=Emitente, 1=Destinatário, 2=Terceiros, 9=Sem Frete
+    -- 0=emitente, 1=Destinatário, 2=Terceiros, 9=Sem Frete
     informacoes_complementares TEXT,
     cnpj_emitente VARCHAR(18) NOT NULL,
     cnpj_destinatario VARCHAR(18) NOT NULL,
     cnpj_transportador VARCHAR(18),
-    condicao_pagamento_id UUID NOT NULL,
-    cliente_id UUID REFERENCES Cliente(id),
+    condicao_pagamento_id INTEGER NOT NULL,
+    cliente_id INTEGER REFERENCES cliente(id),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_nfe_emitente FOREIGN KEY (cnpj_emitente) REFERENCES Emitente (cnpj),
-    CONSTRAINT fk_nfe_destinatario FOREIGN KEY (cnpj_destinatario) REFERENCES Destinatario (cnpj_cpf),
-    CONSTRAINT fk_nfe_transportador FOREIGN KEY (cnpj_transportador) REFERENCES Transportador (cnpj_cpf),
-    CONSTRAINT fk_nfe_condicao_pagamento FOREIGN KEY (condicao_pagamento_id) REFERENCES CondicaoPagamento (id),
+    CONSTRAINT fk_nfe_emitente FOREIGN KEY (cnpj_emitente) REFERENCES emitente (cnpj),
+    CONSTRAINT fk_nfe_destinatario FOREIGN KEY (cnpj_destinatario) REFERENCES destinatario (cnpj_cpf),
+    CONSTRAINT fk_nfe_transportador FOREIGN KEY (cnpj_transportador) REFERENCES transportador (cnpj_cpf),
+    CONSTRAINT fk_nfe_condicao_pagamento FOREIGN KEY (condicao_pagamento_id) REFERENCES condicao_pagamento (id),
     CONSTRAINT uk_nfe_numero_serie_emissor UNIQUE (numero, serie, cnpj_emitente)
 );
--- Tabela ITEM_NFE
-CREATE TABLE ItemNfe (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+-- Tabela ITEM_nfe
+CREATE TABLE itemnfe (
+    id SERIAL PRIMARY KEY,
     chave_acesso_nfe VARCHAR(44) NOT NULL,
     codigo_produto VARCHAR(30) NOT NULL,
     cfop VARCHAR(5),
@@ -255,24 +338,24 @@ CREATE TABLE ItemNfe (
     ordem INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_item_nfe_nfe FOREIGN KEY (chave_acesso_nfe) REFERENCES Nfe (chave_acesso),
-    CONSTRAINT fk_item_nfe_produto FOREIGN KEY (codigo_produto) REFERENCES Produto (codigo)
+    CONSTRAINT fk_item_nfe_nfe FOREIGN KEY (chave_acesso_nfe) REFERENCES nfe (chave_acesso),
+    CONSTRAINT fk_item_nfe_produto FOREIGN KEY (codigo_produto) REFERENCES produto (codigo)
 );
--- Tabela FATURA
-CREATE TABLE Fatura (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+-- Tabela fatura
+CREATE TABLE fatura (
+    id SERIAL PRIMARY KEY,
     chave_acesso_nfe VARCHAR(44) NOT NULL,
     numero VARCHAR(20),
     valor_total DECIMAL(15, 2) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_fatura_nfe FOREIGN KEY (chave_acesso_nfe) REFERENCES Nfe (chave_acesso)
+    CONSTRAINT fk_fatura_nfe FOREIGN KEY (chave_acesso_nfe) REFERENCES nfe (chave_acesso)
 );
--- Tabela PARCELA
-CREATE TABLE Parcela (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    fatura_id UUID NOT NULL,
-    forma_pagamento_id UUID NOT NULL,
+-- Tabela parcela
+CREATE TABLE parcela (
+    id SERIAL PRIMARY KEY,
+    fatura_id INTEGER NOT NULL,
+    forma_pagamento_id INTEGER NOT NULL,
     numero INTEGER NOT NULL,
     data_vencimento DATE NOT NULL,
     valor DECIMAL(15, 2) NOT NULL,
@@ -281,12 +364,12 @@ CREATE TABLE Parcela (
     data_pagamento DATE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_parcela_fatura FOREIGN KEY (fatura_id) REFERENCES Fatura (id),
-    CONSTRAINT fk_parcela_forma_pagamento FOREIGN KEY (forma_pagamento_id) REFERENCES formapagamento (id)
+    CONSTRAINT fk_parcela_fatura FOREIGN KEY (fatura_id) REFERENCES fatura (id),
+    CONSTRAINT fk_parcela_forma_pagamento FOREIGN KEY (forma_pagamento_id) REFERENCES forma_pagamento (id)
 );
--- Tabela VOLUME
-CREATE TABLE Volume (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+-- Tabela volume
+CREATE TABLE volume (
+    id SERIAL PRIMARY KEY,
     chave_acesso_nfe VARCHAR(44) NOT NULL,
     quantidade DECIMAL(15, 3),
     especie VARCHAR(30),
@@ -296,38 +379,49 @@ CREATE TABLE Volume (
     peso_liquido DECIMAL(15, 3),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_volume_nfe FOREIGN KEY (chave_acesso_nfe) REFERENCES Nfe (chave_acesso)
+    CONSTRAINT fk_volume_nfe FOREIGN KEY (chave_acesso_nfe) REFERENCES nfe (chave_acesso)
 );
 -- Criar índices para melhorar performance
 -- Índices para chaves estrangeiras
-CREATE INDEX idx_estado_pais_id ON Estado(pais_id);
-CREATE INDEX idx_cidade_estado_id ON Cidade(estado_id);
-CREATE INDEX idx_emitente_cidade_id ON Emitente(cidade_id);
-CREATE INDEX idx_destinatario_cidade_id ON Destinatario(cidade_id);
-CREATE INDEX idx_destinatario_cliente_id ON Destinatario(cliente_id);
-CREATE INDEX idx_cliente_destinatario_cliente_id ON Cliente_Destinatario(cliente_id);
-CREATE INDEX idx_cliente_destinatario_destinatario_id ON Cliente_Destinatario(destinatario_id);
-CREATE INDEX idx_cliente_cnpj_cpf ON Cliente(cnpj_cpf);
-CREATE INDEX idx_transportador_cidade_id ON Transportador(cidade_id);
--- Índices para NFE
-CREATE INDEX idx_nfe_cnpj_emitente ON Nfe(cnpj_emitente);
-CREATE INDEX idx_nfe_cnpj_destinatario ON Nfe(cnpj_destinatario);
-CREATE INDEX idx_nfe_cliente_id ON Nfe(cliente_id);
-CREATE INDEX idx_nfe_data_emissao ON Nfe(data_emissao);
-CREATE INDEX idx_nfe_numero ON Nfe(numero);
-CREATE INDEX idx_nfe_situacao ON Nfe(situacao);
--- Índices para ITEM_NFE
-CREATE INDEX idx_item_nfe_chave_acesso ON ItemNfe(chave_acesso_nfe);
-CREATE INDEX idx_item_nfe_codigo_produto ON ItemNfe(codigo_produto);
--- Índices para FATURA
-CREATE INDEX idx_fatura_chave_acesso ON Fatura(chave_acesso_nfe);
--- Índices para PARCELA
-CREATE INDEX idx_parcela_fatura_id ON Parcela(fatura_id);
-CREATE INDEX idx_parcela_forma_pagamento_id ON Parcela(forma_pagamento_id);
-CREATE INDEX idx_parcela_data_vencimento ON Parcela(data_vencimento);
-CREATE INDEX idx_parcela_status ON Parcela(status);
--- Índices para VOLUME
-CREATE INDEX idx_volume_chave_acesso ON Volume(chave_acesso_nfe);
+CREATE INDEX idx_estado_pais_id ON estado(pais_id);
+CREATE INDEX idx_cidade_estado_id ON cidade(estado_id);
+CREATE INDEX idx_emitente_cidade_id ON emitente(cidade_id);
+CREATE INDEX idx_destinatario_cidade_id ON destinatario(cidade_id);
+CREATE INDEX idx_destinatario_cliente_id ON destinatario(cliente_id);
+CREATE INDEX idx_cliente_destinatario_cliente_id ON cliente_destinatario(cliente_id);
+CREATE INDEX idx_cliente_destinatario_destinatario_id ON cliente_destinatario(destinatario_id);
+CREATE INDEX idx_cliente_cnpj_cpf ON cliente(cnpj_cpf);
+CREATE INDEX idx_fornecedor_cnpj_cpf ON fornecedor(cnpj_cpf);
+CREATE INDEX idx_fornecedor_razao_social ON fornecedor(razao_social);
+CREATE INDEX idx_fornecedor_cidade_id ON fornecedor(cidade_id);
+CREATE INDEX idx_fornecedor_condicao_pagamento_id ON fornecedor(condicao_pagamento_id);
+CREATE INDEX idx_funcionario_cpf ON funcionario(cpf);
+CREATE INDEX idx_funcionario_email ON funcionario(email);
+CREATE INDEX idx_funcionario_cargo ON funcionario(cargo);
+CREATE INDEX idx_funcionario_departamento ON funcionario(departamento);
+CREATE INDEX idx_transportador_cidade_id ON transportador(cidade_id);
+-- Índices para nfe
+CREATE INDEX idx_nfe_cnpj_emitente ON nfe(cnpj_emitente);
+CREATE INDEX idx_nfe_cnpj_destinatario ON nfe(cnpj_destinatario);
+CREATE INDEX idx_nfe_cliente_id ON nfe(cliente_id);
+CREATE INDEX idx_nfe_data_emissao ON nfe(data_emissao);
+CREATE INDEX idx_nfe_numero ON nfe(numero);
+CREATE INDEX idx_nfe_situacao ON nfe(situacao);
+-- Índices para ITEM_nfe
+CREATE INDEX idx_item_nfe_chave_acesso ON itemnfe(chave_acesso_nfe);
+CREATE INDEX idx_item_nfe_codigo_produto ON itemnfe(codigo_produto);
+-- Índices para fatura
+CREATE INDEX idx_fatura_chave_acesso ON fatura(chave_acesso_nfe);
+-- Índices para parcela
+CREATE INDEX idx_parcela_fatura_id ON parcela(fatura_id);
+CREATE INDEX idx_parcela_forma_pagamento_id ON parcela(forma_pagamento_id);
+CREATE INDEX idx_parcela_data_vencimento ON parcela(data_vencimento);
+CREATE INDEX idx_parcela_status ON parcela(status);
+-- Índices para volume
+CREATE INDEX idx_volume_chave_acesso ON volume(chave_acesso_nfe);
+-- Índices para CONDIÇÃO DE PAGAMENTO E parcelaS - ADICIONADOS
+CREATE INDEX idx_parcela_condicao_pagamento_condicao_id ON parcela_condicao_pagamento(condicao_pagamento_id);
+CREATE INDEX idx_parcela_condicao_pagamento_forma_id ON parcela_condicao_pagamento(forma_pagamento_id);
 -- Triggers para atualizar o campo updated_at automaticamente
 -- Função para atualizar o timestamp
 CREATE OR REPLACE FUNCTION update_timestamp() RETURNS TRIGGER AS $$ BEGIN NEW.updated_at = CURRENT_TIMESTAMP;
@@ -336,70 +430,113 @@ END;
 $$ language 'plpgsql';
 -- Aplicar o trigger em todas as tabelas
 CREATE TRIGGER update_pais_timestamp BEFORE
-UPDATE ON Pais FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON pais FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_estado_timestamp BEFORE
-UPDATE ON Estado FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON estado FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_cidade_timestamp BEFORE
-UPDATE ON Cidade FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON cidade FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_condicao_pagamento_timestamp BEFORE
-UPDATE ON CondicaoPagamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON condicao_pagamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_forma_pagamento_timestamp BEFORE
-UPDATE ON formapagamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON forma_pagamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_emitente_timestamp BEFORE
-UPDATE ON Emitente FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON emitente FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_cliente_timestamp BEFORE
-UPDATE ON Cliente FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON cliente FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_fornecedor_timestamp BEFORE
+UPDATE ON fornecedor FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_funcionario_timestamp BEFORE
+UPDATE ON funcionario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_destinatario_timestamp BEFORE
-UPDATE ON Destinatario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON destinatario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_transportador_timestamp BEFORE
-UPDATE ON Transportador FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON transportador FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_produto_timestamp BEFORE
-UPDATE ON Produto FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON produto FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_nfe_timestamp BEFORE
-UPDATE ON Nfe FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON nfe FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_item_nfe_timestamp BEFORE
-UPDATE ON ItemNfe FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON itemnfe FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_fatura_timestamp BEFORE
-UPDATE ON Fatura FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON fatura FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_parcela_timestamp BEFORE
-UPDATE ON Parcela FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON parcela FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_volume_timestamp BEFORE
-UPDATE ON Volume FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+UPDATE ON volume FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 -- Inserir dados iniciais
 -- Inserir país padrão (Brasil)
-INSERT INTO Pais (nome, codigo, sigla)
-VALUES ('Brasil', '55', 'BR');
+INSERT INTO pais (nome, codigo, sigla)
+VALUES ('BRASIL', '55', 'BR');
 -- Inserir formas de pagamento comuns
-INSERT INTO formapagamento (descricao, codigo, tipo)
-VALUES ('Dinheiro', '01', 'À vista'),
-    ('Cartão de Crédito', '03', 'Crédito'),
-    ('Cartão de Débito', '04', 'Débito'),
-    ('PIX', '17', 'À vista'),
-    ('Boleto Bancário', '15', 'À prazo');
+INSERT INTO forma_pagamento (descricao, codigo, tipo)
+VALUES ('DINHEIRO', '01', 'À VISTA'),
+    ('CARTÃO DE CRÉDITO', '03', 'CRÉDITO'),
+    ('CARTÃO DE DÉBITO', '04', 'DÉBITO'),
+    ('PIX', '17', 'À VISTA'),
+    ('BOLETO BANCÁRIO', '15', 'À PRAZO');
 -- Inserir condições de pagamento comuns
-INSERT INTO CondicaoPagamento (descricao, dias, parcelas)
-VALUES ('À Vista', 0, 1),
-    ('30 Dias', 30, 1),
-    ('30/60', 30, 2),
-    ('30/60/90', 30, 3),
-    ('Entrada + 30 Dias', 30, 2);
+INSERT INTO condicao_pagamento (nome, descricao, ativo)
+VALUES ('À VISTA', 'PAGAMENTO À VISTA', true),
+    ('30 DIAS', 'PAGAMENTO EM 30 DIAS', true),
+    ('30/60', 'PAGAMENTO EM DUAS parcelaS DE 30 E 60 DIAS', true),
+    ('30/60/90', 'PAGAMENTO EM TRÊS parcelaS DE 30, 60 e 90 DIAS', true),
+    ('ENTRADA + 30 DIAS', 'PAGAMENTO COM ENTRADA E MAIS 30 DIAS', true);
 -- Comentários
 COMMENT ON SCHEMA dbo IS 'Schema principal para o sistema de NF-e';
-COMMENT ON TABLE dbo.Pais IS 'Cadastro de países';
-COMMENT ON TABLE dbo.Estado IS 'Cadastro de estados/províncias';
-COMMENT ON TABLE dbo.Cidade IS 'Cadastro de cidades/municípios';
-COMMENT ON TABLE dbo.CondicaoPagamento IS 'Condições de pagamento para notas fiscais';
-COMMENT ON TABLE dbo.formapagamento IS 'Formas de pagamento das parcelas de notas fiscais';
-COMMENT ON TABLE dbo.Emitente IS 'Cadastro de empresas emitentes de notas fiscais';
-COMMENT ON TABLE dbo.Cliente IS 'Cadastro de clientes';
-COMMENT ON TABLE dbo.Destinatario IS 'Cadastro de destinatários de notas fiscais';
-COMMENT ON TABLE dbo.Cliente_Destinatario IS 'Relacionamento entre clientes e destinatários';
-COMMENT ON TABLE dbo.Transportador IS 'Cadastro de transportadores de mercadorias';
-COMMENT ON TABLE dbo.Produto IS 'Cadastro de produtos';
-COMMENT ON TABLE dbo.Nfe IS 'Notas fiscais eletrônicas';
-COMMENT ON TABLE dbo.ItemNfe IS 'Itens de notas fiscais';
-COMMENT ON TABLE dbo.Fatura IS 'Faturas de pagamento de notas fiscais';
-COMMENT ON TABLE dbo.Parcela IS 'Parcelas de pagamento das faturas';
-COMMENT ON TABLE dbo.Volume IS 'Volumes de transporte das notas fiscais';
+COMMENT ON TABLE dbo.pais IS 'Cadastro de países';
+COMMENT ON TABLE dbo.estado IS 'Cadastro de estados/províncias';
+COMMENT ON TABLE dbo.cidade IS 'Cadastro de cidades/municípios';
+COMMENT ON TABLE dbo.condicao_pagamento IS 'Condições de pagamento para notas fiscais';
+COMMENT ON TABLE dbo.forma_pagamento IS 'Formas de pagamento das parcelas de notas fiscais';
+COMMENT ON TABLE dbo.emitente IS 'Cadastro de empresas emitentes de notas fiscais';
+COMMENT ON TABLE dbo.cliente IS 'Cadastro de clientes';
+COMMENT ON TABLE dbo.fornecedor IS 'Cadastro de fornecedores';
+COMMENT ON COLUMN dbo.fornecedor.id IS 'ID único do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.cnpj_cpf IS 'CNPJ ou CPF do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.tipo IS 'Tipo de fornecedor: F=Física, J=Jurídica';
+COMMENT ON COLUMN dbo.fornecedor.is_estrangeiro IS 'Indica se é um fornecedor estrangeiro';
+COMMENT ON COLUMN dbo.fornecedor.tipo_documento IS 'Tipo de documento para fornecedores estrangeiros';
+COMMENT ON COLUMN dbo.fornecedor.razao_social IS 'Razão social ou nome completo do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.nome_fantasia IS 'Nome fantasia do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.inscricao_estadual IS 'Inscrição estadual do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.inscricao_municipal IS 'Inscrição municipal do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.endereco IS 'Endereço do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.numero IS 'Número do endereço do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.complemento IS 'Complemento do endereço do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.bairro IS 'Bairro do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.cidade_id IS 'ID da cidade do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.cep IS 'CEP do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.telefone IS 'Telefone do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.email IS 'Email do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.website IS 'Website do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.observacoes IS 'Observações sobre o fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.responsavel IS 'Nome do responsável pelo fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.celular_responsavel IS 'Celular do responsável pelo fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.condicao_pagamento_id IS 'ID da condição de pagamento do fornecedor';
+COMMENT ON COLUMN dbo.fornecedor.ativo IS 'Indica se o fornecedor está ativo';
+COMMENT ON COLUMN dbo.fornecedor.created_at IS 'Data de criação do registro';
+COMMENT ON COLUMN dbo.fornecedor.updated_at IS 'Data da última atualização do registro';
+COMMENT ON TABLE dbo.funcionario IS 'Cadastro de funcionários';
+COMMENT ON COLUMN dbo.funcionario.id IS 'ID único do funcionário';
+COMMENT ON COLUMN dbo.funcionario.nome IS 'Nome completo do funcionário';
+COMMENT ON COLUMN dbo.funcionario.cpf IS 'CPF do funcionário (apenas números)';
+COMMENT ON COLUMN dbo.funcionario.email IS 'Email profissional do funcionário';
+COMMENT ON COLUMN dbo.funcionario.telefone IS 'Telefone de contato do funcionário';
+COMMENT ON COLUMN dbo.funcionario.cargo IS 'Cargo do funcionário';
+COMMENT ON COLUMN dbo.funcionario.departamento IS 'Departamento do funcionário';
+COMMENT ON COLUMN dbo.funcionario.data_admissao IS 'Data de admissão do funcionário';
+COMMENT ON COLUMN dbo.funcionario.data_demissao IS 'Data de demissão do funcionário (se aplicável)';
+COMMENT ON COLUMN dbo.funcionario.ativo IS 'Indica se o funcionário está ativo';
+COMMENT ON COLUMN dbo.funcionario.created_at IS 'Data de criação do registro';
+COMMENT ON COLUMN dbo.funcionario.updated_at IS 'Data da última atualização do registro';
+COMMENT ON TABLE dbo.destinatario IS 'Cadastro de destinatários de notas fiscais';
+COMMENT ON TABLE dbo.cliente_destinatario IS 'Relacionamento entre clientes e destinatários';
+COMMENT ON TABLE dbo.transportador IS 'Cadastro de transportadores de mercadorias';
+COMMENT ON TABLE dbo.produto IS 'Cadastro de produtos';
+COMMENT ON TABLE dbo.nfe IS 'Notas fiscais eletrônicas';
+COMMENT ON TABLE dbo.itemnfe IS 'Itens de notas fiscais';
+COMMENT ON TABLE dbo.fatura IS 'faturas de pagamento de notas fiscais';
+COMMENT ON TABLE dbo.parcela IS 'parcelas de pagamento das faturas';
+COMMENT ON TABLE dbo.volume IS 'volumes de transporte das notas fiscais';
 -- Confirmando a transação apenas se tudo executar corretamente
 COMMIT;

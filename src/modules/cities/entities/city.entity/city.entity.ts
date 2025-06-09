@@ -2,10 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class City {
   @ApiProperty({
-    description: 'ID único da cidade (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000'
+    description: 'ID único da cidade',
+    example: 1
   })
-  id: string;
+  id: number;
 
   @ApiProperty({
     description: 'Nome da cidade',
@@ -21,10 +21,10 @@ export class City {
   codigoIbge?: string;
 
   @ApiProperty({
-    description: 'ID do estado ao qual a cidade pertence (UUID)',
-    example: '550e8400-e29b-41d4-a716-446655440000'
+    description: 'ID do estado ao qual a cidade pertence',
+    example: 1
   })
-  estadoId: string;
+  estadoId: number;
 
   @ApiProperty({
     description: 'Data de criação do registro',

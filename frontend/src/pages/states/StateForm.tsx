@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { stateApi, countryApi } from '@/services/api';
-import { CreateStateDto, UpdateStateDto, Country } from '@/types/location';
+import { Country } from '@/types/location';
 import { toast } from 'sonner';
 import CountryCreationDialog from '@/components/dialogs/CountryCreationDialog';
 import { SearchDialog } from '@/components/SearchDialog';
@@ -25,7 +25,7 @@ const formSchema = z.object({
     .string()
     .min(2, 'Nome do estado é obrigatório e deve ter pelo menos 2 caracteres'),
   uf: z.string().length(2, 'UF deve ter exatamente 2 caracteres').toUpperCase(),
-  paisId: z.string().uuid('Selecione um país válido'),
+  paisId: z.number().min(1, 'Selecione um país válido'),
 });
 
 const StateForm = () => {
@@ -35,6 +35,7 @@ const StateForm = () => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [countryDialogOpen, setCountryDialogOpen] = useState(false);
   const [countrySearchOpen, setCountrySearchOpen] = useState(false);
+  const [countryToEdit, setCountryToEdit] = useState<Country | null>(null);
   const location = useLocation();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -42,7 +43,7 @@ const StateForm = () => {
     defaultValues: {
       nome: '',
       uf: '',
-      paisId: '',
+      paisId: 0,
     },
   });
 
@@ -59,14 +60,13 @@ const StateForm = () => {
 
     fetchCountries();
   }, []);
-
   useEffect(() => {
     const fetchState = async () => {
       if (!id) return;
 
       setIsLoading(true);
       try {
-        const state = await stateApi.getById(id);
+        const state = await stateApi.getById(Number(id));
         form.reset({
           nome: state.nome,
           uf: state.uf,
@@ -89,7 +89,7 @@ const StateForm = () => {
     const countryId = params.get('countryId');
 
     if (countryId) {
-      form.setValue('paisId', countryId);
+      form.setValue('paisId', Number(countryId));
     }
   }, [location.search, form]);
 
@@ -97,30 +97,28 @@ const StateForm = () => {
     setIsLoading(true);
 
     try {
-      let createdOrUpdatedId: string;
+      let createdOrUpdatedId: number | undefined;
 
       // Format the data to handle empty strings
       const formattedData = {
         nome: data.nome.trim(),
         uf: data.uf.trim(),
-        paisId: data.paisId
-      };
-
-      if (id) {
-        await stateApi.update(id, formattedData);
+        paisId: data.paisId,      };      if (id) {
+        await stateApi.update(Number(id), formattedData);
         toast.success('Estado atualizado com sucesso!');
-        createdOrUpdatedId = id;
+        createdOrUpdatedId = Number(id);
       } else {
         const createdState = await stateApi.create(formattedData);
         toast.success('Estado criado com sucesso!');
         createdOrUpdatedId = createdState.id;
       }
-
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
+        // Handle cascading form returns, pass the created/updated entity ID back to the parent form
         const returnWithParams = `${returnUrl}?createdEntity=state&createdId=${createdOrUpdatedId}`;
         navigate(returnWithParams);
       } else {
+        // Only navigate to list view if not part of a cascading form
         navigate('/states');
       }
     } catch (error: any) {
@@ -129,12 +127,27 @@ const StateForm = () => {
     } finally {
       setIsLoading(false);
     }
+  };  const handleCountryCreated = (newCountry: Country) => {
+    setCountries((prev) => [...prev, newCountry]);
+    setCountryDialogOpen(false);
+    setCountrySearchOpen(true);
+    toast.success(`País ${newCountry.nome} criado com sucesso! Selecione-o na lista.`);
   };
 
-  const handleCountryCreated = (newCountry: Country) => {
-    setCountries((prev) => [...prev, newCountry]);
-    form.setValue('paisId', newCountry.id);
-    setCountryDialogOpen(false);
+  const handleCountryUpdated = (updatedCountry: Country) => {
+    // Atualiza o país na lista de países
+    setCountries((prev) =>
+      prev.map((country) =>
+        country.id === updatedCountry.id ? updatedCountry : country,
+      ),
+    );
+    setCountryToEdit(null);
+  };
+
+  const handleEditCountry = (country: Country) => {
+    setCountryToEdit(country);
+    setCountrySearchOpen(false);
+    setCountryDialogOpen(true);
   };
 
   return (
@@ -253,7 +266,8 @@ const StateForm = () => {
       <CountryCreationDialog
         open={countryDialogOpen}
         onOpenChange={setCountryDialogOpen}
-        onSuccess={handleCountryCreated}
+        onSuccess={countryToEdit ? handleCountryUpdated : handleCountryCreated}
+        country={countryToEdit}
       />
 
       <SearchDialog
@@ -270,12 +284,15 @@ const StateForm = () => {
           setCountrySearchOpen(false);
           setCountryDialogOpen(true);
         }}
+        onEdit={handleEditCountry}
         displayColumns={[
           { key: 'nome', header: 'Nome' },
           { key: 'sigla', header: 'Sigla' },
           { key: 'codigo', header: 'Código' },
         ]}
         searchKeys={['nome', 'sigla', 'codigo']}
+        entityType="paises"
+        description="Selecione um país para associar ao estado ou edite um país existente."
       />
     </div>
   );

@@ -3,9 +3,9 @@ import { ApiProperty } from '@nestjs/swagger';
 export class Employee {
   @ApiProperty({
     description: 'ID único do funcionário',
-    example: '550e8400-e29b-41d4-a716-446655440000'
+    example: 1
   })
-  id: string;
+  id: number;
 
   @ApiProperty({
     description: 'Nome completo do funcionário',
@@ -30,18 +30,29 @@ export class Employee {
     example: '11987654321'
   })
   telefone?: string;
+  @ApiProperty({
+    description: 'ID do cargo do funcionário',
+    example: 1
+  })
+  cargoId?: number;
 
   @ApiProperty({
-    description: 'Cargo do funcionário',
+    description: 'Nome do cargo do funcionário',
     example: 'Vendedor'
   })
-  cargo: string;
+  cargoNome?: string;
 
   @ApiProperty({
-    description: 'Departamento do funcionário',
+    description: 'ID do departamento do funcionário',
+    example: 1
+  })
+  departamentoId?: number;
+
+  @ApiProperty({
+    description: 'Nome do departamento do funcionário',
     example: 'Comercial'
   })
-  departamento: string;
+  departamentoNome?: string;
 
   @ApiProperty({
     description: 'Data de admissão',

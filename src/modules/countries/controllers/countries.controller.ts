@@ -83,9 +83,8 @@ export class CountriesController {
     @ApiResponse({
         status: HttpStatus.NOT_FOUND,
         description: 'País não encontrado'
-    })
-    findOne(@Param('id') id: string) {
-        return this.countriesService.findOne(id);
+    })    findOne(@Param('id') id: string) {
+        return this.countriesService.findOne(parseInt(id, 10));
     }
 
     @Patch(':id')
@@ -107,9 +106,8 @@ export class CountriesController {
     @ApiResponse({
         status: HttpStatus.CONFLICT,
         description: 'País com mesmo código ou sigla já existe'
-    })
-    update(@Param('id') id: string, @Body() updateCountryDto: UpdateCountryDto) {
-        return this.countriesService.update(id, updateCountryDto);
+    })    update(@Param('id') id: string, @Body() updateCountryDto: UpdateCountryDto) {
+        return this.countriesService.update(parseInt(id, 10), updateCountryDto);
     }
 
     @Delete(':id')
@@ -127,8 +125,7 @@ export class CountriesController {
     @ApiResponse({
         status: HttpStatus.CONFLICT,
         description: 'Não é possível excluir o país pois ele possui estados vinculados'
-    })
-    async remove(@Param('id') id: string) {
-        await this.countriesService.remove(id);
+    })    async remove(@Param('id') id: string) {
+        await this.countriesService.remove(parseInt(id, 10));
     }
 }

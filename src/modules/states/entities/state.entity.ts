@@ -2,10 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class State {
     @ApiProperty({
-        description: 'ID único do estado (UUID)',
-        example: '550e8400-e29b-41d4-a716-446655440000'
+        description: 'ID único do estado',
+        example: 1
     })
-    id: string;
+    id: number;
 
     @ApiProperty({
         description: 'Nome do estado',
@@ -20,10 +20,10 @@ export class State {
     uf: string;
 
     @ApiProperty({
-        description: 'ID do país ao qual o estado pertence (UUID)',
-        example: '550e8400-e29b-41d4-a716-446655440000'
+        description: 'ID do país ao qual o estado pertence',
+        example: 1
     })
-    paisId: string;
+    paisId: number;
 
     @ApiProperty({
         description: 'Nome do país ao qual o estado pertence',

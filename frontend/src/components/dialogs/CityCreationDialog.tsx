@@ -24,7 +24,7 @@ import {
   FormDescription,
 } from '@/components/ui/form';
 import { cityApi, stateApi } from '@/services/api';
-import { City, CreateCityDto, State } from '@/types/location';
+import { City, State } from '@/types/location';
 import StateCreationDialog from './StateCreationDialog';
 import { SearchDialog } from '@/components/SearchDialog';
 
@@ -33,19 +33,20 @@ const formSchema = z.object({
     .string()
     .min(2, 'Nome da cidade é obrigatório e deve ter pelo menos 2 caracteres'),
   codigoIbge: z
-    .string()
+  .string()
     .optional()
     .refine((val) => !val || /^[0-9]{7}$/.test(val), {
       message: 'O código IBGE deve ter exatamente 7 dígitos numéricos',
     }),
-  estadoId: z.string().uuid('Estado é obrigatório'),
+  estadoId: z.number().min(1, 'Estado é obrigatório'),
 });
 
 interface CityCreationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: (city: City) => void;
-  selectedStateId?: string;
+  selectedStateId?: number;
+  city?: City | null; // Cidade para edição
 }
 
 const CityCreationDialog = ({
@@ -53,18 +54,19 @@ const CityCreationDialog = ({
   onOpenChange,
   onSuccess,
   selectedStateId,
+  city,
 }: CityCreationDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [states, setStates] = useState<State[]>([]);
   const [stateDialogOpen, setStateDialogOpen] = useState(false);
   const [stateSearchOpen, setStateSearchOpen] = useState(false);
-
+  const [stateToEdit, setStateToEdit] = useState<State | null>(null);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nome: '',
-      codigoIbge: '',
-      estadoId: selectedStateId || '',
+      nome: city?.nome || '',
+      codigoIbge: city?.codigoIbge || '',
+      estadoId: city?.estadoId || selectedStateId || undefined,
     },
   });
 
@@ -75,14 +77,23 @@ const CityCreationDialog = ({
   }, [selectedStateId, form]);
 
   useEffect(() => {
-    if (!open) {
-      form.reset({
-        nome: '',
-        codigoIbge: '',
-        estadoId: selectedStateId || '',
-      });
+    if (open) {      if (city) {
+        // Preenche o formulário com os dados da cidade para edição
+        form.reset({
+          nome: city.nome || '',
+          codigoIbge: city.codigoIbge || '',
+          estadoId: city.estadoId || selectedStateId || undefined,
+        });
+      } else {
+        // Reset para valores padrão quando estiver criando nova cidade
+        form.reset({
+          nome: '',
+          codigoIbge: '',
+          estadoId: selectedStateId || undefined,
+        });
+      }
     }
-  }, [open, form, selectedStateId]);
+  }, [open, form, selectedStateId, city]);
 
   useEffect(() => {
     if (open) {
@@ -104,7 +115,7 @@ const CityCreationDialog = ({
     setIsLoading(true);
 
     try {
-      const createData: CreateCityDto = {
+      const formData = {
         nome: data.nome,
         codigoIbge:
           data.codigoIbge && data.codigoIbge.trim() !== ''
@@ -113,23 +124,47 @@ const CityCreationDialog = ({
         estadoId: data.estadoId,
       };
 
-      const newCity = await cityApi.create(createData);
-      toast.success(`Cidade ${data.nome} criada com sucesso!`);
-
-      onSuccess(newCity);
+      let savedCity;      if (city) {
+        // Edição de cidade existente
+        savedCity = await cityApi.update(city.id, formData);
+        toast.success(`Cidade ${data.nome} atualizada com sucesso!`);      } else {
+        // Criação de nova cidade
+        savedCity = await cityApi.create(formData);
+        toast.success(`Cidade ${data.nome} criada com sucesso!`);
+      }      
+      // Return the saved city to the parent component and close dialog.
+      // This enables proper cascading form behavior where the created city 
+      // is passed back to the parent form without redirecting to a list view.
+      onSuccess(savedCity);
       onOpenChange(false);
     } catch (error: any) {
-      console.error('Erro ao criar cidade:', error);
-      toast.error(error.message || 'Ocorreu um erro ao criar a cidade.');
+      console.error('Erro ao salvar cidade:', error);
+      toast.error(error.message || 'Ocorreu um erro ao salvar a cidade.');
     } finally {
       setIsLoading(false);
     }
   };
-
   const handleStateCreated = (newState: State) => {
     setStates((prevStates) => [...prevStates, newState]);
-    form.setValue('estadoId', newState.id);
     setStateDialogOpen(false);
+    setStateSearchOpen(true);
+    toast.success(`Estado ${newState.nome} criado com sucesso! Selecione-o na lista.`);
+  };
+
+  const handleStateUpdated = (updatedState: State) => {
+    // Atualiza o estado na lista de estados
+    setStates((prev) =>
+      prev.map((state) =>
+        state.id === updatedState.id ? updatedState : state
+      )
+    );
+    setStateToEdit(null);
+  };
+
+  const handleEditState = (state: State) => {
+    setStateToEdit(state);
+    setStateSearchOpen(false);
+    setStateDialogOpen(true);
   };
 
   return (
@@ -138,10 +173,12 @@ const CityCreationDialog = ({
         <DialogContent className="sm:max-w-[95vw] md:max-w-[85vw] lg:max-w-[75vw] xl:max-w-[65vw] 2xl:max-w-[55vw] max-h-[95vh] overflow-y-auto p-6">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">
-              Adicionar nova cidade
+              {city ? 'Editar cidade' : 'Adicionar nova cidade'}
             </DialogTitle>
             <DialogDescription className="text-base">
-              Preencha os campos abaixo para cadastrar uma nova cidade.
+              {city
+                ? 'Altere os campos abaixo para atualizar a cidade.'
+                : 'Preencha os campos abaixo para cadastrar uma nova cidade.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -259,13 +296,12 @@ const CityCreationDialog = ({
             </form>
           </Form>
         </DialogContent>
-      </Dialog>
-
-      <StateCreationDialog
+      </Dialog>      <StateCreationDialog
         open={stateDialogOpen}
         onOpenChange={setStateDialogOpen}
-        onSuccess={handleStateCreated}
-        selectedCountryId=""
+        onSuccess={stateToEdit ? handleStateUpdated : handleStateCreated}
+        selectedCountryId={undefined}
+        state={stateToEdit}
       />
 
       <SearchDialog
@@ -282,6 +318,7 @@ const CityCreationDialog = ({
           setStateSearchOpen(false);
           setStateDialogOpen(true);
         }}
+        onEdit={handleEditState}
         displayColumns={[
           { key: 'nome', header: 'Nome' },
           { key: 'uf', header: 'UF' },
@@ -289,7 +326,7 @@ const CityCreationDialog = ({
         ]}
         searchKeys={['nome', 'uf', 'paisNome']}
         entityType="estados"
-        description="Selecione um estado para associar à cidade ou cadastre um novo estado."
+        description="Selecione um estado para associar à cidade ou edite um estado existente."
       />
     </>
   );

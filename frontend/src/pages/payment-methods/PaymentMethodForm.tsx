@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { paymentMethodApi } from '@/services/api';
 import { toast } from 'sonner';
 import { CreatePaymentMethodDto, UpdatePaymentMethodDto } from '@/types/payment-method';
@@ -56,7 +56,7 @@ const PaymentMethodForm = () => {
   const fetchPaymentMethod = async (paymentMethodId: string) => {
     setIsLoadingData(true);
     try {
-      const data = await paymentMethodApi.getById(paymentMethodId);
+      const data = await paymentMethodApi.getById(Number(paymentMethodId));
       form.reset({
         description: data.description,
         code: data.code || '',
@@ -89,10 +89,8 @@ const PaymentMethodForm = () => {
       
       if (values.type && values.type.trim() !== '') {
         paymentMethodData.type = values.type;
-      }
-
-      if (id) {
-        await paymentMethodApi.update(id, paymentMethodData);
+      }      if (id) {
+        await paymentMethodApi.update(Number(id), paymentMethodData);
         toast.success('Sucesso', {
           description: 'Método de pagamento atualizado com sucesso!',
         });
@@ -102,7 +100,14 @@ const PaymentMethodForm = () => {
           description: 'Método de pagamento criado com sucesso!',
         });
       }
-      navigate('/payment-methods');
+      
+      // Check if we need to return to a parent form in a cascading scenario
+      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
+      if (returnUrl) {
+        navigate(returnUrl);
+      } else {
+        navigate('/payment-methods');
+      }
     } catch (error: any) {
       console.error('Erro ao salvar método de pagamento:', error);
       toast.error('Erro', {
@@ -186,15 +191,13 @@ const PaymentMethodForm = () => {
                   <FormMessage />
                 </FormItem>
               )}
-            />
-
-            <FormField
+            />            <FormField
               control={form.control}
               name="active"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox
+                    <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />

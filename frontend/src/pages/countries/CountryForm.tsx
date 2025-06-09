@@ -15,7 +15,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { countryApi } from '@/services/api';
-import { CreateCountryDto, UpdateCountryDto } from '@/types/location';
 import { toast } from 'sonner';
 
 const formSchema = z.object({
@@ -67,7 +66,7 @@ const CountryForm = () => {
 
       setIsLoading(true);
       try {
-        const country = await countryApi.getById(id);
+        const country = await countryApi.getById(Number(id));
         form.reset({
           nome: country.nome,
           sigla: country.sigla,
@@ -101,7 +100,7 @@ const CountryForm = () => {
       };
 
       if (id) {
-        await countryApi.update(id, formattedData);
+        await countryApi.update(Number(id), formattedData);
         toast.success('Sucesso', {
           description: 'País atualizado com sucesso!',
         });
@@ -111,7 +110,7 @@ const CountryForm = () => {
         toast.success('Sucesso', {
           description: 'País criado com sucesso!',
         });
-        createdOrUpdatedId = createdCountry.id;
+        createdOrUpdatedId = String(createdCountry.id);
       }
 
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');

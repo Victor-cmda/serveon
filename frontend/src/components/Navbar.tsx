@@ -1,11 +1,8 @@
-import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import {
   Search,
   User,
   Menu,
-  Sun,
-  Moon,
   ChevronDown,
   LogOut,
   Settings,
@@ -19,31 +16,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SearchInputWithRouter } from './SearchInput';
+import { ThemeToggle } from './ThemeToggle';
 
 const Navbar = () => {
-  const { theme, setTheme } = useTheme();
-
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
-
   return (
-    <nav className="fixed top-0 z-30 w-full border-b border-border bg-background backdrop-blur-sm supports-[backdrop-filter]:bg-background/60">
+    <nav className="fixed top-0 z-30 w-full border-b border-border bg-background backdrop-blur-sm supports-[backdrop-filter]:bg-background/60 animate-fade-in-down animate-duration-500">
       <div className="px-4 py-3 lg:px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="lg:hidden transition-transform hover:scale-110 hover:rotate-12"
               aria-label="Toggle Menu"
             >
               <Menu className="h-5 w-5" />
@@ -53,10 +39,10 @@ const Navbar = () => {
               href="/"
               className="flex items-center gap-2 transition-opacity hover:opacity-80"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-blue-600 to-indigo-600 text-white transition-transform hover:scale-105">
                 <span className="font-bold">S</span>
               </div>
-              <span className="hidden text-xl font-semibold tracking-tight sm:inline-block">
+              <span className="hidden text-xl font-semibold tracking-tight sm:inline-block transition-transform hover:scale-105">
                 Serveon
               </span>
             </a>
@@ -64,35 +50,13 @@ const Navbar = () => {
 
           <div className="hidden max-w-md flex-1 px-4 lg:block lg:px-6">
             <SearchInputWithRouter />
-          </div>
-
-          <div className="flex items-center gap-1 sm:gap-2">
-            <TooltipProvider delayDuration={300}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={toggleTheme}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    {theme === 'light' ? (
-                      <Moon className="h-[1.2rem] w-[1.2rem]" />
-                    ) : (
-                      <Sun className="h-[1.2rem] w-[1.2rem]" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Alternar tema</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          </div>          <div className="flex items-center gap-1 sm:gap-2">
+            <ThemeToggle />
 
             <Button
               variant="ghost"
               size="icon"
-              className="text-muted-foreground hover:text-foreground lg:hidden"
+              className="text-muted-foreground hover:text-foreground lg:hidden transition-transform hover:scale-110 hover:rotate-12"
             >
               <Search className="h-[1.2rem] w-[1.2rem]" />
             </Button>
@@ -101,7 +65,7 @@ const Navbar = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="ml-1 flex items-center gap-2 pl-1 pr-2 text-muted-foreground hover:text-foreground sm:gap-3"
+                  className="ml-1 flex items-center gap-2 pl-1 pr-2 text-muted-foreground hover:text-foreground sm:gap-3 transition-transform hover:scale-105"
                 >
                   <Avatar className="h-8 w-8 border border-border">
                     <AvatarImage src="/avatar-placeholder.png" alt="Usuário" />

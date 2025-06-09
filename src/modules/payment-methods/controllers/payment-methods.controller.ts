@@ -32,10 +32,9 @@ export class PaymentMethodsController {
   findAll(): Promise<PaymentMethod[]> {
     return this.paymentMethodsService.findAll();
   }
-
   @Get(':id')
   @ApiOperation({ summary: 'Get a payment method by ID' })
-  @ApiParam({ name: 'id', description: 'Payment method ID (UUID)' })
+  @ApiParam({ name: 'id', description: 'Payment method ID (número)' })
   @ApiResponse({ 
     status: HttpStatus.OK, 
     description: 'Returns the payment method',
@@ -43,12 +42,11 @@ export class PaymentMethodsController {
   })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Payment method not found' })
   findOne(@Param('id') id: string): Promise<PaymentMethod> {
-    return this.paymentMethodsService.findOne(id);
+    return this.paymentMethodsService.findOne(parseInt(id, 10));
   }
-
   @Patch(':id')
   @ApiOperation({ summary: 'Update a payment method' })
-  @ApiParam({ name: 'id', description: 'Payment method ID (UUID)' })
+  @ApiParam({ name: 'id', description: 'Payment method ID (número)' })
   @ApiResponse({ 
     status: HttpStatus.OK, 
     description: 'The payment method has been successfully updated',
@@ -60,14 +58,13 @@ export class PaymentMethodsController {
     @Param('id') id: string, 
     @Body() updatePaymentMethodDto: UpdatePaymentMethodDto
   ): Promise<PaymentMethod> {
-    return this.paymentMethodsService.update(id, updatePaymentMethodDto);
+    return this.paymentMethodsService.update(parseInt(id, 10), updatePaymentMethodDto);
   }
-
   @Delete(':id')
   @ApiOperation({ 
     summary: 'Delete a payment method or mark as inactive if in use' 
   })
-  @ApiParam({ name: 'id', description: 'Payment method ID (UUID)' })
+  @ApiParam({ name: 'id', description: 'Payment method ID (número)' })
   @ApiResponse({ 
     status: HttpStatus.NO_CONTENT, 
     description: 'The payment method has been successfully deleted or inactivated'
@@ -75,6 +72,6 @@ export class PaymentMethodsController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Payment method not found' })
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string): Promise<void> {
-    return this.paymentMethodsService.remove(id);
+    return this.paymentMethodsService.remove(parseInt(id, 10));
   }
 }

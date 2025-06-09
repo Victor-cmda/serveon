@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsUUID, Length, Matches, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, Length, Matches, MaxLength } from 'class-validator';
 
 export class CreateStateDto {
     @ApiProperty({
@@ -22,10 +22,10 @@ export class CreateStateDto {
     uf: string;
 
     @ApiProperty({
-        description: 'ID do país ao qual o estado pertence (UUID)',
-        example: '550e8400-e29b-41d4-a716-446655440000'
+        description: 'ID do país ao qual o estado pertence',
+        example: 1
     })
     @IsNotEmpty({ message: 'ID do país é obrigatório' })
-    @IsUUID(4, { message: 'ID do país deve ser um UUID válido' })
-    paisId: string;
+    @IsNumber({}, { message: 'ID do país deve ser um número válido' })
+    paisId: number;
 }
