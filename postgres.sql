@@ -203,11 +203,11 @@ CREATE TABLE transportador (
     cep VARCHAR(10),
     codigo_antt VARCHAR(20),
     placa_veiculo VARCHAR(10),
-    uf_veiculo CHAR(2),
-    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    uf_veiculo CHAR(2),    ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_transportador_cidade FOREIGN KEY (cidade_id) REFERENCES cidade (id),    CONSTRAINT ck_transportador_tipo CHECK (tipo IN ('F', 'J'))
+    CONSTRAINT fk_transportador_cidade FOREIGN KEY (cidade_id) REFERENCES cidade (id),
+    CONSTRAINT ck_transportador_tipo CHECK (tipo IN ('F', 'J'))
 );
 
 -- Tabelas de RH
@@ -241,11 +241,11 @@ CREATE TABLE produto (
     unidade VARCHAR(6),
     valor_unitario DECIMAL(15, 4),
     peso_liquido DECIMAL(15, 3),
-    peso_bruto DECIMAL(15, 3),
-    gtin VARCHAR(14),
+    peso_bruto DECIMAL(15, 3),    gtin VARCHAR(14),
     -- Código de barras
     gtin_tributavel VARCHAR(14),
-    ativo BOOLEAN NOT NULL DEFAULT TRUE,    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -397,8 +397,8 @@ CREATE INDEX idx_fornecedor_cidade_id ON fornecedor(cidade_id);
 CREATE INDEX idx_fornecedor_condicao_pagamento_id ON fornecedor(condicao_pagamento_id);
 CREATE INDEX idx_funcionario_cpf ON funcionario(cpf);
 CREATE INDEX idx_funcionario_email ON funcionario(email);
-CREATE INDEX idx_funcionario_cargo ON funcionario(cargo);
-CREATE INDEX idx_funcionario_departamento ON funcionario(departamento);
+CREATE INDEX idx_funcionario_cargo_id ON funcionario(cargo_id);
+CREATE INDEX idx_funcionario_departamento_id ON funcionario(departamento_id);
 CREATE INDEX idx_transportador_cidade_id ON transportador(cidade_id);
 -- Índices para nfe
 CREATE INDEX idx_nfe_cnpj_emitente ON nfe(cnpj_emitente);
@@ -439,12 +439,18 @@ CREATE TRIGGER update_condicao_pagamento_timestamp BEFORE
 UPDATE ON condicao_pagamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_forma_pagamento_timestamp BEFORE
 UPDATE ON forma_pagamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_parcela_condicao_pagamento_timestamp BEFORE
+UPDATE ON parcela_condicao_pagamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_emitente_timestamp BEFORE
 UPDATE ON emitente FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_cliente_timestamp BEFORE
 UPDATE ON cliente FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_fornecedor_timestamp BEFORE
 UPDATE ON fornecedor FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_departamento_timestamp BEFORE
+UPDATE ON departamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_cargo_timestamp BEFORE
+UPDATE ON cargo FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_funcionario_timestamp BEFORE
 UPDATE ON funcionario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_destinatario_timestamp BEFORE
@@ -522,8 +528,8 @@ COMMENT ON COLUMN dbo.funcionario.nome IS 'Nome completo do funcionário';
 COMMENT ON COLUMN dbo.funcionario.cpf IS 'CPF do funcionário (apenas números)';
 COMMENT ON COLUMN dbo.funcionario.email IS 'Email profissional do funcionário';
 COMMENT ON COLUMN dbo.funcionario.telefone IS 'Telefone de contato do funcionário';
-COMMENT ON COLUMN dbo.funcionario.cargo IS 'Cargo do funcionário';
-COMMENT ON COLUMN dbo.funcionario.departamento IS 'Departamento do funcionário';
+COMMENT ON COLUMN dbo.funcionario.cargo_id IS 'ID do cargo do funcionário';
+COMMENT ON COLUMN dbo.funcionario.departamento_id IS 'ID do departamento do funcionário';
 COMMENT ON COLUMN dbo.funcionario.data_admissao IS 'Data de admissão do funcionário';
 COMMENT ON COLUMN dbo.funcionario.data_demissao IS 'Data de demissão do funcionário (se aplicável)';
 COMMENT ON COLUMN dbo.funcionario.ativo IS 'Indica se o funcionário está ativo';
