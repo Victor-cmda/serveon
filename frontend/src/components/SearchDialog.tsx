@@ -38,10 +38,20 @@ import { Badge } from '@/components/ui/badge';
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+  TooltipProvider,  TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { debounce } from 'lodash';
+
+// Implementação nativa do debounce para evitar dependência do lodash
+const debounce = <T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): ((...args: Parameters<T>) => void) => {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
 
 export interface Entity {
   id: number;

@@ -9,7 +9,6 @@ import {
   customerApi,
   cityApi,
   stateApi,
-  countryApi,
   paymentTermApi,
 } from '@/services/api';
 import { State, City } from '@/types/location';
@@ -305,22 +304,7 @@ const CustomerForm = () => {
       loadCities();
     } else if (citySearchOpen) {
       fetchCities();
-    }
-  }, [selectedStateId, citySearchOpen]);
-  useEffect(() => {
-    const loadCountries = async () => {
-      try {
-        // Carregar países apenas se necessário
-        await countryApi.getAll();
-        // Não estamos usando os dados aqui
-      } catch (error) {
-        console.error('Erro ao carregar países:', error);
-        toast.error('Não foi possível carregar a lista de países');
-      }
-    };
-
-    loadCountries();
-  }, []);
+    }  }, [selectedStateId, citySearchOpen]);
 
   useEffect(() => {
     const loadStates = async () => {
