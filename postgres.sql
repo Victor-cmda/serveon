@@ -232,17 +232,67 @@ CREATE TABLE cargo (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Tabelas auxiliares para produtos
+-- Tabela marca
+CREATE TABLE marca (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    descricao TEXT,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela categoria
+CREATE TABLE categoria (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    descricao TEXT,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela unidade_medida
+CREATE TABLE unidade_medida (
+    id SERIAL PRIMARY KEY,
+    sigla VARCHAR(6) NOT NULL UNIQUE,
+    descricao VARCHAR(50) NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Tabela produto
 CREATE TABLE produto (
-    codigo VARCHAR(30) PRIMARY KEY,
-    descricao VARCHAR(150) NOT NULL,
+    id SERIAL PRIMARY KEY,
+    produto VARCHAR(255) NOT NULL,
+    unidade_medida_id INTEGER REFERENCES unidade_medida(id),
+    codigo_barras VARCHAR(255),
+    referencia VARCHAR(10),
+    marca_id INTEGER REFERENCES marca(id),
+    categoria_id INTEGER REFERENCES categoria(id),
+    quantidade_minima INTEGER DEFAULT 0,
+    valor_compra NUMERIC(10, 2),
+    valor_venda NUMERIC(10, 2),
+    quantidade INTEGER DEFAULT 0,
+    percentual_lucro NUMERIC(10, 2),
+    descricao VARCHAR(255),
+    observacoes VARCHAR(255),
+    situacao DATE,
+    data_criacao DATE DEFAULT CURRENT_DATE,
+    data_alteracao DATE DEFAULT CURRENT_DATE,
+    usuario_criacao TEXT,
+    usuario_atualizacao TEXT,
+    -- Campos originais mantidos para compatibilidade com NFe
+    codigo VARCHAR(30) UNIQUE,
     ncm VARCHAR(10),
     cest VARCHAR(10),
     unidade VARCHAR(6),
     valor_unitario DECIMAL(15, 4),
     peso_liquido DECIMAL(15, 3),
-    peso_bruto DECIMAL(15, 3),    gtin VARCHAR(14),
-    -- Código de barras
+    peso_bruto DECIMAL(15, 3),
+    gtin VARCHAR(14), -- Código de barras
     gtin_tributavel VARCHAR(14),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -400,6 +450,14 @@ CREATE INDEX idx_funcionario_email ON funcionario(email);
 CREATE INDEX idx_funcionario_cargo_id ON funcionario(cargo_id);
 CREATE INDEX idx_funcionario_departamento_id ON funcionario(departamento_id);
 CREATE INDEX idx_transportador_cidade_id ON transportador(cidade_id);
+-- Índices para produtos e tabelas relacionadas
+CREATE INDEX idx_produto_marca_id ON produto(marca_id);
+CREATE INDEX idx_produto_categoria_id ON produto(categoria_id);
+CREATE INDEX idx_produto_unidade_medida_id ON produto(unidade_medida_id);
+CREATE INDEX idx_produto_codigo ON produto(codigo);
+CREATE INDEX idx_produto_codigo_barras ON produto(codigo_barras);
+CREATE INDEX idx_produto_produto ON produto(produto);
+CREATE INDEX idx_produto_ativo ON produto(ativo);
 -- Índices para nfe
 CREATE INDEX idx_nfe_cnpj_emitente ON nfe(cnpj_emitente);
 CREATE INDEX idx_nfe_cnpj_destinatario ON nfe(cnpj_destinatario);
@@ -451,6 +509,12 @@ CREATE TRIGGER update_departamento_timestamp BEFORE
 UPDATE ON departamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_cargo_timestamp BEFORE
 UPDATE ON cargo FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_marca_timestamp BEFORE
+UPDATE ON marca FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_categoria_timestamp BEFORE
+UPDATE ON categoria FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_unidade_medida_timestamp BEFORE
+UPDATE ON unidade_medida FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_funcionario_timestamp BEFORE
 UPDATE ON funcionario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_destinatario_timestamp BEFORE
@@ -487,6 +551,66 @@ VALUES ('À VISTA', 'PAGAMENTO À VISTA', true),
     ('30/60', 'PAGAMENTO EM DUAS parcelaS DE 30 E 60 DIAS', true),
     ('30/60/90', 'PAGAMENTO EM TRÊS parcelaS DE 30, 60 e 90 DIAS', true),
     ('ENTRADA + 30 DIAS', 'PAGAMENTO COM ENTRADA E MAIS 30 DIAS', true);
+
+-- Inserir unidades de medida comuns
+INSERT INTO unidade_medida (sigla, descricao, ativo)
+VALUES ('UN', 'UNIDADE', true),
+    ('KG', 'QUILOGRAMA', true),
+    ('G', 'GRAMA', true),
+    ('L', 'LITRO', true),
+    ('ML', 'MILILITRO', true),
+    ('M', 'METRO', true),
+    ('CM', 'CENTÍMETRO', true),
+    ('M2', 'METRO QUADRADO', true),
+    ('M3', 'METRO CÚBICO', true),
+    ('PC', 'PEÇA', true),
+    ('CX', 'CAIXA', true),
+    ('PCT', 'PACOTE', true);
+
+-- Inserir marcas exemplo
+INSERT INTO marca (nome, descricao, ativo)
+VALUES ('GENÉRICA', 'MARCA GENÉRICA PARA PRODUTOS SEM MARCA ESPECÍFICA', true),
+    ('NACIONAL', 'PRODUTOS NACIONAIS', true),
+    ('IMPORTADO', 'PRODUTOS IMPORTADOS', true);
+
+-- Inserir categorias exemplo
+INSERT INTO categoria (nome, descricao, ativo)
+VALUES ('GERAL', 'CATEGORIA GERAL PARA PRODUTOS DIVERSOS', true),
+    ('INFORMÁTICA', 'PRODUTOS DE INFORMÁTICA E TECNOLOGIA', true),
+    ('ESCRITÓRIO', 'MATERIAIS DE ESCRITÓRIO', true),
+    ('LIMPEZA', 'PRODUTOS DE LIMPEZA', true),
+    ('ALIMENTAÇÃO', 'PRODUTOS ALIMENTÍCIOS', true);
+
+-- Inserir unidades de medida comuns
+INSERT INTO unidade_medida (sigla, descricao)
+VALUES ('UN', 'UNIDADE'),
+    ('KG', 'QUILOGRAMA'),
+    ('G', 'GRAMA'),
+    ('L', 'LITRO'),
+    ('ML', 'MILILITRO'),
+    ('M', 'METRO'),
+    ('CM', 'CENTÍMETRO'),
+    ('M²', 'METRO QUADRADO'),
+    ('M³', 'METRO CÚBICO'),
+    ('CX', 'CAIXA'),
+    ('PC', 'PEÇA'),
+    ('PAR', 'PAR'),
+    ('DZ', 'DÚZIA'),
+    ('CT', 'CENTO');
+
+-- Inserir categorias padrão
+INSERT INTO categoria (nome, descricao)
+VALUES ('GERAL', 'CATEGORIA GERAL PARA PRODUTOS'),
+    ('ELETRÔNICOS', 'PRODUTOS ELETRÔNICOS'),
+    ('INFORMÁTICA', 'PRODUTOS DE INFORMÁTICA'),
+    ('ESCRITÓRIO', 'MATERIAIS DE ESCRITÓRIO'),
+    ('LIMPEZA', 'PRODUTOS DE LIMPEZA'),
+    ('ALIMENTAÇÃO', 'PRODUTOS ALIMENTÍCIOS');
+
+-- Inserir marcas padrão
+INSERT INTO marca (nome, descricao)
+VALUES ('GENÉRICA', 'MARCA GENÉRICA PARA PRODUTOS SEM MARCA ESPECÍFICA'),
+    ('PRÓPRIA', 'MARCA PRÓPRIA DA EMPRESA');
 -- Comentários
 COMMENT ON SCHEMA dbo IS 'Schema principal para o sistema de NF-e';
 COMMENT ON TABLE dbo.pais IS 'Cadastro de países';
@@ -494,6 +618,41 @@ COMMENT ON TABLE dbo.estado IS 'Cadastro de estados/províncias';
 COMMENT ON TABLE dbo.cidade IS 'Cadastro de cidades/municípios';
 COMMENT ON TABLE dbo.condicao_pagamento IS 'Condições de pagamento para notas fiscais';
 COMMENT ON TABLE dbo.forma_pagamento IS 'Formas de pagamento das parcelas de notas fiscais';
+COMMENT ON TABLE dbo.marca IS 'Cadastro de marcas de produtos';
+COMMENT ON TABLE dbo.categoria IS 'Cadastro de categorias de produtos';
+COMMENT ON TABLE dbo.unidade_medida IS 'Cadastro de unidades de medida';
+COMMENT ON TABLE dbo.produto IS 'Cadastro de produtos';
+COMMENT ON COLUMN dbo.produto.id IS 'ID único do produto';
+COMMENT ON COLUMN dbo.produto.produto IS 'Nome/descrição do produto';
+COMMENT ON COLUMN dbo.produto.unidade_medida_id IS 'ID da unidade de medida';
+COMMENT ON COLUMN dbo.produto.codigo_barras IS 'Código de barras do produto';
+COMMENT ON COLUMN dbo.produto.referencia IS 'Referência interna do produto';
+COMMENT ON COLUMN dbo.produto.marca_id IS 'ID da marca do produto';
+COMMENT ON COLUMN dbo.produto.categoria_id IS 'ID da categoria do produto';
+COMMENT ON COLUMN dbo.produto.quantidade_minima IS 'Quantidade mínima em estoque';
+COMMENT ON COLUMN dbo.produto.valor_compra IS 'Valor de compra do produto';
+COMMENT ON COLUMN dbo.produto.valor_venda IS 'Valor de venda do produto';
+COMMENT ON COLUMN dbo.produto.quantidade IS 'Quantidade atual em estoque';
+COMMENT ON COLUMN dbo.produto.percentual_lucro IS 'Percentual de lucro sobre o produto';
+COMMENT ON COLUMN dbo.produto.descricao IS 'Descrição detalhada do produto';
+COMMENT ON COLUMN dbo.produto.observacoes IS 'Observações sobre o produto';
+COMMENT ON COLUMN dbo.produto.situacao IS 'Data de situação do produto';
+COMMENT ON COLUMN dbo.produto.data_criacao IS 'Data de criação do produto';
+COMMENT ON COLUMN dbo.produto.data_alteracao IS 'Data da última alteração';
+COMMENT ON COLUMN dbo.produto.usuario_criacao IS 'Usuário que criou o produto';
+COMMENT ON COLUMN dbo.produto.usuario_atualizacao IS 'Usuário que atualizou o produto';
+COMMENT ON COLUMN dbo.produto.codigo IS 'Código do produto para NFe';
+COMMENT ON COLUMN dbo.produto.ncm IS 'NCM do produto';
+COMMENT ON COLUMN dbo.produto.cest IS 'CEST do produto';
+COMMENT ON COLUMN dbo.produto.unidade IS 'Unidade para NFe';
+COMMENT ON COLUMN dbo.produto.valor_unitario IS 'Valor unitário para NFe';
+COMMENT ON COLUMN dbo.produto.peso_liquido IS 'Peso líquido em kg';
+COMMENT ON COLUMN dbo.produto.peso_bruto IS 'Peso bruto em kg';
+COMMENT ON COLUMN dbo.produto.gtin IS 'GTIN/EAN do produto';
+COMMENT ON COLUMN dbo.produto.gtin_tributavel IS 'GTIN tributável';
+COMMENT ON COLUMN dbo.produto.ativo IS 'Indica se o produto está ativo';
+COMMENT ON COLUMN dbo.produto.created_at IS 'Data de criação do registro';
+COMMENT ON COLUMN dbo.produto.updated_at IS 'Data da última atualização do registro';
 COMMENT ON TABLE dbo.emitente IS 'Cadastro de empresas emitentes de notas fiscais';
 COMMENT ON TABLE dbo.cliente IS 'Cadastro de clientes';
 COMMENT ON TABLE dbo.fornecedor IS 'Cadastro de fornecedores';
