@@ -5,12 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  customerApi,
-  cityApi,
-  stateApi,
-  paymentTermApi,
-} from '@/services/api';
+import { customerApi, cityApi, stateApi, paymentTermApi } from '@/services/api';
 import { State, City } from '@/types/location';
 import { PaymentTerm } from '@/types/payment-term';
 import { toast } from 'sonner';
@@ -98,6 +93,7 @@ const formatters = {
 };
 
 const formSchema = z.object({
+  id: z.number().optional(),
   cnpjCpf: z.string().min(1, 'Documento é obrigatório'),
   tipo: z.enum(['F', 'J']),
   isEstrangeiro: z.boolean().default(false),
@@ -144,6 +140,7 @@ const CustomerForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      id: id ? Number(id) : undefined,
       cnpjCpf: '',
       tipo: 'J' as const,
       isEstrangeiro: false,
@@ -200,6 +197,7 @@ const CustomerForm = () => {
         setIsLoading(true);
         const customer = await customerApi.getById(Number(id));
         form.reset({
+          id: customer.id || 0,
           cnpjCpf: customer.cnpjCpf || '',
           tipo: customer.tipo || 'J',
           isEstrangeiro: Boolean(customer.isEstrangeiro),
@@ -220,16 +218,12 @@ const CustomerForm = () => {
         }); // Load city data if available
         if (customer.cidadeId) {
           try {
-            const cityData = await cityApi.getById(
-              customer.cidadeId,
-            );
+            const cityData = await cityApi.getById(customer.cidadeId);
             setSelectedCity(cityData);
 
             if (cityData.estadoId) {
               setSelectedStateId(cityData.estadoId);
-              const citiesData = await cityApi.getByState(
-                cityData.estadoId,
-              );
+              const citiesData = await cityApi.getByState(cityData.estadoId);
               setCities(citiesData);
             }
           } catch (error) {
@@ -261,6 +255,7 @@ const CustomerForm = () => {
       fetchCustomer();
     } else {
       form.reset({
+        id: 0,
         cnpjCpf: '',
         tipo: 'J',
         isEstrangeiro: false,
@@ -289,9 +284,7 @@ const CustomerForm = () => {
       const loadCities = async () => {
         try {
           setIsLoading(true);
-          const citiesData = await cityApi.getByState(
-            selectedStateId,
-          );
+          const citiesData = await cityApi.getByState(selectedStateId);
           setCities(citiesData);
         } catch (error) {
           console.error('Erro ao carregar cidades:', error);
@@ -304,7 +297,8 @@ const CustomerForm = () => {
       loadCities();
     } else if (citySearchOpen) {
       fetchCities();
-    }  }, [selectedStateId, citySearchOpen]);
+    }
+  }, [selectedStateId, citySearchOpen]);
 
   useEffect(() => {
     const loadStates = async () => {
@@ -387,6 +381,7 @@ const CustomerForm = () => {
     try {
       const formattedData = {
         ...data,
+        id: data.id ? Number(data.id) : undefined,
         cnpjCpf: formatters.clearFormat(data.cnpjCpf),
         email: data.email?.trim() || undefined,
         nomeFantasia: data.nomeFantasia?.trim() || undefined,
@@ -410,6 +405,7 @@ const CustomerForm = () => {
         await customerApi.create(formattedData);
         toast.success('Cliente criado com sucesso!');
         form.reset({
+          id: 0,
           cnpjCpf: '',
           tipo: 'J',
           isEstrangeiro: false,
@@ -738,14 +734,17 @@ const CustomerForm = () => {
       />
       <CityCreationDialog
         open={newCityDialogOpen}
-        onOpenChange={setNewCityDialogOpen}        onSuccess={
+        onOpenChange={setNewCityDialogOpen}
+        onSuccess={
           cityToEdit
             ? handleCityUpdated
             : (newCity: City) => {
                 setCities((prev) => [...prev, newCity]);
                 setNewCityDialogOpen(false);
                 setCitySearchOpen(true);
-                toast.success(`Cidade ${newCity.nome} criada com sucesso! Selecione-a na lista.`);
+                toast.success(
+                  `Cidade ${newCity.nome} criada com sucesso! Selecione-a na lista.`,
+                );
               }
         }
         selectedStateId={selectedStateId}
