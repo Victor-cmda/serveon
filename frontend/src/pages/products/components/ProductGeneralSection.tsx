@@ -1,3 +1,4 @@
+import { Search, Tag, Package, Ruler } from 'lucide-react';
 import {
   FormControl,
   FormField,
@@ -7,7 +8,8 @@ import {
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
 import { Switch } from '../../../components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
+import { Button } from '../../../components/ui/button';
+import { Badge } from '../../../components/ui/badge';
 import { UseFormReturn } from 'react-hook-form';
 import { Category } from '../../../types/category';
 import { Brand } from '../../../types/brand';
@@ -16,18 +18,24 @@ import { UnitMeasure } from '../../../types/unit-measure';
 interface ProductGeneralSectionProps {
   form: UseFormReturn<any>;
   isLoading: boolean;
-  categories: Category[];
-  brands: Brand[];
-  unitMeasures: UnitMeasure[];
+  selectedCategory: Category | null;
+  selectedBrand: Brand | null;
+  selectedUnitMeasure: UnitMeasure | null;
+  setCategorySearchOpen: (open: boolean) => void;
+  setBrandSearchOpen: (open: boolean) => void;
+  setUnitMeasureSearchOpen: (open: boolean) => void;
   id?: string;
 }
 
 const ProductGeneralSection = ({
   form,
   isLoading,
-  categories,
-  brands,
-  unitMeasures,
+  selectedCategory,
+  selectedBrand,
+  selectedUnitMeasure,
+  setCategorySearchOpen,
+  setBrandSearchOpen,
+  setUnitMeasureSearchOpen,
   id,
 }: ProductGeneralSectionProps) => {
   return (
@@ -95,59 +103,117 @@ const ProductGeneralSection = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Categoria *</FormLabel>
-              <Select
-                onValueChange={(value) => field.onChange(Number(value))}
-                value={field.value?.toString()}
-                disabled={isLoading}
-              >
+              <div className="flex gap-2">
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma categoria" />
-                  </SelectTrigger>
+                  <div className="flex w-full items-center gap-2">
+                    <div className="relative flex-grow">
+                      <Input
+                        value={selectedCategory?.nome || ''}
+                        readOnly
+                        placeholder="Selecione uma categoria"
+                        className="cursor-pointer h-10 text-base pl-9"
+                        onClick={() => setCategorySearchOpen(true)}
+                      />
+                      <input
+                        type="hidden"
+                        name={field.name}
+                        value={field.value || ''}
+                        onChange={(e) => {
+                          field.onChange(e);
+                        }}
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                      />
+                      <Tag className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCategorySearchOpen(true)}
+                      className="h-10 w-10"
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </FormControl>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id.toString()}>
-                      {category.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              </div>
+              {selectedCategory && (
+                <div className="mt-1">
+                  <Badge variant="outline">
+                    {selectedCategory.nome}
+                  </Badge>
+                </div>
+              )}
+              {field.value && !selectedCategory && (
+                <div className="mt-1">
+                  <Badge variant="outline" className="bg-yellow-50">
+                    Categoria selecionada mas dados não carregados. ID: {field.value}
+                  </Badge>
+                </div>
+              )}
               <FormMessage />
             </FormItem>
           )}
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">        <FormField
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormField
           control={form.control}
           name="marcaId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Marca</FormLabel>              <Select
-                onValueChange={(value) => {
-                  if (value === "" || !value) {
-                    field.onChange(undefined);
-                  } else {
-                    field.onChange(Number(value));
-                  }
-                }}
-                value={field.value?.toString() || ""}
-                disabled={isLoading}
-              >
+              <FormLabel>Marca</FormLabel>
+              <div className="flex gap-2">
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma marca (opcional)" />
-                  </SelectTrigger>
+                  <div className="flex w-full items-center gap-2">
+                    <div className="relative flex-grow">
+                      <Input
+                        value={selectedBrand?.nome || ''}
+                        readOnly
+                        placeholder="Selecione uma marca (opcional)"
+                        className="cursor-pointer h-10 text-base pl-9"
+                        onClick={() => setBrandSearchOpen(true)}
+                      />
+                      <input
+                        type="hidden"
+                        name={field.name}
+                        value={field.value || ''}
+                        onChange={(e) => {
+                          field.onChange(e);
+                        }}
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                      />
+                      <Package className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setBrandSearchOpen(true)}
+                      className="h-10 w-10"
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </FormControl>
-                <SelectContent>
-                  {brands.map((brand) => (
-                    <SelectItem key={brand.id} value={brand.id.toString()}>
-                      {brand.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              </div>
+              {selectedBrand && (
+                <div className="mt-1">
+                  <Badge variant="outline">
+                    {selectedBrand.nome}
+                  </Badge>
+                </div>
+              )}
+              {field.value && !selectedBrand && (
+                <div className="mt-1">
+                  <Badge variant="outline" className="bg-yellow-50">
+                    Marca selecionada mas dados não carregados. ID: {field.value}
+                  </Badge>
+                </div>
+              )}
               <FormMessage />
             </FormItem>
           )}
@@ -159,24 +225,55 @@ const ProductGeneralSection = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Unidade de Medida *</FormLabel>
-              <Select
-                onValueChange={(value) => field.onChange(Number(value))}
-                value={field.value?.toString()}
-                disabled={isLoading}
-              >
+              <div className="flex gap-2">
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma unidade" />
-                  </SelectTrigger>
+                  <div className="flex w-full items-center gap-2">
+                    <div className="relative flex-grow">
+                      <Input
+                        value={selectedUnitMeasure ? `${selectedUnitMeasure.nome} (${selectedUnitMeasure.sigla})` : ''}
+                        readOnly
+                        placeholder="Selecione uma unidade de medida"
+                        className="cursor-pointer h-10 text-base pl-9"
+                        onClick={() => setUnitMeasureSearchOpen(true)}
+                      />
+                      <input
+                        type="hidden"
+                        name={field.name}
+                        value={field.value || ''}
+                        onChange={(e) => {
+                          field.onChange(e);
+                        }}
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                      />
+                      <Ruler className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setUnitMeasureSearchOpen(true)}
+                      className="h-10 w-10"
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </FormControl>
-                <SelectContent>
-                  {unitMeasures.map((unit) => (
-                    <SelectItem key={unit.id} value={unit.id.toString()}>
-                      {unit.nome} ({unit.sigla})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              </div>
+              {selectedUnitMeasure && (
+                <div className="mt-1">
+                  <Badge variant="outline">
+                    {selectedUnitMeasure.nome} ({selectedUnitMeasure.sigla})
+                  </Badge>
+                </div>
+              )}
+              {field.value && !selectedUnitMeasure && (
+                <div className="mt-1">
+                  <Badge variant="outline" className="bg-yellow-50">
+                    Unidade selecionada mas dados não carregados. ID: {field.value}
+                  </Badge>
+                </div>
+              )}
               <FormMessage />
             </FormItem>
           )}
