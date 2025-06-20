@@ -565,11 +565,15 @@ VALUES ('UN', 'UNIDADE', true),
     ('M3', 'METRO CÚBICO', true),
     ('PC', 'PEÇA', true),
     ('CX', 'CAIXA', true),
-    ('PCT', 'PACOTE', true);
+    ('PCT', 'PACOTE', true),
+    ('PAR', 'PAR', true),
+    ('DZ', 'DÚZIA', true),
+    ('CT', 'CENTO', true);
 
 -- Inserir marcas exemplo
 INSERT INTO marca (nome, descricao, ativo)
 VALUES ('GENÉRICA', 'MARCA GENÉRICA PARA PRODUTOS SEM MARCA ESPECÍFICA', true),
+    ('PRÓPRIA', 'MARCA PRÓPRIA DA EMPRESA', true),
     ('NACIONAL', 'PRODUTOS NACIONAIS', true),
     ('IMPORTADO', 'PRODUTOS IMPORTADOS', true);
 
@@ -577,40 +581,11 @@ VALUES ('GENÉRICA', 'MARCA GENÉRICA PARA PRODUTOS SEM MARCA ESPECÍFICA', true
 INSERT INTO categoria (nome, descricao, ativo)
 VALUES ('GERAL', 'CATEGORIA GERAL PARA PRODUTOS DIVERSOS', true),
     ('INFORMÁTICA', 'PRODUTOS DE INFORMÁTICA E TECNOLOGIA', true),
+    ('ELETRÔNICOS', 'PRODUTOS ELETRÔNICOS', true),
     ('ESCRITÓRIO', 'MATERIAIS DE ESCRITÓRIO', true),
     ('LIMPEZA', 'PRODUTOS DE LIMPEZA', true),
     ('ALIMENTAÇÃO', 'PRODUTOS ALIMENTÍCIOS', true);
 
--- Inserir unidades de medida comuns
-INSERT INTO unidade_medida (sigla, descricao)
-VALUES ('UN', 'UNIDADE'),
-    ('KG', 'QUILOGRAMA'),
-    ('G', 'GRAMA'),
-    ('L', 'LITRO'),
-    ('ML', 'MILILITRO'),
-    ('M', 'METRO'),
-    ('CM', 'CENTÍMETRO'),
-    ('M²', 'METRO QUADRADO'),
-    ('M³', 'METRO CÚBICO'),
-    ('CX', 'CAIXA'),
-    ('PC', 'PEÇA'),
-    ('PAR', 'PAR'),
-    ('DZ', 'DÚZIA'),
-    ('CT', 'CENTO');
-
--- Inserir categorias padrão
-INSERT INTO categoria (nome, descricao)
-VALUES ('GERAL', 'CATEGORIA GERAL PARA PRODUTOS'),
-    ('ELETRÔNICOS', 'PRODUTOS ELETRÔNICOS'),
-    ('INFORMÁTICA', 'PRODUTOS DE INFORMÁTICA'),
-    ('ESCRITÓRIO', 'MATERIAIS DE ESCRITÓRIO'),
-    ('LIMPEZA', 'PRODUTOS DE LIMPEZA'),
-    ('ALIMENTAÇÃO', 'PRODUTOS ALIMENTÍCIOS');
-
--- Inserir marcas padrão
-INSERT INTO marca (nome, descricao)
-VALUES ('GENÉRICA', 'MARCA GENÉRICA PARA PRODUTOS SEM MARCA ESPECÍFICA'),
-    ('PRÓPRIA', 'MARCA PRÓPRIA DA EMPRESA');
 -- Comentários
 COMMENT ON SCHEMA dbo IS 'Schema principal para o sistema de NF-e';
 COMMENT ON TABLE dbo.pais IS 'Cadastro de países';
