@@ -119,25 +119,28 @@ const ProductGeneralSection = ({
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">        <FormField
           control={form.control}
           name="marcaId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Marca</FormLabel>
-              <Select
-                onValueChange={(value) => field.onChange(value ? Number(value) : undefined)}
-                value={field.value?.toString() || ''}
+              <FormLabel>Marca</FormLabel>              <Select
+                onValueChange={(value) => {
+                  if (value === "" || !value) {
+                    field.onChange(undefined);
+                  } else {
+                    field.onChange(Number(value));
+                  }
+                }}
+                value={field.value?.toString() || ""}
                 disabled={isLoading}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma marca" />
+                    <SelectValue placeholder="Selecione uma marca (opcional)" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">Nenhuma marca</SelectItem>
                   {brands.map((brand) => (
                     <SelectItem key={brand.id} value={brand.id.toString()}>
                       {brand.nome}
