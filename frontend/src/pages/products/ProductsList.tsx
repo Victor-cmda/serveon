@@ -45,10 +45,9 @@ const ProductsList: React.FC = () => {
       }
     }
   };
-
   const filteredProducts = products.filter(
     (product) =>
-      product.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.nome && product.nome.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (product.codigo && product.codigo.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (product.descricao && product.descricao.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (product.categoria?.nome && product.categoria.nome.toLowerCase().includes(searchTerm.toLowerCase())) ||

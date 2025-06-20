@@ -45,10 +45,9 @@ const CategoriesList: React.FC = () => {
       }
     }
   };
-
   const filteredCategories = categories.filter(
     (category) =>
-      category.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (category.nome && category.nome.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (category.descricao && category.descricao.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 

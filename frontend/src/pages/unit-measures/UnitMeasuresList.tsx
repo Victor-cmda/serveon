@@ -45,11 +45,10 @@ const UnitMeasuresList: React.FC = () => {
       }
     }
   };
-
   const filteredUnitMeasures = unitMeasures.filter(
     (unitMeasure) =>
-      unitMeasure.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      unitMeasure.sigla.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (unitMeasure.nome && unitMeasure.nome.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (unitMeasure.sigla && unitMeasure.sigla.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (unitMeasure.descricao && unitMeasure.descricao.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 

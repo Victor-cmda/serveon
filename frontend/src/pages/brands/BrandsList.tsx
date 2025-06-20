@@ -45,10 +45,9 @@ const BrandsList: React.FC = () => {
       }
     }
   };
-
   const filteredBrands = brands.filter(
     (brand) =>
-      brand.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (brand.nome && brand.nome.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (brand.descricao && brand.descricao.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
