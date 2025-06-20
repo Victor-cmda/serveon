@@ -15,6 +15,9 @@ import {
   ChevronRight,
   Building2,
   Briefcase,
+  Tags,
+  Layers,
+  Scale,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -139,8 +142,7 @@ const Sidebar = () => {
           path: '/cities',
         },
       ],
-    },
-    {
+    },    {
       id: 'admin',
       title: 'Administração',
       icon: <Settings className="h-4 w-4" />,
@@ -166,12 +168,37 @@ const Sidebar = () => {
         },
       ],
     },
+    {
+      id: 'catalog',
+      title: 'Cadastros de Produtos',
+      icon: <Package className="h-4 w-4" />,
+      color: 'indigo',
+      items: [
+        {
+          id: 'categories',
+          title: 'Categorias',
+          icon: <Layers className="h-4 w-4" />,
+          path: '/categories',
+        },
+        {
+          id: 'brands',
+          title: 'Marcas',
+          icon: <Tags className="h-4 w-4" />,
+          path: '/brands',
+        },
+        {
+          id: 'unit-measures',
+          title: 'Unidades de Medida',
+          icon: <Scale className="h-4 w-4" />,
+          path: '/unit-measures',
+        },
+      ],
+    },
   ];
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
-  };
-  const getColorClasses = (color: string, variant: 'light' | 'medium' | 'dark' = 'medium') => {
+  };  const getColorClasses = (color: string, variant: 'light' | 'medium' | 'dark' = 'medium') => {
     const colors = {
       blue: {
         light: 'bg-blue-50 text-blue-600 border-blue-200',
@@ -192,6 +219,11 @@ const Sidebar = () => {
         light: 'bg-purple-50 text-purple-600 border-purple-200',
         medium: 'bg-purple-500 text-white',
         dark: 'bg-purple-600 text-white',
+      },
+      indigo: {
+        light: 'bg-indigo-50 text-indigo-600 border-indigo-200',
+        medium: 'bg-indigo-500 text-white',
+        dark: 'bg-indigo-600 text-white',
       },
     };
     return colors[color as keyof typeof colors]?.[variant] || colors.blue[variant];
