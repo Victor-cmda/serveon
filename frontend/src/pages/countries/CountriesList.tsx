@@ -45,10 +45,10 @@ const CountriesList: React.FC = () => {
       }
     }
   };
-
   const filteredCountries = countries.filter(
     country =>
       country.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      country.id.toString().includes(searchTerm) ||
       (country.codigo && country.codigo.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
@@ -96,23 +96,28 @@ const CountriesList: React.FC = () => {
       <div className="rounded-md border">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead>
-              <tr className="border-b bg-muted/50">
+            <thead>              
+              <tr className="border-b bg-muted/50">                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Código
+                </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Nome
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                  Código
+                  Sigla
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  DDI
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Ações
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody>              
               {filteredCountries.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="h-24 text-center">
+                  <td colSpan={4} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Globe className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -125,7 +130,13 @@ const CountriesList: React.FC = () => {
                 filteredCountries.map((country) => (
                   <tr key={country.id} className="border-b">
                     <td className="p-4">
+                      <div className="font-mono text-sm text-muted-foreground">{country.id}</div>
+                    </td>
+                    <td className="p-4">
                       <div className="font-medium">{country.nome}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="font-medium">{country.sigla}</div>
                     </td>
                     <td className="p-4">
                       <code className="text-sm">{country.codigo || '-'}</code>

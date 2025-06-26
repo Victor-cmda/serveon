@@ -220,10 +220,28 @@ const EmployeeForm: React.FC = () => {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="border rounded-lg p-5 shadow-sm">
             <div className="grid grid-cols-1 gap-y-6">
-              <div>
-                <h3 className="text-lg font-medium mb-4">Informações Pessoais</h3>
+              <div>                <h3 className="text-lg font-medium mb-4">Informações Pessoais</h3>
                 
                 <div className="space-y-4">
+                  {id && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormItem>
+                        <FormLabel className="text-base font-medium">Código</FormLabel>
+                        <FormControl>
+                          <Input 
+                            value={id} 
+                            disabled 
+                            className="bg-muted h-11 text-base font-mono text-muted-foreground" 
+                          />
+                        </FormControl>
+                        <p className="text-sm text-muted-foreground">
+                          Código único do funcionário
+                        </p>
+                      </FormItem>
+                      <div></div> {/* Espaço vazio para manter o grid */}
+                    </div>
+                  )}
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}

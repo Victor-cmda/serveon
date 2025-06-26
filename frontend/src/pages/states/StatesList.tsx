@@ -51,10 +51,10 @@ const StatesList: React.FC = () => {
       }
     }
   };
-
   const filteredStates = states.filter(state => {
     const matchesSearch = state.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       state.uf.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      state.id.toString().includes(searchTerm) ||
       (state.paisNome && state.paisNome.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesCountry = !selectedCountry || state.paisId === Number(selectedCountry);
@@ -134,9 +134,11 @@ const StatesList: React.FC = () => {
 
       <div className="rounded-md border">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
+          <table className="w-full">            <thead>
               <tr className="border-b bg-muted/50">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Código
+                </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Nome
                 </th>
@@ -151,10 +153,9 @@ const StatesList: React.FC = () => {
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {filteredStates.length === 0 ? (
+            <tbody>              {filteredStates.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="h-24 text-center">
+                  <td colSpan={5} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <MapPin className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -166,6 +167,9 @@ const StatesList: React.FC = () => {
               ) : (
                 filteredStates.map((state) => (
                   <tr key={state.id} className="border-b">
+                    <td className="p-4">
+                      <div className="font-mono text-sm text-muted-foreground">{state.id}</div>
+                    </td>
                     <td className="p-4">
                       <div className="font-medium">{state.nome}</div>
                     </td>

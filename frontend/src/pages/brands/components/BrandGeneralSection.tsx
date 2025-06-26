@@ -19,9 +19,20 @@ const BrandGeneralSection = ({
   form,
   isLoading,
   id,
-}: BrandGeneralSectionProps) => {
-  return (
+}: BrandGeneralSectionProps) => {  return (
     <div className="space-y-4">
+      {id && (
+        <FormItem>
+          <FormLabel>Código</FormLabel>
+          <FormControl>
+            <Input value={id} disabled className="bg-muted" />
+          </FormControl>
+          <p className="text-sm text-muted-foreground">
+            Código único da marca
+          </p>
+        </FormItem>
+      )}
+      
       <FormField
         control={form.control}
         name="nome"

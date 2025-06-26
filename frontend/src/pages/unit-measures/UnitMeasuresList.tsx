@@ -44,12 +44,12 @@ const UnitMeasuresList: React.FC = () => {
         });
       }
     }
-  };
-  const filteredUnitMeasures = unitMeasures.filter(
+  };  const filteredUnitMeasures = unitMeasures.filter(
     (unitMeasure) =>
       (unitMeasure.nome && unitMeasure.nome.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (unitMeasure.sigla && unitMeasure.sigla.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (unitMeasure.descricao && unitMeasure.descricao.toLowerCase().includes(searchTerm.toLowerCase()))
+      (unitMeasure.descricao && unitMeasure.descricao.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      unitMeasure.id.toString().includes(searchTerm)
   );
 
   if (loading) {
@@ -131,10 +131,9 @@ const UnitMeasuresList: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredUnitMeasures.map((unitMeasure) => (
-                  <tr key={unitMeasure.id} className="border-b">
+                filteredUnitMeasures.map((unitMeasure) => (                  <tr key={unitMeasure.id} className="border-b">
                     <td className="p-4">
-                      <div className="font-medium">{unitMeasure.id}</div>
+                      <div className="font-mono text-sm text-muted-foreground">{unitMeasure.id}</div>
                     </td>
                     <td className="p-4">
                       <div className="font-medium">{unitMeasure.nome}</div>

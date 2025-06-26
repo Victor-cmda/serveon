@@ -140,8 +140,19 @@ const PaymentMethodForm = () => {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {id && (
+              <FormItem>
+                <FormLabel>Código</FormLabel>
+                <FormControl>
+                  <Input value={id} disabled className="bg-muted" />
+                </FormControl>
+                <FormDescription>
+                  Código único do método de pagamento
+                </FormDescription>
+              </FormItem>
+            )}
+            
             <FormField
               control={form.control}
               name="description"

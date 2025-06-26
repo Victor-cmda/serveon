@@ -130,8 +130,19 @@ const DepartmentForm: React.FC = () => {
             <div className="grid grid-cols-1 gap-y-6">
               <div>
                 <h3 className="text-lg font-medium mb-4">Informações do Departamento</h3>
-                
-                <div className="space-y-4">
+                  <div className="space-y-4">
+                  {id && (
+                    <FormItem>
+                      <FormLabel>Código</FormLabel>
+                      <FormControl>
+                        <Input value={id} disabled className="bg-muted" />
+                      </FormControl>
+                      <p className="text-sm text-muted-foreground">
+                        Código único do departamento
+                      </p>
+                    </FormItem>
+                  )}
+                  
                   <FormField
                     control={form.control}
                     name="nome"

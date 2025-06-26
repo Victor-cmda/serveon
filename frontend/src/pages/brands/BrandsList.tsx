@@ -44,11 +44,11 @@ const BrandsList: React.FC = () => {
         });
       }
     }
-  };
-  const filteredBrands = brands.filter(
+  };  const filteredBrands = brands.filter(
     (brand) =>
       (brand.nome && brand.nome.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (brand.descricao && brand.descricao.toLowerCase().includes(searchTerm.toLowerCase()))
+      (brand.descricao && brand.descricao.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      brand.id.toString().includes(searchTerm)
   );
 
   if (loading) {
@@ -114,8 +114,7 @@ const BrandsList: React.FC = () => {
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {filteredBrands.length === 0 ? (
+            <tbody>              {filteredBrands.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
@@ -130,7 +129,7 @@ const BrandsList: React.FC = () => {
                 filteredBrands.map((brand) => (
                   <tr key={brand.id} className="border-b">
                     <td className="p-4">
-                      <div className="font-medium">{brand.id}</div>
+                      <div className="font-mono text-sm text-muted-foreground">{brand.id}</div>
                     </td>
                     <td className="p-4">
                       <div className="font-medium">{brand.nome}</div>

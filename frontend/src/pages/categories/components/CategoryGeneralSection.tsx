@@ -19,9 +19,20 @@ const CategoryGeneralSection = ({
   form,
   isLoading,
   id,
-}: CategoryGeneralSectionProps) => {
-  return (
+}: CategoryGeneralSectionProps) => {  return (
     <div className="space-y-4">
+      {id && (
+        <FormItem>
+          <FormLabel>Código</FormLabel>
+          <FormControl>
+            <Input value={id} disabled className="bg-muted" />
+          </FormControl>
+          <p className="text-sm text-muted-foreground">
+            Código único da categoria
+          </p>
+        </FormItem>
+      )}
+      
       <FormField
         control={form.control}
         name="nome"

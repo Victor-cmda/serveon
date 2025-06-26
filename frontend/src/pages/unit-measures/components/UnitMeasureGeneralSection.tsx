@@ -19,9 +19,20 @@ const UnitMeasureGeneralSection = ({
   form,
   isLoading,
   id,
-}: UnitMeasureGeneralSectionProps) => {
-  return (
+}: UnitMeasureGeneralSectionProps) => {  return (
     <div className="space-y-4">
+      {id && (
+        <FormItem>
+          <FormLabel>Código</FormLabel>
+          <FormControl>
+            <Input value={id} disabled className="bg-muted" />
+          </FormControl>
+          <p className="text-sm text-muted-foreground">
+            Código único da unidade de medida
+          </p>
+        </FormItem>
+      )}
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-2">
           <FormField

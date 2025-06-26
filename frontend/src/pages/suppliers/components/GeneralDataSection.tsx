@@ -88,13 +88,24 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSecti
             </FormItem>
           )}
         />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+      </div>      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        {id && (
+          <FormItem className="md:col-span-1">
+            <FormLabel className="text-base font-medium">Código</FormLabel>
+            <FormControl>
+              <Input value={id} disabled className="bg-muted h-10 text-base" />
+            </FormControl>
+            <p className="text-sm text-muted-foreground">
+              ID único do fornecedor
+            </p>
+          </FormItem>
+        )}
+        
         <FormField
           control={form.control}
           name="razaoSocial"
           render={({ field }) => (
-            <FormItem className="md:col-span-8">
+            <FormItem className={id ? "md:col-span-7" : "md:col-span-8"}>
               <FormLabel className="text-base font-medium">
                 {watchTipo === 'J' ? 'Razão Social' : 'Nome Completo'}
               </FormLabel>
