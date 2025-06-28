@@ -107,9 +107,10 @@ const CountryCreationDialog = ({
       }      // Return the saved country to the parent component and close dialog
       onSuccess(savedCountry);
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar país:', error);
-      toast.error(error.message || 'Ocorreu um erro ao salvar o país.');
+      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar o país.';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

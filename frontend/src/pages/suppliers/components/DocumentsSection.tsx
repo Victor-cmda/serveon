@@ -9,10 +9,23 @@ import {
 import { Input } from "../../../components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 
+interface DocumentsFormData {
+  cnpjCpf: string;
+  inscricaoEstadual?: string;
+  inscricaoMunicipal?: string;
+  [key: string]: any;
+}
+
+interface Formatters {
+  cnpj: (value: string | undefined) => string;
+  cpf: (value: string | undefined) => string;
+  inscricaoEstadual: (value: string | undefined) => string;
+}
+
 interface DocumentsSectionProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<DocumentsFormData>;
   isLoading: boolean;
-  formatters: any;
+  formatters: Formatters;
   watchTipo: 'J' | 'F';
   watchIsEstrangeiro: boolean;
 }

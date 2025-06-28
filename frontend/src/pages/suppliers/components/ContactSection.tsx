@@ -9,10 +9,20 @@ import {
 import { Input } from '../../../components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
 
+interface ContactFormData {
+  telefone?: string;
+  email?: string;
+  [key: string]: any;
+}
+
+interface Formatters {
+  telefone: (value: string | undefined) => string;
+}
+
 interface ContactSectionProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<ContactFormData>;
   isLoading: boolean;
-  formatters: any;
+  formatters: Formatters;
 }
 
 const ContactSection = ({

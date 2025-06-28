@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, ConflictException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateSupplierDto } from '../dto/create-supplier.dto';
 import { UpdateSupplierDto } from '../dto/update-supplier.dto';
 import { DatabaseService } from '../../../common/database/database.service';
@@ -11,21 +17,23 @@ export class SuppliersService {
   async create(createSupplierDto: CreateSupplierDto): Promise<Supplier> {
     try {
       const client = await this.databaseService.getClient();
-      
+
       try {
         await client.query('BEGIN');
-        
+
         // Verificar se fornecedor já existe
         const existingSupplier = await client.query(
           'SELECT id FROM dbo.fornecedor WHERE cnpj_cpf = $1',
-          [createSupplierDto.cnpjCpf]
+          [createSupplierDto.cnpjCpf],
         );
 
         if (existingSupplier.rowCount > 0) {
-          throw new ConflictException(`Fornecedor com CNPJ/CPF ${createSupplierDto.cnpjCpf} já existe`);
+          throw new ConflictException(
+            `Fornecedor com CNPJ/CPF ${createSupplierDto.cnpjCpf} já existe`,
+          );
         }
-          // Inserir o novo fornecedor (ID será gerado automaticamente)
-        
+        // Inserir o novo fornecedor (ID será gerado automaticamente)
+
         // Inserir o novo fornecedor
         const result = await client.query(
           `INSERT INTO dbo.fornecedor
@@ -37,7 +45,8 @@ export class SuppliersService {
           VALUES
             ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 
             $15, $16, $17, $18, $19, $20, $21, $22)
-          RETURNING *`,          [
+          RETURNING *`,
+          [
             createSupplierDto.cnpjCpf,
             createSupplierDto.tipo,
             createSupplierDto.isEstrangeiro || false,
@@ -59,13 +68,13 @@ export class SuppliersService {
             createSupplierDto.celularResponsavel || null,
             createSupplierDto.observacoes || null,
             createSupplierDto.condicaoPagamentoId || null,
-            true // ativo por padrão
-          ]
+            true, // ativo por padrão
+          ],
         );
 
         // Buscar as informações adicionais do fornecedor (cidade, estado, país, condição de pagamento)
         const supplier = await this.enrichSupplierData(client, result.rows[0]);
-        
+
         await client.query('COMMIT');
         return supplier;
       } catch (error) {
@@ -81,7 +90,7 @@ export class SuppliersService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      
+
       console.error('Erro ao criar fornecedor:', error);
       throw new InternalServerErrorException('Erro ao criar fornecedor');
     }
@@ -104,8 +113,8 @@ export class SuppliersService {
           LEFT JOIN dbo.condicao_pagamento cp ON f.condicao_pagamento_id = cp.id
           ORDER BY f.razao_social ASC
         `);
-        
-        return result.rows.map(row => this.mapRowToSupplier(row));
+
+        return result.rows.map((row) => this.mapRowToSupplier(row));
       } finally {
         client.release();
       }
@@ -118,7 +127,8 @@ export class SuppliersService {
     try {
       const client = await this.databaseService.getClient();
       try {
-        const result = await client.query(`
+        const result = await client.query(
+          `
           SELECT f.*, 
                  c.nome as cidade_nome, 
                  e.uf,
@@ -130,12 +140,14 @@ export class SuppliersService {
           LEFT JOIN dbo.pais p ON e.pais_id = p.id
           LEFT JOIN dbo.condicao_pagamento cp ON f.condicao_pagamento_id = cp.id
           WHERE f.id = $1
-        `, [id]);
-        
+        `,
+          [id],
+        );
+
         if (result.rowCount === 0) {
           throw new NotFoundException(`Fornecedor com ID ${id} não encontrado`);
         }
-        
+
         return this.mapRowToSupplier(result.rows[0]);
       } finally {
         client.release();
@@ -144,9 +156,11 @@ export class SuppliersService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      
+
       console.error(`Erro ao buscar fornecedor com ID ${id}:`, error);
-      throw new InternalServerErrorException(`Erro ao buscar fornecedor com ID ${id}`);
+      throw new InternalServerErrorException(
+        `Erro ao buscar fornecedor com ID ${id}`,
+      );
     }
   }
 
@@ -154,7 +168,8 @@ export class SuppliersService {
     try {
       const client = await this.databaseService.getClient();
       try {
-        const result = await client.query(`
+        const result = await client.query(
+          `
           SELECT f.*, 
                  c.nome as cidade_nome, 
                  e.uf,
@@ -166,12 +181,16 @@ export class SuppliersService {
           LEFT JOIN dbo.pais p ON e.pais_id = p.id
           LEFT JOIN dbo.condicao_pagamento cp ON f.condicao_pagamento_id = cp.id
           WHERE f.cnpj_cpf = $1
-        `, [cnpjCpf]);
-        
+        `,
+          [cnpjCpf],
+        );
+
         if (result.rowCount === 0) {
-          throw new NotFoundException(`Fornecedor com documento ${cnpjCpf} não encontrado`);
+          throw new NotFoundException(
+            `Fornecedor com documento ${cnpjCpf} não encontrado`,
+          );
         }
-        
+
         return this.mapRowToSupplier(result.rows[0]);
       } finally {
         client.release();
@@ -180,45 +199,55 @@ export class SuppliersService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      
-      console.error(`Erro ao buscar fornecedor com documento ${cnpjCpf}:`, error);
-      throw new InternalServerErrorException(`Erro ao buscar fornecedor com documento ${cnpjCpf}`);
+
+      console.error(
+        `Erro ao buscar fornecedor com documento ${cnpjCpf}:`,
+        error,
+      );
+      throw new InternalServerErrorException(
+        `Erro ao buscar fornecedor com documento ${cnpjCpf}`,
+      );
     }
   }
-  async update(id: number, updateSupplierDto: UpdateSupplierDto): Promise<Supplier> {
+  async update(
+    id: number,
+    updateSupplierDto: UpdateSupplierDto,
+  ): Promise<Supplier> {
     try {
       const client = await this.databaseService.getClient();
-      
+
       try {
         await client.query('BEGIN');
-        
+
         // Verificar se o fornecedor existe
         const existingSupplier = await client.query(
           'SELECT id FROM dbo.fornecedor WHERE id = $1',
-          [id]
+          [id],
         );
 
         if (existingSupplier.rowCount === 0) {
           throw new NotFoundException(`Fornecedor com ID ${id} não encontrado`);
         }
-        
+
         // Verificar se o CNPJ/CPF já está sendo usado por outro fornecedor
         if (updateSupplierDto.cnpjCpf) {
           const duplicateCheck = await client.query(
             'SELECT id FROM dbo.fornecedor WHERE cnpj_cpf = $1 AND id != $2',
-            [updateSupplierDto.cnpjCpf, id]
+            [updateSupplierDto.cnpjCpf, id],
           );
-          
+
           if (duplicateCheck.rowCount > 0) {
-            throw new ConflictException(`Outro fornecedor com CNPJ/CPF ${updateSupplierDto.cnpjCpf} já existe`);
+            throw new ConflictException(
+              `Outro fornecedor com CNPJ/CPF ${updateSupplierDto.cnpjCpf} já existe`,
+            );
           }
         }
-        
+
         // Construir a consulta de atualização dinamicamente
         const updateFields: string[] = [];
         const updateValues: any[] = [];
         let paramCounter = 1;
-        
+
         // Mapear campos do DTO para colunas SQL
         const fieldMappings = {
           cnpjCpf: 'cnpj_cpf',
@@ -242,9 +271,9 @@ export class SuppliersService {
           celularResponsavel: 'celular_responsavel',
           observacoes: 'observacoes',
           condicaoPagamentoId: 'condicao_pagamento_id',
-          ativo: 'ativo'
+          ativo: 'ativo',
         };
-        
+
         // Adicionar campos a serem atualizados
         for (const [dtoField, dbField] of Object.entries(fieldMappings)) {
           if (dtoField in updateSupplierDto) {
@@ -253,13 +282,13 @@ export class SuppliersService {
             paramCounter++;
           }
         }
-        
+
         // Sempre atualizar o campo updated_at
         updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
-        
+
         // Adicionar o ID como último parâmetro
         updateValues.push(id);
-        
+
         // Executar a atualização
         const updateQuery = `
           UPDATE dbo.fornecedor
@@ -267,12 +296,15 @@ export class SuppliersService {
           WHERE id = $${paramCounter}
           RETURNING *
         `;
-        
+
         const result = await client.query(updateQuery, updateValues);
-        
+
         // Buscar as informações adicionais do fornecedor
-        const updatedSupplier = await this.enrichSupplierData(client, result.rows[0]);
-        
+        const updatedSupplier = await this.enrichSupplierData(
+          client,
+          result.rows[0],
+        );
+
         await client.query('COMMIT');
         return updatedSupplier;
       } catch (error) {
@@ -282,37 +314,42 @@ export class SuppliersService {
         client.release();
       }
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ConflictException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ConflictException
+      ) {
         throw error;
       }
-      
+
       console.error(`Erro ao atualizar fornecedor com ID ${id}:`, error);
-      throw new InternalServerErrorException(`Erro ao atualizar fornecedor com ID ${id}`);
+      throw new InternalServerErrorException(
+        `Erro ao atualizar fornecedor com ID ${id}`,
+      );
     }
   }
   async remove(id: number): Promise<void> {
     try {
       const client = await this.databaseService.getClient();
-      
+
       try {
         await client.query('BEGIN');
-        
+
         // Verificar se o fornecedor existe
         const existingSupplier = await client.query(
           'SELECT id FROM dbo.fornecedor WHERE id = $1',
-          [id]
+          [id],
         );
 
         if (existingSupplier.rowCount === 0) {
           throw new NotFoundException(`Fornecedor com ID ${id} não encontrado`);
         }
-        
+
         // Verificar se o fornecedor está sendo usado em pedidos ou outros registros
         // Note: Esta verificação pode precisar ser expandida conforme o sistema cresce
-        
+
         // Remover o fornecedor
         await client.query('DELETE FROM dbo.fornecedor WHERE id = $1', [id]);
-        
+
         await client.query('COMMIT');
       } catch (error) {
         await client.query('ROLLBACK');
@@ -324,17 +361,23 @@ export class SuppliersService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      
+
       console.error(`Erro ao remover fornecedor com ID ${id}:`, error);
-      throw new InternalServerErrorException(`Erro ao remover fornecedor com ID ${id}`);
+      throw new InternalServerErrorException(
+        `Erro ao remover fornecedor com ID ${id}`,
+      );
     }
   }
 
   // Método privado para enriquecer os dados do fornecedor com informações relacionadas
-  private async enrichSupplierData(client: any, supplierData: any): Promise<Supplier> {
+  private async enrichSupplierData(
+    client: any,
+    supplierData: any,
+  ): Promise<Supplier> {
     // Se o fornecedor tem cidade, buscar informações da cidade, estado e país
     if (supplierData.cidade_id) {
-      const locationResult = await client.query(`
+      const locationResult = await client.query(
+        `
         SELECT 
           c.nome as cidade_nome, 
           e.uf, 
@@ -343,31 +386,37 @@ export class SuppliersService {
         LEFT JOIN dbo.estado e ON c.estado_id = e.id
         LEFT JOIN dbo.pais p ON e.pais_id = p.id
         WHERE c.id = $1
-      `, [supplierData.cidade_id]);
-      
+      `,
+        [supplierData.cidade_id],
+      );
+
       if (locationResult.rowCount > 0) {
         supplierData.cidade_nome = locationResult.rows[0].cidade_nome;
         supplierData.uf = locationResult.rows[0].uf;
         supplierData.pais_nome = locationResult.rows[0].pais_nome;
       }
     }
-    
+
     // Se o fornecedor tem condição de pagamento, buscar informações da condição
     if (supplierData.condicao_pagamento_id) {
-      const paymentResult = await client.query(`
+      const paymentResult = await client.query(
+        `
         SELECT nome as condicao_pagamento_nome
         FROM dbo.condicao_pagamento
         WHERE id = $1
-      `, [supplierData.condicao_pagamento_id]);
-      
+      `,
+        [supplierData.condicao_pagamento_id],
+      );
+
       if (paymentResult.rowCount > 0) {
-        supplierData.condicao_pagamento_nome = paymentResult.rows[0].condicao_pagamento_nome;
+        supplierData.condicao_pagamento_nome =
+          paymentResult.rows[0].condicao_pagamento_nome;
       }
     }
-    
+
     return this.mapRowToSupplier(supplierData);
   }
-  
+
   // Método privado para mapear uma linha do banco para o objeto Supplier
   private mapRowToSupplier(row: any): Supplier {
     return {
@@ -401,7 +450,7 @@ export class SuppliersService {
       website: row.website,
       observacoes: row.observacoes,
       responsavel: row.responsavel,
-      celularResponsavel: row.celular_responsavel
+      celularResponsavel: row.celular_responsavel,
     };
   }
 }

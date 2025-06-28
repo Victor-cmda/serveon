@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Building2, Save, X } from 'lucide-react';
+import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { departmentApi } from '../../services/api';
 import { toast } from '../../lib/toast';
 import {
@@ -43,13 +43,7 @@ const DepartmentForm: React.FC = () => {
     defaultValues,
   });
 
-  useEffect(() => {
-    if (id) {
-      loadDepartment();
-    }
-  }, [id]);
-
-  const loadDepartment = async () => {
+  const loadDepartment = useCallback(async () => {
     if (!id) return;
 
     try {
@@ -70,7 +64,13 @@ const DepartmentForm: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, form, navigate]);
+
+  useEffect(() => {
+    if (id) {
+      loadDepartment();
+    }
+  }, [id, loadDepartment]);
 
   const onSubmit = async (data: DepartmentFormData) => {
     try {
@@ -94,11 +94,11 @@ const DepartmentForm: React.FC = () => {
       }
       
       navigate('/departments');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar departamento:', error);
       
       let errorMessage = 'Erro ao salvar departamento';
-      if (error?.message?.includes('nome')) {
+      if (error instanceof Error && error.message.includes('nome')) {
         errorMessage = 'Este nome já está em uso';
       }
       
@@ -111,26 +111,41 @@ const DepartmentForm: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight flex items-center gap-2">
-            <Building2 className="h-6 w-6" />
-            {id ? 'Editar Departamento' : 'Novo Departamento'}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {id ? 'Edite as informações do departamento' : 'Adicione um novo departamento ao sistema'}
-          </p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Link to="/departments">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {id ? 'Editar Departamento' : 'Novo Departamento'}
+            </h1>
+            <p className="text-muted-foreground">
+              {id
+                ? 'Edite as informações do departamento abaixo'
+                : 'Preencha as informações para criar um novo departamento'}
+            </p>
+          </div>
         </div>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="border rounded-lg p-5 shadow-sm">
-            <div className="grid grid-cols-1 gap-y-6">
-              <div>
-                <h3 className="text-lg font-medium mb-4">Informações do Departamento</h3>
-                
+          <div className="grid gap-6">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Dados Gerais
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Informações básicas do departamento
+                </p>
+              </div>
+              <div className="p-6 pt-0">
                 <div className="space-y-4">
                   <FormField
                     control={form.control}
@@ -167,46 +182,49 @@ const DepartmentForm: React.FC = () => {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />                  <FormField
-                    control={form.control}
-                    name="ativo"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                        <div className="space-y-0.5">
-                          <FormLabel>Departamento Ativo</FormLabel>
-                          <div className="text-sm text-muted-foreground">
-                            Indica se o departamento está ativo no sistema
-                          </div>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            disabled={loading}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
                   />
+
+                  {id && (
+                    <FormField
+                      control={form.control}
+                      name="ativo"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={loading}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-base font-medium">
+                              Departamento Ativo
+                            </FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              Desative para ocultar o departamento das listagens
+                            </p>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
               </div>
-
-              <div className="flex justify-end pt-4 mt-2 border-t space-x-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate('/departments')}
-                  disabled={loading}
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={loading}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {loading ? 'Salvando...' : 'Salvar'}
-                </Button>
-              </div>
             </div>
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <Link to="/departments">
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
+            </Link>
+            <Button type="submit" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {id ? 'Atualizar' : 'Salvar'}
+              <Save className="ml-2 h-4 w-4" />
+            </Button>
           </div>
         </form>
       </Form>

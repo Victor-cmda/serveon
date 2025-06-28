@@ -310,19 +310,19 @@ const ProductForm = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Link
-            to="/products"
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 w-10"
-          >
-            <ArrowLeft className="h-4 w-4" />
+          <Link to="/products">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight">
               {id ? 'Editar Produto' : 'Novo Produto'}
             </h1>
             <p className="text-muted-foreground">
               {id
-                ? 'Edite as informações do produto selecionado'
+                ? 'Edite as informações do produto abaixo'
                 : 'Preencha as informações para criar um novo produto'}
             </p>
           </div>

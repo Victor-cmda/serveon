@@ -78,12 +78,12 @@ const CategoryForm = () => {
       }
 
       navigate('/categories');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar categoria:', error);
-      toast.error(
-        error?.response?.data?.message ||
-          'Erro ao salvar categoria. Tente novamente.',
-      );
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : (error as any)?.response?.data?.message || 'Erro ao salvar categoria. Tente novamente.';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

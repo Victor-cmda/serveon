@@ -12,7 +12,6 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { INestApplication } from '@nestjs/common';
 
 async function bootstrap() {
-
   const logDir = path.join(__dirname, '../logs');
   if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
@@ -33,7 +32,7 @@ async function bootstrap() {
         filename: path.join(__dirname, '../logs/app.log'),
         format: winston.format.combine(
           winston.format.timestamp(),
-          winston.format.json()
+          winston.format.json(),
         ),
         level: 'info',
       }),
@@ -41,7 +40,7 @@ async function bootstrap() {
         filename: path.join(__dirname, '../logs/error.log'),
         format: winston.format.combine(
           winston.format.timestamp(),
-          winston.format.json()
+          winston.format.json(),
         ),
         level: 'error',
       }),
@@ -53,26 +52,26 @@ async function bootstrap() {
         maxFiles: '14d',
         format: winston.format.combine(
           winston.format.timestamp(),
-          winston.format.json()
+          winston.format.json(),
         ),
       }),
     ],
   });
 
   const app = await NestFactory.create(AppModule, {
-    logger: loggerInstance
+    logger: loggerInstance,
   });
 
   app.enableCors({
     origin: [
       'https://serveon-k32xgjzn9-victor-cmdas-projects.vercel.app',
       'http://localhost:5173',
-      'https://serveon.vercel.app'
+      'https://serveon.vercel.app',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     preflightContinue: false,
-    optionsSuccessStatus: 204
+    optionsSuccessStatus: 204,
   });
 
   app.setGlobalPrefix('api');
@@ -84,7 +83,11 @@ async function bootstrap() {
   app.use(express.static(path.join(__dirname, '..', 'wwwroot')));
 
   app.use((req, res, next) => {
-    if (req.originalUrl && !req.originalUrl.startsWith('/api/') && !req.originalUrl.startsWith('/api/docs')) {
+    if (
+      req.originalUrl &&
+      !req.originalUrl.startsWith('/api/') &&
+      !req.originalUrl.startsWith('/api/docs')
+    ) {
       return res.sendFile(path.join(__dirname, '..', 'wwwroot', 'index.html'));
     }
     next();
@@ -97,15 +100,11 @@ async function bootstrap() {
 }
 
 function configureGlobalPipes(app: INestApplication) {
-  app.useGlobalPipes(
-    new ValidationPipe(),
-  );
+  app.useGlobalPipes(new ValidationPipe());
 }
 
 function configureGlobalFilters(app: INestApplication) {
-  app.useGlobalFilters(
-    new HttpExceptionFilter(),
-  );
+  app.useGlobalFilters(new HttpExceptionFilter());
 }
 
 function configureSwagger(app: INestApplication) {

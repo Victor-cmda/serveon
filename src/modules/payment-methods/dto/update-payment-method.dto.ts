@@ -3,11 +3,13 @@ import { CreatePaymentMethodDto } from './create-payment-method.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString, IsBoolean, MaxLength } from 'class-validator';
 
-export class UpdatePaymentMethodDto extends PartialType(CreatePaymentMethodDto) {
+export class UpdatePaymentMethodDto extends PartialType(
+  CreatePaymentMethodDto,
+) {
   @ApiProperty({
     description: 'Description of the payment method',
     example: 'Credit Card',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -17,7 +19,7 @@ export class UpdatePaymentMethodDto extends PartialType(CreatePaymentMethodDto) 
   @ApiProperty({
     description: 'Code of the payment method',
     example: 'CC',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -27,7 +29,7 @@ export class UpdatePaymentMethodDto extends PartialType(CreatePaymentMethodDto) 
   @ApiProperty({
     description: 'Type of payment method',
     example: 'card',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -37,7 +39,7 @@ export class UpdatePaymentMethodDto extends PartialType(CreatePaymentMethodDto) 
   @ApiProperty({
     description: 'Status of the payment method (active/inactive)',
     example: true,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsBoolean()

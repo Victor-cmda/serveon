@@ -435,9 +435,10 @@ const CustomerForm = () => {
       } else {
         navigate('/customers');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar cliente:', error);
-      toast.error(error.message || 'Ocorreu um erro ao salvar o cliente');
+      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar o cliente';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -548,31 +549,40 @@ const CustomerForm = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight">
-            {id ? 'Editar Cliente' : 'Novo Cliente'}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {id
-              ? 'Atualize as informações do cliente conforme necessário'
-              : 'Preencha as informações para cadastrar um novo cliente'}
-          </p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" asChild>
-            <Link to="/customers">
-              <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-            </Link>
-          </Button>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Link to="/customers">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {id ? 'Editar Cliente' : 'Novo Cliente'}
+            </h1>
+            <p className="text-muted-foreground">
+              {id
+                ? 'Edite as informações do cliente abaixo'
+                : 'Preencha as informações para criar um novo cliente'}
+            </p>
+          </div>
         </div>
       </div>{' '}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="border rounded-lg p-5 shadow-sm">
-            <div className="grid grid-cols-1 gap-y-6">
-              <div>
+          <div className="grid gap-6">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Dados Gerais
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Informações básicas do cliente
+                </p>
+              </div>
+              <div className="p-6 pt-0">
                 <GeneralDataSection
                   form={form}
                   isLoading={isLoading}
@@ -580,7 +590,18 @@ const CustomerForm = () => {
                   id={id}
                 />
               </div>
-              <div>
+            </div>
+
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Endereço
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Informações de localização do cliente
+                </p>
+              </div>
+              <div className="p-6 pt-0">
                 <AddressSection
                   form={form}
                   isLoading={isLoading}
@@ -590,14 +611,36 @@ const CustomerForm = () => {
                   setCitySearchOpen={setCitySearchOpen}
                 />
               </div>
-              <div>
+            </div>
+
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Contato
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Informações de contato do cliente
+                </p>
+              </div>
+              <div className="p-6 pt-0">
                 <ContactSection
                   form={form}
                   isLoading={isLoading}
                   formatters={formatters}
                 />
               </div>
-              <div>
+            </div>
+
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Documentos
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Documentos fiscais do cliente
+                </p>
+              </div>
+              <div className="p-6 pt-0">
                 <DocumentsSection
                   form={form}
                   isLoading={isLoading}
@@ -605,8 +648,19 @@ const CustomerForm = () => {
                   watchTipo={watchTipo}
                   watchIsEstrangeiro={watchIsEstrangeiro}
                 />
-              </div>{' '}
-              <div>
+              </div>
+            </div>
+
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Pagamento
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Condições de pagamento do cliente
+                </p>
+              </div>
+              <div className="p-6 pt-0">
                 <PaymentSection
                   form={form}
                   isLoading={isLoading}
@@ -614,25 +668,19 @@ const CustomerForm = () => {
                   setPaymentTermSearchOpen={setPaymentTermSearchOpen}
                 />
               </div>
-              <div className="flex justify-end pt-4 mt-2 border-t">
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="h-10 px-6 text-base"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Salvando...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" /> Salvar Cliente
-                    </>
-                  )}
-                </Button>
-              </div>
             </div>
+          </div>
+          <div className="flex justify-end space-x-4">
+            <Link to="/customers">
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
+            </Link>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {id ? 'Atualizar' : 'Salvar'}
+              <Save className="ml-2 h-4 w-4" />
+            </Button>
           </div>
         </form>
       </Form>

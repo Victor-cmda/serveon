@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   X,
   Filter,
@@ -42,7 +42,7 @@ import {
 } from '@/components/ui/tooltip';
 
 // Implementação nativa do debounce para evitar dependência do lodash
-const debounce = <T extends (...args: any[]) => any>(
+const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
@@ -261,8 +261,8 @@ export function SearchDialog<T extends Entity = Entity>({
     [searchTerm, filters, searchKeys],
   );
 
-  const debouncedSetSearchTerm = useCallback(
-    debounce((value: string) => {
+  const debouncedSetSearchTerm = useMemo(
+    () => debounce((value: string) => {
       setSearchTerm(value);
     }, 300),
     [],

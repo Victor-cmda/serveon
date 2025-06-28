@@ -1,4 +1,10 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor, Logger } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+  Logger,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Request, Response } from 'express';
@@ -12,12 +18,13 @@ export class LoggingInterceptor implements NestInterceptor {
     const { method, url, body, params, query, headers } = request;
     const userAgent = headers['user-agent'] || 'unknown';
     const ipAddress = this.getClientIp(request);
-    
+
     // Logging exibe método, URL, IP, e remove informações sensíveis do body quando for um POST
-    const sanitizedBody = method === 'POST' || method === 'PUT' || method === 'PATCH'
-      ? this.sanitizeBody(body)
-      : {};
-      
+    const sanitizedBody =
+      method === 'POST' || method === 'PUT' || method === 'PATCH'
+        ? this.sanitizeBody(body)
+        : {};
+
     this.logger.log({
       message: `Requisição recebida`,
       method,
@@ -35,7 +42,7 @@ export class LoggingInterceptor implements NestInterceptor {
         next: (data: any) => {
           const response = context.switchToHttp().getResponse<Response>();
           const delay = Date.now() - now;
-          
+
           this.logger.log({
             message: `Requisição concluída`,
             method,
@@ -46,7 +53,7 @@ export class LoggingInterceptor implements NestInterceptor {
         },
         error: (error: any) => {
           const delay = Date.now() - now;
-          
+
           this.logger.error({
             message: `Erro na requisição`,
             method,
@@ -61,28 +68,37 @@ export class LoggingInterceptor implements NestInterceptor {
   }
 
   private getClientIp(request: Request): string {
-    return request.ip ||
-      request.headers['x-forwarded-for'] as string ||
-      request.headers['x-real-ip'] as string ||
+    return (
+      request.ip ||
+      (request.headers['x-forwarded-for'] as string) ||
+      (request.headers['x-real-ip'] as string) ||
       request.connection.remoteAddress ||
-      'unknown';
+      'unknown'
+    );
   }
 
   private sanitizeBody(body: any): any {
     if (!body) return {};
-    
+
     // Criar uma cópia para não modificar o objeto original
     const sanitized = { ...body };
-    
+
     // Remover campos sensíveis
-    const sensitiveFields = ['password', 'senha', 'token', 'secret', 'apiKey', 'api_key'];
-    
-    sensitiveFields.forEach(field => {
+    const sensitiveFields = [
+      'password',
+      'senha',
+      'token',
+      'secret',
+      'apiKey',
+      'api_key',
+    ];
+
+    sensitiveFields.forEach((field) => {
       if (sanitized[field]) {
         sanitized[field] = '******';
       }
     });
-    
+
     return sanitized;
   }
 }

@@ -1,4 +1,4 @@
-import { PaymentTermInstallment } from "./payment-term-installment.entity";
+import { PaymentTermInstallment } from './payment-term-installment.entity';
 
 export class PaymentTerm {
   id: number;

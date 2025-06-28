@@ -1,11 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString, IsDate, Matches, MaxLength, IsBoolean, IsNumber } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsDate,
+  Matches,
+  MaxLength,
+  IsBoolean,
+  IsNumber,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateEmployeeDto {
   @ApiProperty({
     description: 'Nome completo do funcionário',
-    example: 'João da Silva'
+    example: 'João da Silva',
   })
   @IsNotEmpty({ message: 'Nome completo é obrigatório' })
   @IsString({ message: 'Nome deve ser uma string' })
@@ -14,15 +24,17 @@ export class CreateEmployeeDto {
 
   @ApiProperty({
     description: 'CPF do funcionário (apenas números)',
-    example: '12345678901'
+    example: '12345678901',
   })
   @IsNotEmpty({ message: 'CPF é obrigatório' })
-  @Matches(/^[0-9]{11}$/, { message: 'CPF deve conter exatamente 11 dígitos numéricos' })
+  @Matches(/^[0-9]{11}$/, {
+    message: 'CPF deve conter exatamente 11 dígitos numéricos',
+  })
   cpf: string;
 
   @ApiProperty({
     description: 'Email profissional do funcionário',
-    example: 'joao.silva@empresa.com'
+    example: 'joao.silva@empresa.com',
   })
   @IsNotEmpty({ message: 'Email é obrigatório' })
   @IsEmail({}, { message: 'Email inválido' })
@@ -32,16 +44,17 @@ export class CreateEmployeeDto {
   @ApiProperty({
     description: 'Telefone de contato',
     example: '11987654321',
-    required: false
+    required: false,
   })
   @IsOptional()
-  @IsString({ message: 'Telefone deve ser uma string' })  @MaxLength(20, { message: 'Telefone deve ter no máximo 20 caracteres' })
+  @IsString({ message: 'Telefone deve ser uma string' })
+  @MaxLength(20, { message: 'Telefone deve ter no máximo 20 caracteres' })
   telefone?: string;
 
   @ApiProperty({
     description: 'ID do cargo do funcionário',
     example: 1,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsNumber({}, { message: 'ID do cargo deve ser um número' })
@@ -50,7 +63,7 @@ export class CreateEmployeeDto {
   @ApiProperty({
     description: 'ID do departamento do funcionário',
     example: 1,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsNumber({}, { message: 'ID do departamento deve ser um número' })
@@ -58,7 +71,7 @@ export class CreateEmployeeDto {
 
   @ApiProperty({
     description: 'Data de admissão no formato YYYY-MM-DD',
-    example: '2023-01-15'
+    example: '2023-01-15',
   })
   @IsNotEmpty({ message: 'Data de admissão é obrigatória' })
   @Type(() => Date)
@@ -68,7 +81,7 @@ export class CreateEmployeeDto {
   @ApiProperty({
     description: 'Status ativo/inativo do funcionário',
     example: true,
-    default: true
+    default: true,
   })
   @IsOptional()
   @IsBoolean({ message: 'Status ativo deve ser um valor booleano' })

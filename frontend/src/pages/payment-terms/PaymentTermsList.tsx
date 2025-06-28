@@ -37,12 +37,11 @@ const PaymentTermsList = () => {
         toast.success('Sucesso', {
           description: `Condição de pagamento "${term.name}" removida com sucesso.`,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Erro ao excluir condição de pagamento:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Não foi possível excluir a condição de pagamento. Verifique se não está sendo usada em pedidos.';
         toast.error('Erro', {
-          description:
-            error.message ||
-            'Não foi possível excluir a condição de pagamento. Verifique se não está sendo usada em pedidos.',
+          description: errorMessage,
         });
       }
     }
