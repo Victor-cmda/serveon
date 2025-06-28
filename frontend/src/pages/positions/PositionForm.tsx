@@ -244,6 +244,7 @@ const PositionForm: React.FC = () => {
         </div>
       </div>
 
+<<<<<<< HEAD
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid gap-6">
@@ -378,6 +379,79 @@ const PositionForm: React.FC = () => {
                         </FormItem>
                       )}
                     />
+=======
+      <div className="rounded-md border p-6">        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {id && (
+              <FormItem>
+                <FormLabel className="text-base font-medium">Código</FormLabel>
+                <FormControl>
+                  <Input value={id} disabled className="bg-muted h-11 text-base" />
+                </FormControl>
+                <p className="text-sm text-muted-foreground">
+                  Código único do cargo
+                </p>
+              </FormItem>
+            )}
+            
+            <FormField
+              control={form.control}
+              name="departamentoId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base font-medium">
+                    Departamento
+                  </FormLabel>
+                  <div className="flex gap-2">
+                    <div className="relative flex-grow">
+                      <Input
+                        value={selectedDepartment ? selectedDepartment.nome : ''}
+                        readOnly
+                        placeholder="Selecione um departamento"
+                        className="cursor-pointer h-11 text-base pl-9"
+                        onClick={() => setDepartmentSearchOpen(true)}
+                      />
+                      <input
+                        type="hidden"
+                        name={field.name}
+                        value={field.value || ''}
+                        onChange={(e) => {
+                          field.onChange(e);
+                        }}
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                      />
+                      <Briefcase className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setDepartmentSearchOpen(true)}
+                      className="h-11 w-11"
+                    >
+                      <Search className="h-5 w-5" />
+                    </Button>
+                  </div>
+                  {selectedDepartment && (
+                    <div className="mt-1 flex items-center">
+                      <Badge variant="outline" className="mr-2">
+                        {selectedDepartment.nome}
+                      </Badge>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedDepartment(null);
+                          form.setValue('departamentoId', undefined);
+                        }}
+                        className="h-6 px-2 text-xs"
+                      >
+                        Remover
+                      </Button>
+                    </div>
+>>>>>>> 4d13857da67cef62ff94221e3b59d3c872af3086
                   )}
                 </div>
               </div>

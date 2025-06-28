@@ -44,11 +44,11 @@ const CategoriesList: React.FC = () => {
         });
       }
     }
-  };
-  const filteredCategories = categories.filter(
+  };  const filteredCategories = categories.filter(
     (category) =>
       (category.nome && category.nome.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (category.descricao && category.descricao.toLowerCase().includes(searchTerm.toLowerCase()))
+      (category.descricao && category.descricao.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      category.id.toString().includes(searchTerm)
   );
 
   if (loading) {
@@ -127,10 +127,9 @@ const CategoriesList: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredCategories.map((category) => (
-                  <tr key={category.id} className="border-b">
+                filteredCategories.map((category) => (                  <tr key={category.id} className="border-b">
                     <td className="p-4">
-                      <div className="font-medium">{category.id}</div>
+                      <div className="font-mono text-sm text-muted-foreground">{category.id}</div>
                     </td>
                     <td className="p-4">
                       <div className="font-medium">{category.nome}</div>

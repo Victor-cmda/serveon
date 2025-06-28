@@ -150,6 +150,7 @@ const PaymentMethodForm = () => {
       </div>
 
       <Form {...form}>
+<<<<<<< HEAD
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid gap-6">
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
@@ -176,6 +177,37 @@ const PaymentMethodForm = () => {
                       </FormItem>
                     )}
                   />
+=======
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {id && (
+              <FormItem>
+                <FormLabel>Código</FormLabel>
+                <FormControl>
+                  <Input value={id} disabled className="bg-muted" />
+                </FormControl>
+                <FormDescription>
+                  Código único do método de pagamento
+                </FormDescription>
+              </FormItem>
+            )}
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex: Cartão de Crédito" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Nome do método de pagamento
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+>>>>>>> 4d13857da67cef62ff94221e3b59d3c872af3086
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField

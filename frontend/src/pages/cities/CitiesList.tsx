@@ -59,10 +59,10 @@ const CitiesList: React.FC = () => {
   const filteredStates = selectedCountry
     ? states.filter(state => state.paisId === Number(selectedCountry))
     : states;
-
   const filteredCities = cities.filter(city => {
     const matchesSearch = city.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (city.codigoIbge && city.codigoIbge.includes(searchTerm)) ||
+      city.id.toString().includes(searchTerm) ||
       (city.estadoNome && city.estadoNome.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (city.uf && city.uf.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (city.paisNome && city.paisNome.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -164,9 +164,11 @@ const CitiesList: React.FC = () => {
 
       <div className="rounded-md border">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
+          <table className="w-full">            <thead>
               <tr className="border-b bg-muted/50">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Código
+                </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Nome
                 </th>
@@ -187,10 +189,9 @@ const CitiesList: React.FC = () => {
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {filteredCities.length === 0 ? (
+            <tbody>              {filteredCities.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="h-24 text-center">
+                  <td colSpan={7} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <MapPin className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -202,6 +203,9 @@ const CitiesList: React.FC = () => {
               ) : (
                 filteredCities.map((city) => (
                   <tr key={city.id} className="border-b">
+                    <td className="p-4">
+                      <div className="font-mono text-sm text-muted-foreground">{city.id}</div>
+                    </td>
                     <td className="p-4">
                       <div className="font-medium">{city.nome}</div>
                     </td>

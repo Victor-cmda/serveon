@@ -58,10 +58,10 @@ const PositionsList: React.FC = () => {
       }
     }
   };
-
   const filteredPositions = positions.filter(
     position => {
       const matchesSearch = position.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        position.id.toString().includes(searchTerm) ||
         (position.descricao && position.descricao.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (position.departamentoNome && position.departamentoNome.toLowerCase().includes(searchTerm.toLowerCase()));
       
@@ -131,9 +131,11 @@ const PositionsList: React.FC = () => {
 
       <div className="rounded-md border">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
+          <table className="w-full">            <thead>
               <tr className="border-b bg-muted/50">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Código
+                </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Nome
                 </th>
@@ -154,10 +156,9 @@ const PositionsList: React.FC = () => {
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {filteredPositions.length === 0 ? (
+            <tbody>              {filteredPositions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="h-24 text-center">
+                  <td colSpan={7} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Briefcase className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -169,6 +170,9 @@ const PositionsList: React.FC = () => {
               ) : (
                 filteredPositions.map((position) => (
                   <tr key={position.id} className="border-b">
+                    <td className="p-4">
+                      <div className="font-mono text-sm text-muted-foreground">{position.id}</div>
+                    </td>
                     <td className="p-4">
                       <div className="font-medium">{position.nome}</div>
                     </td>

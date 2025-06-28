@@ -45,7 +45,6 @@ const CustomersList: React.FC = () => {
       }
     }
   };
-
   const filteredCustomers = customers.filter(
     (customer) =>
       customer.razaoSocial.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -54,6 +53,7 @@ const CustomersList: React.FC = () => {
           .toLowerCase()
           .includes(searchTerm.toLowerCase())) ||
       customer.cnpjCpf.includes(searchTerm) ||
+      customer.id.toString().includes(searchTerm) ||
       (customer.cidadeNome &&
         customer.cidadeNome.toLowerCase().includes(searchTerm.toLowerCase())),
   );
@@ -143,10 +143,9 @@ const CustomersList: React.FC = () => {
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {filteredCustomers.length === 0 ? (
+            <tbody>              {filteredCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="h-24 text-center">
+                  <td colSpan={7} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Users className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -158,10 +157,9 @@ const CustomersList: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredCustomers.map((customer) => (
-                  <tr key={customer.id} className="border-b">
+                filteredCustomers.map((customer) => (                  <tr key={customer.id} className="border-b">
                     <td className="p-4">
-                      <div className="font-medium">{customer.id}</div>
+                      <div className="font-mono text-sm text-muted-foreground">{customer.id}</div>
                     </td>
                     <td className="p-4">
                       <div className="font-medium">{customer.razaoSocial}</div>
