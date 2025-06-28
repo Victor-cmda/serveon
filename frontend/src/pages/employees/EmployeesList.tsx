@@ -41,10 +41,10 @@ const EmployeesList: React.FC = () => {
         });
       }
     }
-  };
-  const filteredEmployees = employees.filter(
+  };  const filteredEmployees = employees.filter(
     employee =>
       employee.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.id.toString().includes(searchTerm) ||
       employee.cpf.includes(searchTerm) ||
       employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (employee.cargoNome && employee.cargoNome.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -102,9 +102,11 @@ const EmployeesList: React.FC = () => {
 
       <div className="rounded-md border">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
+          <table className="w-full">            <thead>
               <tr className="border-b bg-muted/50">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Código
+                </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Nome
                 </th>
@@ -131,10 +133,9 @@ const EmployeesList: React.FC = () => {
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {filteredEmployees.length === 0 ? (
+            <tbody>              {filteredEmployees.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="h-24 text-center">
+                  <td colSpan={9} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Users className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -146,6 +147,9 @@ const EmployeesList: React.FC = () => {
               ) : (
                 filteredEmployees.map((employee) => (
                   <tr key={employee.id} className="border-b">
+                    <td className="p-4">
+                      <div className="font-mono text-sm text-muted-foreground">{employee.id}</div>
+                    </td>
                     <td className="p-4">
                       <div className="font-medium">{employee.nome}</div>
                     </td>

@@ -11,6 +11,10 @@ import { PaymentTermsModule } from './modules/payment-terms/payment-terms.module
 import { SuppliersModule } from './modules/suppliers/suppliers.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { PositionsModule } from './modules/positions/positions.module';
+import { ProductsModule } from './modules/products/products.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { BrandsModule } from './modules/brands/brands.module';
+import { UnitMeasuresModule } from './modules/unit-measures/unit-measures.module';
 
 @Module({
   imports: [
@@ -29,6 +33,10 @@ import { PositionsModule } from './modules/positions/positions.module';
     SuppliersModule,
     DepartmentsModule,
     PositionsModule,
+    ProductsModule,
+    CategoriesModule,
+    BrandsModule,
+    UnitMeasuresModule,
   ],
 })
 export class AppModule { }

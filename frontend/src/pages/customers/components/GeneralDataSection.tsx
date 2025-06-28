@@ -1,14 +1,14 @@
-import { Building2, User } from "lucide-react";
-import { 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from "../../../components/ui/form";
-import { Input } from "../../../components/ui/input";
-import { Switch } from "../../../components/ui/switch";
-import { UseFormReturn } from "react-hook-form";
+import { Building2, User } from 'lucide-react';
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../../../components/ui/form';
+import { Input } from '../../../components/ui/input';
+import { Switch } from '../../../components/ui/switch';
+import { UseFormReturn } from 'react-hook-form';
 
 interface GeneralDataSectionProps {
   form: UseFormReturn<any>;
@@ -17,9 +17,16 @@ interface GeneralDataSectionProps {
   id?: string;
 }
 
-const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSectionProps) => {
+const GeneralDataSection = ({
+  form,
+  isLoading,
+  watchTipo,
+  id,
+}: GeneralDataSectionProps) => {
   return (
-    <div className="space-y-4">      <div className="flex flex-col sm:flex-row justify-between gap-4">
+    <div className="space-y-4">
+      {' '}
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
         <FormField
           control={form.control}
           name="tipo"
@@ -37,7 +44,10 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSecti
                     checked={field.value === 'J'}
                     onChange={() => field.onChange('J')}
                   />
-                  <label htmlFor="juridica" className="text-base flex items-center gap-1">
+                  <label
+                    htmlFor="juridica"
+                    className="text-base flex items-center gap-1"
+                  >
                     <Building2 className="h-4 w-4" />
                     Jurídica
                   </label>
@@ -50,7 +60,10 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSecti
                     checked={field.value === 'F'}
                     onChange={() => field.onChange('F')}
                   />
-                  <label htmlFor="fisica" className="text-base flex items-center gap-1">
+                  <label
+                    htmlFor="fisica"
+                    className="text-base flex items-center gap-1"
+                  >
                     <User className="h-4 w-4" />
                     Física
                   </label>
@@ -59,7 +72,8 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSecti
               <FormMessage className="text-sm" />
             </FormItem>
           )}
-        />        <FormField
+        />{' '}
+        <FormField
           control={form.control}
           name="ativo"
           render={({ field }) => (
@@ -72,7 +86,7 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSecti
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
-                <FormLabel 
+                <FormLabel
                   className={`text-base font-medium ${!id ? 'cursor-not-allowed opacity-60' : ''}`}
                 >
                   Cliente Ativo
@@ -86,12 +100,22 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSecti
             </FormItem>
           )}
         />
-      </div>      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-        <FormField
+      </div>{' '}      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        {id && (
+          <FormItem className="md:col-span-1">
+            <FormLabel className="text-base font-medium">Código</FormLabel>
+            <FormControl>
+              <Input value={id} disabled className="bg-muted h-10 text-base" />
+            </FormControl>
+            <p className="text-sm text-muted-foreground">
+              ID único do cliente
+            </p>
+          </FormItem>
+        )}        <FormField
           control={form.control}
           name="razaoSocial"
           render={({ field }) => (
-            <FormItem className="md:col-span-8">
+            <FormItem className={id ? "md:col-span-7" : "md:col-span-8"}>
               <FormLabel className="text-base font-medium">
                 {watchTipo === 'J' ? 'Razão Social' : 'Nome Completo'}
               </FormLabel>
@@ -102,10 +126,11 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSecti
                     disabled={isLoading}
                     className="h-10 text-base pl-9"
                   />
-                  {watchTipo === 'J' ? 
-                    <Building2 className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" /> : 
+                  {watchTipo === 'J' ? (
+                    <Building2 className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                  ) : (
                     <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                  }
+                  )}
                 </div>
               </FormControl>
               <FormMessage className="text-sm" />

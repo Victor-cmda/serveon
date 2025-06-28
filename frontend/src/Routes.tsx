@@ -23,6 +23,15 @@ import DepartmentsList from './pages/departments/DepartmentsList';
 import DepartmentForm from './pages/departments/DepartmentForm';
 import PositionsList from './pages/positions/PositionsList';
 import PositionForm from './pages/positions/PositionForm';
+// Novos módulos
+import ProductsList from './pages/products/ProductsList';
+import ProductForm from './pages/products/ProductForm';
+import CategoriesList from './pages/categories/CategoriesList';
+import CategoryForm from './pages/categories/CategoryForm';
+import BrandsList from './pages/brands/BrandsList';
+import BrandForm from './pages/brands/BrandForm';
+import UnitMeasuresList from './pages/unit-measures/UnitMeasuresList';
+import UnitMeasureForm from './pages/unit-measures/UnitMeasureForm';
 import { FormStateProvider } from './contexts/FormStateContext';
 
 const router = createBrowserRouter([
@@ -156,10 +165,60 @@ const router = createBrowserRouter([
       {
         path: 'positions/new',
         element: <PositionForm />,
-      },
-      {
+      },      {
         path: 'positions/edit/:id',
         element: <PositionForm />,
+      },      // Produtos
+      {
+        path: 'products',
+        element: <ProductsList />,
+      },
+      {
+        path: 'products/new',
+        element: <ProductForm />,
+      },
+      {
+        path: 'products/edit/:id',
+        element: <ProductForm />,
+      },
+      // Categorias
+      {
+        path: 'categories',
+        element: <CategoriesList />,
+      },
+      {
+        path: 'categories/new',
+        element: <CategoryForm />,
+      },
+      {
+        path: 'categories/edit/:id',
+        element: <CategoryForm />,
+      },
+      // Marcas
+      {
+        path: 'brands',
+        element: <BrandsList />,
+      },
+      {
+        path: 'brands/new',
+        element: <BrandForm />,
+      },
+      {
+        path: 'brands/edit/:id',
+        element: <BrandForm />,
+      },
+      // Unidades de Medida
+      {
+        path: 'unit-measures',
+        element: <UnitMeasuresList />,
+      },
+      {
+        path: 'unit-measures/new',
+        element: <UnitMeasureForm />,
+      },
+      {
+        path: 'unit-measures/edit/:id',
+        element: <UnitMeasureForm />,
       },
       // Rota de fallback
       {

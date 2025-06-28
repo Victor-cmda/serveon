@@ -44,12 +44,12 @@ const PaymentMethodsList: React.FC = () => {
         });
       }
     }
-  };
-  const filteredPaymentMethods = paymentMethods.filter(
+  };  const filteredPaymentMethods = paymentMethods.filter(
     paymentMethod =>
       paymentMethod.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (paymentMethod.code && paymentMethod.code.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (paymentMethod.type && paymentMethod.type.toLowerCase().includes(searchTerm.toLowerCase()))
+      (paymentMethod.type && paymentMethod.type.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      paymentMethod.id.toString().includes(searchTerm)
   );
 
   if (loading) {
@@ -96,8 +96,11 @@ const PaymentMethodsList: React.FC = () => {
       <div className="rounded-md border">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead>
-              <tr className="border-b bg-muted/50">                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+            <thead>              <tr className="border-b bg-muted/50">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  ID
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Descrição
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
@@ -113,8 +116,7 @@ const PaymentMethodsList: React.FC = () => {
                   Ações
                 </th>
               </tr>
-            </thead>            <tbody>
-              {filteredPaymentMethods.length === 0 ? (
+            </thead>            <tbody>              {filteredPaymentMethods.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
@@ -125,9 +127,11 @@ const PaymentMethodsList: React.FC = () => {
                     </div>
                   </td>
                 </tr>
-              ) : (
-                filteredPaymentMethods.map((paymentMethod) => (
+              ) : (filteredPaymentMethods.map((paymentMethod) => (
                   <tr key={paymentMethod.id} className="border-b">
+                    <td className="p-4">
+                      <div className="font-mono text-sm text-muted-foreground">{paymentMethod.id}</div>
+                    </td>
                     <td className="p-4">
                       <div className="font-medium">{paymentMethod.description}</div>
                     </td>

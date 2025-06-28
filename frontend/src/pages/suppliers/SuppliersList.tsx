@@ -45,12 +45,12 @@ const SuppliersList: React.FC = () => {
       }
     }
   };
-
   const filteredSuppliers = suppliers.filter(
     supplier =>
       supplier.razaoSocial.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (supplier.nomeFantasia && supplier.nomeFantasia.toLowerCase().includes(searchTerm.toLowerCase())) ||
       supplier.cnpjCpf.includes(searchTerm) ||
+      supplier.id.toString().includes(searchTerm) ||
       (supplier.cidadeNome && supplier.cidadeNome.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (supplier.responsavel && supplier.responsavel.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -114,9 +114,11 @@ const SuppliersList: React.FC = () => {
 
       <div className="rounded-md border">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
+          <table className="w-full">            <thead>
               <tr className="border-b bg-muted/50">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Código
+                </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Nome/Razão Social
                 </th>
@@ -140,10 +142,9 @@ const SuppliersList: React.FC = () => {
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {filteredSuppliers.length === 0 ? (
+            <tbody>              {filteredSuppliers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="h-24 text-center">
+                  <td colSpan={8} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Users className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -155,6 +156,9 @@ const SuppliersList: React.FC = () => {
               ) : (
                 filteredSuppliers.map((supplier) => (
                   <tr key={supplier.id} className="border-b">
+                    <td className="p-4">
+                      <div className="font-mono text-sm text-muted-foreground">{supplier.id}</div>
+                    </td>
                     <td className="p-4">
                       <div className="font-medium">{supplier.razaoSocial}</div>
                     </td>

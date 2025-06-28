@@ -44,6 +44,26 @@ import {
   CreateEmployeeDto,
   UpdateEmployeeDto,
 } from '../types/employee';
+import {
+  Product,
+  CreateProductDto,
+  UpdateProductDto,
+} from '../types/product';
+import {
+  Category,
+  CreateCategoryDto,
+  UpdateCategoryDto,
+} from '../types/category';
+import {
+  Brand,
+  CreateBrandDto,
+  UpdateBrandDto,
+} from '../types/brand';
+import {
+  UnitMeasure,
+  CreateUnitMeasureDto,
+  UpdateUnitMeasureDto,
+} from '../types/unit-measure';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -523,6 +543,174 @@ export const positionApi = {
 
   delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_URL}/positions/${id}`, {
+      method: 'DELETE',
+    });
+    return handleResponse(response);
+  },
+};
+
+// API para Produtos
+export const productApi = {
+  getAll: async (): Promise<Product[]> => {
+    const response = await fetch(`${API_URL}/products`);
+    return handleResponse(response);
+  },
+
+  getById: async (id: number): Promise<Product> => {
+    const response = await fetch(`${API_URL}/products/${id}`);
+    return handleResponse(response);
+  },
+
+  create: async (product: CreateProductDto): Promise<Product> => {
+    const response = await fetch(`${API_URL}/products`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(product),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (id: number, product: UpdateProductDto): Promise<Product> => {
+    const response = await fetch(`${API_URL}/products/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(product),
+    });
+    return handleResponse(response);
+  },
+
+  delete: async (id: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/products/${id}`, {
+      method: 'DELETE',
+    });
+    return handleResponse(response);
+  },
+};
+
+// API para Categorias
+export const categoryApi = {
+  getAll: async (): Promise<Category[]> => {
+    const response = await fetch(`${API_URL}/categories`);
+    return handleResponse(response);
+  },
+
+  getById: async (id: number): Promise<Category> => {
+    const response = await fetch(`${API_URL}/categories/${id}`);
+    return handleResponse(response);
+  },
+
+  create: async (category: CreateCategoryDto): Promise<Category> => {
+    const response = await fetch(`${API_URL}/categories`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(category),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (id: number, category: UpdateCategoryDto): Promise<Category> => {
+    const response = await fetch(`${API_URL}/categories/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(category),
+    });
+    return handleResponse(response);
+  },
+
+  delete: async (id: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/categories/${id}`, {
+      method: 'DELETE',
+    });
+    return handleResponse(response);
+  },
+};
+
+// API para Marcas
+export const brandApi = {
+  getAll: async (): Promise<Brand[]> => {
+    const response = await fetch(`${API_URL}/brands`);
+    return handleResponse(response);
+  },
+
+  getById: async (id: number): Promise<Brand> => {
+    const response = await fetch(`${API_URL}/brands/${id}`);
+    return handleResponse(response);
+  },
+
+  create: async (brand: CreateBrandDto): Promise<Brand> => {
+    const response = await fetch(`${API_URL}/brands`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(brand),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (id: number, brand: UpdateBrandDto): Promise<Brand> => {
+    const response = await fetch(`${API_URL}/brands/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(brand),
+    });
+    return handleResponse(response);
+  },
+
+  delete: async (id: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/brands/${id}`, {
+      method: 'DELETE',
+    });
+    return handleResponse(response);
+  },
+};
+
+// API para Unidades de Medida
+export const unitMeasureApi = {
+  getAll: async (): Promise<UnitMeasure[]> => {
+    const response = await fetch(`${API_URL}/unit-measures`);
+    return handleResponse(response);
+  },
+
+  getById: async (id: number): Promise<UnitMeasure> => {
+    const response = await fetch(`${API_URL}/unit-measures/${id}`);
+    return handleResponse(response);
+  },
+
+  create: async (unitMeasure: CreateUnitMeasureDto): Promise<UnitMeasure> => {
+    const response = await fetch(`${API_URL}/unit-measures`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(unitMeasure),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (id: number, unitMeasure: UpdateUnitMeasureDto): Promise<UnitMeasure> => {
+    const response = await fetch(`${API_URL}/unit-measures/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(unitMeasure),
+    });
+    return handleResponse(response);
+  },
+
+  delete: async (id: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/unit-measures/${id}`, {
       method: 'DELETE',
     });
     return handleResponse(response);

@@ -45,13 +45,17 @@ const CustomersList: React.FC = () => {
       }
     }
   };
-
   const filteredCustomers = customers.filter(
-    customer =>
+    (customer) =>
       customer.razaoSocial.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (customer.nomeFantasia && customer.nomeFantasia.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (customer.nomeFantasia &&
+        customer.nomeFantasia
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())) ||
       customer.cnpjCpf.includes(searchTerm) ||
-      (customer.cidadeNome && customer.cidadeNome.toLowerCase().includes(searchTerm.toLowerCase()))
+      customer.id.toString().includes(searchTerm) ||
+      (customer.cidadeNome &&
+        customer.cidadeNome.toLowerCase().includes(searchTerm.toLowerCase())),
   );
 
   const formatCpfCnpj = (doc: string, tipo: 'F' | 'J') => {
@@ -117,6 +121,9 @@ const CustomersList: React.FC = () => {
             <thead>
               <tr className="border-b bg-muted/50">
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Código
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Nome/Razão Social
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
@@ -136,40 +143,51 @@ const CustomersList: React.FC = () => {
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {filteredCustomers.length === 0 ? (
+            <tbody>              {filteredCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="h-24 text-center">
+                  <td colSpan={7} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Users className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
-                        {searchTerm ? 'Nenhum cliente encontrado.' : 'Nenhum cliente cadastrado.'}
+                        {searchTerm
+                          ? 'Nenhum cliente encontrado.'
+                          : 'Nenhum cliente cadastrado.'}
                       </p>
                     </div>
                   </td>
                 </tr>
               ) : (
-                filteredCustomers.map((customer) => (
-                  <tr key={customer.cnpjCpf} className="border-b">
+                filteredCustomers.map((customer) => (                  <tr key={customer.id} className="border-b">
+                    <td className="p-4">
+                      <div className="font-mono text-sm text-muted-foreground">{customer.id}</div>
+                    </td>
                     <td className="p-4">
                       <div className="font-medium">{customer.razaoSocial}</div>
                     </td>
                     <td className="p-4">
-                      <div className="text-sm">{customer.nomeFantasia || '-'}</div>
+                      <div className="text-sm">
+                        {customer.nomeFantasia || '-'}
+                      </div>
                     </td>
                     <td className="p-4">
-                      <code className="text-sm">{formatCpfCnpj(customer.cnpjCpf, customer.tipo)}</code>
+                      <code className="text-sm">
+                        {formatCpfCnpj(customer.cnpjCpf, customer.tipo)}
+                      </code>
                     </td>
                     <td className="p-4">
-                      <div className="text-sm">{customer.tipo === 'F' ? 'Física' : 'Jurídica'}</div>
+                      <div className="text-sm">
+                        {customer.tipo === 'F' ? 'Física' : 'Jurídica'}
+                      </div>
                     </td>
                     <td className="p-4">
-                      <div className="text-sm">{customer.cidadeNome || '-'}</div>
+                      <div className="text-sm">
+                        {customer.cidadeNome || '-'}
+                      </div>
                     </td>
                     <td className="p-4">
                       <div className="flex items-center space-x-2">
                         <Link
-                          to={`/customers/edit/${customer.cnpjCpf}`}
+                          to={`/customers/edit/${customer.id}`}
                           className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
                         >
                           <Edit className="h-3 w-3" />
@@ -193,7 +211,8 @@ const CustomersList: React.FC = () => {
       {filteredCustomers.length > 0 && (
         <div className="flex items-center justify-between px-2">
           <div className="text-sm text-muted-foreground">
-            Mostrando {filteredCustomers.length} de {customers.length} cliente(s)
+            Mostrando {filteredCustomers.length} de {customers.length}{' '}
+            cliente(s)
           </div>
         </div>
       )}
