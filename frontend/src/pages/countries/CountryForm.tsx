@@ -158,6 +158,7 @@ const CountryForm = () => {
         </div>
       </div>
 
+<<<<<<< HEAD
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid gap-6">
@@ -211,6 +212,36 @@ const CountryForm = () => {
                           <FormMessage />
                         </FormItem>
                       )}
+=======
+      <div className="rounded-md border p-6">        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {id && (
+              <FormItem>
+                <FormLabel className="text-base font-medium">ID</FormLabel>
+                <FormControl>
+                  <Input value={id} disabled className="bg-muted h-11 text-base" />
+                </FormControl>
+                <p className="text-sm text-muted-foreground">
+                  Identificador único do país
+                </p>
+              </FormItem>
+            )}
+            
+            <FormField
+              control={form.control}
+              name="nome"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base font-medium">
+                    Nome do País
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ex: Brasil"
+                      {...field}
+                      disabled={isLoading}
+                      className="h-11 text-base"
+>>>>>>> 4d13857da67cef62ff94221e3b59d3c872af3086
                     />
 
                     <FormField

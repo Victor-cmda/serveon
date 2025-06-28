@@ -135,6 +135,7 @@ const DepartmentForm: React.FC = () => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+<<<<<<< HEAD
           <div className="grid gap-6">
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
               <div className="flex flex-col space-y-1.5 p-6">
@@ -147,6 +148,25 @@ const DepartmentForm: React.FC = () => {
               </div>
               <div className="p-6 pt-0">
                 <div className="space-y-4">
+=======
+          <div className="border rounded-lg p-5 shadow-sm">
+            <div className="grid grid-cols-1 gap-y-6">
+              <div>
+                <h3 className="text-lg font-medium mb-4">Informações do Departamento</h3>
+                  <div className="space-y-4">
+                  {id && (
+                    <FormItem>
+                      <FormLabel>Código</FormLabel>
+                      <FormControl>
+                        <Input value={id} disabled className="bg-muted" />
+                      </FormControl>
+                      <p className="text-sm text-muted-foreground">
+                        Código único do departamento
+                      </p>
+                    </FormItem>
+                  )}
+                  
+>>>>>>> 4d13857da67cef62ff94221e3b59d3c872af3086
                   <FormField
                     control={form.control}
                     name="nome"
