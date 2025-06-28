@@ -10,10 +10,22 @@ import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 
+interface SupplierFormData {
+  website?: string;
+  responsavel?: string;
+  celularResponsavel?: string;
+  observacoes?: string;
+  [key: string]: any;
+}
+
+interface Formatters {
+  telefone: (value: string | undefined) => string;
+}
+
 interface SupplierSpecificSectionProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<SupplierFormData>;
   isLoading: boolean;
-  formatters: any;
+  formatters: Formatters;
 }
 
 const SupplierSpecificSection = ({ 

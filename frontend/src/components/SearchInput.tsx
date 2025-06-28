@@ -142,7 +142,7 @@ export function SearchInput(props: SearchInputProps) {
   try {
     // Tenta usar o componente com Router
     return <SearchInputWithNavigation {...props} />;
-  } catch (error) {
+  } catch {
     // Fallback para o componente sem Router
     console.warn('Router context not available, using fallback navigation');
     return <SearchInputInternal {...props} />;

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Users, Save, X } from 'lucide-react';
+import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { employeeApi } from '../../services/api';
 import { toast } from '../../lib/toast';
 import type { Department } from '../../types/department';
@@ -97,7 +97,7 @@ const EmployeeForm: React.FC = () => {
     }
   };
 
-  const loadPositions = async () => {
+  const loadPositions = useCallback(async () => {
     try {
       const data = await employeeApi.getActivePositions();
       setPositions(data);
@@ -107,9 +107,9 @@ const EmployeeForm: React.FC = () => {
         description: 'Não foi possível carregar os cargos',
       });
     }
-  };
+  }, []);
 
-  const loadPositionsByDepartment = async (departmentId: number) => {
+  const loadPositionsByDepartment = useCallback(async (departmentId: number) => {
     try {
       const data = await employeeApi.getPositionsByDepartment(departmentId);
       setPositions(data);
@@ -118,8 +118,9 @@ const EmployeeForm: React.FC = () => {
       // Fallback para todos os cargos
       loadPositions();
     }
-  };
-  const loadEmployee = async () => {
+  }, [loadPositions]);
+
+  const loadEmployee = useCallback(async () => {
     if (!id) return;
 
     try {
@@ -155,7 +156,7 @@ const EmployeeForm: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, form, navigate]);
 
   const onSubmit = async (data: EmployeeFormData) => {
     try {
@@ -178,16 +179,20 @@ const EmployeeForm: React.FC = () => {
       }
       
       navigate('/employees');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar funcionário:', error);
       
       let errorMessage = 'Erro ao salvar funcionário';
-      if (error?.message?.includes('CPF')) {
-        errorMessage = 'Este CPF já está cadastrado';
-      } else if (error?.message?.includes('email')) {
-        errorMessage = 'Este email já está cadastrado';
+      if (error instanceof Error) {
+        if (error.message.includes('CPF')) {
+          errorMessage = 'Este CPF já está cadastrado';
+        } else if (error.message.includes('email')) {
+          errorMessage = 'Este email já está cadastrado';
+        } else {
+          errorMessage = error.message;
+        }
       }
-        toast.error('Erro', {
+      toast.error('Erro', {
         description: errorMessage,
       });
     } finally {
@@ -203,25 +208,41 @@ const EmployeeForm: React.FC = () => {
     return value.replace(/\D/g, '').slice(0, 11);
   };
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight flex items-center gap-2">
-            <Users className="h-6 w-6" />
-            {id ? 'Editar Funcionário' : 'Novo Funcionário'}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {id ? 'Edite as informações do funcionário' : 'Adicione um novo funcionário ao sistema'}
-          </p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Link to="/employees">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {id ? 'Editar Funcionário' : 'Novo Funcionário'}
+            </h1>
+            <p className="text-muted-foreground">
+              {id
+                ? 'Edite as informações do funcionário abaixo'
+                : 'Preencha as informações para criar um novo funcionário'}
+            </p>
+          </div>
         </div>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="border rounded-lg p-5 shadow-sm">
-            <div className="grid grid-cols-1 gap-y-6">
-              <div>                <h3 className="text-lg font-medium mb-4">Informações Pessoais</h3>
-                
+          <div className="grid gap-6">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Informações Pessoais
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Dados pessoais do funcionário
+                </p>
+              </div>
+              <div className="p-6 pt-0">
                 <div className="space-y-4">
                   {id && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -322,10 +343,18 @@ const EmployeeForm: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div>
-                <h3 className="text-lg font-medium mb-4">Informações Profissionais</h3>
-                
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Informações Profissionais
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Dados profissionais do funcionário
+                </p>
+              </div>
+              <div className="p-6 pt-0">
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
@@ -435,46 +464,47 @@ const EmployeeForm: React.FC = () => {
                         )}
                       />
                     )}
-                  </div>                  <FormField
-                    control={form.control}
-                    name="ativo"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                        <div className="space-y-0.5">
-                          <FormLabel>Funcionário Ativo</FormLabel>
-                          <div className="text-sm text-muted-foreground">
-                            Indica se o funcionário está ativo no sistema
+                  </div>                  {id && (
+                    <FormField
+                      control={form.control}
+                      name="ativo"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={loading}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-base font-medium">
+                              Funcionário Ativo
+                            </FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              Desative para ocultar o funcionário das listagens
+                            </p>
                           </div>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            disabled={loading}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
               </div>
-
-              <div className="flex justify-end pt-4 mt-2 border-t space-x-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate('/employees')}
-                  disabled={loading}
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={loading}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {loading ? 'Salvando...' : 'Salvar'}
-                </Button>
-              </div>
             </div>
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <Link to="/employees">
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
+            </Link>
+            <Button type="submit" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {id ? 'Atualizar' : 'Salvar'}
+              <Save className="ml-2 h-4 w-4" />
+            </Button>
           </div>
         </form>
       </Form>

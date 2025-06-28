@@ -225,8 +225,9 @@ export default function SupplierForm() {
         condicaoPagamentoId: values.condicaoPagamentoId || undefined,
       };
       Object.keys(formattedData).forEach((key) => {
-        if ((formattedData as any)[key] === undefined) {
-          delete (formattedData as any)[key];
+        const typedKey = key as keyof typeof formattedData;
+        if (formattedData[typedKey] === undefined) {
+          delete formattedData[typedKey];
         }
       });
       if (isEditing) {
@@ -329,33 +330,40 @@ export default function SupplierForm() {
     toast.success(`Condição de pagamento ${updatedPaymentTerm.name} atualizada com sucesso!`);
   };
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight">
-            {isEditing ? 'Editar Fornecedor' : 'Novo Fornecedor'}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {isEditing
-              ? 'Atualize as informações do fornecedor conforme necessário'
-              : 'Preencha as informações para cadastrar um novo fornecedor'}
-          </p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" asChild>
-            <Link to="/suppliers">
-              <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
-            </Link>
-          </Button>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Link to="/suppliers">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {isEditing ? 'Editar Fornecedor' : 'Novo Fornecedor'}
+            </h1>
+            <p className="text-muted-foreground">
+              {isEditing
+                ? 'Edite as informações do fornecedor abaixo'
+                : 'Preencha as informações para criar um novo fornecedor'}
+            </p>
+          </div>
         </div>
       </div>
       <Form {...form}>
-        {' '}
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="border rounded-lg p-5 shadow-sm">
-            <div className="grid grid-cols-1 gap-y-6">
-              <div>
-                <h2 className="text-lg font-medium mb-4">Dados Gerais</h2>
+          <div className="grid gap-6">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Dados Gerais
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Informações básicas do fornecedor
+                </p>
+              </div>
+              <div className="p-6 pt-0">
                 <GeneralDataSection
                   form={form}
                   isLoading={isLoading}
@@ -363,20 +371,18 @@ export default function SupplierForm() {
                   id={id}
                 />
               </div>
+            </div>
 
-              <div>
-                <h2 className="text-lg font-medium mb-4">Documentos</h2>
-                <DocumentsSection
-                  form={form}
-                  isLoading={isLoading}
-                  formatters={formatters}
-                  watchTipo={watchTipo}
-                  watchIsEstrangeiro={watchIsEstrangeiro}
-                />
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Endereço
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Informações de localização do fornecedor
+                </p>
               </div>
-
-              <div>
-                <h2 className="text-lg font-medium mb-4">Endereço</h2>
+              <div className="p-6 pt-0">
                 <AddressSection
                   form={form}
                   isLoading={isLoading}
@@ -386,29 +392,74 @@ export default function SupplierForm() {
                   setCitySearchOpen={setCitySearchOpen}
                 />
               </div>
+            </div>
 
-              <div>
-                <h2 className="text-lg font-medium mb-4">Contato</h2>
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Contato
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Informações de contato do fornecedor
+                </p>
+              </div>
+              <div className="p-6 pt-0">
                 <ContactSection
                   form={form}
                   isLoading={isLoading}
                   formatters={formatters}
                 />
               </div>
+            </div>
 
-              <div>
-                <h2 className="text-lg font-medium mb-4">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Documentos
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Documentos fiscais do fornecedor
+                </p>
+              </div>
+              <div className="p-6 pt-0">
+                <DocumentsSection
+                  form={form}
+                  isLoading={isLoading}
+                  formatters={formatters}
+                  watchTipo={watchTipo}
+                  watchIsEstrangeiro={watchIsEstrangeiro}
+                />
+              </div>
+            </div>
+
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
                   Informações Adicionais
-                </h2>
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Dados específicos do fornecedor
+                </p>
+              </div>
+              <div className="p-6 pt-0">
                 <SupplierSpecificSection
                   form={form}
                   isLoading={isLoading}
                   formatters={formatters}
                 />
               </div>
+            </div>
 
-              <div>
-                <h2 className="text-lg font-medium mb-4">Pagamento</h2>
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Pagamento
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Condições de pagamento do fornecedor
+                </p>
+              </div>
+              <div className="p-6 pt-0">
                 <PaymentSection
                   form={form}
                   isLoading={isLoading}
@@ -416,29 +467,23 @@ export default function SupplierForm() {
                   setPaymentTermSearchOpen={setPaymentTermSearchOpen}
                 />
               </div>
-
-              <div className="flex justify-end pt-4 mt-2 border-t">
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="h-10 px-6 text-base"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Salvando...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" /> Salvar Fornecedor
-                    </>
-                  )}
-                </Button>
-              </div>
             </div>
           </div>
+
+          <div className="flex justify-end space-x-4">
+            <Link to="/suppliers">
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
+            </Link>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isEditing ? 'Atualizar' : 'Salvar'}
+              <Save className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </form>
-      </Form>{' '}      <SearchDialog
+      </Form>      <SearchDialog
         title="Selecione uma cidade"
         open={citySearchOpen}
         onOpenChange={setCitySearchOpen}

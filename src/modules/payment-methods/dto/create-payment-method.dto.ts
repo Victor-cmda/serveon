@@ -1,10 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsOptional, IsBoolean, MaxLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  IsBoolean,
+  MaxLength,
+} from 'class-validator';
 
 export class CreatePaymentMethodDto {
   @ApiProperty({
     description: 'Description of the payment method',
-    example: 'Credit Card'
+    example: 'Credit Card',
   })
   @IsNotEmpty()
   @IsString()
@@ -14,7 +20,7 @@ export class CreatePaymentMethodDto {
   @ApiProperty({
     description: 'Code of the payment method',
     example: 'CC',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -24,7 +30,7 @@ export class CreatePaymentMethodDto {
   @ApiProperty({
     description: 'Type of payment method',
     example: 'card',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -35,7 +41,7 @@ export class CreatePaymentMethodDto {
     description: 'Status of the payment method (active/inactive)',
     example: true,
     required: false,
-    default: true
+    default: true,
   })
   @IsOptional()
   @IsBoolean()

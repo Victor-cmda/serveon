@@ -7,7 +7,7 @@ export class UpdateSupplierDto extends PartialType(CreateSupplierDto) {
   @ApiProperty({
     description: 'Status ativo/inativo do fornecedor',
     example: true,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsBoolean({ message: 'ativo deve ser um valor booleano' })

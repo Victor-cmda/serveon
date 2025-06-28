@@ -8,7 +8,7 @@ export class UpdateEmployeeDto extends PartialType(CreateEmployeeDto) {
   @ApiProperty({
     description: 'Data de demissão no formato YYYY-MM-DD',
     example: '2023-12-31',
-    required: false
+    required: false,
   })
   @IsOptional()
   @Type(() => Date)

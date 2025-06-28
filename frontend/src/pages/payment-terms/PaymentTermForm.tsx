@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { paymentTermApi, paymentMethodApi } from '@/services/api';
 import { PaymentMethod } from '@/types/payment-method';
@@ -212,11 +212,11 @@ const PaymentTermForm = () => {
       } else {
         navigate('/payment-terms');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar condição de pagamento:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar a condição de pagamento.';
       toast.error('Erro', {
-        description:
-          error.message || 'Ocorreu um erro ao salvar a condição de pagamento.',
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -265,129 +265,145 @@ const PaymentTermForm = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => navigate('/payment-terms')}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-2xl font-bold tracking-tight">
-            {id ? 'Editar' : 'Nova'} Condição de Pagamento
-          </h1>
+        <div className="flex items-center space-x-4">
+          <Link to="/payment-terms">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {id ? 'Editar Condição de Pagamento' : 'Nova Condição de Pagamento'}
+            </h1>
+            <p className="text-muted-foreground">
+              {id
+                ? 'Edite as informações da condição de pagamento abaixo'
+                : 'Preencha as informações para criar uma nova condição de pagamento'}
+            </p>
+          </div>
         </div>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {id && (
-              <FormItem>
-                <FormLabel>Código</FormLabel>
-                <FormControl>
-                  <Input value={id} disabled className="bg-muted" />
-                </FormControl>
-                <FormDescription>
-                  Código único da condição de pagamento
-                </FormDescription>
-              </FormItem>
-            )}
-            
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: 30/60/90 dias" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Nome da condição de pagamento
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /><FormField
-              control={form.control}
-              name="isActive"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid gap-6">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Dados Gerais
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Informações básicas da condição de pagamento
+                </p>
+              </div>
+              <div className="p-6 pt-0">
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nome da condição de pagamento" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descrição</FormLabel>
+                        <FormControl>
+                          <textarea
+                            className="w-full min-h-[100px] px-3 py-2 text-sm border border-input rounded-md bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            placeholder="Descrição da condição de pagamento"
+                            {...field}
+                            value={field.value || ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {id && (
+                    <FormField
+                      control={form.control}
+                      name="isActive"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-base font-medium">
+                              Condição Ativa
+                            </FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              Desative para ocultar a condição das listagens
+                            </p>
+                          </div>
+                        </FormItem>
+                      )}
                     />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Ativa</FormLabel>
-                    <FormDescription>
-                      Indica se a condição de pagamento está disponível para uso
-                    </FormDescription>
-                  </div>
-                </FormItem>
-              )}
-            />
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Descrição</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Descrição detalhada da condição de pagamento"
-                    {...field}
-                    value={field.value || ''}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Detalhes adicionais sobre esta condição de pagamento
-                  (opcional)
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Parcelas</h2>
-              <Button type="button" onClick={addInstallment} variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar Parcela
-              </Button>
-            </div>
-
-            {form.formState.errors.installments?.root && (
-              <p className="text-sm font-medium text-destructive">
-                {form.formState.errors.installments.root.message}
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div className="flex flex-col space-y-1.5 p-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Parcelas
+                </h3>
+                <Button type="button" onClick={addInstallment} variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Parcela
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Configure as parcelas da condição de pagamento
               </p>
-            )}
+            </div>
+            <div className="p-6 pt-0">
+                {form.formState.errors.installments?.root && (
+                  <p className="text-sm font-medium text-destructive">
+                    {form.formState.errors.installments.root.message}
+                  </p>
+                )}
 
-            {fields.map((field, index) => (
-              <Card key={field.id}>
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between">
-                    <CardTitle className="text-lg">
-                      Parcela {index + 1}
-                    </CardTitle>
-                    {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => remove(index)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="pb-2 pt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {fields.map((field, index) => (
+                  <Card key={field.id}>
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between">
+                        <CardTitle className="text-lg">
+                          Parcela {index + 1}
+                        </CardTitle>
+                        {fields.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => remove(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pb-2 pt-0">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name={`installments.${index}.installmentNumber`}
@@ -529,24 +545,23 @@ const PaymentTermForm = () => {
                         </FormItem>
                       )}
                     />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
           </div>
 
-          <div className="flex justify-end space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/payment-terms')}
-              type="button"
-            >
-              Cancelar
-            </Button>
+          <div className="flex justify-end space-x-4">
+            <Link to="/payment-terms">
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
+            </Link>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Save className="mr-2 h-4 w-4" />
-              Salvar
+              {id ? 'Atualizar' : 'Salvar'}
+              <Save className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </form>
@@ -571,11 +586,13 @@ const PaymentTermForm = () => {
           entities={paymentMethods}
           isLoading={isLoading}
           onSelect={(method) => {
-            form.setValue(
-              `installments.${paymentMethodSearchOpen}.paymentMethodId`, 
-              method.id
-            );
-            setPaymentMethodSearchOpen(null);
+            if (paymentMethodSearchOpen !== null) {
+              form.setValue(
+                `installments.${paymentMethodSearchOpen}.paymentMethodId`, 
+                method.id
+              );
+              setPaymentMethodSearchOpen(null);
+            }
           }}
           onCreateNew={() => {
             setPaymentMethodSearchOpen(paymentMethodSearchOpen);

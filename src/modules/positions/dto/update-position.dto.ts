@@ -7,7 +7,7 @@ export class UpdatePositionDto extends PartialType(CreatePositionDto) {
   @ApiProperty({
     description: 'Status ativo/inativo do cargo',
     example: true,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsBoolean({ message: 'ativo deve ser um valor booleano' })

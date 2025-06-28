@@ -1,4 +1,11 @@
-import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsPositive, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  Min,
+} from 'class-validator';
 
 export class CreatePaymentTermInstallmentDto {
   @IsNotEmpty()

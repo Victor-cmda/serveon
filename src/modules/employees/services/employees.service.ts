@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateEmployeeDto } from '../dto/create-employee.dto';
 import { UpdateEmployeeDto } from '../dto/update-employee.dto';
 import { DatabaseService } from '../../../common/database/database.service';
@@ -6,27 +11,32 @@ import { Employee } from '../entities/employee.entity';
 
 @Injectable()
 export class EmployeesService {
-  constructor(private readonly databaseService: DatabaseService) { }
+  constructor(private readonly databaseService: DatabaseService) {}
 
   async create(createEmployeeDto: CreateEmployeeDto): Promise<Employee> {
     try {
       const existingEmployee = await this.databaseService.query(
         'SELECT id FROM dbo.funcionario WHERE cpf = $1',
-        [createEmployeeDto.cpf]
+        [createEmployeeDto.cpf],
       );
 
       if (existingEmployee.rowCount > 0) {
-        throw new ConflictException(`Funcionário com CPF ${createEmployeeDto.cpf} já existe`);
+        throw new ConflictException(
+          `Funcionário com CPF ${createEmployeeDto.cpf} já existe`,
+        );
       }
 
       const existingEmail = await this.databaseService.query(
         'SELECT id FROM dbo.funcionario WHERE email = $1',
-        [createEmployeeDto.email]
+        [createEmployeeDto.email],
       );
 
       if (existingEmail.rowCount > 0) {
-        throw new ConflictException(`Email ${createEmployeeDto.email} já está em uso`);
-      }      const result = await this.databaseService.query(
+        throw new ConflictException(
+          `Email ${createEmployeeDto.email} já está em uso`,
+        );
+      }
+      const result = await this.databaseService.query(
         `INSERT INTO dbo.funcionario
           (nome, cpf, email, telefone, cargo_id, departamento_id, data_admissao, ativo)
          VALUES
@@ -40,8 +50,8 @@ export class EmployeesService {
           createEmployeeDto.cargoId || null,
           createEmployeeDto.departamentoId || null,
           createEmployeeDto.dataAdmissao,
-          createEmployeeDto.ativo
-        ]
+          createEmployeeDto.ativo,
+        ],
       );
 
       return this.mapToEmployeeEntity(result.rows[0]);
@@ -66,7 +76,7 @@ export class EmployeesService {
         ORDER BY f.nome
       `);
 
-      return result.rows.map(row => this.mapToEmployeeEntity(row));
+      return result.rows.map((row) => this.mapToEmployeeEntity(row));
     } catch (error) {
       console.error('Erro ao buscar funcionários:', error);
       throw new InternalServerErrorException('Erro ao buscar funcionários');
@@ -74,7 +84,8 @@ export class EmployeesService {
   }
   async findOne(id: number): Promise<Employee> {
     try {
-      const result = await this.databaseService.query(`
+      const result = await this.databaseService.query(
+        `
         SELECT 
           f.*,
           c.nome as cargo_nome,
@@ -83,7 +94,9 @@ export class EmployeesService {
         LEFT JOIN dbo.cargo c ON f.cargo_id = c.id
         LEFT JOIN dbo.departamento d ON f.departamento_id = d.id
         WHERE f.id = $1
-      `, [id]);
+      `,
+        [id],
+      );
 
       if (result.rowCount === 0) {
         throw new NotFoundException(`Funcionário com ID ${id} não encontrado`);
@@ -95,15 +108,20 @@ export class EmployeesService {
         throw error;
       }
       console.error(`Erro ao buscar funcionário ${id}:`, error);
-      throw new InternalServerErrorException(`Erro ao buscar funcionário ${id}`);
+      throw new InternalServerErrorException(
+        `Erro ao buscar funcionário ${id}`,
+      );
     }
   }
 
-  async update(id: number, updateEmployeeDto: UpdateEmployeeDto): Promise<Employee> {
+  async update(
+    id: number,
+    updateEmployeeDto: UpdateEmployeeDto,
+  ): Promise<Employee> {
     try {
       const existingEmployee = await this.databaseService.query(
         'SELECT id FROM dbo.funcionario WHERE id = $1',
-        [id]
+        [id],
       );
 
       if (existingEmployee.rowCount === 0) {
@@ -113,22 +131,26 @@ export class EmployeesService {
       if (updateEmployeeDto.email) {
         const existingEmail = await this.databaseService.query(
           'SELECT id FROM dbo.funcionario WHERE email = $1 AND id != $2',
-          [updateEmployeeDto.email, id]
+          [updateEmployeeDto.email, id],
         );
 
         if (existingEmail.rowCount > 0) {
-          throw new ConflictException(`Email ${updateEmployeeDto.email} já está em uso`);
+          throw new ConflictException(
+            `Email ${updateEmployeeDto.email} já está em uso`,
+          );
         }
       }
 
       if (updateEmployeeDto.cpf) {
         const existingCpf = await this.databaseService.query(
           'SELECT id FROM dbo.funcionario WHERE cpf = $1 AND id != $2',
-          [updateEmployeeDto.cpf, id]
+          [updateEmployeeDto.cpf, id],
         );
 
         if (existingCpf.rowCount > 0) {
-          throw new ConflictException(`CPF ${updateEmployeeDto.cpf} já está cadastrado`);
+          throw new ConflictException(
+            `CPF ${updateEmployeeDto.cpf} já está cadastrado`,
+          );
         }
       }
 
@@ -154,7 +176,8 @@ export class EmployeesService {
       if (updateEmployeeDto.telefone !== undefined) {
         updates.push(`telefone = $${paramCounter++}`);
         values.push(updateEmployeeDto.telefone);
-      }      if (updateEmployeeDto.cargoId !== undefined) {
+      }
+      if (updateEmployeeDto.cargoId !== undefined) {
         updates.push(`cargo_id = $${paramCounter++}`);
         values.push(updateEmployeeDto.cargoId);
       }
@@ -195,11 +218,16 @@ export class EmployeesService {
       const result = await this.databaseService.query(updateQuery, values);
       return this.mapToEmployeeEntity(result.rows[0]);
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ConflictException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ConflictException
+      ) {
         throw error;
       }
       console.error(`Erro ao atualizar funcionário ${id}:`, error);
-      throw new InternalServerErrorException(`Erro ao atualizar funcionário ${id}`);
+      throw new InternalServerErrorException(
+        `Erro ao atualizar funcionário ${id}`,
+      );
     }
   }
 
@@ -207,7 +235,7 @@ export class EmployeesService {
     try {
       const existingEmployee = await this.databaseService.query(
         'SELECT id FROM dbo.funcionario WHERE id = $1',
-        [id]
+        [id],
       );
 
       if (existingEmployee.rowCount === 0) {
@@ -219,12 +247,12 @@ export class EmployeesService {
       if (hasReferences) {
         await this.databaseService.query(
           'UPDATE dbo.funcionario SET ativo = false, data_demissao = CURRENT_DATE WHERE id = $1',
-          [id]
+          [id],
         );
       } else {
         await this.databaseService.query(
           'DELETE FROM dbo.funcionario WHERE id = $1',
-          [id]
+          [id],
         );
       }
     } catch (error) {
@@ -232,7 +260,9 @@ export class EmployeesService {
         throw error;
       }
       console.error(`Erro ao remover funcionário ${id}:`, error);
-      throw new InternalServerErrorException(`Erro ao remover funcionário ${id}`);
+      throw new InternalServerErrorException(
+        `Erro ao remover funcionário ${id}`,
+      );
     }
   }
 
@@ -251,7 +281,7 @@ export class EmployeesService {
       dataDemissao: dbRecord.data_demissao,
       ativo: dbRecord.ativo,
       createdAt: dbRecord.created_at,
-      updatedAt: dbRecord.updated_at
+      updatedAt: dbRecord.updated_at,
     };
   }
 }

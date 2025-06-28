@@ -187,11 +187,10 @@ const PaymentTermCreationDialog = ({
       // is passed back to the parent form without redirecting to a list view.
       onSuccess(savedPaymentTerm);
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar condição de pagamento:', error);
-      toast.error(
-        error.message || 'Ocorreu um erro ao salvar a condição de pagamento.',
-      );
+      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar a condição de pagamento.';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

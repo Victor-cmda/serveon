@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpCode, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpStatus,
+  HttpCode,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { BrandsService } from '../services/brands.service';
 import { CreateBrandDto } from '../dto/create-brand.dto';
 import { UpdateBrandDto } from '../dto/update-brand.dto';
@@ -12,18 +23,18 @@ export class BrandsController {
 
   @Post()
   @ApiOperation({ summary: 'Criar nova marca' })
-  @ApiResponse({ 
-    status: HttpStatus.CREATED, 
+  @ApiResponse({
+    status: HttpStatus.CREATED,
     description: 'Marca criada com sucesso',
-    type: Brand
+    type: Brand,
   })
-  @ApiResponse({ 
-    status: HttpStatus.BAD_REQUEST, 
-    description: 'Dados de entrada inválidos' 
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Dados de entrada inválidos',
   })
-  @ApiResponse({ 
-    status: HttpStatus.CONFLICT, 
-    description: 'Marca com mesmo nome já existe' 
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Marca com mesmo nome já existe',
   })
   create(@Body() createBrandDto: CreateBrandDto) {
     return this.brandsService.create(createBrandDto);
@@ -31,10 +42,10 @@ export class BrandsController {
 
   @Get()
   @ApiOperation({ summary: 'Listar todas as marcas' })
-  @ApiResponse({ 
-    status: HttpStatus.OK, 
+  @ApiResponse({
+    status: HttpStatus.OK,
     description: 'Lista de marcas retornada com sucesso',
-    type: [Brand]
+    type: [Brand],
   })
   findAll() {
     return this.brandsService.findAll();
@@ -43,14 +54,14 @@ export class BrandsController {
   @Get(':id')
   @ApiOperation({ summary: 'Obter marca por ID' })
   @ApiParam({ name: 'id', description: 'ID da marca', type: 'number' })
-  @ApiResponse({ 
-    status: HttpStatus.OK, 
+  @ApiResponse({
+    status: HttpStatus.OK,
     description: 'Marca encontrada',
-    type: Brand
+    type: Brand,
   })
-  @ApiResponse({ 
-    status: HttpStatus.NOT_FOUND, 
-    description: 'Marca não encontrada' 
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Marca não encontrada',
   })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.brandsService.findOne(id);
@@ -59,24 +70,27 @@ export class BrandsController {
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar marca' })
   @ApiParam({ name: 'id', description: 'ID da marca', type: 'number' })
-  @ApiResponse({ 
-    status: HttpStatus.OK, 
+  @ApiResponse({
+    status: HttpStatus.OK,
     description: 'Marca atualizada com sucesso',
-    type: Brand
+    type: Brand,
   })
-  @ApiResponse({ 
-    status: HttpStatus.NOT_FOUND, 
-    description: 'Marca não encontrada' 
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Marca não encontrada',
   })
-  @ApiResponse({ 
-    status: HttpStatus.BAD_REQUEST, 
-    description: 'Dados de entrada inválidos' 
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Dados de entrada inválidos',
   })
-  @ApiResponse({ 
-    status: HttpStatus.CONFLICT, 
-    description: 'Nome já está sendo usado por outra marca' 
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Nome já está sendo usado por outra marca',
   })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateBrandDto: UpdateBrandDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateBrandDto: UpdateBrandDto,
+  ) {
     return this.brandsService.update(id, updateBrandDto);
   }
 
@@ -84,17 +98,17 @@ export class BrandsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remover marca (soft delete)' })
   @ApiParam({ name: 'id', description: 'ID da marca', type: 'number' })
-  @ApiResponse({ 
-    status: HttpStatus.NO_CONTENT, 
-    description: 'Marca removida com sucesso' 
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Marca removida com sucesso',
   })
-  @ApiResponse({ 
-    status: HttpStatus.NOT_FOUND, 
-    description: 'Marca não encontrada' 
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Marca não encontrada',
   })
-  @ApiResponse({ 
-    status: HttpStatus.CONFLICT, 
-    description: 'Marca está sendo usada por produtos ativos' 
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Marca está sendo usada por produtos ativos',
   })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.brandsService.remove(id);

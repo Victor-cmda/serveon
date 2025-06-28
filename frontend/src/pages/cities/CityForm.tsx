@@ -13,8 +13,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from '@/components/ui/form';
+import { Switch } from '@/components/ui/switch';
 import { cityApi, stateApi } from '@/services/api';
 import { CreateCityDto, UpdateCityDto, State } from '@/types/location';
 import { toast } from 'sonner';
@@ -32,6 +32,7 @@ const formSchema = z.object({
       message: 'O código IBGE deve ter exatamente 7 dígitos numéricos',
     }),
   estadoId: z.number().optional(),
+  ativo: z.boolean().default(true),
 });
 
 const CityForm = () => {
@@ -51,6 +52,7 @@ const CityForm = () => {
       nome: '',
       codigoIbge: '',
       estadoId: undefined,
+      ativo: true,
     },
   });
 
@@ -78,6 +80,7 @@ const CityForm = () => {
           nome: city.nome,
           codigoIbge: city.codigoIbge || '',
           estadoId: city.estadoId,
+          ativo: city.ativo !== false,
         });
       }catch (error) {
         console.error('Erro ao buscar cidade:', error);
@@ -141,9 +144,10 @@ const CityForm = () => {
         // Only navigate to list view if not part of a cascading form
         navigate('/cities');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar cidade:', error);
-      toast.error(error.message || 'Ocorreu um erro ao salvar a cidade.');
+      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar a cidade.';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -173,126 +177,155 @@ const CityForm = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">
-          {id ? 'Editar Cidade' : 'Nova Cidade'}
-        </h1>
-        <Button variant="outline" asChild>
+        <div className="flex items-center space-x-4">
           <Link to="/cities">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
           </Link>
-        </Button>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {id ? 'Editar Cidade' : 'Nova Cidade'}
+            </h1>
+            <p className="text-muted-foreground">
+              {id
+                ? 'Edite as informações da cidade abaixo'
+                : 'Preencha as informações para criar uma nova cidade'}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="rounded-md border p-6">        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {id && (
-              <FormItem>
-                <FormLabel className="text-base font-medium">Código</FormLabel>
-                <FormControl>
-                  <Input value={id} disabled className="bg-muted h-11 text-base" />
-                </FormControl>
-                <FormDescription>
-                  Código único da cidade
-                </FormDescription>
-              </FormItem>
-            )}
-            
-            <FormField
-              control={form.control}
-              name="estadoId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-medium">
-                    Estado
-                  </FormLabel>
-                  <div className="flex gap-2">
-                    <div className="w-full flex-1">
-                      <Input
-                        value={
-                          states.find((s) => s.id === field.value)?.nome || ''
-                        }
-                        readOnly
-                        placeholder="Selecione um estado"
-                        className="cursor-pointer h-11 text-base"
-                        onClick={() => setStateSearchOpen(true)}
-                      />
-                      <input type="hidden" {...field} />
-                    </div>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="outline"
-                      onClick={() => setStateSearchOpen(true)}
-                      disabled={isLoading}
-                      className="h-11 w-11"
-                    >
-                      <Search className="h-5 w-5" />
-                    </Button>
-                  </div>
-                  <FormMessage className="text-sm" />
-                </FormItem>
-              )}
-            />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid gap-6">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Dados Gerais
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Informações básicas da cidade
+                </p>
+              </div>
+              <div className="p-6 pt-0">
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="estadoId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Estado</FormLabel>
+                        <div className="flex gap-2">
+                          <div className="w-full flex-1">
+                            <Input
+                              value={
+                                states.find((s) => s.id === field.value)?.nome || ''
+                              }
+                              readOnly
+                              placeholder="Selecione um estado"
+                              className="cursor-pointer"
+                              onClick={() => setStateSearchOpen(true)}
+                            />
+                            <input type="hidden" {...field} />
+                          </div>
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="outline"
+                            onClick={() => setStateSearchOpen(true)}
+                            disabled={isLoading}
+                          >
+                            <Search className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-            <FormField
-              control={form.control}
-              name="nome"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-medium">
-                    Nome da Cidade
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ex: São Paulo"
-                      {...field}
-                      disabled={isLoading}
-                      className="h-11 text-base"
+                  <FormField
+                    control={form.control}
+                    name="nome"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome da Cidade *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Nome da cidade"
+                            {...field}
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="codigoIbge"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Código IBGE</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Código de 7 dígitos"
+                            {...field}
+                            maxLength={7}
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {id && (
+                    <FormField
+                      control={form.control}
+                      name="ativo"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-base font-medium">
+                              Cidade Ativa
+                            </FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              Desative para ocultar a cidade das listagens
+                            </p>
+                          </div>
+                        </FormItem>
+                      )}
                     />
-                  </FormControl>
-                  <FormMessage className="text-sm" />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="codigoIbge"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-medium">
-                    Código IBGE (opcional)
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ex: 3550308"
-                      {...field}
-                      maxLength={7}
-                      disabled={isLoading}
-                      className="h-11 text-base"
-                    />
-                  </FormControl>
-                  <FormDescription className="text-sm">
-                    Código de 7 dígitos do IBGE para o município
-                  </FormDescription>
-                  <FormMessage className="text-sm" />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end pt-4">
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="h-11 px-6 text-base"
-              >
-                {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                <Save className="mr-2 h-5 w-5" /> Salvar
-              </Button>
+                  )}
+                </div>
+              </div>
             </div>
-          </form>
-        </Form>
-      </div>
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <Link to="/cities">
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
+            </Link>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {id ? 'Atualizar' : 'Salvar'}
+              <Save className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </form>
+      </Form>
 
       {/* Dialogs */}      <StateCreationDialog
         open={stateDialogOpen}

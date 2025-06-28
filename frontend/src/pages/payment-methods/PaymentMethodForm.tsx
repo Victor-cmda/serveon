@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -47,13 +46,7 @@ const PaymentMethodForm = () => {
     },
   });
 
-  useEffect(() => {
-    if (id) {
-      fetchPaymentMethod(id);
-    }
-  }, [id]);
-
-  const fetchPaymentMethod = async (paymentMethodId: string) => {
+  const fetchPaymentMethod = useCallback(async (paymentMethodId: string) => {
     setIsLoadingData(true);
     try {
       const data = await paymentMethodApi.getById(Number(paymentMethodId));
@@ -72,7 +65,13 @@ const PaymentMethodForm = () => {
     } finally {
       setIsLoadingData(false);
     }
-  };
+  }, [form, navigate]);
+
+  useEffect(() => {
+    if (id) {
+      fetchPaymentMethod(id);
+    }
+  }, [id, fetchPaymentMethod]);
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);
@@ -108,10 +107,11 @@ const PaymentMethodForm = () => {
       } else {
         navigate('/payment-methods');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar método de pagamento:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar o método de pagamento.';
       toast.error('Erro', {
-        description: error.message || 'Ocorreu um erro ao salvar o método de pagamento.',
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -129,113 +129,123 @@ const PaymentMethodForm = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" size="icon" onClick={() => navigate('/payment-methods')}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-2xl font-bold tracking-tight">
-            {id ? 'Editar' : 'Novo'} Método de Pagamento
-          </h1>
+        <div className="flex items-center space-x-4">
+          <Link to="/payment-methods">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {id ? 'Editar Método de Pagamento' : 'Novo Método de Pagamento'}
+            </h1>
+            <p className="text-muted-foreground">
+              {id
+                ? 'Edite as informações do método de pagamento abaixo'
+                : 'Preencha as informações para criar um novo método de pagamento'}
+            </p>
+          </div>
         </div>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {id && (
-              <FormItem>
-                <FormLabel>Código</FormLabel>
-                <FormControl>
-                  <Input value={id} disabled className="bg-muted" />
-                </FormControl>
-                <FormDescription>
-                  Código único do método de pagamento
-                </FormDescription>
-              </FormItem>
-            )}
-            
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: Cartão de Crédito" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Nome do método de pagamento
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid gap-6">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Dados Gerais
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Informações básicas do método de pagamento
+                </p>
+              </div>
+              <div className="p-6 pt-0">
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descrição *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nome do método de pagamento" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-            <FormField
-              control={form.control}
-              name="code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Código</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: CC" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Código identificador do método (opcional)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: card, cash, transfer" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Tipo de método de pagamento (opcional)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />            <FormField
-              control={form.control}
-              name="active"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="code"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Código</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Código identificador" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Ativo</FormLabel>
-                    <FormDescription>
-                      Indica se o método de pagamento está disponível para uso
-                    </FormDescription>
+
+                    <FormField
+                      control={form.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Tipo do método" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
-                </FormItem>
-              )}
-            />
+
+                  {id && (
+                    <FormField
+                      control={form.control}
+                      name="active"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-base font-medium">
+                              Método Ativo
+                            </FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              Desative para ocultar o método das listagens
+                            </p>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="flex justify-end space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/payment-methods')}
-              type="button"
-            >
-              Cancelar
-            </Button>
+          <div className="flex justify-end space-x-4">
+            <Link to="/payment-methods">
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
+            </Link>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Save className="mr-2 h-4 w-4" />
-              Salvar
+              {id ? 'Atualizar' : 'Salvar'}
+              <Save className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </form>

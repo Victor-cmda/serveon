@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useLocation, Link } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Briefcase, Save, Search, ArrowLeft, Loader2 } from 'lucide-react';
+import { Save, Search, ArrowLeft, Loader2 } from 'lucide-react';
 import { positionApi, departmentApi } from '../../services/api';
 import { toast } from '../../lib/toast';
 import { Department } from '../../types/department';
@@ -19,7 +19,6 @@ import {
 } from '../../components/ui/form';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
-import { Textarea } from '../../components/ui/textarea';
 import { Switch } from '../../components/ui/switch';
 import { Badge } from '../../components/ui/badge';
 
@@ -57,32 +56,7 @@ const PositionForm: React.FC = () => {
     defaultValues,
   });
 
-  useEffect(() => {
-    loadDepartments();
-    if (id) {
-      loadPosition();
-    }
-  }, [id]);
-
-  // Verificar se há um departamento pré-selecionado via URL params
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const departmentId = params.get('departmentId');
-    
-    if (departmentId) {
-      const departmentIdNumber = parseInt(departmentId, 10);
-      if (!isNaN(departmentIdNumber)) {
-        form.setValue('departamentoId', departmentIdNumber);
-        // Buscar o departamento para mostrar no campo
-        const dept = departments.find(d => d.id === departmentIdNumber);
-        if (dept) {
-          setSelectedDepartment(dept);
-        }
-      }
-    }
-  }, [location.search, form, departments]);
-
-  const loadDepartments = async () => {
+  const loadDepartments = useCallback(async () => {
     try {
       const data = await departmentApi.getAll();
       setDepartments(data);
@@ -90,9 +64,9 @@ const PositionForm: React.FC = () => {
       console.error('Erro ao carregar departamentos:', error);
       toast.error('Não foi possível carregar a lista de departamentos');
     }
-  };
+  }, []);
 
-  const loadPosition = async () => {
+  const loadPosition = useCallback(async () => {
     if (!id) return;
 
     try {
@@ -120,7 +94,32 @@ const PositionForm: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, form, departments, navigate]);
+
+  useEffect(() => {
+    loadDepartments();
+    if (id) {
+      loadPosition();
+    }
+  }, [id, loadDepartments, loadPosition]);
+
+  // Verificar se há um departamento pré-selecionado via URL params
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const departmentId = params.get('departmentId');
+    
+    if (departmentId) {
+      const departmentIdNumber = parseInt(departmentId, 10);
+      if (!isNaN(departmentIdNumber)) {
+        form.setValue('departamentoId', departmentIdNumber);
+        // Buscar o departamento para mostrar no campo
+        const dept = departments.find(d => d.id === departmentIdNumber);
+        if (dept) {
+          setSelectedDepartment(dept);
+        }
+      }
+    }
+  }, [location.search, form, departments]);
 
   const onSelectDepartment = (department: Department) => {
     if (!department || !department.id) {
@@ -204,15 +203,19 @@ const PositionForm: React.FC = () => {
         // Navegar apenas para a view de lista se não for parte de um formulário cascateado
         navigate('/positions');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar cargo:', error);
       
       let errorMessage = 'Erro ao salvar cargo';
-      if (error?.message?.includes('nome')) {
-        errorMessage = 'Este nome já está em uso';
+      if (error instanceof Error) {
+        if (error.message.includes('nome')) {
+          errorMessage = 'Este nome já está em uso';
+        } else {
+          errorMessage = error.message;
+        }
       }
       
-      toast.error(error.message || errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -221,170 +224,180 @@ const PositionForm: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">
-          {id ? 'Editar Cargo' : 'Novo Cargo'}
-        </h1>
-        <Button variant="outline" asChild>
+        <div className="flex items-center space-x-4">
           <Link to="/positions">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
           </Link>
-        </Button>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {id ? 'Editar Cargo' : 'Novo Cargo'}
+            </h1>
+            <p className="text-muted-foreground">
+              {id
+                ? 'Edite as informações do cargo abaixo'
+                : 'Preencha as informações para criar um novo cargo'}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="rounded-md border p-6">        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {id && (
-              <FormItem>
-                <FormLabel className="text-base font-medium">Código</FormLabel>
-                <FormControl>
-                  <Input value={id} disabled className="bg-muted h-11 text-base" />
-                </FormControl>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid gap-6">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Dados Gerais
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  Código único do cargo
+                  Informações básicas do cargo
                 </p>
-              </FormItem>
-            )}
-            
-            <FormField
-              control={form.control}
-              name="departamentoId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-medium">
-                    Departamento
-                  </FormLabel>
-                  <div className="flex gap-2">
-                    <div className="relative flex-grow">
-                      <Input
-                        value={selectedDepartment ? selectedDepartment.nome : ''}
-                        readOnly
-                        placeholder="Selecione um departamento"
-                        className="cursor-pointer h-11 text-base pl-9"
-                        onClick={() => setDepartmentSearchOpen(true)}
-                      />
-                      <input
-                        type="hidden"
-                        name={field.name}
-                        value={field.value || ''}
-                        onChange={(e) => {
-                          field.onChange(e);
-                        }}
-                        ref={field.ref}
-                        onBlur={field.onBlur}
-                      />
-                      <Briefcase className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setDepartmentSearchOpen(true)}
-                      className="h-11 w-11"
-                    >
-                      <Search className="h-5 w-5" />
-                    </Button>
-                  </div>
-                  {selectedDepartment && (
-                    <div className="mt-1 flex items-center">
-                      <Badge variant="outline" className="mr-2">
-                        {selectedDepartment.nome}
-                      </Badge>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedDepartment(null);
-                          form.setValue('departamentoId', undefined);
-                        }}
-                        className="h-6 px-2 text-xs"
-                      >
-                        Remover
-                      </Button>
-                    </div>
+              </div>
+              <div className="p-6 pt-0">
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="departamentoId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Departamento</FormLabel>
+                        <div className="flex gap-2">
+                          <div className="w-full flex-1">
+                            <Input
+                              value={selectedDepartment ? selectedDepartment.nome : ''}
+                              readOnly
+                              placeholder="Selecione um departamento"
+                              className="cursor-pointer"
+                              onClick={() => setDepartmentSearchOpen(true)}
+                            />
+                            <input
+                              type="hidden"
+                              name={field.name}
+                              value={field.value || ''}
+                              onChange={(e) => {
+                                field.onChange(e);
+                              }}
+                              ref={field.ref}
+                              onBlur={field.onBlur}
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setDepartmentSearchOpen(true)}
+                          >
+                            <Search className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        {selectedDepartment && (
+                          <div className="mt-1 flex items-center">
+                            <Badge variant="outline" className="mr-2">
+                              {selectedDepartment.nome}
+                            </Badge>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedDepartment(null);
+                                form.setValue('departamentoId', undefined);
+                              }}
+                              className="h-6 px-2 text-xs"
+                            >
+                              Remover
+                            </Button>
+                          </div>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="nome"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome do Cargo *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Nome do cargo"
+                            {...field}
+                            disabled={loading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="descricao"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descrição</FormLabel>
+                        <FormControl>
+                          <textarea
+                            className="w-full min-h-[100px] px-3 py-2 text-sm border border-input rounded-md bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            placeholder="Descrição do cargo"
+                            disabled={loading}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {id && (
+                    <FormField
+                      control={form.control}
+                      name="ativo"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={loading}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-base font-medium">
+                              Cargo Ativo
+                            </FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              Desative para ocultar o cargo das listagens
+                            </p>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
                   )}
-                  <FormMessage className="text-sm" />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="nome"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-medium">
-                    Nome do Cargo
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ex: Analista de Sistemas"
-                      {...field}
-                      disabled={loading}
-                      className="h-11 text-base"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-sm" />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="descricao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-medium">
-                    Descrição
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Descrição opcional do cargo..."
-                      {...field}
-                      disabled={loading}
-                      className="text-base min-h-[100px]"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-sm" />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="ativo"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Cargo Ativo</FormLabel>
-                    <div className="text-sm text-muted-foreground">
-                      Indica se o cargo está disponível para uso no sistema
-                    </div>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled={loading}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end pt-4">
-              <Button
-                type="submit"
-                disabled={loading}
-                className="h-11 px-6 text-base"
-              >
-                {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                <Save className="mr-2 h-5 w-5" /> Salvar
-              </Button>
+                </div>
+              </div>
             </div>
-          </form>
-        </Form>
-      </div>
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <Link to="/positions">
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
+            </Link>
+            <Button type="submit" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {id ? 'Atualizar' : 'Salvar'}
+              <Save className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </form>
+      </Form>
 
       {/* Diálogos */}
       <DepartmentCreationDialog
