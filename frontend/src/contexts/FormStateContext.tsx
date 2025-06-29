@@ -1,9 +1,9 @@
 import { createContext, useState, useContext, ReactNode } from 'react';
 
 interface FormStateContextType {
-  formStates: Record<string, any>;
-  saveFormState: (formId: string, state: any) => void;
-  getFormState: (formId: string) => any;
+  formStates: Record<string, unknown>;
+  saveFormState: (formId: string, state: unknown) => void;
+  getFormState: (formId: string) => unknown;
   clearFormState: (formId: string) => void;
   clearAllFormStates: () => void;
 }
@@ -13,9 +13,9 @@ const FormStateContext = createContext<FormStateContextType | undefined>(
 );
 
 export function FormStateProvider({ children }: { children: ReactNode }) {
-  const [formStates, setFormStates] = useState<Record<string, any>>({});
+  const [formStates, setFormStates] = useState<Record<string, unknown>>({});
 
-  const saveFormState = (formId: string, state: any) => {
+  const saveFormState = (formId: string, state: unknown) => {
     setFormStates((prev) => ({
       ...prev,
       [formId]: state,

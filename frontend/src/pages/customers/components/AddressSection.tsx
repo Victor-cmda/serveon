@@ -12,10 +12,25 @@ import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { City } from '../../../types/location';
 
+interface AddressFormData {
+  endereco?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cep?: string;
+  cidadeId?: number;
+  [key: string]: any;
+}
+
+interface Formatters {
+  numero: (value: string | undefined) => string;
+  cep: (value: string | undefined) => string;
+}
+
 interface AddressSectionProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<AddressFormData>;
   isLoading: boolean;
-  formatters: any;
+  formatters: Formatters;
   selectedCity: City | null;
   watchIsEstrangeiro: boolean;
   setCitySearchOpen: (open: boolean) => void;

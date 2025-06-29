@@ -7,7 +7,7 @@ export class UpdateDepartmentDto extends PartialType(CreateDepartmentDto) {
   @ApiProperty({
     description: 'Status ativo/inativo do departamento',
     example: true,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsBoolean({ message: 'ativo deve ser um valor booleano' })

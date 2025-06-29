@@ -7,28 +7,35 @@ export class UpdateCustomerDto extends PartialType(CreateCustomerDto) {
   @ApiProperty({
     description: 'Status ativo/inativo do cliente',
     example: true,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsBoolean({ message: 'ativo deve ser um valor booleano' })
   ativo?: boolean;
-  
+
   @ApiProperty({
     description: 'Se o cliente também é um destinatário',
     example: true,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsBoolean({ message: 'isDestinatario deve ser um valor booleano' })
   isDestinatario?: boolean;
-    @ApiProperty({
-    description: 'Lista de IDs de destinatários associados (quando o cliente não é o destinatário)',
+  @ApiProperty({
+    description:
+      'Lista de IDs de destinatários associados (quando o cliente não é o destinatário)',
     example: [1, 2, 3],
     type: [Number],
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsArray({ message: 'destinatariosIds deve ser um array' })
-  @IsNumber({}, { each: true, message: 'Cada ID de destinatário deve ser um número válido' })
+  @IsNumber(
+    {},
+    {
+      each: true,
+      message: 'Cada ID de destinatário deve ser um número válido',
+    },
+  )
   destinatariosIds?: number[];
 }

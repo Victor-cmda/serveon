@@ -78,12 +78,12 @@ const BrandForm = () => {
       }
 
       navigate('/brands');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar marca:', error);
-      toast.error(
-        error?.response?.data?.message ||
-          'Erro ao salvar marca. Tente novamente.',
-      );
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : (error as any)?.response?.data?.message || 'Erro ao salvar marca. Tente novamente.';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

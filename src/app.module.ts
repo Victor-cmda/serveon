@@ -39,4 +39,4 @@ import { UnitMeasuresModule } from './modules/unit-measures/unit-measures.module
     UnitMeasuresModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -111,9 +111,10 @@ const DepartmentCreationDialog = ({
       // is passed back to the parent form without redirecting to a list view.
       onSuccess(savedDepartment);
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar departamento:', error);
-      toast.error(error.message || 'Ocorreu um erro ao salvar o departamento.');
+      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar o departamento.';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -103,9 +103,10 @@ const PaymentMethodCreationDialog = ({
       }      // Return the saved payment method to the parent component and close dialog
       onSuccess(savedPaymentMethod);
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar método de pagamento:', error);
-      toast.error(error.message || 'Ocorreu um erro ao salvar o método de pagamento.');
+      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar o método de pagamento.';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

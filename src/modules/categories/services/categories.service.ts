@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, ConflictException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { DatabaseService } from '../../../common/database/database.service';
@@ -11,18 +17,20 @@ export class CategoriesService {
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
     try {
       const client = await this.databaseService.getClient();
-      
+
       try {
         await client.query('BEGIN');
-        
+
         // Verificar se categoria já existe
         const existingCategory = await client.query(
           'SELECT id FROM dbo.categoria WHERE LOWER(nome) = LOWER($1)',
-          [createCategoryDto.nome]
+          [createCategoryDto.nome],
         );
 
         if (existingCategory.rowCount > 0) {
-          throw new ConflictException(`Categoria '${createCategoryDto.nome}' já existe`);
+          throw new ConflictException(
+            `Categoria '${createCategoryDto.nome}' já existe`,
+          );
         }
 
         // Inserir a nova categoria
@@ -33,107 +41,130 @@ export class CategoriesService {
           [
             createCategoryDto.nome,
             createCategoryDto.descricao || null,
-            createCategoryDto.ativo !== undefined ? createCategoryDto.ativo : true
-          ]
+            createCategoryDto.ativo !== undefined
+              ? createCategoryDto.ativo
+              : true,
+          ],
         );
 
         await client.query('COMMIT');
-        
+
         const createdCategory = result.rows[0];
         return this.mapDatabaseToEntity(createdCategory);
-        
       } catch (error) {
         await client.query('ROLLBACK');
-        
+
         if (error instanceof ConflictException) {
           throw error;
         }
-        
+
         console.error('Erro ao criar categoria:', error);
-        throw new InternalServerErrorException('Erro interno do servidor ao criar categoria');
+        throw new InternalServerErrorException(
+          'Erro interno do servidor ao criar categoria',
+        );
       } finally {
         client.release();
       }
     } catch (error) {
-      if (error instanceof ConflictException || error instanceof InternalServerErrorException) {
+      if (
+        error instanceof ConflictException ||
+        error instanceof InternalServerErrorException
+      ) {
         throw error;
       }
-      
+
       console.error('Erro ao obter conexão com banco:', error);
-      throw new InternalServerErrorException('Erro de conexão com banco de dados');
+      throw new InternalServerErrorException(
+        'Erro de conexão com banco de dados',
+      );
     }
   }
 
   async findAll(): Promise<Category[]> {
     try {
       const client = await this.databaseService.getClient();
-      
+
       try {
         const result = await client.query(`
           SELECT * FROM dbo.categoria
           ORDER BY nome ASC
         `);
-        
-        return result.rows.map(row => this.mapDatabaseToEntity(row));
-        
+
+        return result.rows.map((row) => this.mapDatabaseToEntity(row));
       } catch (error) {
         console.error('Erro ao buscar categorias:', error);
-        throw new InternalServerErrorException('Erro interno do servidor ao buscar categorias');
+        throw new InternalServerErrorException(
+          'Erro interno do servidor ao buscar categorias',
+        );
       } finally {
         client.release();
       }
     } catch (error) {
       console.error('Erro ao obter conexão com banco:', error);
-      throw new InternalServerErrorException('Erro de conexão com banco de dados');
+      throw new InternalServerErrorException(
+        'Erro de conexão com banco de dados',
+      );
     }
   }
 
   async findOne(id: number): Promise<Category> {
     try {
       const client = await this.databaseService.getClient();
-      
+
       try {
-        const result = await client.query(`
+        const result = await client.query(
+          `
           SELECT * FROM dbo.categoria WHERE id = $1
-        `, [id]);
-        
+        `,
+          [id],
+        );
+
         if (result.rowCount === 0) {
           throw new NotFoundException(`Categoria com ID ${id} não encontrada`);
         }
-        
+
         return this.mapDatabaseToEntity(result.rows[0]);
-        
       } catch (error) {
         if (error instanceof NotFoundException) {
           throw error;
         }
-        
+
         console.error('Erro ao buscar categoria:', error);
-        throw new InternalServerErrorException('Erro interno do servidor ao buscar categoria');
+        throw new InternalServerErrorException(
+          'Erro interno do servidor ao buscar categoria',
+        );
       } finally {
         client.release();
       }
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof InternalServerErrorException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof InternalServerErrorException
+      ) {
         throw error;
       }
-      
+
       console.error('Erro ao obter conexão com banco:', error);
-      throw new InternalServerErrorException('Erro de conexão com banco de dados');
+      throw new InternalServerErrorException(
+        'Erro de conexão com banco de dados',
+      );
     }
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
+  async update(
+    id: number,
+    updateCategoryDto: UpdateCategoryDto,
+  ): Promise<Category> {
     try {
       const client = await this.databaseService.getClient();
-      
+
       try {
         await client.query('BEGIN');
-        
+
         // Verificar se a categoria existe
         const existingCategory = await client.query(
           'SELECT id FROM dbo.categoria WHERE id = $1',
-          [id]
+          [id],
         );
 
         if (existingCategory.rowCount === 0) {
@@ -144,11 +175,13 @@ export class CategoriesService {
         if (updateCategoryDto.nome) {
           const nameConflict = await client.query(
             'SELECT id FROM dbo.categoria WHERE LOWER(nome) = LOWER($1) AND id != $2',
-            [updateCategoryDto.nome, id]
+            [updateCategoryDto.nome, id],
           );
 
           if (nameConflict.rowCount > 0) {
-            throw new ConflictException(`Nome '${updateCategoryDto.nome}' já está sendo usado por outra categoria`);
+            throw new ConflictException(
+              `Nome '${updateCategoryDto.nome}' já está sendo usado por outra categoria`,
+            );
           }
         }
 
@@ -176,11 +209,13 @@ export class CategoriesService {
         }
 
         if (updateFields.length === 0) {
-          throw new BadRequestException('Nenhum campo válido fornecido para atualização');
+          throw new BadRequestException(
+            'Nenhum campo válido fornecido para atualização',
+          );
         }
 
         updateValues.push(id); // Para o WHERE
-        
+
         const updateQuery = `
           UPDATE dbo.categoria 
           SET ${updateFields.join(', ')}
@@ -189,46 +224,57 @@ export class CategoriesService {
         `;
 
         const result = await client.query(updateQuery, updateValues);
-        
+
         await client.query('COMMIT');
-        
+
         const updatedCategory = result.rows[0];
         return this.mapDatabaseToEntity(updatedCategory);
-        
       } catch (error) {
         await client.query('ROLLBACK');
-        
-        if (error instanceof NotFoundException || error instanceof ConflictException || error instanceof BadRequestException) {
+
+        if (
+          error instanceof NotFoundException ||
+          error instanceof ConflictException ||
+          error instanceof BadRequestException
+        ) {
           throw error;
         }
-        
+
         console.error('Erro ao atualizar categoria:', error);
-        throw new InternalServerErrorException('Erro interno do servidor ao atualizar categoria');
+        throw new InternalServerErrorException(
+          'Erro interno do servidor ao atualizar categoria',
+        );
       } finally {
         client.release();
       }
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ConflictException || 
-          error instanceof BadRequestException || error instanceof InternalServerErrorException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ConflictException ||
+        error instanceof BadRequestException ||
+        error instanceof InternalServerErrorException
+      ) {
         throw error;
       }
-      
+
       console.error('Erro ao obter conexão com banco:', error);
-      throw new InternalServerErrorException('Erro de conexão com banco de dados');
+      throw new InternalServerErrorException(
+        'Erro de conexão com banco de dados',
+      );
     }
   }
 
   async remove(id: number): Promise<void> {
     try {
       const client = await this.databaseService.getClient();
-      
+
       try {
         await client.query('BEGIN');
-        
+
         // Verificar se a categoria existe
         const existingCategory = await client.query(
           'SELECT id FROM dbo.categoria WHERE id = $1',
-          [id]
+          [id],
         );
 
         if (existingCategory.rowCount === 0) {
@@ -238,41 +284,52 @@ export class CategoriesService {
         // Verificar se categoria está sendo usada por produtos
         const productsUsingCategory = await client.query(
           'SELECT id FROM dbo.produto WHERE categoria_id = $1 AND ativo = true',
-          [id]
+          [id],
         );
 
         if (productsUsingCategory.rowCount > 0) {
-          throw new ConflictException('Não é possível remover categoria que está sendo usada por produtos ativos');
+          throw new ConflictException(
+            'Não é possível remover categoria que está sendo usada por produtos ativos',
+          );
         }
 
         // Fazer soft delete (marcar como inativo)
         await client.query(
           'UPDATE dbo.categoria SET ativo = false WHERE id = $1',
-          [id]
+          [id],
         );
-        
+
         await client.query('COMMIT');
-        
       } catch (error) {
         await client.query('ROLLBACK');
-        
-        if (error instanceof NotFoundException || error instanceof ConflictException) {
+
+        if (
+          error instanceof NotFoundException ||
+          error instanceof ConflictException
+        ) {
           throw error;
         }
-        
+
         console.error('Erro ao remover categoria:', error);
-        throw new InternalServerErrorException('Erro interno do servidor ao remover categoria');
+        throw new InternalServerErrorException(
+          'Erro interno do servidor ao remover categoria',
+        );
       } finally {
         client.release();
       }
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof ConflictException || 
-          error instanceof InternalServerErrorException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ConflictException ||
+        error instanceof InternalServerErrorException
+      ) {
         throw error;
       }
-      
+
       console.error('Erro ao obter conexão com banco:', error);
-      throw new InternalServerErrorException('Erro de conexão com banco de dados');
+      throw new InternalServerErrorException(
+        'Erro de conexão com banco de dados',
+      );
     }
   }
 
@@ -283,7 +340,7 @@ export class CategoriesService {
       descricao: row.descricao,
       ativo: row.ativo,
       createdAt: row.created_at?.toISOString(),
-      updatedAt: row.updated_at?.toISOString()
+      updatedAt: row.updated_at?.toISOString(),
     };
   }
 }

@@ -25,7 +25,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const responseMessage =
       exception instanceof HttpException
         ? exception.getResponse()
-        : { 
+        : {
             statusCode: status,
             message: exception.message || 'Erro interno do servidor',
             error: exception.name || 'InternalServerError',
@@ -41,7 +41,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     // Formatação da resposta de erro
     const errorResponse = {
-      ...(typeof responseMessage === 'object' ? responseMessage : { message: responseMessage }),
+      ...(typeof responseMessage === 'object'
+        ? responseMessage
+        : { message: responseMessage }),
       timestamp: new Date().toISOString(),
       path: request.url,
     };

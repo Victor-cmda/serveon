@@ -14,6 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Switch } from '@/components/ui/switch';
 import { stateApi, countryApi } from '@/services/api';
 import { Country } from '@/types/location';
 import { toast } from 'sonner';
@@ -26,6 +27,7 @@ const formSchema = z.object({
     .min(2, 'Nome do estado é obrigatório e deve ter pelo menos 2 caracteres'),
   uf: z.string().length(2, 'UF deve ter exatamente 2 caracteres').toUpperCase(),
   paisId: z.number().min(1, 'Selecione um país válido'),
+  ativo: z.boolean().default(true),
 });
 
 const StateForm = () => {
@@ -44,6 +46,7 @@ const StateForm = () => {
       nome: '',
       uf: '',
       paisId: 0,
+      ativo: true,
     },
   });
 
@@ -71,6 +74,7 @@ const StateForm = () => {
           nome: state.nome,
           uf: state.uf,
           paisId: state.paisId,
+          ativo: state.ativo !== false,
         });
       } catch (error) {
         console.error('Erro ao buscar estado:', error);
@@ -121,9 +125,10 @@ const StateForm = () => {
         // Only navigate to list view if not part of a cascading form
         navigate('/states');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar estado:', error);
-      toast.error(error.message || 'Ocorreu um erro ao salvar o estado.');
+      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar o estado.';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -153,16 +158,76 @@ const StateForm = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">
-          {id ? 'Editar Estado' : 'Novo Estado'}
-        </h1>
-        <Button variant="outline" asChild>
+        <div className="flex items-center space-x-4">
           <Link to="/states">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
           </Link>
-        </Button>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {id ? 'Editar Estado' : 'Novo Estado'}
+            </h1>
+            <p className="text-muted-foreground">
+              {id
+                ? 'Edite as informações do estado abaixo'
+                : 'Preencha as informações para criar um novo estado'}
+            </p>
+          </div>
+        </div>
       </div>
 
+<<<<<<< HEAD
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid gap-6">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Dados Gerais
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Informações básicas do estado
+                </p>
+              </div>
+              <div className="p-6 pt-0">
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="paisId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>País *</FormLabel>
+                        <div className="flex gap-2">
+                          <div className="w-full flex-1">
+                            <Input
+                              value={
+                                countries.find((c) => c.id === field.value)?.nome ||
+                                ''
+                              }
+                              readOnly
+                              placeholder="Selecione um país"
+                              className="cursor-pointer"
+                              onClick={() => setCountrySearchOpen(true)}
+                            />
+                            <input type="hidden" {...field} />
+                          </div>
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="outline"
+                            onClick={() => setCountrySearchOpen(true)}
+                            disabled={isLoading}
+                          >
+                            <Search className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+=======
       <div className="rounded-md border p-6">        <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {id && (
@@ -212,66 +277,92 @@ const StateForm = () => {
                 </FormItem>
               )}
             />
+>>>>>>> 4d13857da67cef62ff94221e3b59d3c872af3086
 
-            <FormField
-              control={form.control}
-              name="nome"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-medium">
-                    Nome do Estado
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ex: São Paulo"
-                      {...field}
-                      disabled={isLoading}
-                      className="h-11 text-base"
+                  <FormField
+                    control={form.control}
+                    name="nome"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome do Estado *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Nome do estado"
+                            {...field}
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="uf"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>UF *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ex: SP"
+                            {...field}
+                            maxLength={2}
+                            onChange={(e) =>
+                              field.onChange(e.target.value.toUpperCase())
+                            }
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {id && (
+                    <FormField
+                      control={form.control}
+                      name="ativo"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-base font-medium">
+                              Estado Ativo
+                            </FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              Desative para ocultar o estado das listagens
+                            </p>
+                          </div>
+                        </FormItem>
+                      )}
                     />
-                  </FormControl>
-                  <FormMessage className="text-sm" />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="uf"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-medium">
-                    UF (2 caracteres)
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Ex: SP"
-                      {...field}
-                      maxLength={2}
-                      onChange={(e) =>
-                        field.onChange(e.target.value.toUpperCase())
-                      }
-                      disabled={isLoading}
-                      className="h-11 text-base"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-sm" />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end pt-4">
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="h-11 px-6 text-base"
-              >
-                {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                <Save className="mr-2 h-5 w-5" /> Salvar
-              </Button>
+                  )}
+                </div>
+              </div>
             </div>
-          </form>
-        </Form>
-      </div>
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <Link to="/states">
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
+            </Link>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {id ? 'Atualizar' : 'Salvar'}
+              <Save className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </form>
+      </Form>
 
       {/* Dialogs */}
       <CountryCreationDialog

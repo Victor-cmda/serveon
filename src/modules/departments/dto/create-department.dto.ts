@@ -5,7 +5,7 @@ export class CreateDepartmentDto {
   @ApiProperty({
     description: 'Nome do departamento',
     example: 'Tecnologia da Informação',
-    maxLength: 100
+    maxLength: 100,
   })
   @IsNotEmpty({ message: 'Nome é obrigatório' })
   @IsString({ message: 'Nome deve ser uma string' })
@@ -14,9 +14,10 @@ export class CreateDepartmentDto {
 
   @ApiProperty({
     description: 'Descrição do departamento',
-    example: 'Departamento responsável pela infraestrutura e desenvolvimento de sistemas',
+    example:
+      'Departamento responsável pela infraestrutura e desenvolvimento de sistemas',
     required: false,
-    maxLength: 500
+    maxLength: 500,
   })
   @IsOptional()
   @IsString({ message: 'Descrição deve ser uma string' })

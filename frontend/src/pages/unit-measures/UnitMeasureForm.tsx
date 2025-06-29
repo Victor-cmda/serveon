@@ -81,12 +81,12 @@ const UnitMeasureForm = () => {
       }
 
       navigate('/unit-measures');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao salvar unidade de medida:', error);
-      toast.error(
-        error?.response?.data?.message ||
-          'Erro ao salvar unidade de medida. Tente novamente.',
-      );
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : (error as any)?.response?.data?.message || 'Erro ao salvar unidade de medida. Tente novamente.';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
