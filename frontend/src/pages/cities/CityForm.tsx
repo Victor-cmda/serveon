@@ -80,7 +80,6 @@ const CityForm = () => {
           nome: city.nome,
           codigoIbge: city.codigoIbge || '',
           estadoId: city.estadoId,
-          ativo: city.ativo !== false,
         });
       }catch (error) {
         console.error('Erro ao buscar cidade:', error);
@@ -197,7 +196,6 @@ const CityForm = () => {
         </div>
       </div>
 
-<<<<<<< HEAD
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid gap-6">
@@ -245,58 +243,6 @@ const CityForm = () => {
                       </FormItem>
                     )}
                   />
-=======
-      <div className="rounded-md border p-6">        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {id && (
-              <FormItem>
-                <FormLabel className="text-base font-medium">Código</FormLabel>
-                <FormControl>
-                  <Input value={id} disabled className="bg-muted h-11 text-base" />
-                </FormControl>
-                <FormDescription>
-                  Código único da cidade
-                </FormDescription>
-              </FormItem>
-            )}
-            
-            <FormField
-              control={form.control}
-              name="estadoId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-medium">
-                    Estado
-                  </FormLabel>
-                  <div className="flex gap-2">
-                    <div className="w-full flex-1">
-                      <Input
-                        value={
-                          states.find((s) => s.id === field.value)?.nome || ''
-                        }
-                        readOnly
-                        placeholder="Selecione um estado"
-                        className="cursor-pointer h-11 text-base"
-                        onClick={() => setStateSearchOpen(true)}
-                      />
-                      <input type="hidden" {...field} />
-                    </div>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="outline"
-                      onClick={() => setStateSearchOpen(true)}
-                      disabled={isLoading}
-                      className="h-11 w-11"
-                    >
-                      <Search className="h-5 w-5" />
-                    </Button>
-                  </div>
-                  <FormMessage className="text-sm" />
-                </FormItem>
-              )}
-            />
->>>>>>> 4d13857da67cef62ff94221e3b59d3c872af3086
 
                   <FormField
                     control={form.control}

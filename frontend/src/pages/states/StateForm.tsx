@@ -74,7 +74,6 @@ const StateForm = () => {
           nome: state.nome,
           uf: state.uf,
           paisId: state.paisId,
-          ativo: state.ativo !== false,
         });
       } catch (error) {
         console.error('Erro ao buscar estado:', error);
@@ -178,7 +177,6 @@ const StateForm = () => {
         </div>
       </div>
 
-<<<<<<< HEAD
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid gap-6">
@@ -227,57 +225,6 @@ const StateForm = () => {
                       </FormItem>
                     )}
                   />
-=======
-      <div className="rounded-md border p-6">        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {id && (
-              <FormItem>
-                <FormLabel className="text-base font-medium">Código</FormLabel>
-                <FormControl>
-                  <Input value={id} disabled className="bg-muted h-11 text-base" />
-                </FormControl>
-                <p className="text-sm text-muted-foreground">
-                  Código único do estado
-                </p>
-              </FormItem>
-            )}
-            
-            <FormField
-              control={form.control}
-              name="paisId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base font-medium">País</FormLabel>
-                  <div className="flex gap-2">
-                    <div className="w-full flex-1">
-                      <Input
-                        value={
-                          countries.find((c) => c.id === field.value)?.nome ||
-                          ''
-                        }
-                        readOnly
-                        placeholder="Selecione um país"
-                        className="cursor-pointer h-11 text-base"
-                        onClick={() => setCountrySearchOpen(true)}
-                      />
-                      <input type="hidden" {...field} />
-                    </div>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="outline"
-                      onClick={() => setCountrySearchOpen(true)}
-                      disabled={isLoading}
-                      className="h-11 w-11"
-                    >
-                      <Search className="h-5 w-5" />
-                    </Button>
-                  </div>
-                  <FormMessage className="text-sm" />
-                </FormItem>
-              )}
-            />
->>>>>>> 4d13857da67cef62ff94221e3b59d3c872af3086
 
                   <FormField
                     control={form.control}
