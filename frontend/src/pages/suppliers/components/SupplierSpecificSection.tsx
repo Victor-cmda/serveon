@@ -10,20 +10,12 @@ import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 
-interface SupplierFormData {
-  website?: string;
-  responsavel?: string;
-  celularResponsavel?: string;
-  observacoes?: string;
-  [key: string]: any;
-}
-
 interface Formatters {
   telefone: (value: string | undefined) => string;
 }
 
 interface SupplierSpecificSectionProps {
-  form: UseFormReturn<SupplierFormData>;
+  form: UseFormReturn<any>;
   isLoading: boolean;
   formatters: Formatters;
 }
@@ -31,10 +23,14 @@ interface SupplierSpecificSectionProps {
 const SupplierSpecificSection = ({ 
   form, 
   isLoading, 
-  formatters
+  formatters 
 }: SupplierSpecificSectionProps) => {
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-2">
+        <h4 className="text-lg font-semibold text-foreground">Informações Adicionais</h4>
+        <div className="flex-1 h-px bg-border"></div>
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         <div className="lg:col-span-6">
           <FormField

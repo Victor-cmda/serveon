@@ -363,319 +363,337 @@ const EmployeeForm: React.FC = () => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid gap-6">
-            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-              <div className="flex flex-col space-y-1.5 p-6">
-                <h3 className="text-2xl font-semibold leading-none tracking-tight">
-                  Informações Pessoais
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Dados pessoais do funcionário
-                </p>
-              </div>
-              <div className="p-6 pt-0">
-                <div className="space-y-4">
-                  {id && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div className="flex flex-col space-y-1.5 p-6">
+              <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                Informações do Funcionário
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Preencha todas as informações necessárias do funcionário
+              </p>
+            </div>
+            <div className="p-6 pt-0 space-y-6">
+              {/* Seção Informações Pessoais */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <h4 className="text-lg font-semibold text-foreground">Informações Pessoais</h4>
+                  <div className="flex-1 h-px bg-border"></div>
+                </div>
+                
+                {id && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormItem>
+                      <FormLabel className="text-base font-medium">Código</FormLabel>
+                      <FormControl>
+                        <Input 
+                          value={id} 
+                          disabled 
+                          className="bg-muted h-11 text-base font-mono text-muted-foreground" 
+                        />
+                      </FormControl>
+                      <p className="text-sm text-muted-foreground">
+                        Código único do funcionário
+                      </p>
+                    </FormItem>
+                    <div></div> {/* Espaço vazio para manter o grid */}
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="nome"
+                    render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-base font-medium">Código</FormLabel>
+                        <FormLabel>Nome Completo *</FormLabel>
                         <FormControl>
                           <Input 
-                            value={id} 
-                            disabled 
-                            className="bg-muted h-11 text-base font-mono text-muted-foreground" 
+                            placeholder="Digite o nome completo" 
+                            {...field} 
+                            disabled={loading}
                           />
                         </FormControl>
-                        <p className="text-sm text-muted-foreground">
-                          Código único do funcionário
-                        </p>
+                        <FormMessage />
                       </FormItem>
-                      <div></div> {/* Espaço vazio para manter o grid */}
-                    </div>
-                  )}
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="nome"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nome Completo *</FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder="Digite o nome completo" 
-                              {...field} 
-                              disabled={loading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    )}
+                  />
 
-                    <FormField
-                      control={form.control}
-                      name="cpf"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>CPF *</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="12345678901"
-                              {...field}
-                              disabled={loading || !!id} // CPF não pode ser editado
-                              onChange={(e) => field.onChange(formatCPF(e.target.value))}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="cpf"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CPF *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="12345678901"
+                            {...field}
+                            disabled={loading || !!id} // CPF não pode ser editado
+                            onChange={(e) => field.onChange(formatCPF(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email *</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="email"
-                              placeholder="funcionario@empresa.com"
-                              {...field}
-                              disabled={loading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email *</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="funcionario@empresa.com"
+                            {...field}
+                            disabled={loading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <FormField
-                      control={form.control}
-                      name="telefone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Telefone</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="11987654321"
-                              {...field}
-                              disabled={loading}
-                              onChange={(e) => field.onChange(formatPhone(e.target.value))}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="telefone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Telefone</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="11987654321"
+                            {...field}
+                            disabled={loading}
+                            onChange={(e) => field.onChange(formatPhone(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="rg"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>RG</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Digite o RG"
-                              {...field}
-                              disabled={loading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="rg"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>RG</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Digite o RG"
+                            {...field}
+                            disabled={loading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <FormField
-                      control={form.control}
-                      name="cidadeId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Cidade</FormLabel>
-                          <div className="flex gap-2">
-                            <FormControl>
-                              <div className="flex w-full items-center gap-2">
-                                <div className="relative flex-grow">
-                                  <Input
-                                    value={selectedCity?.nome || ''}
-                                    readOnly
-                                    placeholder="Selecione uma cidade"
-                                    className="cursor-pointer h-10 text-base pl-9"
-                                    onClick={() => setCitySearchOpen(true)}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name={field.name}
-                                    value={field.value || ''}
-                                    onChange={(e) => {
-                                      field.onChange(e);
-                                    }}
-                                    ref={field.ref}
-                                    onBlur={field.onBlur}
-                                  />
-                                  <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                                </div>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="icon"
+                  <FormField
+                    control={form.control}
+                    name="cidadeId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cidade</FormLabel>
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <div className="flex w-full items-center gap-2">
+                              <div className="relative flex-grow">
+                                <Input
+                                  value={selectedCity?.nome || ''}
+                                  readOnly
+                                  placeholder="Selecione uma cidade"
+                                  className="cursor-pointer h-10 text-base pl-9"
                                   onClick={() => setCitySearchOpen(true)}
-                                  className="h-10 w-10"
-                                >
-                                  <Search className="h-4 w-4" />
-                                </Button>
+                                />
+                                <input
+                                  type="hidden"
+                                  name={field.name}
+                                  value={field.value || ''}
+                                  onChange={(e) => {
+                                    field.onChange(e);
+                                  }}
+                                  ref={field.ref}
+                                  onBlur={field.onBlur}
+                                />
+                                <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                               </div>
-                            </FormControl>
-                          </div>
-                          {selectedCity && (
-                            <div className="mt-1">
-                              <Badge variant="outline">
-                                {selectedCity.nome} - {selectedCity.uf}
-                              </Badge>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setCitySearchOpen(true)}
+                                className="h-10 w-10"
+                              >
+                                <Search className="h-4 w-4" />
+                              </Button>
                             </div>
-                          )}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                          </FormControl>
+                        </div>
+                        {selectedCity && (
+                          <div className="mt-1">
+                            <Badge variant="outline">
+                              {selectedCity.nome} - {selectedCity.uf}
+                            </Badge>
+                          </div>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
-            </div>
 
-            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-              <div className="flex flex-col space-y-1.5 p-6">
-                <h3 className="text-2xl font-semibold leading-none tracking-tight">
-                  Informações Profissionais
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Dados profissionais do funcionário
-                </p>
-              </div>
-              <div className="p-6 pt-0">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="departamentoId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Departamento</FormLabel>
-                          <div className="flex gap-2">
-                            <FormControl>
-                              <div className="flex w-full items-center gap-2">
-                                <div className="relative flex-grow">
-                                  <Input
-                                    value={selectedDepartment?.nome || ''}
-                                    readOnly
-                                    placeholder="Selecione um departamento"
-                                    className="cursor-pointer h-10 text-base pl-9"
-                                    onClick={() => setDepartmentSearchOpen(true)}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name={field.name}
-                                    value={field.value || ''}
-                                    onChange={(e) => {
-                                      field.onChange(e);
-                                    }}
-                                    ref={field.ref}
-                                    onBlur={field.onBlur}
-                                  />
-                                  <Users className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                                </div>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="icon"
+              {/* Seção Informações Profissionais */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <h4 className="text-lg font-semibold text-foreground">Informações Profissionais</h4>
+                  <div className="flex-1 h-px bg-border"></div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="departamentoId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Departamento</FormLabel>
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <div className="flex w-full items-center gap-2">
+                              <div className="relative flex-grow">
+                                <Input
+                                  value={selectedDepartment?.nome || ''}
+                                  readOnly
+                                  placeholder="Selecione um departamento"
+                                  className="cursor-pointer h-10 text-base pl-9"
                                   onClick={() => setDepartmentSearchOpen(true)}
-                                  className="h-10 w-10"
-                                >
-                                  <Search className="h-4 w-4" />
-                                </Button>
+                                />
+                                <input
+                                  type="hidden"
+                                  name={field.name}
+                                  value={field.value || ''}
+                                  onChange={(e) => {
+                                    field.onChange(e);
+                                  }}
+                                  ref={field.ref}
+                                  onBlur={field.onBlur}
+                                />
+                                <Users className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                               </div>
-                            </FormControl>
-                          </div>
-                          {selectedDepartment && (
-                            <div className="mt-1">
-                              <Badge variant="outline">
-                                {selectedDepartment.nome}
-                              </Badge>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setDepartmentSearchOpen(true)}
+                                className="h-10 w-10"
+                              >
+                                <Search className="h-4 w-4" />
+                              </Button>
                             </div>
-                          )}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                          </FormControl>
+                        </div>
+                        {selectedDepartment && (
+                          <div className="mt-1">
+                            <Badge variant="outline">
+                              {selectedDepartment.nome}
+                            </Badge>
+                          </div>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <FormField
-                      control={form.control}
-                      name="cargoId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Cargo</FormLabel>
-                          <div className="flex gap-2">
-                            <FormControl>
-                              <div className="flex w-full items-center gap-2">
-                                <div className="relative flex-grow">
-                                  <Input
-                                    value={selectedPosition?.nome || ''}
-                                    readOnly
-                                    placeholder="Selecione um cargo"
-                                    className="cursor-pointer h-10 text-base pl-9"
-                                    onClick={() => setPositionSearchOpen(true)}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name={field.name}
-                                    value={field.value || ''}
-                                    onChange={(e) => {
-                                      field.onChange(e);
-                                    }}
-                                    ref={field.ref}
-                                    onBlur={field.onBlur}
-                                  />
-                                  <Briefcase className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                                </div>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="icon"
+                  <FormField
+                    control={form.control}
+                    name="cargoId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cargo</FormLabel>
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <div className="flex w-full items-center gap-2">
+                              <div className="relative flex-grow">
+                                <Input
+                                  value={selectedPosition?.nome || ''}
+                                  readOnly
+                                  placeholder="Selecione um cargo"
+                                  className="cursor-pointer h-10 text-base pl-9"
                                   onClick={() => setPositionSearchOpen(true)}
-                                  className="h-10 w-10"
-                                >
-                                  <Search className="h-4 w-4" />
-                                </Button>
+                                />
+                                <input
+                                  type="hidden"
+                                  name={field.name}
+                                  value={field.value || ''}
+                                  onChange={(e) => {
+                                    field.onChange(e);
+                                  }}
+                                  ref={field.ref}
+                                  onBlur={field.onBlur}
+                                />
+                                <Briefcase className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                               </div>
-                            </FormControl>
-                          </div>
-                          {selectedPosition && (
-                            <div className="mt-1">
-                              <Badge variant="outline">
-                                {selectedPosition.nome}
-                                {selectedPosition.departamentoNome && ` (${selectedPosition.departamentoNome})`}
-                              </Badge>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setPositionSearchOpen(true)}
+                                className="h-10 w-10"
+                              >
+                                <Search className="h-4 w-4" />
+                              </Button>
                             </div>
-                          )}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                          </FormControl>
+                        </div>
+                        {selectedPosition && (
+                          <div className="mt-1">
+                            <Badge variant="outline">
+                              {selectedPosition.nome}
+                              {selectedPosition.departamentoNome && ` (${selectedPosition.departamentoNome})`}
+                            </Badge>
+                          </div>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="dataAdmissao"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Data de Admissão *</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            {...field}
+                            disabled={loading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {id && (
                     <FormField
                       control={form.control}
-                      name="dataAdmissao"
+                      name="dataDemissao"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Data de Admissão *</FormLabel>
+                          <FormLabel>Data de Demissão</FormLabel>
                           <FormControl>
                             <Input
                               type="date"
@@ -687,52 +705,34 @@ const EmployeeForm: React.FC = () => {
                         </FormItem>
                       )}
                     />
-
-                    {id && (
-                      <FormField
-                        control={form.control}
-                        name="dataDemissao"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Data de Demissão</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="date"
-                                {...field}
-                                disabled={loading}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
-                  </div>                  {id && (
-                    <FormField
-                      control={form.control}
-                      name="ativo"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              disabled={loading}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="text-base font-medium">
-                              Funcionário Ativo
-                            </FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              Desative para ocultar o funcionário das listagens
-                            </p>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
                   )}
                 </div>
+
+                {id && (
+                  <FormField
+                    control={form.control}
+                    name="ativo"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            disabled={loading}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="text-base font-medium">
+                            Funcionário Ativo
+                          </FormLabel>
+                          <p className="text-sm text-muted-foreground">
+                            Desative para ocultar o funcionário das listagens
+                          </p>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                )}
               </div>
             </div>
           </div>

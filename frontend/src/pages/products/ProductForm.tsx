@@ -331,48 +331,32 @@ const ProductForm = () => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid gap-6">
-            {/* Seção de Dados Gerais */}
-            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-              <div className="flex flex-col space-y-1.5 p-6">
-                <h3 className="text-2xl font-semibold leading-none tracking-tight">
-                  Dados Gerais
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Informações básicas do produto
-                </p>
-              </div>
-              <div className="p-6 pt-0">
-                <ProductGeneralSection
-                  form={form}
-                  isLoading={isLoading}
-                  selectedCategory={selectedCategory}
-                  selectedBrand={selectedBrand}
-                  selectedUnitMeasure={selectedUnitMeasure}
-                  setCategorySearchOpen={setCategorySearchOpen}
-                  setBrandSearchOpen={setBrandSearchOpen}
-                  setUnitMeasureSearchOpen={setUnitMeasureSearchOpen}
-                  id={id}
-                />
-              </div>
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div className="flex flex-col space-y-1.5 p-6">
+              <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                Informações do Produto
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Preencha todas as informações necessárias do produto
+              </p>
             </div>
-
-            {/* Seção de Informações Adicionais */}
-            <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-              <div className="flex flex-col space-y-1.5 p-6">
-                <h3 className="text-2xl font-semibold leading-none tracking-tight">
-                  Informações Adicionais
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Preços, estoque e outras informações
-                </p>
-              </div>
-              <div className="p-6 pt-0">
-                <ProductAdditionalSection
-                  form={form}
-                  isLoading={isLoading}
-                />
-              </div>
+            <div className="p-6 pt-0 space-y-6">
+              <ProductGeneralSection
+                form={form}
+                isLoading={isLoading}
+                selectedCategory={selectedCategory}
+                selectedBrand={selectedBrand}
+                selectedUnitMeasure={selectedUnitMeasure}
+                setCategorySearchOpen={setCategorySearchOpen}
+                setBrandSearchOpen={setBrandSearchOpen}
+                setUnitMeasureSearchOpen={setUnitMeasureSearchOpen}
+                id={id}
+              />
+              
+              <ProductAdditionalSection
+                form={form}
+                isLoading={isLoading}
+              />
             </div>
           </div>
 

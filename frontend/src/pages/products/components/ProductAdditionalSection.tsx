@@ -19,6 +19,10 @@ const ProductAdditionalSection = ({
 }: ProductAdditionalSectionProps) => {
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-2">
+        <h4 className="text-lg font-semibold text-foreground">Informações Adicionais</h4>
+        <div className="flex-1 h-px bg-border"></div>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
