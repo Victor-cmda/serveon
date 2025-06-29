@@ -144,12 +144,12 @@ const PaymentMethodsList: React.FC = () => {
                     <td className="p-4">
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                          paymentMethod.active
+                          paymentMethod.ativo
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
                         }`}
                       >
-                        {paymentMethod.active ? 'Ativo' : 'Inativo'}
+                        {paymentMethod.ativo ? 'Ativo' : 'Inativo'}
                       </span>
                     </td>
                     <td className="p-4">

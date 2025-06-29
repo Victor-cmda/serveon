@@ -3,6 +3,7 @@ export interface Country {
   nome: string;
   codigo: string;
   sigla: string;
+  ativo: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -13,6 +14,7 @@ export interface State {
   uf: string;
   paisId: number;
   paisNome?: string;
+  ativo: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -25,6 +27,7 @@ export interface City {
   estadoNome?: string;
   uf?: string;
   paisNome?: string;
+  ativo: boolean;
   createdAt: string;
   updatedAt: string;
 }

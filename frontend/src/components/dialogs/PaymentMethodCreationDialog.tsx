@@ -74,7 +74,7 @@ const PaymentMethodCreationDialog = ({
         description: paymentMethod.description,
         code: paymentMethod.code,
         type: paymentMethod.type,
-        active: paymentMethod.active,
+        active: paymentMethod.ativo,
       });
     }
   }, [open, form, paymentMethod]);
@@ -87,7 +87,7 @@ const PaymentMethodCreationDialog = ({
         description: data.description,
         code: data.code || undefined,
         type: data.type || undefined,
-        active: data.active,
+        ativo: data.active,
       };
 
       let savedPaymentMethod;

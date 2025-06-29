@@ -153,12 +153,12 @@ const PaymentTermsList = () => {
                     <td className="p-4">
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                          term.isActive
+                          term.ativo
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
                         }`}
                       >
-                        {term.isActive ? 'Ativo' : 'Inativo'}
+                        {term.ativo ? 'Ativo' : 'Inativo'}
                       </span>
                     </td>
                     <td className="p-4">

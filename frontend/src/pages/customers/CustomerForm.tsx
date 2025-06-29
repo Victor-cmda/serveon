@@ -5,12 +5,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { customerApi, cityApi, stateApi, paymentTermApi } from '@/services/api';
 import { State, City } from '@/types/location';
 import { PaymentTerm } from '@/types/payment-term';
 import { toast } from 'sonner';
 import { SearchDialog } from '@/components/SearchDialog';
-import { Form } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import AuditSection from '@/components/AuditSection';
 
 import StateCreationDialog from '@/components/dialogs/StateCreationDialog';
 import CityCreationDialog from '@/components/dialogs/CityCreationDialog';
@@ -117,6 +119,7 @@ const CustomerForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [customerData, setCustomerData] = useState<any>(null);
   const [states, setStates] = useState<State[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
@@ -196,6 +199,7 @@ const CustomerForm = () => {
       try {
         setIsLoading(true);
         const customer = await customerApi.getById(Number(id));
+        setCustomerData(customer);
         form.reset({
           id: customer.id || 0,
           cnpjCpf: customer.cnpjCpf || '',
@@ -319,7 +323,7 @@ const CustomerForm = () => {
     const fetchPaymentTerms = async () => {
       try {
         const terms = await paymentTermApi.getAll();
-        setPaymentTerms(terms.filter((term) => term.isActive));
+        setPaymentTerms(terms.filter((term) => term.ativo));
       } catch (error) {
         console.error('Erro ao carregar condições de pagamento:', error);
         toast.error('Não foi possível carregar as condições de pagamento');
@@ -569,7 +573,28 @@ const CustomerForm = () => {
             </p>
           </div>
         </div>
-      </div>{' '}
+        
+        {id && (
+          <FormField
+            control={form.control}
+            name="ativo"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center space-x-2 space-y-0 flex-shrink-0">
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormLabel className="text-sm font-medium whitespace-nowrap">
+                  Cliente Ativo
+                </FormLabel>
+              </FormItem>
+            )}
+          />
+        )}
+      </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
@@ -617,6 +642,17 @@ const CustomerForm = () => {
                 isLoading={isLoading}
                 selectedPaymentTerm={selectedPaymentTerm}
                 setPaymentTermSearchOpen={setPaymentTermSearchOpen}
+              />
+              
+              <AuditSection
+                form={form}
+                data={{
+                  id: id ? customerData?.id : undefined,
+                  ativo: form.watch('ativo'),
+                  createdAt: customerData?.createdAt,
+                  updatedAt: customerData?.updatedAt,
+                }}
+                isEditing={!!id}
               />
             </div>
           </div>

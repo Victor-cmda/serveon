@@ -2,7 +2,7 @@ export interface PaymentTerm {
   id: number;
   name: string;
   description?: string;
-  isActive: boolean;
+  ativo: boolean;
   createdAt: string;
   updatedAt: string;
   installments: PaymentTermInstallment[];
@@ -16,7 +16,7 @@ export interface PaymentTermInstallment {
   daysToPayment: number;
   percentageValue: number;
   interestRate: number;
-  isActive: boolean;
+  ativo: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -24,7 +24,7 @@ export interface PaymentTermInstallment {
 export interface CreatePaymentTermDto {
   name: string;
   description?: string;
-  isActive?: boolean;
+  ativo?: boolean;
   installments: CreatePaymentTermInstallmentDto[];
 }
 
@@ -34,12 +34,12 @@ export interface CreatePaymentTermInstallmentDto {
   daysToPayment: number;
   percentageValue: number;
   interestRate?: number;
-  isActive?: boolean;
+  ativo?: boolean;
 }
 
 export interface UpdatePaymentTermDto {
   name?: string;
   description?: string;
-  isActive?: boolean;
+  ativo?: boolean;
   installments?: CreatePaymentTermInstallmentDto[];
 }

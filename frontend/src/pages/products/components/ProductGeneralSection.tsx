@@ -7,7 +7,6 @@ import {
   FormMessage,
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
-import { Switch } from '../../../components/ui/switch';
 import { Button } from '../../../components/ui/button';
 import { Badge } from '../../../components/ui/badge';
 import { UseFormReturn } from 'react-hook-form';
@@ -24,7 +23,6 @@ interface ProductGeneralSectionProps {
   setCategorySearchOpen: (open: boolean) => void;
   setBrandSearchOpen: (open: boolean) => void;
   setUnitMeasureSearchOpen: (open: boolean) => void;
-  id?: string;
 }
 
 const ProductGeneralSection = ({
@@ -36,7 +34,6 @@ const ProductGeneralSection = ({
   setCategorySearchOpen,
   setBrandSearchOpen,
   setUnitMeasureSearchOpen,
-  id,
 }: ProductGeneralSectionProps) => {
   return (
     <div className="space-y-4">
@@ -302,32 +299,6 @@ const ProductGeneralSection = ({
           </FormItem>
         )}
       />
-
-      {id && (
-        <FormField
-          control={form.control}
-          name="ativo"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isLoading}
-                />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel className="text-base font-medium">
-                  Produto Ativo
-                </FormLabel>
-                <p className="text-sm text-muted-foreground">
-                  Desative para ocultar o produto das listagens
-                </p>
-              </div>
-            </FormItem>
-          )}
-        />
-      )}
     </div>
   );
 };

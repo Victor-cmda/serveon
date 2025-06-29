@@ -19,8 +19,37 @@ const UnitMeasureGeneralSection = ({
   form,
   isLoading,
   id,
-}: UnitMeasureGeneralSectionProps) => {  return (
+}: UnitMeasureGeneralSectionProps) => {
+  return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between gap-4 mb-2">
+        <div className="flex items-center gap-2">
+          <h4 className="text-lg font-semibold text-foreground">Dados Gerais</h4>
+          <div className="flex-1 h-px bg-border"></div>
+        </div>
+        
+        {id && (
+          <FormField
+            control={form.control}
+            name="ativo"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center space-x-2 space-y-0 flex-shrink-0">
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormLabel className="text-sm font-medium whitespace-nowrap">
+                  Unidade Ativa
+                </FormLabel>
+              </FormItem>
+            )}
+          />
+        )}
+      </div>
+      
       {id && (
         <FormItem>
           <FormLabel>Código</FormLabel>
@@ -89,34 +118,8 @@ const UnitMeasureGeneralSection = ({
             </FormControl>
             <FormMessage />
           </FormItem>
-        )}
-      />
-
-      {id && (
-        <FormField
-          control={form.control}
-          name="ativo"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isLoading}
-                />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel className="text-base font-medium">
-                  Unidade de Medida Ativa
-                </FormLabel>
-                <p className="text-sm text-muted-foreground">
-                  Desative para ocultar a unidade de medida das listagens
-                </p>
-              </div>
-            </FormItem>
-          )}
-        />
       )}
+      />
     </div>
   );
 };

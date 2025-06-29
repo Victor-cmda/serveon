@@ -42,7 +42,7 @@ import {
 } from '@/components/ui/tooltip';
 
 // Implementação nativa do debounce para evitar dependência do lodash
-const debounce = <T extends (...args: unknown[]) => unknown>(
+const debounce = <T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {

@@ -109,7 +109,7 @@ const PaymentTermForm = () => {
   const fetchPaymentMethods = async () => {
     try {
       const methods = await paymentMethodApi.getAll();
-      setPaymentMethods(methods.filter((method) => method.active));
+      setPaymentMethods(methods.filter((method) => method.ativo));
     } catch (error) {
       console.error('Erro ao buscar métodos de pagamento:', error);
       toast.error('Erro', {
@@ -131,14 +131,14 @@ const PaymentTermForm = () => {
       form.reset({
         name: data.name,
         description: data.description || '',
-        isActive: data.isActive,
+        isActive: data.ativo,
         installments: sortedInstallments.map((inst) => ({
           installmentNumber: inst.installmentNumber,
           paymentMethodId: inst.paymentMethodId,
           daysToPayment: inst.daysToPayment,
           percentageValue: inst.percentageValue,
           interestRate: inst.interestRate,
-          isActive: inst.isActive,
+          isActive: inst.ativo,
         })),
       });
     } catch (error) {
@@ -173,7 +173,7 @@ const PaymentTermForm = () => {
       const paymentTermData: CreatePaymentTermDto = {
         name: values.name,
         description: values.description,
-        isActive: values.isActive,
+        ativo: values.isActive,
         installments: values.installments.map((inst) => ({
           installmentNumber: inst.installmentNumber,
           paymentMethodId: inst.paymentMethodId,

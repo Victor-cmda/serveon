@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from '../../components/ui/form';
 import { Input } from '../../components/ui/input';
+import AuditSection from '@/components/AuditSection';
 import { Button } from '../../components/ui/button';
 import { Switch } from '../../components/ui/switch';
 import { Badge } from '../../components/ui/badge';
@@ -63,6 +64,7 @@ const EmployeeForm: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(false);
+  const [employeeData, setEmployeeData] = useState<any>(null);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [positions, setPositions] = useState<Position[]>([]);
   const [cities, setCities] = useState<City[]>([]);
@@ -160,6 +162,7 @@ const EmployeeForm: React.FC = () => {
     try {
       setLoading(true);
       const data = await employeeApi.getById(parseInt(id));
+      setEmployeeData(data);
       
       // Format dates for input fields
       const dataAdmissao = data.dataAdmissao ? new Date(data.dataAdmissao).toISOString().split('T')[0] : '';
@@ -375,9 +378,32 @@ const EmployeeForm: React.FC = () => {
             <div className="p-6 pt-0 space-y-6">
               {/* Seção Informações Pessoais */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <h4 className="text-lg font-semibold text-foreground">Informações Pessoais</h4>
-                  <div className="flex-1 h-px bg-border"></div>
+                <div className="flex items-center justify-between gap-4 mb-2">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-lg font-semibold text-foreground">Informações Pessoais</h4>
+                    <div className="flex-1 h-px bg-border"></div>
+                  </div>
+                  
+                  {id && (
+                    <FormField
+                      control={form.control}
+                      name="ativo"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0 flex-shrink-0">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={loading}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-medium whitespace-nowrap">
+                            Funcionário Ativo
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
                 
                 {id && (
@@ -707,33 +733,18 @@ const EmployeeForm: React.FC = () => {
                     />
                   )}
                 </div>
-
-                {id && (
-                  <FormField
-                    control={form.control}
-                    name="ativo"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            disabled={loading}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel className="text-base font-medium">
-                            Funcionário Ativo
-                          </FormLabel>
-                          <p className="text-sm text-muted-foreground">
-                            Desative para ocultar o funcionário das listagens
-                          </p>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                )}
               </div>
+              
+              <AuditSection
+                form={form}
+                data={{
+                  id: id ? employeeData?.id : undefined,
+                  ativo: form.watch('ativo'),
+                  createdAt: employeeData?.createdAt,
+                  updatedAt: employeeData?.updatedAt,
+                }}
+                isEditing={!!id}
+              />
             </div>
           </div>
 

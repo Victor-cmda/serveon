@@ -249,12 +249,37 @@ const PositionForm: React.FC = () => {
           <div className="grid gap-6">
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
               <div className="flex flex-col space-y-1.5 p-6">
-                <h3 className="text-2xl font-semibold leading-none tracking-tight">
-                  Dados Gerais
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Informações básicas do cargo
-                </p>
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                      Dados Gerais
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Informações básicas do cargo
+                    </p>
+                  </div>
+                  
+                  {id && (
+                    <FormField
+                      control={form.control}
+                      name="ativo"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-2 space-y-0 flex-shrink-0">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              disabled={loading}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-sm font-medium whitespace-nowrap">
+                            Cargo Ativo
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
               </div>
               <div className="p-6 pt-0">
                 <div className="space-y-4">
@@ -350,35 +375,9 @@ const PositionForm: React.FC = () => {
                           />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {id && (
-                    <FormField
-                      control={form.control}
-                      name="ativo"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              disabled={loading}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="text-base font-medium">
-                              Cargo Ativo
-                            </FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              Desative para ocultar o cargo das listagens
-                            </p>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                  </FormItem>
+                )}
+              />
                 </div>
               </div>
             </div>

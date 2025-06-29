@@ -5,13 +5,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { Switch } from '../../components/ui/switch';
 import { productApi, categoryApi, brandApi, unitMeasureApi } from '../../services/api';
 import { Category } from '../../types/category';
 import { Brand } from '../../types/brand';
 import { UnitMeasure } from '../../types/unit-measure';
 import { toast } from 'sonner';
-import { Form } from '../../components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '../../components/ui/form';
 import { SearchDialog } from '../../components/SearchDialog';
+import AuditSection from '@/components/AuditSection';
 
 // Componentes modulares
 import ProductGeneralSection from './components/ProductGeneralSection';
@@ -47,6 +49,7 @@ const ProductForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [productData, setProductData] = useState<any>(null);
   
   // Estados para entidades relacionadas
   const [categories, setCategories] = useState<Category[]>([]);
@@ -248,6 +251,7 @@ const ProductForm = () => {
         setIsLoading(true);
         try {
           const product = await productApi.getById(Number(id));
+          setProductData(product);
           
           // Preenche o formulário
           form.reset({
@@ -327,6 +331,27 @@ const ProductForm = () => {
             </p>
           </div>
         </div>
+        
+        {id && (
+          <FormField
+            control={form.control}
+            name="ativo"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center space-x-2 space-y-0 flex-shrink-0">
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormLabel className="text-sm font-medium whitespace-nowrap">
+                  Produto Ativo
+                </FormLabel>
+              </FormItem>
+            )}
+          />
+        )}
       </div>
 
       <Form {...form}>
@@ -350,12 +375,22 @@ const ProductForm = () => {
                 setCategorySearchOpen={setCategorySearchOpen}
                 setBrandSearchOpen={setBrandSearchOpen}
                 setUnitMeasureSearchOpen={setUnitMeasureSearchOpen}
-                id={id}
               />
               
               <ProductAdditionalSection
                 form={form}
                 isLoading={isLoading}
+              />
+              
+              <AuditSection
+                form={form}
+                data={{
+                  id: id ? productData?.id : undefined,
+                  ativo: form.watch('ativo'),
+                  createdAt: productData?.createdAt,
+                  updatedAt: productData?.updatedAt,
+                }}
+                isEditing={!!id}
               />
             </div>
           </div>

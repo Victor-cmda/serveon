@@ -54,7 +54,7 @@ const PaymentMethodForm = () => {
         description: data.description,
         code: data.code || '',
         type: data.type || '',
-        active: data.active,
+        active: data.ativo,
       });
     } catch (error) {
       console.error('Erro ao buscar método de pagamento:', error);
@@ -78,7 +78,7 @@ const PaymentMethodForm = () => {
     try {
       const paymentMethodData: CreatePaymentMethodDto | UpdatePaymentMethodDto = {
         description: values.description,
-        active: values.active,
+        ativo: values.active,
       };
       
       // Somente incluir código e tipo se não estiverem vazios
@@ -147,6 +147,27 @@ const PaymentMethodForm = () => {
             </p>
           </div>
         </div>
+        
+        {id && (
+          <FormField
+            control={form.control}
+            name="active"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center space-x-2 space-y-0 flex-shrink-0">
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormLabel className="text-sm font-medium whitespace-nowrap">
+                  Método Ativo
+                </FormLabel>
+              </FormItem>
+            )}
+          />
+        )}
       </div>
 
       <Form {...form}>
@@ -207,30 +228,6 @@ const PaymentMethodForm = () => {
                     />
                   </div>
 
-                  {id && (
-                    <FormField
-                      control={form.control}
-                      name="active"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="text-base font-medium">
-                              Método Ativo
-                            </FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              Desative para ocultar o método das listagens
-                            </p>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  )}
                 </div>
               </div>
             </div>

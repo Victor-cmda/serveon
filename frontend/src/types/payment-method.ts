@@ -3,7 +3,7 @@ export interface PaymentMethod {
   description: string;
   code?: string;
   type?: string;
-  active: boolean;
+  ativo: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -12,12 +12,12 @@ export interface CreatePaymentMethodDto {
   description: string;
   code?: string;
   type?: string;
-  active?: boolean;
+  ativo?: boolean;
 }
 
 export interface UpdatePaymentMethodDto {
   description?: string;
   code?: string;
   type?: string;
-  active?: boolean;
+  ativo?: boolean;
 } 

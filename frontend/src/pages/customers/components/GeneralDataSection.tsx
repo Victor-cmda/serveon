@@ -7,7 +7,6 @@ import {
   FormMessage,
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
-import { Switch } from '../../../components/ui/switch';
 import { UseFormReturn } from 'react-hook-form';
 
 interface GeneralDataSectionProps {
@@ -29,81 +28,53 @@ const GeneralDataSection = ({
         <h4 className="text-lg font-semibold text-foreground">Dados Gerais</h4>
         <div className="flex-1 h-px bg-border"></div>
       </div>
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <FormField
-          control={form.control}
-          name="tipo"
-          render={({ field }) => (
-            <FormItem className="space-y-2">
-              <FormLabel className="text-base font-medium">
-                Tipo de Pessoa
-              </FormLabel>
-              <div className="flex space-x-4">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    id="juridica"
-                    value="J"
-                    checked={field.value === 'J'}
-                    onChange={() => field.onChange('J')}
-                  />
-                  <label
-                    htmlFor="juridica"
-                    className="text-base flex items-center gap-1"
-                  >
-                    <Building2 className="h-4 w-4" />
-                    Jurídica
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    id="fisica"
-                    value="F"
-                    checked={field.value === 'F'}
-                    onChange={() => field.onChange('F')}
-                  />
-                  <label
-                    htmlFor="fisica"
-                    className="text-base flex items-center gap-1"
-                  >
-                    <User className="h-4 w-4" />
-                    Física
-                  </label>
-                </div>
-              </div>
-              <FormMessage className="text-sm" />
-            </FormItem>
-          )}
-        />{' '}
-        <FormField
-          control={form.control}
-          name="ativo"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 sm:pt-8">
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={!id}
+      
+      <FormField
+        control={form.control}
+        name="tipo"
+        render={({ field }) => (
+          <FormItem className="space-y-2">
+            <FormLabel className="text-base font-medium">
+              Tipo de Pessoa
+            </FormLabel>
+            <div className="flex space-x-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  id="juridica"
+                  value="J"
+                  checked={field.value === 'J'}
+                  onChange={() => field.onChange('J')}
                 />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel
-                  className={`text-base font-medium ${!id ? 'cursor-not-allowed opacity-60' : ''}`}
+                <label
+                  htmlFor="juridica"
+                  className="text-base flex items-center gap-1"
                 >
-                  Cliente Ativo
-                  {!id && (
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      (Disponível apenas na edição)
-                    </span>
-                  )}
-                </FormLabel>
+                  <Building2 className="h-4 w-4" />
+                  Jurídica
+                </label>
               </div>
-            </FormItem>
-          )}
-        />
-      </div>{' '}      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  id="fisica"
+                  value="F"
+                  checked={field.value === 'F'}
+                  onChange={() => field.onChange('F')}
+                />
+                <label
+                  htmlFor="fisica"
+                  className="text-base flex items-center gap-1"
+                >
+                  <User className="h-4 w-4" />
+                  Física
+                </label>
+              </div>
+            </div>
+            <FormMessage className="text-sm" />
+          </FormItem>
+        )}
+      />{' '}{' '}      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
         {id && (
           <FormItem className="md:col-span-1">
             <FormLabel className="text-base font-medium">Código</FormLabel>

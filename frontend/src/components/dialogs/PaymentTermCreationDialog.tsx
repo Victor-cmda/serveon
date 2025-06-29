@@ -107,7 +107,7 @@ const PaymentTermCreationDialog = ({
       const loadPaymentMethods = async () => {
         try {
           const data = await paymentMethodApi.getAll();
-          setPaymentMethods(data.filter((method) => method.active));
+          setPaymentMethods(data.filter((method) => method.ativo));
         } catch (error) {
           console.error('Erro ao carregar métodos de pagamento:', error);
           toast.error('Não foi possível carregar os métodos de pagamento');
@@ -120,14 +120,14 @@ const PaymentTermCreationDialog = ({
         form.reset({
           name: paymentTerm.name || '',
           description: paymentTerm.description || '',
-          isActive: paymentTerm.isActive,
+          isActive: paymentTerm.ativo,
           installments: paymentTerm.installments.map((inst) => ({
             installmentNumber: inst.installmentNumber,
             paymentMethodId: inst.paymentMethodId,
             daysToPayment: inst.daysToPayment,
             percentageValue: inst.percentageValue,
             interestRate: inst.interestRate,
-            isActive: inst.isActive,
+            isActive: inst.ativo,
           })),
         });
       } else {        form.reset({
@@ -156,7 +156,7 @@ const PaymentTermCreationDialog = ({
       const formData: CreatePaymentTermDto = {
         name: data.name,
         description: data.description || undefined,
-        isActive: data.isActive,
+        ativo: data.isActive,
         installments: data.installments.map((inst) => ({
           installmentNumber: inst.installmentNumber,
           paymentMethodId: inst.paymentMethodId,
@@ -206,7 +206,7 @@ const PaymentTermCreationDialog = ({
       daysToPayment: lastInstallment.daysToPayment + 30,
       percentageValue: 0,
       interestRate: 0,
-      isActive: true,
+      ativo: true,
     };
 
     form.setValue('installments', [
@@ -214,7 +214,7 @@ const PaymentTermCreationDialog = ({
         ...inst,
         isActive: inst.isActive ?? true,
       })),
-      { ...newInstallment, isActive: newInstallment.isActive ?? true },
+      { ...newInstallment, isActive: newInstallment.ativo ?? true },
     ]);
   };
 
