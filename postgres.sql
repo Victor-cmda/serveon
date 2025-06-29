@@ -11,6 +11,7 @@ CREATE TABLE pais (
     nome VARCHAR(60) NOT NULL,
     codigo VARCHAR(3) NOT NULL,
     sigla VARCHAR(2) NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uk_pais_codigo UNIQUE (codigo),
@@ -22,6 +23,7 @@ CREATE TABLE estado (
     nome VARCHAR(60) NOT NULL,
     uf CHAR(2) NOT NULL,
     pais_id INTEGER NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_estado_pais FOREIGN KEY (pais_id) REFERENCES pais (id),
@@ -34,6 +36,7 @@ CREATE TABLE cidade (
     nome VARCHAR(100) NOT NULL,
     codigo_ibge VARCHAR(7),
     estado_id INTEGER NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_cidade_estado FOREIGN KEY (estado_id) REFERENCES estado (id),
@@ -59,7 +62,7 @@ CREATE TABLE condicao_pagamento (
     descricao TEXT,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Tabela de parcelas das condições de pagamento
@@ -73,7 +76,7 @@ CREATE TABLE parcela_condicao_pagamento (
     taxa_juros DECIMAL(5,2) NOT NULL DEFAULT 0,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uk_numero_parcela_por_condicao UNIQUE (condicao_pagamento_id, numero_parcela)
 );
 
@@ -182,9 +185,13 @@ CREATE TABLE destinatario (
 
 -- Tabela de relacionamento entre cliente e Destinatário
 CREATE TABLE cliente_destinatario (
+    id SERIAL PRIMARY KEY,
     cliente_id INTEGER NOT NULL REFERENCES cliente(id),
     destinatario_id INTEGER NOT NULL REFERENCES destinatario(id),
-    PRIMARY KEY (cliente_id, destinatario_id)
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_cliente_destinatario UNIQUE (cliente_id, destinatario_id)
 );
 
 -- Tabela transportador
@@ -355,6 +362,7 @@ CREATE TABLE nfe (
     cnpj_transportador VARCHAR(18),
     condicao_pagamento_id INTEGER NOT NULL,
     cliente_id INTEGER REFERENCES cliente(id),
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_nfe_emitente FOREIGN KEY (cnpj_emitente) REFERENCES emitente (cnpj),
@@ -388,6 +396,7 @@ CREATE TABLE itemnfe (
     cst_cofins VARCHAR(2),
     valor_desconto DECIMAL(15, 2),
     ordem INTEGER NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_item_nfe_nfe FOREIGN KEY (chave_acesso_nfe) REFERENCES nfe (chave_acesso),
@@ -399,6 +408,7 @@ CREATE TABLE fatura (
     chave_acesso_nfe VARCHAR(44) NOT NULL,
     numero VARCHAR(20),
     valor_total DECIMAL(15, 2) NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_fatura_nfe FOREIGN KEY (chave_acesso_nfe) REFERENCES nfe (chave_acesso)
@@ -414,6 +424,7 @@ CREATE TABLE parcela (
     status CHAR(1) NOT NULL DEFAULT 'A',
     -- A=Aberto, P=Pago, C=Cancelado
     data_pagamento DATE,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_parcela_fatura FOREIGN KEY (fatura_id) REFERENCES fatura (id),
@@ -429,6 +440,7 @@ CREATE TABLE volume (
     numeracao VARCHAR(30),
     peso_bruto DECIMAL(15, 3),
     peso_liquido DECIMAL(15, 3),
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_volume_nfe FOREIGN KEY (chave_acesso_nfe) REFERENCES nfe (chave_acesso)
@@ -536,6 +548,8 @@ CREATE TRIGGER update_parcela_timestamp BEFORE
 UPDATE ON parcela FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_volume_timestamp BEFORE
 UPDATE ON volume FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_cliente_destinatario_timestamp BEFORE
+UPDATE ON cliente_destinatario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 -- Inserir dados iniciais
 -- Inserir país padrão (Brasil)
 INSERT INTO pais (nome, codigo, sigla)

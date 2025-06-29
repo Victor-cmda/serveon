@@ -1,12 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { BaseEntity } from '../../../common/entities/base.entity';
 
-export class Position {
-  @ApiProperty({
-    description: 'ID único do cargo',
-    example: 1,
-  })
-  id: number;
 
+export class Position extends BaseEntity {
   @ApiProperty({
     description: 'Nome do cargo',
     example: 'Analista de Sistemas',
@@ -34,23 +30,4 @@ export class Position {
     required: false,
   })
   departamentoNome?: string;
-
-  @ApiProperty({
-    description: 'Indica se o cargo está ativo',
-    example: true,
-    default: true,
-  })
-  ativo: boolean;
-
-  @ApiProperty({
-    description: 'Data de criação do registro',
-    example: '2024-06-08T10:30:00.000Z',
-  })
-  createdAt: string;
-
-  @ApiProperty({
-    description: 'Data da última atualização do registro',
-    example: '2024-06-08T10:30:00.000Z',
-  })
-  updatedAt: string;
 }

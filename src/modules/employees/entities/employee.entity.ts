@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { BaseEntity } from '../../../common/entities/base.entity';
 
-export class Employee {
-  @ApiProperty({
-    description: 'ID único do funcionário',
-    example: 1,
-  })
-  id: number;
-
+export class Employee extends BaseEntity {
   @ApiProperty({
     description: 'Nome completo do funcionário',
     example: 'João da Silva',
@@ -84,22 +79,4 @@ export class Employee {
     example: null,
   })
   dataDemissao?: Date;
-
-  @ApiProperty({
-    description: 'Status ativo/inativo do funcionário',
-    example: true,
-  })
-  ativo: boolean;
-
-  @ApiProperty({
-    description: 'Data de criação do registro',
-    example: '2023-01-15T12:00:00.000Z',
-  })
-  createdAt: Date;
-
-  @ApiProperty({
-    description: 'Data da última atualização do registro',
-    example: '2023-01-15T12:00:00.000Z',
-  })
-  updatedAt: Date;
 }

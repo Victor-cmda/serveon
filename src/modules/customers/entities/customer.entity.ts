@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { BaseEntity } from '../../../common/entities/base.entity';
 
-export class Customer {
-  @ApiProperty({
-    description: 'ID único do cliente',
-    example: 1,
-  })
-  id: number;
-
+export class Customer extends BaseEntity {
   @ApiProperty({
     description: 'CNPJ, CPF ou documento internacional do cliente',
     example: '12345678901234',
@@ -122,24 +117,6 @@ export class Customer {
     example: 'contato@empresa.com',
   })
   email?: string;
-
-  @ApiProperty({
-    description: 'Status ativo/inativo do cliente',
-    example: true,
-  })
-  ativo: boolean;
-
-  @ApiProperty({
-    description: 'Data de criação',
-    example: '2023-01-01T00:00:00.000Z',
-  })
-  createdAt: Date;
-
-  @ApiProperty({
-    description: 'Data da última atualização',
-    example: '2023-01-01T00:00:00.000Z',
-  })
-  updatedAt: Date;
 
   @ApiProperty({
     description: 'Nome da cidade',

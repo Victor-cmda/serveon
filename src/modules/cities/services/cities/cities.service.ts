@@ -391,6 +391,7 @@ export class CitiesService {
       estadoId: dbRecord.estado_id,
       createdAt: dbRecord.created_at,
       updatedAt: dbRecord.updated_at,
+      ativo: dbRecord.ativo
     };
 
     if (dbRecord.estado_nome) city.estadoNome = dbRecord.estado_nome;

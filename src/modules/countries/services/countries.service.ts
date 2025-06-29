@@ -271,6 +271,7 @@ export class CountriesService {
       sigla: dbRecord.sigla,
       createdAt: dbRecord.created_at,
       updatedAt: dbRecord.updated_at,
+      ativo: dbRecord.ativo
     };
   }
 }

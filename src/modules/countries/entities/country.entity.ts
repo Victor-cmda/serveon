@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { BaseEntity } from '../../../common/entities/base.entity';
 
-export class Country {
-  @ApiProperty({
-    description: 'ID único do país',
-    example: 1,
-  })
-  id: number;
-
+export class Country extends BaseEntity {
   @ApiProperty({
     description: 'Nome do país',
     example: 'Brasil',
@@ -24,16 +19,4 @@ export class Country {
     example: 'BR',
   })
   sigla: string;
-
-  @ApiProperty({
-    description: 'Data de criação do registro',
-    example: '2023-01-15T12:00:00.000Z',
-  })
-  createdAt: Date;
-
-  @ApiProperty({
-    description: 'Data da última atualização do registro',
-    example: '2023-01-15T12:00:00.000Z',
-  })
-  updatedAt: Date;
 }

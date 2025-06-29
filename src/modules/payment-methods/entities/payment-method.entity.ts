@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { BaseEntity } from '../../../common/entities/base.entity';
 
-export class PaymentMethod {
-  @ApiProperty({
-    description: 'Unique ID of the payment method',
-    example: 1,
-  })
-  id: number;
-
+export class PaymentMethod extends BaseEntity {
   @ApiProperty({
     description: 'Description of the payment method',
     example: 'Credit Card',
@@ -26,22 +21,4 @@ export class PaymentMethod {
     required: false,
   })
   type?: string;
-
-  @ApiProperty({
-    description: 'Status of the payment method (active/inactive)',
-    example: true,
-  })
-  active: boolean;
-
-  @ApiProperty({
-    description: 'Creation date',
-    example: '2023-01-01T00:00:00.000Z',
-  })
-  createdAt: Date;
-
-  @ApiProperty({
-    description: 'Last update date',
-    example: '2023-01-01T00:00:00.000Z',
-  })
-  updatedAt: Date;
 }

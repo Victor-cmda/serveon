@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { BaseEntity } from '../../../common/entities/base.entity';
 
-export class Product {
-  @ApiProperty({
-    description: 'ID único do produto',
-    example: 1,
-  })
-  id: number;
-
+export class Product extends BaseEntity {
   @ApiProperty({
     description: 'Nome/descrição do produto',
     example: 'Notebook Dell Inspiron 15',
@@ -214,22 +209,4 @@ export class Product {
     required: false,
   })
   gtinTributavel?: string;
-
-  @ApiProperty({
-    description: 'Status do produto (ativo/inativo)',
-    example: true,
-  })
-  ativo: boolean;
-
-  @ApiProperty({
-    description: 'Data de criação do registro',
-    example: '2025-06-19T10:00:00Z',
-  })
-  createdAt: string;
-
-  @ApiProperty({
-    description: 'Data da última atualização',
-    example: '2025-06-19T10:00:00Z',
-  })
-  updatedAt: string;
 }

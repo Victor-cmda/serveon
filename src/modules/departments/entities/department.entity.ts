@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { BaseEntity } from '../../../common/entities/base.entity';
 
-export class Department {
-  @ApiProperty({
-    description: 'ID único do departamento',
-    example: 1,
-  })
-  id: number;
-
+export class Department extends BaseEntity {
   @ApiProperty({
     description: 'Nome do departamento',
     example: 'Recursos Humanos',
@@ -20,23 +15,4 @@ export class Department {
     required: false,
   })
   descricao?: string;
-
-  @ApiProperty({
-    description: 'Indica se o departamento está ativo',
-    example: true,
-    default: true,
-  })
-  ativo: boolean;
-
-  @ApiProperty({
-    description: 'Data de criação do registro',
-    example: '2024-06-08T10:30:00.000Z',
-  })
-  createdAt: string;
-
-  @ApiProperty({
-    description: 'Data da última atualização do registro',
-    example: '2024-06-08T10:30:00.000Z',
-  })
-  updatedAt: string;
 }

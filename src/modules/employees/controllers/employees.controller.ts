@@ -123,6 +123,6 @@ export class EmployeesController {
   @ApiResponse({ status: 200, description: 'Lista de cidades ativas.' })
   async getActiveCities() {
     const cities = await this.citiesService.findAll();
-    return cities;
+    return cities.filter((city) => city.ativo);
   }
 }

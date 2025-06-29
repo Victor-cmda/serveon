@@ -346,7 +346,7 @@ export class UnitMeasuresService {
       id: row.id,
       sigla: row.sigla,
       descricao: row.descricao,
-      ativo: row.ativo,
+      ativo: row.status,
       createdAt: row.created_at?.toISOString(),
       updatedAt: row.updated_at?.toISOString(),
     };
