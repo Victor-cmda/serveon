@@ -30,6 +30,25 @@ export class Employee {
     example: '11987654321',
   })
   telefone?: string;
+
+  @ApiProperty({
+    description: 'RG do funcionário',
+    example: '123456789',
+  })
+  rg?: string;
+
+  @ApiProperty({
+    description: 'ID da cidade do funcionário',
+    example: 1,
+  })
+  cidadeId?: number;
+
+  @ApiProperty({
+    description: 'Nome da cidade do funcionário',
+    example: 'São Paulo',
+  })
+  cidadeNome?: string;
+
   @ApiProperty({
     description: 'ID do cargo do funcionário',
     example: 1,

@@ -452,6 +452,11 @@ export const employeeApi = {
     const response = await fetch(`${API_URL}/employees/positions/by-department/${departmentId}`);
     return handleResponse(response);
   },
+
+  getActiveCities: async (): Promise<City[]> => {
+    const response = await fetch(`${API_URL}/employees/cities/active`);
+    return handleResponse(response);
+  },
 };
 
 // API para Departamentos

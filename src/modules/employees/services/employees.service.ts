@@ -38,15 +38,17 @@ export class EmployeesService {
       }
       const result = await this.databaseService.query(
         `INSERT INTO dbo.funcionario
-          (nome, cpf, email, telefone, cargo_id, departamento_id, data_admissao, ativo)
+          (nome, cpf, email, telefone, rg, cidade_id, cargo_id, departamento_id, data_admissao, ativo)
          VALUES
-          ($1, $2, $3, $4, $5, $6, $7, $8)
+          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
          RETURNING *`,
         [
           createEmployeeDto.nome,
           createEmployeeDto.cpf,
           createEmployeeDto.email,
           createEmployeeDto.telefone || null,
+          createEmployeeDto.rg || null,
+          createEmployeeDto.cidadeId || null,
           createEmployeeDto.cargoId || null,
           createEmployeeDto.departamentoId || null,
           createEmployeeDto.dataAdmissao,
@@ -69,10 +71,12 @@ export class EmployeesService {
         SELECT 
           f.*,
           c.nome as cargo_nome,
-          d.nome as departamento_nome
+          d.nome as departamento_nome,
+          cid.nome as cidade_nome
         FROM dbo.funcionario f
         LEFT JOIN dbo.cargo c ON f.cargo_id = c.id
         LEFT JOIN dbo.departamento d ON f.departamento_id = d.id
+        LEFT JOIN dbo.cidade cid ON f.cidade_id = cid.id
         ORDER BY f.nome
       `);
 
@@ -89,10 +93,12 @@ export class EmployeesService {
         SELECT 
           f.*,
           c.nome as cargo_nome,
-          d.nome as departamento_nome
+          d.nome as departamento_nome,
+          cid.nome as cidade_nome
         FROM dbo.funcionario f
         LEFT JOIN dbo.cargo c ON f.cargo_id = c.id
         LEFT JOIN dbo.departamento d ON f.departamento_id = d.id
+        LEFT JOIN dbo.cidade cid ON f.cidade_id = cid.id
         WHERE f.id = $1
       `,
         [id],
@@ -177,6 +183,17 @@ export class EmployeesService {
         updates.push(`telefone = $${paramCounter++}`);
         values.push(updateEmployeeDto.telefone);
       }
+
+      if (updateEmployeeDto.rg !== undefined) {
+        updates.push(`rg = $${paramCounter++}`);
+        values.push(updateEmployeeDto.rg);
+      }
+
+      if (updateEmployeeDto.cidadeId !== undefined) {
+        updates.push(`cidade_id = $${paramCounter++}`);
+        values.push(updateEmployeeDto.cidadeId);
+      }
+
       if (updateEmployeeDto.cargoId !== undefined) {
         updates.push(`cargo_id = $${paramCounter++}`);
         values.push(updateEmployeeDto.cargoId);
@@ -273,6 +290,9 @@ export class EmployeesService {
       cpf: dbRecord.cpf,
       email: dbRecord.email,
       telefone: dbRecord.telefone,
+      rg: dbRecord.rg,
+      cidadeId: dbRecord.cidade_id,
+      cidadeNome: dbRecord.cidade_nome,
       cargoId: dbRecord.cargo_id,
       cargoNome: dbRecord.cargo_nome,
       departamentoId: dbRecord.departamento_id,

@@ -224,6 +224,21 @@
         ]
       }
     },
+    "/api/employees/cities/active": {
+      "get": {
+        "operationId": "EmployeesController_getActiveCities",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de cidades ativas."
+          }
+        },
+        "summary": "Listar cidades ativas para seleção",
+        "tags": [
+          "Funcionários"
+        ]
+      }
+    },
     "/api/departments": {
       "post": {
         "operationId": "DepartmentsController_create",
@@ -598,6 +613,256 @@
         "summary": "Buscar cargos por departamento",
         "tags": [
           "Positions"
+        ]
+      }
+    },
+    "/api/cities": {
+      "post": {
+        "operationId": "CitiesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cidade criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/City"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "404": {
+            "description": "Estado não encontrado"
+          },
+          "409": {
+            "description": "Cidade com mesmo nome ou código IBGE já existe"
+          }
+        },
+        "summary": "Criar nova cidade",
+        "tags": [
+          "Cities"
+        ]
+      },
+      "get": {
+        "operationId": "CitiesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de cidades retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/City"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todas as cidades",
+        "tags": [
+          "Cities"
+        ]
+      }
+    },
+    "/api/cities/estado/{estadoId}": {
+      "get": {
+        "operationId": "CitiesController_findByEstado",
+        "parameters": [
+          {
+            "name": "estadoId",
+            "required": true,
+            "in": "path",
+            "description": "ID do estado",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de cidades do estado retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/City"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Estado não encontrado"
+          }
+        },
+        "summary": "Listar cidades por estado",
+        "tags": [
+          "Cities"
+        ]
+      }
+    },
+    "/api/cities/ibge/{codigoIbge}": {
+      "get": {
+        "operationId": "CitiesController_findByIbgeCode",
+        "parameters": [
+          {
+            "name": "codigoIbge",
+            "required": true,
+            "in": "path",
+            "description": "Código IBGE da cidade",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cidade encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/City"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cidade não encontrada"
+          }
+        },
+        "summary": "Obter cidade por código IBGE",
+        "tags": [
+          "Cities"
+        ]
+      }
+    },
+    "/api/cities/{id}": {
+      "get": {
+        "operationId": "CitiesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da cidade",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cidade encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/City"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cidade não encontrada"
+          }
+        },
+        "summary": "Obter cidade por ID",
+        "tags": [
+          "Cities"
+        ]
+      },
+      "patch": {
+        "operationId": "CitiesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da cidade",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cidade atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/City"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "404": {
+            "description": "Cidade não encontrada"
+          },
+          "409": {
+            "description": "Cidade com mesmo nome ou código IBGE já existe"
+          }
+        },
+        "summary": "Atualizar cidade por ID",
+        "tags": [
+          "Cities"
+        ]
+      },
+      "delete": {
+        "operationId": "CitiesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da cidade",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Cidade removida com sucesso"
+          },
+          "404": {
+            "description": "Cidade não encontrada"
+          },
+          "409": {
+            "description": "Não é possível excluir a cidade pois ela está sendo referenciada"
+          }
+        },
+        "summary": "Remover cidade por ID",
+        "tags": [
+          "Cities"
         ]
       }
     },
@@ -1279,256 +1544,6 @@
         ]
       }
     },
-    "/api/cities": {
-      "post": {
-        "operationId": "CitiesController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateCityDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Cidade criada com sucesso",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/City"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dados de entrada inválidos"
-          },
-          "404": {
-            "description": "Estado não encontrado"
-          },
-          "409": {
-            "description": "Cidade com mesmo nome ou código IBGE já existe"
-          }
-        },
-        "summary": "Criar nova cidade",
-        "tags": [
-          "Cities"
-        ]
-      },
-      "get": {
-        "operationId": "CitiesController_findAll",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Lista de cidades retornada com sucesso",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/City"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "summary": "Listar todas as cidades",
-        "tags": [
-          "Cities"
-        ]
-      }
-    },
-    "/api/cities/estado/{estadoId}": {
-      "get": {
-        "operationId": "CitiesController_findByEstado",
-        "parameters": [
-          {
-            "name": "estadoId",
-            "required": true,
-            "in": "path",
-            "description": "ID do estado",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Lista de cidades do estado retornada com sucesso",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/City"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Estado não encontrado"
-          }
-        },
-        "summary": "Listar cidades por estado",
-        "tags": [
-          "Cities"
-        ]
-      }
-    },
-    "/api/cities/ibge/{codigoIbge}": {
-      "get": {
-        "operationId": "CitiesController_findByIbgeCode",
-        "parameters": [
-          {
-            "name": "codigoIbge",
-            "required": true,
-            "in": "path",
-            "description": "Código IBGE da cidade",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Cidade encontrada",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/City"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Cidade não encontrada"
-          }
-        },
-        "summary": "Obter cidade por código IBGE",
-        "tags": [
-          "Cities"
-        ]
-      }
-    },
-    "/api/cities/{id}": {
-      "get": {
-        "operationId": "CitiesController_findOne",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "ID da cidade",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Cidade encontrada",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/City"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Cidade não encontrada"
-          }
-        },
-        "summary": "Obter cidade por ID",
-        "tags": [
-          "Cities"
-        ]
-      },
-      "patch": {
-        "operationId": "CitiesController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "ID da cidade",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCityDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Cidade atualizada com sucesso",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/City"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Dados de entrada inválidos"
-          },
-          "404": {
-            "description": "Cidade não encontrada"
-          },
-          "409": {
-            "description": "Cidade com mesmo nome ou código IBGE já existe"
-          }
-        },
-        "summary": "Atualizar cidade por ID",
-        "tags": [
-          "Cities"
-        ]
-      },
-      "delete": {
-        "operationId": "CitiesController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "ID da cidade",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Cidade removida com sucesso"
-          },
-          "404": {
-            "description": "Cidade não encontrada"
-          },
-          "409": {
-            "description": "Não é possível excluir a cidade pois ela está sendo referenciada"
-          }
-        },
-        "summary": "Remover cidade por ID",
-        "tags": [
-          "Cities"
-        ]
-      }
-    },
     "/api/payment-methods": {
       "post": {
         "operationId": "PaymentMethodsController_create",
@@ -2007,6 +2022,699 @@
           "Suppliers"
         ]
       }
+    },
+    "/api/products": {
+      "post": {
+        "operationId": "ProductsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Produto criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "409": {
+            "description": "Produto com mesmo código já existe"
+          }
+        },
+        "summary": "Criar novo produto",
+        "tags": [
+          "Products"
+        ]
+      },
+      "get": {
+        "operationId": "ProductsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de produtos retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todos os produtos",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "operationId": "ProductsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do produto",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Produto encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Produto não encontrado"
+          }
+        },
+        "summary": "Obter produto por ID",
+        "tags": [
+          "Products"
+        ]
+      },
+      "patch": {
+        "operationId": "ProductsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do produto",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Produto atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "404": {
+            "description": "Produto não encontrado"
+          },
+          "409": {
+            "description": "Código já está sendo usado por outro produto"
+          }
+        },
+        "summary": "Atualizar produto",
+        "tags": [
+          "Products"
+        ]
+      },
+      "delete": {
+        "operationId": "ProductsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do produto",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Produto removido com sucesso"
+          },
+          "404": {
+            "description": "Produto não encontrado"
+          }
+        },
+        "summary": "Remover produto (soft delete)",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/api/categories": {
+      "post": {
+        "operationId": "CategoriesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Categoria criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "409": {
+            "description": "Categoria com mesmo nome já existe"
+          }
+        },
+        "summary": "Criar nova categoria",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "get": {
+        "operationId": "CategoriesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de categorias retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Category"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todas as categorias",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/api/categories/{id}": {
+      "get": {
+        "operationId": "CategoriesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da categoria",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Categoria encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Categoria não encontrada"
+          }
+        },
+        "summary": "Obter categoria por ID",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "patch": {
+        "operationId": "CategoriesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da categoria",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Categoria atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "404": {
+            "description": "Categoria não encontrada"
+          },
+          "409": {
+            "description": "Nome já está sendo usado por outra categoria"
+          }
+        },
+        "summary": "Atualizar categoria",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "delete": {
+        "operationId": "CategoriesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da categoria",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Categoria removida com sucesso"
+          },
+          "404": {
+            "description": "Categoria não encontrada"
+          },
+          "409": {
+            "description": "Categoria está sendo usada por produtos ativos"
+          }
+        },
+        "summary": "Remover categoria (soft delete)",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/api/brands": {
+      "post": {
+        "operationId": "BrandsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBrandDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Marca criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Brand"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "409": {
+            "description": "Marca com mesmo nome já existe"
+          }
+        },
+        "summary": "Criar nova marca",
+        "tags": [
+          "Brands"
+        ]
+      },
+      "get": {
+        "operationId": "BrandsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de marcas retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Brand"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todas as marcas",
+        "tags": [
+          "Brands"
+        ]
+      }
+    },
+    "/api/brands/{id}": {
+      "get": {
+        "operationId": "BrandsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da marca",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Marca encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Brand"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Marca não encontrada"
+          }
+        },
+        "summary": "Obter marca por ID",
+        "tags": [
+          "Brands"
+        ]
+      },
+      "patch": {
+        "operationId": "BrandsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da marca",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBrandDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Marca atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Brand"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "404": {
+            "description": "Marca não encontrada"
+          },
+          "409": {
+            "description": "Nome já está sendo usado por outra marca"
+          }
+        },
+        "summary": "Atualizar marca",
+        "tags": [
+          "Brands"
+        ]
+      },
+      "delete": {
+        "operationId": "BrandsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da marca",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Marca removida com sucesso"
+          },
+          "404": {
+            "description": "Marca não encontrada"
+          },
+          "409": {
+            "description": "Marca está sendo usada por produtos ativos"
+          }
+        },
+        "summary": "Remover marca (soft delete)",
+        "tags": [
+          "Brands"
+        ]
+      }
+    },
+    "/api/unit-measures": {
+      "post": {
+        "operationId": "UnitMeasuresController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUnitMeasureDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Unidade de medida criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitMeasure"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "409": {
+            "description": "Unidade de medida com mesma sigla já existe"
+          }
+        },
+        "summary": "Criar nova unidade de medida",
+        "tags": [
+          "Unit Measures"
+        ]
+      },
+      "get": {
+        "operationId": "UnitMeasuresController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de unidades de medida retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UnitMeasure"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todas as unidades de medida",
+        "tags": [
+          "Unit Measures"
+        ]
+      }
+    },
+    "/api/unit-measures/{id}": {
+      "get": {
+        "operationId": "UnitMeasuresController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da unidade de medida",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unidade de medida encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitMeasure"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unidade de medida não encontrada"
+          }
+        },
+        "summary": "Obter unidade de medida por ID",
+        "tags": [
+          "Unit Measures"
+        ]
+      },
+      "patch": {
+        "operationId": "UnitMeasuresController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da unidade de medida",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUnitMeasureDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Unidade de medida atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitMeasure"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          },
+          "404": {
+            "description": "Unidade de medida não encontrada"
+          },
+          "409": {
+            "description": "Sigla já está sendo usada por outra unidade de medida"
+          }
+        },
+        "summary": "Atualizar unidade de medida",
+        "tags": [
+          "Unit Measures"
+        ]
+      },
+      "delete": {
+        "operationId": "UnitMeasuresController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da unidade de medida",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Unidade de medida removida com sucesso"
+          },
+          "404": {
+            "description": "Unidade de medida não encontrada"
+          },
+          "409": {
+            "description": "Unidade de medida está sendo usada por produtos ativos"
+          }
+        },
+        "summary": "Remover unidade de medida (soft delete)",
+        "tags": [
+          "Unit Measures"
+        ]
+      }
     }
   },
   "info": {
@@ -2048,6 +2756,16 @@
             "type": "string",
             "description": "Telefone de contato",
             "example": "11987654321"
+          },
+          "rg": {
+            "type": "string",
+            "description": "RG do funcionário",
+            "example": "123456789"
+          },
+          "cidadeId": {
+            "type": "number",
+            "description": "ID da cidade do funcionário",
+            "example": 1
           },
           "cargoId": {
             "type": "number",
@@ -2108,6 +2826,21 @@
             "description": "Telefone de contato",
             "example": "11987654321"
           },
+          "rg": {
+            "type": "string",
+            "description": "RG do funcionário",
+            "example": "123456789"
+          },
+          "cidadeId": {
+            "type": "number",
+            "description": "ID da cidade do funcionário",
+            "example": 1
+          },
+          "cidadeNome": {
+            "type": "string",
+            "description": "Nome da cidade do funcionário",
+            "example": "São Paulo"
+          },
           "cargoId": {
             "type": "number",
             "description": "ID do cargo do funcionário",
@@ -2164,6 +2897,9 @@
           "cpf",
           "email",
           "telefone",
+          "rg",
+          "cidadeId",
+          "cidadeNome",
           "cargoId",
           "cargoNome",
           "departamentoId",
@@ -2348,6 +3084,96 @@
             "example": true
           }
         }
+      },
+      "CreateCityDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome da cidade",
+            "example": "São Paulo"
+          },
+          "codigoIbge": {
+            "type": "string",
+            "description": "Código IBGE da cidade",
+            "example": "3550308"
+          },
+          "estadoId": {
+            "type": "number",
+            "description": "ID do estado ao qual a cidade pertence",
+            "example": 1
+          }
+        },
+        "required": [
+          "nome",
+          "estadoId"
+        ]
+      },
+      "City": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID único da cidade",
+            "example": 1
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome da cidade",
+            "example": "São Paulo"
+          },
+          "codigoIbge": {
+            "type": "string",
+            "description": "Código IBGE da cidade",
+            "example": "3550308"
+          },
+          "estadoId": {
+            "type": "number",
+            "description": "ID do estado ao qual a cidade pertence",
+            "example": 1
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de criação do registro",
+            "example": "2023-01-15T12:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data da última atualização do registro",
+            "example": "2023-01-15T12:00:00.000Z"
+          },
+          "estadoNome": {
+            "type": "string",
+            "description": "Nome do estado",
+            "example": "São Paulo"
+          },
+          "uf": {
+            "type": "string",
+            "description": "UF do estado",
+            "example": "SP"
+          },
+          "paisNome": {
+            "type": "string",
+            "description": "Nome do país",
+            "example": "Brasil"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "estadoId",
+          "createdAt",
+          "updatedAt",
+          "estadoNome",
+          "uf",
+          "paisNome"
+        ]
+      },
+      "UpdateCityDto": {
+        "type": "object",
+        "properties": {}
       },
       "CreateCustomerDto": {
         "type": "object",
@@ -2852,96 +3678,6 @@
         "type": "object",
         "properties": {}
       },
-      "CreateCityDto": {
-        "type": "object",
-        "properties": {
-          "nome": {
-            "type": "string",
-            "description": "Nome da cidade",
-            "example": "São Paulo"
-          },
-          "codigoIbge": {
-            "type": "string",
-            "description": "Código IBGE da cidade",
-            "example": "3550308"
-          },
-          "estadoId": {
-            "type": "number",
-            "description": "ID do estado ao qual a cidade pertence",
-            "example": 1
-          }
-        },
-        "required": [
-          "nome",
-          "estadoId"
-        ]
-      },
-      "City": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number",
-            "description": "ID único da cidade",
-            "example": 1
-          },
-          "nome": {
-            "type": "string",
-            "description": "Nome da cidade",
-            "example": "São Paulo"
-          },
-          "codigoIbge": {
-            "type": "string",
-            "description": "Código IBGE da cidade",
-            "example": "3550308"
-          },
-          "estadoId": {
-            "type": "number",
-            "description": "ID do estado ao qual a cidade pertence",
-            "example": 1
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Data de criação do registro",
-            "example": "2023-01-15T12:00:00.000Z"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Data da última atualização do registro",
-            "example": "2023-01-15T12:00:00.000Z"
-          },
-          "estadoNome": {
-            "type": "string",
-            "description": "Nome do estado",
-            "example": "São Paulo"
-          },
-          "uf": {
-            "type": "string",
-            "description": "UF do estado",
-            "example": "SP"
-          },
-          "paisNome": {
-            "type": "string",
-            "description": "Nome do país",
-            "example": "Brasil"
-          }
-        },
-        "required": [
-          "id",
-          "nome",
-          "estadoId",
-          "createdAt",
-          "updatedAt",
-          "estadoNome",
-          "uf",
-          "paisNome"
-        ]
-      },
-      "UpdateCityDto": {
-        "type": "object",
-        "properties": {}
-      },
       "CreatePaymentMethodDto": {
         "type": "object",
         "properties": {
@@ -3394,6 +4130,735 @@
             "type": "boolean",
             "description": "Status ativo/inativo do fornecedor",
             "example": true
+          }
+        }
+      },
+      "CreateProductDto": {
+        "type": "object",
+        "properties": {
+          "produto": {
+            "type": "string",
+            "description": "Nome/descrição do produto",
+            "example": "Notebook Dell Inspiron 15"
+          },
+          "unidadeMedidaId": {
+            "type": "number",
+            "description": "ID da unidade de medida",
+            "example": 1
+          },
+          "codigoBarras": {
+            "type": "string",
+            "description": "Código de barras do produto",
+            "example": "7891234567890"
+          },
+          "referencia": {
+            "type": "string",
+            "description": "Referência do produto",
+            "example": "NB001"
+          },
+          "marcaId": {
+            "type": "number",
+            "description": "ID da marca",
+            "example": 1
+          },
+          "categoriaId": {
+            "type": "number",
+            "description": "ID da categoria",
+            "example": 1
+          },
+          "quantidadeMinima": {
+            "type": "number",
+            "description": "Quantidade mínima em estoque",
+            "example": 5,
+            "default": 0
+          },
+          "valorCompra": {
+            "type": "number",
+            "description": "Valor de compra do produto",
+            "example": 1500
+          },
+          "valorVenda": {
+            "type": "number",
+            "description": "Valor de venda do produto",
+            "example": 2100
+          },
+          "quantidade": {
+            "type": "number",
+            "description": "Quantidade atual em estoque",
+            "example": 10,
+            "default": 0
+          },
+          "percentualLucro": {
+            "type": "number",
+            "description": "Percentual de lucro sobre o produto",
+            "example": 40
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição detalhada do produto",
+            "example": "Notebook Dell Inspiron 15 com processador Intel i5"
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações sobre o produto",
+            "example": "Produto em promoção até 31/12"
+          },
+          "situacao": {
+            "type": "string",
+            "description": "Data de situação do produto (formato YYYY-MM-DD)",
+            "example": "2025-06-19"
+          },
+          "usuarioCriacao": {
+            "type": "string",
+            "description": "Usuário que está criando o produto",
+            "example": "admin"
+          },
+          "codigo": {
+            "type": "string",
+            "description": "Código do produto para NFe",
+            "example": "PROD001"
+          },
+          "ncm": {
+            "type": "string",
+            "description": "NCM do produto",
+            "example": "8471.30.12"
+          },
+          "cest": {
+            "type": "string",
+            "description": "CEST do produto",
+            "example": "01.001.00"
+          },
+          "unidade": {
+            "type": "string",
+            "description": "Unidade para NFe",
+            "example": "UN"
+          },
+          "valorUnitario": {
+            "type": "number",
+            "description": "Valor unitário para NFe",
+            "example": 2100
+          },
+          "pesoLiquido": {
+            "type": "number",
+            "description": "Peso líquido em kg",
+            "example": 2.5
+          },
+          "pesoBruto": {
+            "type": "number",
+            "description": "Peso bruto em kg",
+            "example": 3
+          },
+          "gtin": {
+            "type": "string",
+            "description": "GTIN/EAN do produto",
+            "example": "7891234567890"
+          },
+          "gtinTributavel": {
+            "type": "string",
+            "description": "GTIN tributável",
+            "example": "7891234567890"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status do produto (ativo/inativo)",
+            "example": true,
+            "default": true
+          }
+        },
+        "required": [
+          "produto",
+          "quantidadeMinima",
+          "quantidade",
+          "ativo"
+        ]
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID único do produto",
+            "example": 1
+          },
+          "produto": {
+            "type": "string",
+            "description": "Nome/descrição do produto",
+            "example": "Notebook Dell Inspiron 15"
+          },
+          "unidadeMedidaId": {
+            "type": "number",
+            "description": "ID da unidade de medida",
+            "example": 1
+          },
+          "unidadeMedidaNome": {
+            "type": "string",
+            "description": "Nome da unidade de medida",
+            "example": "UN"
+          },
+          "codigoBarras": {
+            "type": "string",
+            "description": "Código de barras do produto",
+            "example": "7891234567890"
+          },
+          "referencia": {
+            "type": "string",
+            "description": "Referência do produto",
+            "example": "NB001"
+          },
+          "marcaId": {
+            "type": "number",
+            "description": "ID da marca",
+            "example": 1
+          },
+          "marcaNome": {
+            "type": "string",
+            "description": "Nome da marca",
+            "example": "Dell"
+          },
+          "categoriaId": {
+            "type": "number",
+            "description": "ID da categoria",
+            "example": 1
+          },
+          "categoriaNome": {
+            "type": "string",
+            "description": "Nome da categoria",
+            "example": "Informática"
+          },
+          "quantidadeMinima": {
+            "type": "number",
+            "description": "Quantidade mínima em estoque",
+            "example": 5,
+            "default": 0
+          },
+          "valorCompra": {
+            "type": "number",
+            "description": "Valor de compra do produto",
+            "example": 1500
+          },
+          "valorVenda": {
+            "type": "number",
+            "description": "Valor de venda do produto",
+            "example": 2100
+          },
+          "quantidade": {
+            "type": "number",
+            "description": "Quantidade atual em estoque",
+            "example": 10,
+            "default": 0
+          },
+          "percentualLucro": {
+            "type": "number",
+            "description": "Percentual de lucro sobre o produto",
+            "example": 40
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição detalhada do produto",
+            "example": "Notebook Dell Inspiron 15 com processador Intel i5"
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações sobre o produto",
+            "example": "Produto em promoção até 31/12"
+          },
+          "situacao": {
+            "type": "string",
+            "description": "Data de situação do produto",
+            "example": "2025-06-19"
+          },
+          "dataCriacao": {
+            "type": "string",
+            "description": "Data de criação do produto",
+            "example": "2025-06-19"
+          },
+          "dataAlteracao": {
+            "type": "string",
+            "description": "Data da última alteração",
+            "example": "2025-06-19"
+          },
+          "usuarioCriacao": {
+            "type": "string",
+            "description": "Usuário que criou o produto",
+            "example": "admin"
+          },
+          "usuarioAtualizacao": {
+            "type": "string",
+            "description": "Usuário que atualizou o produto",
+            "example": "admin"
+          },
+          "codigo": {
+            "type": "string",
+            "description": "Código do produto para NFe",
+            "example": "PROD001"
+          },
+          "ncm": {
+            "type": "string",
+            "description": "NCM do produto",
+            "example": "8471.30.12"
+          },
+          "cest": {
+            "type": "string",
+            "description": "CEST do produto",
+            "example": "01.001.00"
+          },
+          "unidade": {
+            "type": "string",
+            "description": "Unidade para NFe",
+            "example": "UN"
+          },
+          "valorUnitario": {
+            "type": "number",
+            "description": "Valor unitário para NFe",
+            "example": 2100
+          },
+          "pesoLiquido": {
+            "type": "number",
+            "description": "Peso líquido em kg",
+            "example": 2.5
+          },
+          "pesoBruto": {
+            "type": "number",
+            "description": "Peso bruto em kg",
+            "example": 3
+          },
+          "gtin": {
+            "type": "string",
+            "description": "GTIN/EAN do produto",
+            "example": "7891234567890"
+          },
+          "gtinTributavel": {
+            "type": "string",
+            "description": "GTIN tributável",
+            "example": "7891234567890"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status do produto (ativo/inativo)",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Data de criação do registro",
+            "example": "2025-06-19T10:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Data da última atualização",
+            "example": "2025-06-19T10:00:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "produto",
+          "quantidadeMinima",
+          "quantidade",
+          "dataCriacao",
+          "dataAlteracao",
+          "ativo",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateProductDto": {
+        "type": "object",
+        "properties": {
+          "produto": {
+            "type": "string",
+            "description": "Nome/descrição do produto",
+            "example": "Notebook Dell Inspiron 15"
+          },
+          "unidadeMedidaId": {
+            "type": "number",
+            "description": "ID da unidade de medida",
+            "example": 1
+          },
+          "codigoBarras": {
+            "type": "string",
+            "description": "Código de barras do produto",
+            "example": "7891234567890"
+          },
+          "referencia": {
+            "type": "string",
+            "description": "Referência do produto",
+            "example": "NB001"
+          },
+          "marcaId": {
+            "type": "number",
+            "description": "ID da marca",
+            "example": 1
+          },
+          "categoriaId": {
+            "type": "number",
+            "description": "ID da categoria",
+            "example": 1
+          },
+          "quantidadeMinima": {
+            "type": "number",
+            "description": "Quantidade mínima em estoque",
+            "example": 5,
+            "default": 0
+          },
+          "valorCompra": {
+            "type": "number",
+            "description": "Valor de compra do produto",
+            "example": 1500
+          },
+          "valorVenda": {
+            "type": "number",
+            "description": "Valor de venda do produto",
+            "example": 2100
+          },
+          "quantidade": {
+            "type": "number",
+            "description": "Quantidade atual em estoque",
+            "example": 10,
+            "default": 0
+          },
+          "percentualLucro": {
+            "type": "number",
+            "description": "Percentual de lucro sobre o produto",
+            "example": 40
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição detalhada do produto",
+            "example": "Notebook Dell Inspiron 15 com processador Intel i5"
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações sobre o produto",
+            "example": "Produto em promoção até 31/12"
+          },
+          "situacao": {
+            "type": "string",
+            "description": "Data de situação do produto (formato YYYY-MM-DD)",
+            "example": "2025-06-19"
+          },
+          "usuarioCriacao": {
+            "type": "string",
+            "description": "Usuário que está criando o produto",
+            "example": "admin"
+          },
+          "codigo": {
+            "type": "string",
+            "description": "Código do produto para NFe",
+            "example": "PROD001"
+          },
+          "ncm": {
+            "type": "string",
+            "description": "NCM do produto",
+            "example": "8471.30.12"
+          },
+          "cest": {
+            "type": "string",
+            "description": "CEST do produto",
+            "example": "01.001.00"
+          },
+          "unidade": {
+            "type": "string",
+            "description": "Unidade para NFe",
+            "example": "UN"
+          },
+          "valorUnitario": {
+            "type": "number",
+            "description": "Valor unitário para NFe",
+            "example": 2100
+          },
+          "pesoLiquido": {
+            "type": "number",
+            "description": "Peso líquido em kg",
+            "example": 2.5
+          },
+          "pesoBruto": {
+            "type": "number",
+            "description": "Peso bruto em kg",
+            "example": 3
+          },
+          "gtin": {
+            "type": "string",
+            "description": "GTIN/EAN do produto",
+            "example": "7891234567890"
+          },
+          "gtinTributavel": {
+            "type": "string",
+            "description": "GTIN tributável",
+            "example": "7891234567890"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status do produto (ativo/inativo)",
+            "example": true,
+            "default": true
+          },
+          "usuarioAtualizacao": {
+            "type": "string",
+            "description": "Usuário que está atualizando o produto",
+            "example": "admin"
+          }
+        }
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome da categoria",
+            "example": "Informática"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição da categoria",
+            "example": "Produtos de informática e tecnologia"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status da categoria (ativo/inativo)",
+            "example": true,
+            "default": true
+          }
+        },
+        "required": [
+          "nome",
+          "ativo"
+        ]
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID único da categoria",
+            "example": 1
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome da categoria",
+            "example": "Informática"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição da categoria",
+            "example": "Produtos de informática e tecnologia"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status da categoria (ativo/inativo)",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Data de criação do registro",
+            "example": "2025-06-19T10:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Data da última atualização",
+            "example": "2025-06-19T10:00:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "ativo",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome da categoria",
+            "example": "Informática"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição da categoria",
+            "example": "Produtos de informática e tecnologia"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status da categoria (ativo/inativo)",
+            "example": true,
+            "default": true
+          }
+        }
+      },
+      "CreateBrandDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome da marca",
+            "example": "Dell"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição da marca",
+            "example": "Marca de equipamentos de informática"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status da marca (ativo/inativo)",
+            "example": true,
+            "default": true
+          }
+        },
+        "required": [
+          "nome",
+          "ativo"
+        ]
+      },
+      "Brand": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID único da marca",
+            "example": 1
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome da marca",
+            "example": "Dell"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição da marca",
+            "example": "Marca de equipamentos de informática"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status da marca (ativo/inativo)",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Data de criação do registro",
+            "example": "2025-06-19T10:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Data da última atualização",
+            "example": "2025-06-19T10:00:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "ativo",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateBrandDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome da marca",
+            "example": "Dell"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição da marca",
+            "example": "Marca de equipamentos de informática"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status da marca (ativo/inativo)",
+            "example": true,
+            "default": true
+          }
+        }
+      },
+      "CreateUnitMeasureDto": {
+        "type": "object",
+        "properties": {
+          "sigla": {
+            "type": "string",
+            "description": "Sigla da unidade de medida",
+            "example": "UN"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição da unidade de medida",
+            "example": "Unidade"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status da unidade de medida (ativo/inativo)",
+            "example": true,
+            "default": true
+          }
+        },
+        "required": [
+          "sigla",
+          "ativo"
+        ]
+      },
+      "UnitMeasure": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID único da unidade de medida",
+            "example": 1
+          },
+          "sigla": {
+            "type": "string",
+            "description": "Sigla da unidade de medida",
+            "example": "UN"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição da unidade de medida",
+            "example": "Unidade"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status da unidade de medida (ativo/inativo)",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Data de criação do registro",
+            "example": "2025-06-19T10:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Data da última atualização",
+            "example": "2025-06-19T10:00:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "sigla",
+          "ativo",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateUnitMeasureDto": {
+        "type": "object",
+        "properties": {
+          "sigla": {
+            "type": "string",
+            "description": "Sigla da unidade de medida",
+            "example": "UN"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição da unidade de medida",
+            "example": "Unidade"
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status da unidade de medida (ativo/inativo)",
+            "example": true,
+            "default": true
           }
         }
       }

@@ -306,8 +306,10 @@ CREATE TABLE funcionario (
     cpf VARCHAR(11) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     telefone VARCHAR(20),
+    rg VARCHAR(20),
     cargo_id INTEGER REFERENCES cargo(id),
     departamento_id INTEGER REFERENCES departamento(id),
+    cidade_id INTEGER REFERENCES cidade(id),
     data_admissao DATE NOT NULL,
     data_demissao DATE,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
@@ -449,6 +451,7 @@ CREATE INDEX idx_funcionario_cpf ON funcionario(cpf);
 CREATE INDEX idx_funcionario_email ON funcionario(email);
 CREATE INDEX idx_funcionario_cargo_id ON funcionario(cargo_id);
 CREATE INDEX idx_funcionario_departamento_id ON funcionario(departamento_id);
+CREATE INDEX idx_funcionario_cidade_id ON funcionario(cidade_id);
 CREATE INDEX idx_transportador_cidade_id ON transportador(cidade_id);
 -- Índices para produtos e tabelas relacionadas
 CREATE INDEX idx_produto_marca_id ON produto(marca_id);
@@ -662,8 +665,10 @@ COMMENT ON COLUMN dbo.funcionario.nome IS 'Nome completo do funcionário';
 COMMENT ON COLUMN dbo.funcionario.cpf IS 'CPF do funcionário (apenas números)';
 COMMENT ON COLUMN dbo.funcionario.email IS 'Email profissional do funcionário';
 COMMENT ON COLUMN dbo.funcionario.telefone IS 'Telefone de contato do funcionário';
+COMMENT ON COLUMN dbo.funcionario.rg IS 'RG do funcionário';
 COMMENT ON COLUMN dbo.funcionario.cargo_id IS 'ID do cargo do funcionário';
 COMMENT ON COLUMN dbo.funcionario.departamento_id IS 'ID do departamento do funcionário';
+COMMENT ON COLUMN dbo.funcionario.cidade_id IS 'ID da cidade do funcionário';
 COMMENT ON COLUMN dbo.funcionario.data_admissao IS 'Data de admissão do funcionário';
 COMMENT ON COLUMN dbo.funcionario.data_demissao IS 'Data de demissão do funcionário (se aplicável)';
 COMMENT ON COLUMN dbo.funcionario.ativo IS 'Indica se o funcionário está ativo';

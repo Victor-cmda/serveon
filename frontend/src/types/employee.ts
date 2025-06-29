@@ -4,6 +4,9 @@ export interface Employee {
   cpf: string;
   email: string;
   telefone?: string;
+  rg?: string;
+  cidadeId?: number;
+  cidadeNome?: string;
   cargoId?: number;
   cargoNome?: string;
   departamentoId?: number;
@@ -20,6 +23,8 @@ export interface CreateEmployeeDto {
   cpf: string;
   email: string;
   telefone?: string;
+  rg?: string;
+  cidadeId?: number;
   cargoId?: number;
   departamentoId?: number;
   dataAdmissao: string;
@@ -30,6 +35,8 @@ export interface UpdateEmployeeDto {
   nome?: string;
   email?: string;
   telefone?: string;
+  rg?: string;
+  cidadeId?: number;
   cargoId?: number;
   departamentoId?: number;
   dataAdmissao?: string;

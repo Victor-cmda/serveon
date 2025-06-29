@@ -9,13 +9,6 @@ import {
 import { Input } from "../../../components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 
-interface DocumentsFormData {
-  cnpjCpf: string;
-  inscricaoEstadual?: string;
-  inscricaoMunicipal?: string;
-  [key: string]: any;
-}
-
 interface Formatters {
   cnpj: (value: string | undefined) => string;
   cpf: (value: string | undefined) => string;
@@ -23,7 +16,7 @@ interface Formatters {
 }
 
 interface DocumentsSectionProps {
-  form: UseFormReturn<DocumentsFormData>;
+  form: UseFormReturn<any>;
   isLoading: boolean;
   formatters: Formatters;
   watchTipo: 'J' | 'F';
@@ -38,7 +31,12 @@ const DocumentsSection = ({
   watchIsEstrangeiro
 }: DocumentsSectionProps) => {
   return (
-    <div className="space-y-4">      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-2">
+        <h4 className="text-lg font-semibold text-foreground">Documentos</h4>
+        <div className="flex-1 h-px bg-border"></div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         <div className="lg:col-span-8">
           <FormField
             control={form.control}

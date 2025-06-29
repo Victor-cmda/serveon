@@ -9,18 +9,12 @@ import {
 import { Input } from '../../../components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
 
-interface ContactFormData {
-  telefone?: string;
-  email?: string;
-  [key: string]: any;
-}
-
 interface Formatters {
   telefone: (value: string | undefined) => string;
 }
 
 interface ContactSectionProps {
-  form: UseFormReturn<ContactFormData>;
+  form: UseFormReturn<any>;
   isLoading: boolean;
   formatters: Formatters;
 }
@@ -31,7 +25,12 @@ const ContactSection = ({
   formatters,
 }: ContactSectionProps) => {
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-2">
+        <h4 className="text-lg font-semibold text-foreground">Contato</h4>
+        <div className="flex-1 h-px bg-border"></div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
       <FormField
         control={form.control}
         name="telefone"
@@ -77,6 +76,7 @@ const ContactSection = ({
           </FormItem>
         )}
       />
+    </div>
     </div>
   );
 };

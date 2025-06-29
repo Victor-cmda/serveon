@@ -16,6 +16,7 @@ import { UpdateEmployeeDto } from '../dto/update-employee.dto';
 import { Employee } from '../entities/employee.entity';
 import { DepartmentsService } from '../../departments/services/departments.service';
 import { PositionsService } from '../../positions/services/positions.service';
+import { CitiesService } from '../../cities/services/cities/cities.service';
 
 @ApiTags('Funcionários')
 @Controller('employees')
@@ -24,6 +25,7 @@ export class EmployeesController {
     private readonly employeesService: EmployeesService,
     private readonly departmentsService: DepartmentsService,
     private readonly positionsService: PositionsService,
+    private readonly citiesService: CitiesService,
   ) {}
 
   @Post()
@@ -114,5 +116,13 @@ export class EmployeesController {
   @ApiResponse({ status: 200, description: 'Lista de cargos do departamento.' })
   getPositionsByDepartment(@Param('departmentId') departmentId: string) {
     return this.positionsService.findByDepartment(+departmentId);
+  }
+
+  @Get('cities/active')
+  @ApiOperation({ summary: 'Listar cidades ativas para seleção' })
+  @ApiResponse({ status: 200, description: 'Lista de cidades ativas.' })
+  async getActiveCities() {
+    const cities = await this.citiesService.findAll();
+    return cities;
   }
 }

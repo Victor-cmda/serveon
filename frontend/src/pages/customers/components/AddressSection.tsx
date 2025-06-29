@@ -12,23 +12,13 @@ import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { City } from '../../../types/location';
 
-interface AddressFormData {
-  endereco?: string;
-  numero?: string;
-  complemento?: string;
-  bairro?: string;
-  cep?: string;
-  cidadeId?: number;
-  [key: string]: any;
-}
-
 interface Formatters {
   numero: (value: string | undefined) => string;
   cep: (value: string | undefined) => string;
 }
 
 interface AddressSectionProps {
-  form: UseFormReturn<AddressFormData>;
+  form: UseFormReturn<any>;
   isLoading: boolean;
   formatters: Formatters;
   selectedCity: City | null;
@@ -46,6 +36,10 @@ const AddressSection = ({
 }: AddressSectionProps) => {
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-2">
+        <h4 className="text-lg font-semibold text-foreground">Endereço</h4>
+        <div className="flex-1 h-px bg-border"></div>
+      </div>
       <div className="grid grid-cols-1 gap-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
           <FormField

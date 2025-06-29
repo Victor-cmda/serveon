@@ -52,6 +52,25 @@ export class CreateEmployeeDto {
   telefone?: string;
 
   @ApiProperty({
+    description: 'RG do funcionário',
+    example: '123456789',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'RG deve ser uma string' })
+  @MaxLength(20, { message: 'RG deve ter no máximo 20 caracteres' })
+  rg?: string;
+
+  @ApiProperty({
+    description: 'ID da cidade do funcionário',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'ID da cidade deve ser um número' })
+  cidadeId?: number;
+
+  @ApiProperty({
     description: 'ID do cargo do funcionário',
     example: 1,
     required: false,
