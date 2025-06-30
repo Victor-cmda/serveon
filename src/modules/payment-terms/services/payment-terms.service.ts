@@ -28,7 +28,7 @@ export class PaymentTermsService {
         [
           createPaymentTermDto.name,
           createPaymentTermDto.description,
-          createPaymentTermDto.isActive,
+          createPaymentTermDto.ativo, // Usar ativo em vez de isActive
         ],
       );
 
@@ -49,7 +49,7 @@ export class PaymentTermsService {
             installment.daysToPayment,
             installment.percentageValue,
             installment.interestRate || 0,
-            installment.isActive !== undefined ? installment.isActive : true,
+            installment.ativo !== undefined ? installment.ativo : true, // Usar ativo
           ],
         );
       }
@@ -175,9 +175,9 @@ export class PaymentTermsService {
         paramCount++;
       }
 
-      if (updatePaymentTermDto.isActive !== undefined) {
+      if (updatePaymentTermDto.ativo !== undefined) { // Usar ativo
         updates.push(`ativo = $${paramCount}`);
-        values.push(updatePaymentTermDto.isActive);
+        values.push(updatePaymentTermDto.ativo); // Usar ativo
         paramCount++;
       }
 
@@ -230,7 +230,7 @@ export class PaymentTermsService {
               installment.daysToPayment,
               installment.percentageValue,
               installment.interestRate || 0,
-              installment.isActive !== undefined ? installment.isActive : true,
+              installment.ativo !== undefined ? installment.ativo : true, // Usar ativo
             ],
           );
         }

@@ -19,8 +19,8 @@ import {
 } from '../../components/ui/form';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
-import { Switch } from '../../components/ui/switch';
 import { Badge } from '../../components/ui/badge';
+import AuditSection from '../../components/AuditSection';
 
 const positionSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório').max(100, 'Nome deve ter no máximo 100 caracteres'),
@@ -45,6 +45,7 @@ const PositionForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
+  const [positionData, setPositionData] = useState<any>(null);
   
   // Estados para os diálogos
   const [departmentSearchOpen, setDepartmentSearchOpen] = useState(false);
@@ -73,6 +74,7 @@ const PositionForm: React.FC = () => {
       setLoading(true);
       const data = await positionApi.getById(parseInt(id));
       
+      setPositionData(data);
       form.reset({
         nome: data.nome,
         descricao: data.descricao || '',
@@ -242,6 +244,15 @@ const PositionForm: React.FC = () => {
             </p>
           </div>
         </div>
+        
+        {/* AuditSection no header */}
+        <AuditSection 
+          form={form} 
+          data={positionData}
+          variant="header" 
+          isEditing={!!id}
+          statusFieldName="ativo" // Campo de status é 'ativo' para Position
+        />
       </div>
 
       <Form {...form}>
@@ -258,27 +269,6 @@ const PositionForm: React.FC = () => {
                       Informações básicas do cargo
                     </p>
                   </div>
-                  
-                  {id && (
-                    <FormField
-                      control={form.control}
-                      name="ativo"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0 flex-shrink-0">
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              disabled={loading}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-medium whitespace-nowrap">
-                            Cargo Ativo
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                  )}
                 </div>
               </div>
               <div className="p-6 pt-0">

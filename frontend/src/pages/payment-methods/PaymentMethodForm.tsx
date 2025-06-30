@@ -15,10 +15,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
 import { paymentMethodApi } from '@/services/api';
 import { toast } from 'sonner';
 import { CreatePaymentMethodDto, UpdatePaymentMethodDto } from '@/types/payment-method';
+import AuditSection from '@/components/AuditSection';
 
 // Schema para validação do formulário
 const formSchema = z.object({
@@ -35,6 +35,7 @@ const PaymentMethodForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(id ? true : false);
+  const [paymentMethodData, setPaymentMethodData] = useState<any>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -50,6 +51,7 @@ const PaymentMethodForm = () => {
     setIsLoadingData(true);
     try {
       const data = await paymentMethodApi.getById(Number(paymentMethodId));
+      setPaymentMethodData(data);
       form.reset({
         description: data.description,
         code: data.code || '',
@@ -78,7 +80,7 @@ const PaymentMethodForm = () => {
     try {
       const paymentMethodData: CreatePaymentMethodDto | UpdatePaymentMethodDto = {
         description: values.description,
-        ativo: values.active,
+        ativo: values.active
       };
       
       // Somente incluir código e tipo se não estiverem vazios
@@ -148,26 +150,14 @@ const PaymentMethodForm = () => {
           </div>
         </div>
         
-        {id && (
-          <FormField
-            control={form.control}
-            name="active"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center space-x-2 space-y-0 flex-shrink-0">
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    disabled={isLoading}
-                  />
-                </FormControl>
-                <FormLabel className="text-sm font-medium whitespace-nowrap">
-                  Método Ativo
-                </FormLabel>
-              </FormItem>
-            )}
-          />
-        )}
+        {/* AuditSection no header */}
+        <AuditSection 
+          form={form} 
+          data={paymentMethodData}
+          variant="header" 
+          isEditing={!!id}
+          statusFieldName="active" // Campo de status é 'active' para PaymentMethod
+        />
       </div>
 
       <Form {...form}>

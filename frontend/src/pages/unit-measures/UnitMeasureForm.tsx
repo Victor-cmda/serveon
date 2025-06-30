@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/button';
 import { unitMeasureApi } from '../../services/api';
 import { toast } from 'sonner';
 import { Form } from '../../components/ui/form';
+import AuditSection from '../../components/AuditSection';
 
 // Componente modular
 import UnitMeasureGeneralSection from './components/UnitMeasureGeneralSection';
@@ -26,6 +27,7 @@ const UnitMeasureForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [unitMeasureData, setUnitMeasureData] = useState<any>(null); // Estado para dados da unidade de medida
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -44,6 +46,7 @@ const UnitMeasureForm = () => {
       try {
         setIsLoading(true);
         const unitMeasure = await unitMeasureApi.getById(Number(id));
+        setUnitMeasureData(unitMeasure); // Armazenar dados para AuditSection
         form.reset({
           id: unitMeasure.id || 0,
           nome: unitMeasure.nome || '',
@@ -112,6 +115,15 @@ const UnitMeasureForm = () => {
             </p>
           </div>
         </div>
+        
+        {/* AuditSection no header */}
+        <AuditSection 
+          form={form} 
+          data={unitMeasureData}
+          variant="header" 
+          isEditing={!!id}
+          statusFieldName="ativo" // Campo de status é 'ativo' para UnitMeasure
+        />
       </div>
 
       <Form {...form}>

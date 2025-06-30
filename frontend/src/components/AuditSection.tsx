@@ -8,15 +8,24 @@ interface AuditSectionProps {
   form: UseFormReturn<any>;
   data?: {
     id?: number;
+    active?: boolean;
     ativo?: boolean;
+    isActive?: boolean;
     createdAt?: string;
     updatedAt?: string;
   };
   isEditing?: boolean;
   variant?: 'header' | 'section'; // Nova prop para controlar layout
+  statusFieldName?: string; // Nome do campo de status no formulário
 }
 
-const AuditSection = ({ form, data, isEditing = false, variant = 'section' }: AuditSectionProps) => {
+const AuditSection = ({ 
+  form, 
+  data, 
+  isEditing = false, 
+  variant = 'section',
+  statusFieldName = 'active' // Padrão para 'active'
+}: AuditSectionProps) => {
   const formatDateTime = (dateString?: string) => {
     if (!dateString) return '--';
     try {
@@ -40,13 +49,14 @@ const AuditSection = ({ form, data, isEditing = false, variant = 'section' }: Au
         {/* Status */}
         <FormField
           control={form.control}
-          name="ativo"
+          name={statusFieldName}
           render={({ field }) => (
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium">Status:</span>
               <Switch 
                 checked={field.value} 
                 onCheckedChange={field.onChange}
+                disabled={!isEditing} // Desabilitar para novos registros
                 className="scale-75"
               />
               <span className={`text-xs font-medium ${field.value ? 'text-green-600' : 'text-red-500'}`}>
@@ -91,7 +101,7 @@ const AuditSection = ({ form, data, isEditing = false, variant = 'section' }: Au
       {/* Status - sempre visível */}
       <FormField
         control={form.control}
-        name="ativo"
+        name={statusFieldName}
         render={({ field }) => (
           <FormItem className="space-y-1">
             <FormLabel className="text-xs font-medium flex items-center gap-1">
@@ -99,7 +109,11 @@ const AuditSection = ({ form, data, isEditing = false, variant = 'section' }: Au
               Status
             </FormLabel>
             <div className="flex items-center space-x-2">
-              <Switch checked={field.value} onCheckedChange={field.onChange} />
+              <Switch 
+                checked={field.value} 
+                onCheckedChange={field.onChange}
+                disabled={!isEditing} // Desabilitar para novos registros
+              />
               <span className="text-xs">
                 {field.value ? 'Ativo' : 'Inativo'}
               </span>

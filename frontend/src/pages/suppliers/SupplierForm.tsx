@@ -5,13 +5,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { supplierApi, cityApi, paymentTermApi } from '@/services/api';
 import { City } from '@/types/location';
 import { PaymentTerm } from '@/types/payment-term';
 import { toast } from 'sonner';
 import { SearchDialog } from '@/components/SearchDialog';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Form } from '@/components/ui/form';
 import AuditSection from '@/components/AuditSection';
 
 import StateCreationDialog from '@/components/dialogs/StateCreationDialog';
@@ -355,26 +354,14 @@ export default function SupplierForm() {
           </div>
         </div>
         
-        {isEditing && (
-          <FormField
-            control={form.control}
-            name="ativo"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center space-x-2 space-y-0 flex-shrink-0">
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    disabled={isLoading}
-                  />
-                </FormControl>
-                <FormLabel className="text-sm font-medium whitespace-nowrap">
-                  Fornecedor Ativo
-                </FormLabel>
-              </FormItem>
-            )}
-          />
-        )}
+        {/* AuditSection no header */}
+        <AuditSection 
+          form={form} 
+          data={supplierData}
+          variant="header" 
+          isEditing={isEditing}
+          statusFieldName="ativo" // Campo de status é 'ativo' para Supplier
+        />
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -429,17 +416,6 @@ export default function SupplierForm() {
                 isLoading={isLoading}
                 selectedPaymentTerm={selectedPaymentTerm}
                 setPaymentTermSearchOpen={setPaymentTermSearchOpen}
-              />
-              
-              <AuditSection
-                form={form}
-                data={{
-                  id: isEditing ? supplierData?.id : undefined,
-                  ativo: form.watch('ativo'),
-                  createdAt: supplierData?.createdAt,
-                  updatedAt: supplierData?.updatedAt,
-                }}
-                isEditing={isEditing}
               />
             </div>
           </div>

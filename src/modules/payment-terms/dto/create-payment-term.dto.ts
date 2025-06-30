@@ -20,7 +20,7 @@ export class CreatePaymentTermDto {
 
   @IsOptional()
   @IsBoolean()
-  isActive?: boolean = true;
+  ativo?: boolean = true; // Manter ativo no backend para consistência com banco de dados
 
   @IsArray()
   @ValidateNested({ each: true })

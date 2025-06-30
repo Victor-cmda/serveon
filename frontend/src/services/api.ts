@@ -313,15 +313,34 @@ export const supplierApi = {
   },
 };
 
+// Função para transformar dados de payment method entre frontend (active) e backend (ativo)
+const transformPaymentMethodToBackend = (data: CreatePaymentMethodDto | UpdatePaymentMethodDto) => {
+  const { active, ...rest } = data as any;
+  return {
+    ...rest,
+    ativo: active, // Transformar active para ativo para o backend
+  };
+};
+
+const transformPaymentMethodFromBackend = (data: any): PaymentMethod => {
+  const { ativo, ...rest } = data;
+  return {
+    ...rest,
+    active: ativo, // Transformar ativo para active no frontend
+  };
+};
+
 export const paymentMethodApi = {
   getAll: async (): Promise<PaymentMethod[]> => {
     const response = await fetch(`${API_URL}/payment-methods`);
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    return data.map(transformPaymentMethodFromBackend);
   },
 
   getById: async (id: number): Promise<PaymentMethod> => {
     const response = await fetch(`${API_URL}/payment-methods/${id}`);
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    return transformPaymentMethodFromBackend(data);
   },
 
   create: async (paymentMethod: CreatePaymentMethodDto): Promise<PaymentMethod> => {
@@ -330,9 +349,10 @@ export const paymentMethodApi = {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(paymentMethod),
+      body: JSON.stringify(transformPaymentMethodToBackend(paymentMethod)),
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    return transformPaymentMethodFromBackend(data);
   },
 
   update: async (id: number, paymentMethod: UpdatePaymentMethodDto): Promise<PaymentMethod> => {
@@ -341,9 +361,10 @@ export const paymentMethodApi = {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(paymentMethod),
+      body: JSON.stringify(transformPaymentMethodToBackend(paymentMethod)),
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    return transformPaymentMethodFromBackend(data);
   },
 
   delete: async (id: number): Promise<void> => {
@@ -354,15 +375,48 @@ export const paymentMethodApi = {
   },
 };
 
+// Função para transformar dados de payment term entre frontend (isActive) e backend (ativo)
+const transformPaymentTermToBackend = (data: CreatePaymentTermDto | UpdatePaymentTermDto) => {
+  const { isActive, installments, ...rest } = data as any;
+  return {
+    ...rest,
+    ativo: isActive, // Transformar isActive para ativo para o backend
+    installments: installments?.map((inst: any) => {
+      const { isActive: instIsActive, ...instRest } = inst;
+      return {
+        ...instRest,
+        ativo: instIsActive, // Transformar isActive para ativo nas parcelas
+      };
+    }),
+  };
+};
+
+const transformPaymentTermFromBackend = (data: any): PaymentTerm => {
+  const { ativo, installments, ...rest } = data;
+  return {
+    ...rest,
+    isActive: ativo, // Transformar ativo para isActive no frontend
+    installments: installments?.map((inst: any) => {
+      const { ativo: instAtivo, ...instRest } = inst;
+      return {
+        ...instRest,
+        isActive: instAtivo, // Transformar ativo para isActive nas parcelas
+      };
+    }) || [],
+  };
+};
+
 export const paymentTermApi = {
   getAll: async (): Promise<PaymentTerm[]> => {
     const response = await fetch(`${API_URL}/payment-terms`);
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    return data.map(transformPaymentTermFromBackend);
   },
 
   getById: async (id: number): Promise<PaymentTerm> => {
     const response = await fetch(`${API_URL}/payment-terms/${id}`);
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    return transformPaymentTermFromBackend(data);
   },
 
   create: async (paymentTerm: CreatePaymentTermDto): Promise<PaymentTerm> => {
@@ -371,9 +425,10 @@ export const paymentTermApi = {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(paymentTerm),
+      body: JSON.stringify(transformPaymentTermToBackend(paymentTerm)),
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    return transformPaymentTermFromBackend(data);
   },
 
   update: async (id: number, paymentTerm: UpdatePaymentTermDto): Promise<PaymentTerm> => {
@@ -382,9 +437,10 @@ export const paymentTermApi = {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(paymentTerm),
+      body: JSON.stringify(transformPaymentTermToBackend(paymentTerm)),
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    return transformPaymentTermFromBackend(data);
   },
   delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_URL}/payment-terms/${id}`, {

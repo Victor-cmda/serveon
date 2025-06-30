@@ -6,7 +6,6 @@ import {
   FormMessage,
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
-import { Switch } from '../../../components/ui/switch';
 import { UseFormReturn } from 'react-hook-form';
 
 interface BrandGeneralSectionProps {
@@ -27,27 +26,6 @@ const BrandGeneralSection = ({
           <h4 className="text-lg font-semibold text-foreground">Dados Gerais</h4>
           <div className="flex-1 h-px bg-border"></div>
         </div>
-        
-        {id && (
-          <FormField
-            control={form.control}
-            name="ativo"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center space-x-2 space-y-0 flex-shrink-0">
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    disabled={isLoading}
-                  />
-                </FormControl>
-                <FormLabel className="text-sm font-medium whitespace-nowrap">
-                  Marca Ativa
-                </FormLabel>
-              </FormItem>
-            )}
-          />
-        )}
       </div>
       
       {id && (

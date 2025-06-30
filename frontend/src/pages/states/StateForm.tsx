@@ -14,12 +14,12 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Switch } from '@/components/ui/switch';
 import { stateApi, countryApi } from '@/services/api';
 import { Country } from '@/types/location';
 import { toast } from 'sonner';
 import CountryCreationDialog from '@/components/dialogs/CountryCreationDialog';
 import { SearchDialog } from '@/components/SearchDialog';
+import AuditSection from '@/components/AuditSection';
 
 const formSchema = z.object({
   nome: z
@@ -38,6 +38,7 @@ const StateForm = () => {
   const [countryDialogOpen, setCountryDialogOpen] = useState(false);
   const [countrySearchOpen, setCountrySearchOpen] = useState(false);
   const [countryToEdit, setCountryToEdit] = useState<Country | null>(null);
+  const [stateData, setStateData] = useState<any>(null);
   const location = useLocation();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -70,10 +71,12 @@ const StateForm = () => {
       setIsLoading(true);
       try {
         const state = await stateApi.getById(Number(id));
+        setStateData(state);
         form.reset({
           nome: state.nome,
           uf: state.uf,
           paisId: state.paisId,
+          ativo: state.ativo,
         });
       } catch (error) {
         console.error('Erro ao buscar estado:', error);
@@ -175,6 +178,15 @@ const StateForm = () => {
             </p>
           </div>
         </div>
+        
+        {/* AuditSection no header */}
+        <AuditSection 
+          form={form} 
+          data={stateData}
+          variant="header" 
+          isEditing={!!id}
+          statusFieldName="ativo" // Campo de status é 'ativo' para State
+        />
       </div>
 
       <Form {...form}>
@@ -265,32 +277,6 @@ const StateForm = () => {
                       </FormItem>
                     )}
                   />
-
-                  {id && (
-                    <FormField
-                      control={form.control}
-                      name="ativo"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="text-base font-medium">
-                              Estado Ativo
-                            </FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              Desative para ocultar o estado das listagens
-                            </p>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  )}
                 </div>
               </div>
             </div>

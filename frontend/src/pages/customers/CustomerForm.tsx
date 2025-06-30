@@ -587,6 +587,7 @@ const CustomerForm = () => {
           }}
           variant="header"
           isEditing={!!id}
+          statusFieldName="ativo" // Campo de status é 'ativo' para Customer
         />
       </div>
       <Form {...form}>

@@ -17,7 +17,7 @@ import {
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
-import { Switch } from '../../components/ui/switch';
+import AuditSection from '../../components/AuditSection';
 
 const departmentSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório').max(100, 'Nome deve ter no máximo 100 caracteres'),
@@ -37,6 +37,7 @@ const DepartmentForm: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(false);
+  const [departmentData, setDepartmentData] = useState<any>(null);
 
   const form = useForm<DepartmentFormData>({
     resolver: zodResolver(departmentSchema),
@@ -50,6 +51,7 @@ const DepartmentForm: React.FC = () => {
       setLoading(true);
       const data = await departmentApi.getById(parseInt(id));
       
+      setDepartmentData(data);
       form.reset({
         nome: data.nome,
         descricao: data.descricao || '',
@@ -131,6 +133,15 @@ const DepartmentForm: React.FC = () => {
             </p>
           </div>
         </div>
+        
+        {/* AuditSection no header */}
+        <AuditSection 
+          form={form} 
+          data={departmentData}
+          variant="header" 
+          isEditing={!!id}
+          statusFieldName="ativo" // Campo de status é 'ativo' para Department
+        />
       </div>
 
       <Form {...form}>
@@ -147,27 +158,6 @@ const DepartmentForm: React.FC = () => {
                       Informações básicas do departamento
                     </p>
                   </div>
-                  
-                  {id && (
-                    <FormField
-                      control={form.control}
-                      name="ativo"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0 flex-shrink-0">
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              disabled={loading}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-medium whitespace-nowrap">
-                            Departamento Ativo
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                  )}
                 </div>
               </div>
               <div className="p-6 pt-0">

@@ -19,10 +19,7 @@ interface GeneralDataSectionProps {
 const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSectionProps) => {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <h4 className="text-lg font-semibold text-foreground">Dados Gerais</h4>
-        <div className="flex-1 h-px bg-border"></div>
-      </div>
+      
       
       <FormField
         control={form.control}

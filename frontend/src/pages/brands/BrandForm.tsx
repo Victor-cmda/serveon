@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/button';
 import { brandApi } from '../../services/api';
 import { toast } from 'sonner';
 import { Form } from '../../components/ui/form';
+import AuditSection from '../../components/AuditSection';
 
 // Componente modular
 import BrandGeneralSection from './components/BrandGeneralSection';
@@ -25,6 +26,7 @@ const BrandForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [brandData, setBrandData] = useState<any>(null); // Estado para dados da marca
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -42,6 +44,7 @@ const BrandForm = () => {
       try {
         setIsLoading(true);
         const brand = await brandApi.getById(Number(id));
+        setBrandData(brand); // Armazenar dados para AuditSection
         form.reset({
           id: brand.id || 0,
           nome: brand.nome || '',
@@ -109,6 +112,15 @@ const BrandForm = () => {
             </p>
           </div>
         </div>
+        
+        {/* AuditSection no header */}
+        <AuditSection 
+          form={form} 
+          data={brandData}
+          variant="header" 
+          isEditing={!!id}
+          statusFieldName="ativo" // Campo de status é 'ativo' para Brand
+        />
       </div>
 
       <Form {...form}>

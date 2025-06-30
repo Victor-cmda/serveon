@@ -16,7 +16,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { paymentTermApi, paymentMethodApi } from '@/services/api';
@@ -25,6 +24,7 @@ import { CreatePaymentTermDto } from '@/types/payment-term';
 import { toast } from 'sonner';
 import { SearchDialog } from '@/components/SearchDialog';
 import PaymentMethodCreationDialog from '@/components/dialogs/PaymentMethodCreationDialog';
+import AuditSection from '@/components/AuditSection';
 
 // Schema para validação das parcelas
 const installmentSchema = z.object({
@@ -75,6 +75,7 @@ const PaymentTermForm = () => {
   const [paymentMethodDialogOpen, setPaymentMethodDialogOpen] = useState(false);
   const [paymentMethodSearchOpen, setPaymentMethodSearchOpen] = useState<number | null>(null);
   const [paymentMethodToEdit, setPaymentMethodToEdit] = useState<PaymentMethod | null>(null);
+  const [paymentTermData, setPaymentTermData] = useState<any>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -122,6 +123,7 @@ const PaymentTermForm = () => {
     setIsLoadingData(true);
     try {
       const data = await paymentTermApi.getById(Number(paymentTermId));
+      setPaymentTermData(data);
 
       // Ordenar parcelas por número
       const sortedInstallments = [...data.installments].sort(
@@ -131,14 +133,14 @@ const PaymentTermForm = () => {
       form.reset({
         name: data.name,
         description: data.description || '',
-        isActive: data.ativo,
+        isActive: data.ativo, 
         installments: sortedInstallments.map((inst) => ({
           installmentNumber: inst.installmentNumber,
           paymentMethodId: inst.paymentMethodId,
           daysToPayment: inst.daysToPayment,
           percentageValue: inst.percentageValue,
           interestRate: inst.interestRate,
-          isActive: inst.ativo,
+          isActive: inst.ativo, 
         })),
       });
     } catch (error) {
@@ -283,6 +285,15 @@ const PaymentTermForm = () => {
             </p>
           </div>
         </div>
+        
+        {/* AuditSection no header */}
+        <AuditSection 
+          form={form} 
+          data={paymentTermData}
+          variant="header" 
+          isEditing={!!id}
+          statusFieldName="isActive" // Campo de status é 'isActive' para PaymentTerm
+        />
       </div>
 
       <Form {...form}>
@@ -331,31 +342,6 @@ const PaymentTermForm = () => {
                       </FormItem>
                     )}
                   />
-
-                  {id && (
-                    <FormField
-                      control={form.control}
-                      name="isActive"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="text-base font-medium">
-                              Condição Ativa
-                            </FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              Desative para ocultar a condição das listagens
-                            </p>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  )}
                 </div>
               </div>
             </div>
@@ -525,15 +511,19 @@ const PaymentTermForm = () => {
                           <FormMessage />
                         </FormItem>
                       )}
-                    />                    <FormField
+                    />
+                    
+                    <FormField
                       control={form.control}
                       name={`installments.${index}.isActive`}
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                           <FormControl>
-                            <Switch
+                            <input
+                              type="checkbox"
                               checked={field.value}
-                              onCheckedChange={field.onChange}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                              className="h-4 w-4 text-primary border border-gray-300 rounded focus:ring-primary"
                             />
                           </FormControl>
                           <div className="space-y-1 leading-none">

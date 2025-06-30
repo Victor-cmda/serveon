@@ -5,13 +5,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
-import { Switch } from '../../components/ui/switch';
 import { productApi, categoryApi, brandApi, unitMeasureApi } from '../../services/api';
 import { Category } from '../../types/category';
 import { Brand } from '../../types/brand';
 import { UnitMeasure } from '../../types/unit-measure';
 import { toast } from 'sonner';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '../../components/ui/form';
+import { Form } from '../../components/ui/form';
 import { SearchDialog } from '../../components/SearchDialog';
 import AuditSection from '@/components/AuditSection';
 
@@ -332,26 +331,13 @@ const ProductForm = () => {
           </div>
         </div>
         
-        {id && (
-          <FormField
-            control={form.control}
-            name="ativo"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center space-x-2 space-y-0 flex-shrink-0">
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    disabled={isLoading}
-                  />
-                </FormControl>
-                <FormLabel className="text-sm font-medium whitespace-nowrap">
-                  Produto Ativo
-                </FormLabel>
-              </FormItem>
-            )}
-          />
-        )}
+        <AuditSection
+          form={form}
+          data={productData}
+          variant="header"
+          isEditing={!!id}
+          statusFieldName="ativo" // Campo de status é 'ativo' para Product
+        />
       </div>
 
       <Form {...form}>
@@ -380,17 +366,6 @@ const ProductForm = () => {
               <ProductAdditionalSection
                 form={form}
                 isLoading={isLoading}
-              />
-              
-              <AuditSection
-                form={form}
-                data={{
-                  id: id ? productData?.id : undefined,
-                  ativo: form.watch('ativo'),
-                  createdAt: productData?.createdAt,
-                  updatedAt: productData?.updatedAt,
-                }}
-                isEditing={!!id}
               />
             </div>
           </div>

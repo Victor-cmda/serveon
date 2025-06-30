@@ -34,5 +34,5 @@ export class CreatePaymentTermInstallmentDto {
 
   @IsOptional()
   @IsBoolean()
-  isActive?: boolean = true;
+  ativo?: boolean = true; // Manter ativo no backend para consistência com banco de dados
 }

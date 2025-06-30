@@ -3709,7 +3709,7 @@
             "description": "Type of payment method",
             "example": "card"
           },
-          "active": {
+          "ativo": {
             "type": "boolean",
             "description": "Status of the payment method (active/inactive)",
             "example": true,
@@ -3786,7 +3786,7 @@
             "description": "Type of payment method",
             "example": "card"
           },
-          "active": {
+          "ativo": {
             "type": "boolean",
             "description": "Status of the payment method (active/inactive)",
             "example": true,

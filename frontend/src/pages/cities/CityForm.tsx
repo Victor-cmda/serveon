@@ -14,12 +14,12 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Switch } from '@/components/ui/switch';
 import { cityApi, stateApi } from '@/services/api';
 import { CreateCityDto, UpdateCityDto, State } from '@/types/location';
 import { toast } from 'sonner';
 import StateCreationDialog from '@/components/dialogs/StateCreationDialog';
 import { SearchDialog } from '@/components/SearchDialog';
+import AuditSection from '@/components/AuditSection';
 
 const formSchema = z.object({
   nome: z
@@ -40,6 +40,7 @@ const CityForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [states, setStates] = useState<State[]>([]);
+  const [cityData, setCityData] = useState<any>(null);
 
   const [stateDialogOpen, setStateDialogOpen] = useState(false);
   const [stateSearchOpen, setStateSearchOpen] = useState(false);
@@ -74,14 +75,17 @@ const CityForm = () => {
     const fetchCity = async () => {
       if (!id) return;
 
-      setIsLoading(true);      try {
+      setIsLoading(true);
+      try {
         const city = await cityApi.getById(Number(id));
+        setCityData(city);
         form.reset({
           nome: city.nome,
           codigoIbge: city.codigoIbge || '',
           estadoId: city.estadoId,
+          ativo: city.ativo,
         });
-      }catch (error) {
+      } catch (error) {
         console.error('Erro ao buscar cidade:', error);
         toast.error('Não foi possível carregar os dados da cidade.');
         navigate('/cities');
@@ -194,6 +198,15 @@ const CityForm = () => {
             </p>
           </div>
         </div>
+        
+        {/* AuditSection no header */}
+        <AuditSection 
+          form={form} 
+          data={cityData}
+          variant="header" 
+          isEditing={!!id}
+          statusFieldName="ativo" // Campo de status é 'ativo' para City
+        />
       </div>
 
       <Form {...form}>
@@ -280,32 +293,6 @@ const CityForm = () => {
                       </FormItem>
                     )}
                   />
-
-                  {id && (
-                    <FormField
-                      control={form.control}
-                      name="ativo"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="text-base font-medium">
-                              Cidade Ativa
-                            </FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              Desative para ocultar a cidade das listagens
-                            </p>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  )}
                 </div>
               </div>
             </div>

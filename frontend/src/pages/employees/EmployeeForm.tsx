@@ -20,7 +20,6 @@ import {
 import { Input } from '../../components/ui/input';
 import AuditSection from '@/components/AuditSection';
 import { Button } from '../../components/ui/button';
-import { Switch } from '../../components/ui/switch';
 import { Badge } from '../../components/ui/badge';
 import { SearchDialog } from '../../components/SearchDialog';
 import DepartmentCreationDialog from '../../components/dialogs/DepartmentCreationDialog';
@@ -362,6 +361,15 @@ const EmployeeForm: React.FC = () => {
             </p>
           </div>
         </div>
+        
+        {/* AuditSection no header */}
+        <AuditSection 
+          form={form} 
+          data={employeeData}
+          variant="header" 
+          isEditing={!!id}
+          statusFieldName="ativo" // Campo de status é 'ativo' para Employee
+        />
       </div>
 
       <Form {...form}>
@@ -383,27 +391,6 @@ const EmployeeForm: React.FC = () => {
                     <h4 className="text-lg font-semibold text-foreground">Informações Pessoais</h4>
                     <div className="flex-1 h-px bg-border"></div>
                   </div>
-                  
-                  {id && (
-                    <FormField
-                      control={form.control}
-                      name="ativo"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 space-y-0 flex-shrink-0">
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              disabled={loading}
-                            />
-                          </FormControl>
-                          <FormLabel className="text-sm font-medium whitespace-nowrap">
-                            Funcionário Ativo
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                  )}
                 </div>
                 
                 {id && (
@@ -734,17 +721,6 @@ const EmployeeForm: React.FC = () => {
                   )}
                 </div>
               </div>
-              
-              <AuditSection
-                form={form}
-                data={{
-                  id: id ? employeeData?.id : undefined,
-                  ativo: form.watch('ativo'),
-                  createdAt: employeeData?.createdAt,
-                  updatedAt: employeeData?.updatedAt,
-                }}
-                isEditing={!!id}
-              />
             </div>
           </div>
 

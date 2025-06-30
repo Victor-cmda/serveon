@@ -11,14 +11,14 @@ export class PaymentMethodsService {
   async create(
     createPaymentMethodDto: CreatePaymentMethodDto,
   ): Promise<PaymentMethod> {
-    const { description, code, type, active = true } = createPaymentMethodDto;
+    const { description, code, type, ativo = true } = createPaymentMethodDto; // Usar ativo em vez de active
 
     const result = await this.databaseService.query(
       `INSERT INTO dbo.forma_pagamento (descricao, codigo, tipo, ativo)
         VALUES ($1, $2, $3, $4)
         RETURNING id, descricao as description, codigo as code, tipo as type, 
                 ativo as active, created_at as "createdAt", updated_at as "updatedAt"`,
-      [description, code, type, active],
+      [description, code, type, ativo], // Usar ativo
     );
 
     return result.rows[0];
@@ -79,9 +79,9 @@ export class PaymentMethodsService {
       paramCount++;
     }
 
-    if (updatePaymentMethodDto.active !== undefined) {
+    if (updatePaymentMethodDto.ativo !== undefined) { // Usar ativo
       updates.push(`ativo = $${paramCount}`);
-      values.push(updatePaymentMethodDto.active);
+      values.push(updatePaymentMethodDto.ativo); // Usar ativo
       paramCount++;
     }
 

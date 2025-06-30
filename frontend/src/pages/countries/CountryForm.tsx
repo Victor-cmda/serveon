@@ -14,9 +14,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Switch } from '@/components/ui/switch';
 import { countryApi } from '@/services/api';
 import { toast } from 'sonner';
+import AuditSection from '@/components/AuditSection';
 
 const formSchema = z.object({
   nome: z
@@ -38,6 +38,7 @@ const CountryForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [countryData, setCountryData] = useState<any>(null);
   const location = useLocation();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -70,10 +71,12 @@ const CountryForm = () => {
       setIsLoading(true);
       try {
         const country = await countryApi.getById(Number(id));
+        setCountryData(country);
         form.reset({
           nome: country.nome,
           sigla: country.sigla,
           codigo: country.codigo,
+          ativo: country.ativo,
         });
       } catch (error) {
         console.error('Erro ao buscar país:', error);
@@ -155,6 +158,15 @@ const CountryForm = () => {
             </p>
           </div>
         </div>
+        
+        {/* AuditSection no header */}
+        <AuditSection 
+          form={form} 
+          data={countryData}
+          variant="header" 
+          isEditing={!!id}
+          statusFieldName="ativo" // Campo de status é 'ativo' para Country
+        />
       </div>
 
       <Form {...form}>
@@ -231,32 +243,6 @@ const CountryForm = () => {
                       )}
                     />
                   </div>
-
-                  {id && (
-                    <FormField
-                      control={form.control}
-                      name="ativo"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="text-base font-medium">
-                              País Ativo
-                            </FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              Desative para ocultar o país das listagens
-                            </p>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  )}
                 </div>
               </div>
             </div>

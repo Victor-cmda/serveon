@@ -45,5 +45,5 @@ export class CreatePaymentMethodDto {
   })
   @IsOptional()
   @IsBoolean()
-  active?: boolean;
+  ativo?: boolean; // Manter ativo no backend para consistência com banco de dados
 }

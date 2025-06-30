@@ -39,9 +39,11 @@ const formSchema = z.object({
     .string()
     .min(2, 'Nome é obrigatório e deve ter pelo menos 2 caracteres'),
   description: z.string().optional(),
-  isActive: z.boolean().default(true),  installments: z
+  isActive: z.boolean().default(true),
+  installments: z
     .array(
-      z.object({        installmentNumber: z
+      z.object({
+        installmentNumber: z
           .number()
           .min(1, 'Número da parcela deve ser maior que 0'),
         paymentMethodId: z.number().min(1, 'Método de pagamento é obrigatório'),
@@ -130,7 +132,8 @@ const PaymentTermCreationDialog = ({
             isActive: inst.ativo,
           })),
         });
-      } else {        form.reset({
+      } else {
+        form.reset({
           name: '',
           description: '',
           isActive: true,
@@ -169,14 +172,16 @@ const PaymentTermCreationDialog = ({
 
       let savedPaymentTerm;
 
-      if (paymentTerm) {        // Edição de condição de pagamento existente
+      if (paymentTerm) {
+        // Edição de condição de pagamento existente
         savedPaymentTerm = await paymentTermApi.update(
           paymentTerm.id,
           formData,
         );
         toast.success(
           `Condição de pagamento ${data.name} atualizada com sucesso!`,
-        );      } else {
+        );
+      } else {
         // Criação de nova condição de pagamento
         savedPaymentTerm = await paymentTermApi.create(formData);
         toast.success(`Condição de pagamento ${data.name} criada com sucesso!`);
@@ -189,7 +194,10 @@ const PaymentTermCreationDialog = ({
       onOpenChange(false);
     } catch (error: unknown) {
       console.error('Erro ao salvar condição de pagamento:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar a condição de pagamento.';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Ocorreu um erro ao salvar a condição de pagamento.';
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -251,7 +259,8 @@ const PaymentTermCreationDialog = ({
     setPaymentMethods((prev) => [...prev, newMethod]);
 
     if (currentInstallmentIndex >= 0) {
-      const path = `installments.${currentInstallmentIndex}.paymentMethodId` as const;
+      const path =
+        `installments.${currentInstallmentIndex}.paymentMethodId` as const;
       form.setValue(path, newMethod.id, {
         shouldValidate: true,
         shouldDirty: true,
