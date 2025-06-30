@@ -115,6 +115,12 @@ const PaymentTermsList = () => {
                   Parcelas
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Taxa de Juros
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Multa / Desconto
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Status
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
@@ -124,7 +130,7 @@ const PaymentTermsList = () => {
             </thead>
             <tbody>              {filteredPaymentTerms.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="h-24 text-center">
+                  <td colSpan={8} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <FileText className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -149,6 +155,14 @@ const PaymentTermsList = () => {
                     </td>
                     <td className="p-4">
                       <div className="text-sm">{calculateTotalInstallments(term)}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm">{term.interestRate}%</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm">
+                        {term.fineRate}% / {term.discountPercentage}%
+                      </div>
                     </td>
                     <td className="p-4">
                       <span

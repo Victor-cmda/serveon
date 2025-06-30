@@ -2,6 +2,9 @@ export interface PaymentTerm {
   id: number;
   name: string;
   description?: string;
+  interestRate: number;
+  fineRate: number;
+  discountPercentage: number;
   ativo: boolean;
   createdAt: string;
   updatedAt: string;
@@ -15,7 +18,6 @@ export interface PaymentTermInstallment {
   paymentMethodId: number;
   daysToPayment: number;
   percentageValue: number;
-  interestRate: number;
   ativo: boolean;
   createdAt: string;
   updatedAt: string;
@@ -24,6 +26,9 @@ export interface PaymentTermInstallment {
 export interface CreatePaymentTermDto {
   name: string;
   description?: string;
+  interestRate?: number;
+  fineRate?: number;
+  discountPercentage?: number;
   ativo?: boolean;
   installments: CreatePaymentTermInstallmentDto[];
 }
@@ -33,13 +38,15 @@ export interface CreatePaymentTermInstallmentDto {
   paymentMethodId: number;
   daysToPayment: number;
   percentageValue: number;
-  interestRate?: number;
   ativo?: boolean;
 }
 
 export interface UpdatePaymentTermDto {
   name?: string;
   description?: string;
+  interestRate?: number;
+  fineRate?: number;
+  discountPercentage?: number;
   ativo?: boolean;
   installments?: CreatePaymentTermInstallmentDto[];
 }

@@ -31,10 +31,4 @@ export class PaymentTermInstallment extends BaseEntity {
     example: 100.00,
   })
   percentageValue: number;
-
-  @ApiProperty({
-    description: 'Taxa de juros',
-    example: 0.00,
-  })
-  interestRate: number;
 }

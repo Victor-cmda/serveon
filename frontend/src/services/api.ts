@@ -315,18 +315,16 @@ export const supplierApi = {
 
 // Função para transformar dados de payment method entre frontend (active) e backend (ativo)
 const transformPaymentMethodToBackend = (data: CreatePaymentMethodDto | UpdatePaymentMethodDto) => {
-  const { active, ...rest } = data as any;
   return {
-    ...rest,
-    ativo: active, // Transformar active para ativo para o backend
+    ...data,
+    // Manter ativo como está, pois tanto frontend quanto backend usam ativo
   };
 };
 
 const transformPaymentMethodFromBackend = (data: any): PaymentMethod => {
-  const { ativo, ...rest } = data;
   return {
-    ...rest,
-    active: ativo, // Transformar ativo para active no frontend
+    ...data,
+    // Manter ativo como está, pois a interface espera ativo
   };
 };
 

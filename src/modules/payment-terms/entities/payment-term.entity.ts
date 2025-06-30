@@ -17,6 +17,24 @@ export class PaymentTerm extends BaseEntity {
   description?: string;
 
   @ApiProperty({
+    description: 'Taxa de juros mensal (%)',
+    example: 1.5,
+  })
+  interestRate: number;
+
+  @ApiProperty({
+    description: 'Taxa de multa por atraso (%)',
+    example: 2.0,
+  })
+  fineRate: number;
+
+  @ApiProperty({
+    description: 'Percentual de desconto (%)',
+    example: 5.0,
+  })
+  discountPercentage: number;
+
+  @ApiProperty({
     description: 'Parcelas da condição de pagamento',
     type: () => [PaymentTermInstallment],
   })

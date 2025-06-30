@@ -60,6 +60,9 @@ CREATE TABLE condicao_pagamento (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL UNIQUE,
     descricao TEXT,
+    taxa_juros DECIMAL(5,2) NOT NULL DEFAULT 0,
+    taxa_multa DECIMAL(5,2) NOT NULL DEFAULT 0,
+    percentual_desconto DECIMAL(5,2) NOT NULL DEFAULT 0,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -73,7 +76,6 @@ CREATE TABLE parcela_condicao_pagamento (
     forma_pagamento_id INTEGER NOT NULL REFERENCES forma_pagamento(id),
     dias_para_pagamento INTEGER NOT NULL,
     percentual_valor DECIMAL(5,2) NOT NULL,
-    taxa_juros DECIMAL(5,2) NOT NULL DEFAULT 0,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -563,12 +565,12 @@ VALUES ('DINHEIRO', '01', 'À VISTA'),
     ('PIX', '17', 'À VISTA'),
     ('BOLETO BANCÁRIO', '15', 'À PRAZO');
 -- Inserir condições de pagamento comuns
-INSERT INTO condicao_pagamento (nome, descricao, ativo)
-VALUES ('À VISTA', 'PAGAMENTO À VISTA', true),
-    ('30 DIAS', 'PAGAMENTO EM 30 DIAS', true),
-    ('30/60', 'PAGAMENTO EM DUAS parcelaS DE 30 E 60 DIAS', true),
-    ('30/60/90', 'PAGAMENTO EM TRÊS parcelaS DE 30, 60 e 90 DIAS', true),
-    ('ENTRADA + 30 DIAS', 'PAGAMENTO COM ENTRADA E MAIS 30 DIAS', true);
+INSERT INTO condicao_pagamento (nome, descricao, taxa_juros, taxa_multa, percentual_desconto, ativo)
+VALUES ('À VISTA', 'PAGAMENTO À VISTA', 0, 0, 5, true),
+    ('30 DIAS', 'PAGAMENTO EM 30 DIAS', 1.5, 2, 0, true),
+    ('30/60', 'PAGAMENTO EM DUAS parcelaS DE 30 E 60 DIAS', 2, 2, 0, true),
+    ('30/60/90', 'PAGAMENTO EM TRÊS parcelaS DE 30, 60 e 90 DIAS', 2.5, 2, 0, true),
+    ('ENTRADA + 30 DIAS', 'PAGAMENTO COM ENTRADA E MAIS 30 DIAS', 1, 2, 0, true);
 
 -- Inserir unidades de medida comuns
 INSERT INTO unidade_medida (nome, sigla, ativo)
@@ -609,8 +611,22 @@ COMMENT ON SCHEMA dbo IS 'Schema principal para o sistema de NF-e';
 COMMENT ON TABLE dbo.pais IS 'Cadastro de países';
 COMMENT ON TABLE dbo.estado IS 'Cadastro de estados/províncias';
 COMMENT ON TABLE dbo.cidade IS 'Cadastro de cidades/municípios';
-COMMENT ON TABLE dbo.condicao_pagamento IS 'Condições de pagamento para notas fiscais';
-COMMENT ON TABLE dbo.forma_pagamento IS 'Formas de pagamento das parcelas de notas fiscais';
+COMMENT ON COLUMN dbo.condicao_pagamento.nome IS 'Nome da condição de pagamento';
+COMMENT ON COLUMN dbo.condicao_pagamento.descricao IS 'Descrição da condição de pagamento';
+COMMENT ON COLUMN dbo.condicao_pagamento.taxa_juros IS 'Taxa de juros mensal aplicada à condição de pagamento (%)';
+COMMENT ON COLUMN dbo.condicao_pagamento.taxa_multa IS 'Taxa de multa por atraso no pagamento (%)';
+COMMENT ON COLUMN dbo.condicao_pagamento.percentual_desconto IS 'Percentual de desconto concedido na condição de pagamento (%)';
+COMMENT ON COLUMN dbo.condicao_pagamento.ativo IS 'Indica se a condição de pagamento está ativa';
+COMMENT ON COLUMN dbo.condicao_pagamento.created_at IS 'Data de criação do registro';
+COMMENT ON COLUMN dbo.condicao_pagamento.updated_at IS 'Data da última atualização do registro';
+COMMENT ON COLUMN dbo.parcela_condicao_pagamento.condicao_pagamento_id IS 'ID da condição de pagamento';
+COMMENT ON COLUMN dbo.parcela_condicao_pagamento.numero_parcela IS 'Número sequencial da parcela';
+COMMENT ON COLUMN dbo.parcela_condicao_pagamento.forma_pagamento_id IS 'ID da forma de pagamento';
+COMMENT ON COLUMN dbo.parcela_condicao_pagamento.dias_para_pagamento IS 'Dias para vencimento da parcela';
+COMMENT ON COLUMN dbo.parcela_condicao_pagamento.percentual_valor IS 'Percentual do valor total que representa esta parcela';
+COMMENT ON COLUMN dbo.parcela_condicao_pagamento.ativo IS 'Indica se a parcela está ativa';
+COMMENT ON COLUMN dbo.parcela_condicao_pagamento.created_at IS 'Data de criação do registro';
+COMMENT ON COLUMN dbo.parcela_condicao_pagamento.updated_at IS 'Data da última atualização do registro';
 COMMENT ON TABLE dbo.marca IS 'Cadastro de marcas de produtos';
 COMMENT ON TABLE dbo.categoria IS 'Cadastro de categorias de produtos';
 COMMENT ON TABLE dbo.unidade_medida IS 'Cadastro de unidades de medida';

@@ -48,6 +48,13 @@ const installmentSchema = z.object({
         .min(0.01, 'Percentual obrigatório')
         .max(100, 'Percentual não pode ser maior que 100%'),
     ),
+  ativo: z.boolean().default(true),
+});
+
+// Schema para validação do formulário principal
+const formSchema = z.object({
+  name: z.string().min(1, { message: 'O nome é obrigatório' }).max(100),
+  description: z.string().max(255).optional(),
   interestRate: z
     .union([z.number(), z.string()])
     .transform((val) => {
@@ -59,13 +66,28 @@ const installmentSchema = z.object({
     })
     .pipe(z.number().min(0, 'Taxa de juros não pode ser negativa'))
     .default(0),
-  ativo: z.boolean().default(true),
-});
-
-// Schema para validação do formulário principal
-const formSchema = z.object({
-  name: z.string().min(1, { message: 'O nome é obrigatório' }).max(100),
-  description: z.string().max(255).optional(),
+  fineRate: z
+    .union([z.number(), z.string()])
+    .transform((val) => {
+      if (typeof val === 'string') {
+        const parsed = parseFloat(val);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+      return val;
+    })
+    .pipe(z.number().min(0, 'Taxa de multa não pode ser negativa'))
+    .default(0),
+  discountPercentage: z
+    .union([z.number(), z.string()])
+    .transform((val) => {
+      if (typeof val === 'string') {
+        const parsed = parseFloat(val);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+      return val;
+    })
+    .pipe(z.number().min(0, 'Percentual de desconto não pode ser negativo'))
+    .default(0),
   ativo: z.boolean().default(true),
   installments: z
     .array(installmentSchema)
@@ -103,6 +125,9 @@ const PaymentTermForm = () => {
     defaultValues: {
       name: '',
       description: '',
+      interestRate: 0,
+      fineRate: 0,
+      discountPercentage: 0,
       ativo: true,
       installments: [
         {
@@ -110,7 +135,6 @@ const PaymentTermForm = () => {
           paymentMethodId: 0,
           daysToPayment: 0,
           percentageValue: 100,
-          interestRate: 0,
           ativo: true,
         },
       ],
@@ -155,6 +179,15 @@ const PaymentTermForm = () => {
       form.reset({
         name: data.name,
         description: data.description || '',
+        interestRate: typeof data.interestRate === 'string'
+          ? parseFloat(data.interestRate)
+          : data.interestRate || 0,
+        fineRate: typeof data.fineRate === 'string'
+          ? parseFloat(data.fineRate)
+          : data.fineRate || 0,
+        discountPercentage: typeof data.discountPercentage === 'string'
+          ? parseFloat(data.discountPercentage)
+          : data.discountPercentage || 0,
         ativo: data.ativo,
         installments: sortedInstallments.map((inst) => ({
           installmentNumber: inst.installmentNumber,
@@ -164,10 +197,6 @@ const PaymentTermForm = () => {
             typeof inst.percentageValue === 'string'
               ? parseFloat(inst.percentageValue)
               : inst.percentageValue,
-          interestRate:
-            typeof inst.interestRate === 'string'
-              ? parseFloat(inst.interestRate)
-              : inst.interestRate,
           ativo: inst.ativo,
         })),
       });
@@ -193,9 +222,219 @@ const PaymentTermForm = () => {
       paymentMethodId: 0,
       daysToPayment: lastInstallment ? lastInstallment.daysToPayment + 30 : 30,
       percentageValue: 0,
-      interestRate: 0,
       ativo: true,
     });
+  };
+
+  // Função para distribuir percentuais automaticamente de forma igual
+  const distributeEqualPercentages = () => {
+    const installments = form.getValues('installments');
+    const activeInstallments = installments.filter(inst => inst.ativo);
+    
+    if (activeInstallments.length === 0) return;
+    
+    const equalPercentage = parseFloat((100 / activeInstallments.length).toFixed(2));
+    let remainingPercentage = 100;
+    
+    installments.forEach((installment, index) => {
+      if (!installment.ativo) {
+        form.setValue(`installments.${index}.percentageValue`, 0);
+        return;
+      }
+      
+      // Para a última parcela ativa, usar o percentual restante para evitar problemas de arredondamento
+      const isLastActive = index === installments.map((inst, idx) => inst.ativo ? idx : -1).filter(idx => idx !== -1).slice(-1)[0];
+      const percentage = isLastActive ? remainingPercentage : equalPercentage;
+      
+      form.setValue(`installments.${index}.percentageValue`, percentage);
+      remainingPercentage -= percentage;
+    });
+    
+    // Trigger validation
+    form.trigger('installments');
+  };
+
+  // Função para distribuir percentuais com base em pesos personalizados
+  const distributeWeightedPercentages = () => {
+    const installments = form.getValues('installments');
+    const activeInstallments = installments.filter(inst => inst.ativo);
+    
+    if (activeInstallments.length === 0) return;
+    
+    // Peso decrescente: primeira parcela maior, demais menores
+    const weights = activeInstallments.map((_, index) => {
+      if (index === 0) return 50; // Primeira parcela: 50%
+      return 50 / (activeInstallments.length - 1); // Demais parcelas dividem os 50% restantes
+    });
+    
+    const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+    let remainingPercentage = 100;
+    let activeIndex = 0;
+    
+    installments.forEach((installment, index) => {
+      if (!installment.ativo) {
+        form.setValue(`installments.${index}.percentageValue`, 0);
+        return;
+      }
+      
+      // Para a última parcela ativa, usar o percentual restante
+      const isLastActive = activeIndex === activeInstallments.length - 1;
+      const percentage = isLastActive 
+        ? remainingPercentage 
+        : parseFloat(((weights[activeIndex] / totalWeight) * 100).toFixed(2));
+      
+      form.setValue(`installments.${index}.percentageValue`, percentage);
+      remainingPercentage -= percentage;
+      activeIndex++;
+    });
+    
+    // Trigger validation
+    form.trigger('installments');
+  };
+
+  // Função para zerar todos os percentuais
+  const clearAllPercentages = () => {
+    const installments = form.getValues('installments');
+    installments.forEach((_, index) => {
+      form.setValue(`installments.${index}.percentageValue`, 0);
+    });
+    form.trigger('installments');
+  };
+
+  // Função para calcular o total dos percentuais
+  const calculateTotalPercentage = () => {
+    const installments = form.watch('installments') || [];
+    return installments
+      .filter(inst => inst.ativo)
+      .reduce((total, inst) => {
+        const value = typeof inst.percentageValue === 'string' 
+          ? parseFloat(inst.percentageValue) || 0 
+          : inst.percentageValue || 0;
+        return total + value;
+      }, 0);
+  };
+
+  // Hook para monitorar mudanças nos percentuais
+  const totalPercentage = calculateTotalPercentage();
+
+  // Função para ajustar automaticamente pequenas diferenças de arredondamento
+  const adjustPercentages = () => {
+    const installments = form.getValues('installments');
+    const activeInstallments = installments.filter(inst => inst.ativo);
+    
+    if (activeInstallments.length === 0) return;
+    
+    const currentTotal = calculateTotalPercentage();
+    const difference = 100 - currentTotal;
+    
+    // Se a diferença for muito pequena (≤ 0.1%), ajustar a última parcela ativa
+    if (Math.abs(difference) <= 0.1 && Math.abs(difference) > 0.01) {
+      // Encontrar o índice da última parcela ativa
+      let lastActiveIndex = -1;
+      installments.forEach((inst, index) => {
+        if (inst.ativo) lastActiveIndex = index;
+      });
+      
+      if (lastActiveIndex !== -1) {
+        const currentValue = installments[lastActiveIndex].percentageValue;
+        const newValue = parseFloat((currentValue + difference).toFixed(2));
+        form.setValue(`installments.${lastActiveIndex}.percentageValue`, newValue);
+        form.trigger('installments');
+      }
+    }
+  };
+
+  // Função para aplicar template de condição à vista
+  const applyTemplateAVista = () => {
+    // Limpar parcelas existentes e criar uma parcela única
+    while (fields.length > 1) {
+      remove(fields.length - 1);
+    }
+    
+    // Configurar a parcela única
+    form.setValue('installments.0.installmentNumber', 1);
+    form.setValue('installments.0.daysToPayment', 0);
+    form.setValue('installments.0.percentageValue', 100);
+    form.setValue('installments.0.ativo', true);
+    
+    // Configurar taxas típicas para à vista
+    form.setValue('interestRate', 0);
+    form.setValue('fineRate', 0);
+    form.setValue('discountPercentage', 3); // 3% de desconto para à vista
+    
+    form.trigger();
+  };
+
+  // Função para aplicar template 30/60 dias
+  const applyTemplate30_60 = () => {
+    // Limpar parcelas existentes
+    while (fields.length > 0) {
+      remove(0);
+    }
+    
+    // Adicionar duas parcelas
+    append({
+      installmentNumber: 1,
+      paymentMethodId: 0,
+      daysToPayment: 30,
+      percentageValue: 50,
+      ativo: true,
+    });
+    
+    append({
+      installmentNumber: 2,
+      paymentMethodId: 0,
+      daysToPayment: 60,
+      percentageValue: 50,
+      ativo: true,
+    });
+    
+    // Configurar taxas típicas para 30/60
+    form.setValue('interestRate', 2);
+    form.setValue('fineRate', 2);
+    form.setValue('discountPercentage', 0);
+    
+    form.trigger();
+  };
+
+  // Função para aplicar template entrada + 2 parcelas
+  const applyTemplateEntrada2x = () => {
+    // Limpar parcelas existentes
+    while (fields.length > 0) {
+      remove(0);
+    }
+    
+    // Adicionar três parcelas (entrada + 2x)
+    append({
+      installmentNumber: 1,
+      paymentMethodId: 0,
+      daysToPayment: 0, // Entrada
+      percentageValue: 40,
+      ativo: true,
+    });
+    
+    append({
+      installmentNumber: 2,
+      paymentMethodId: 0,
+      daysToPayment: 30,
+      percentageValue: 30,
+      ativo: true,
+    });
+    
+    append({
+      installmentNumber: 3,
+      paymentMethodId: 0,
+      daysToPayment: 60,
+      percentageValue: 30,
+      ativo: true,
+    });
+    
+    // Configurar taxas típicas
+    form.setValue('interestRate', 1.5);
+    form.setValue('fineRate', 2);
+    form.setValue('discountPercentage', 0);
+    
+    form.trigger();
   };
 
   const onSubmit = async (values: FormValues) => {
@@ -204,6 +443,9 @@ const PaymentTermForm = () => {
       const paymentTermData: CreatePaymentTermDto = {
         name: values.name,
         description: values.description,
+        interestRate: values.interestRate,
+        fineRate: values.fineRate,
+        discountPercentage: values.discountPercentage,
         ativo: values.ativo,
         installments: values.installments.map((inst) => ({
           installmentNumber: inst.installmentNumber,
@@ -213,10 +455,6 @@ const PaymentTermForm = () => {
             typeof inst.percentageValue === 'string'
               ? parseFloat(inst.percentageValue)
               : inst.percentageValue,
-          interestRate:
-            typeof inst.interestRate === 'string'
-              ? parseFloat(inst.interestRate)
-              : inst.interestRate,
           ativo: inst.ativo,
         })),
       }; 
@@ -391,6 +629,107 @@ const PaymentTermForm = () => {
                       </FormItem>
                     )}
                   />
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="interestRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Taxa de Juros (%)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min={0}
+                              placeholder="0.00"
+                              {...field}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (
+                                  value === '' ||
+                                  value === null ||
+                                  value === undefined
+                                ) {
+                                  field.onChange(0);
+                                } else {
+                                  const parsed = parseFloat(value);
+                                  field.onChange(isNaN(parsed) ? 0 : parsed);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="fineRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Taxa de Multa (%)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min={0}
+                              placeholder="0.00"
+                              {...field}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (
+                                  value === '' ||
+                                  value === null ||
+                                  value === undefined
+                                ) {
+                                  field.onChange(0);
+                                } else {
+                                  const parsed = parseFloat(value);
+                                  field.onChange(isNaN(parsed) ? 0 : parsed);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="discountPercentage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Desconto (%)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min={0}
+                              placeholder="0.00"
+                              {...field}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (
+                                  value === '' ||
+                                  value === null ||
+                                  value === undefined
+                                ) {
+                                  field.onChange(0);
+                                } else {
+                                  const parsed = parseFloat(value);
+                                  field.onChange(isNaN(parsed) ? 0 : parsed);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -414,6 +753,115 @@ const PaymentTermForm = () => {
               <p className="text-sm text-muted-foreground">
                 Configure as parcelas da condição de pagamento
               </p>
+              
+              {/* Botões para cálculo automático */}
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    Cálculo Automático
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      onClick={distributeEqualPercentages}
+                      variant="secondary"
+                      size="sm"
+                      title="Distribui 100% igualmente entre todas as parcelas ativas"
+                    >
+                      Distribuir Igualmente
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={distributeWeightedPercentages}
+                      variant="secondary"
+                      size="sm"
+                      title="Primeira parcela recebe 50%, demais dividem os 50% restantes"
+                    >
+                      Entrada + Parcelas
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={adjustPercentages}
+                      variant="secondary"
+                      size="sm"
+                      title="Ajusta automaticamente pequenas diferenças de arredondamento"
+                      disabled={Math.abs(totalPercentage - 100) > 0.1}
+                    >
+                      Ajustar
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={clearAllPercentages}
+                      variant="outline"
+                      size="sm"
+                      title="Zera todos os percentuais das parcelas"
+                    >
+                      Zerar Tudo
+                    </Button>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    Templates Prontos
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      onClick={applyTemplateAVista}
+                      variant="outline"
+                      size="sm"
+                      title="À vista com 3% de desconto"
+                    >
+                      À Vista
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={applyTemplate30_60}
+                      variant="outline"
+                      size="sm"
+                      title="2x (30 e 60 dias) com 2% de juros"
+                    >
+                      30/60 Dias
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={applyTemplateEntrada2x}
+                      variant="outline"
+                      size="sm"
+                      title="Entrada (40%) + 2 parcelas (30% cada)"
+                    >
+                      Entrada + 2x
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Indicador do total de percentuais */}
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <span className="text-sm font-medium">Total dos Percentuais:</span>
+                <div className="flex items-center gap-2">
+                  <span className={`text-sm font-bold ${
+                    Math.abs(totalPercentage - 100) < 0.01 
+                      ? 'text-green-600' 
+                      : totalPercentage > 100 
+                        ? 'text-red-600' 
+                        : 'text-orange-600'
+                  }`}>
+                    {totalPercentage.toFixed(2)}%
+                  </span>
+                  {Math.abs(totalPercentage - 100) < 0.01 ? (
+                    <span className="text-green-600 text-xs">✓ Correto</span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">
+                      {totalPercentage > 100 
+                        ? `Excesso: +${(totalPercentage - 100).toFixed(2)}%` 
+                        : `Falta: ${(100 - totalPercentage).toFixed(2)}%`
+                      }
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
             <div className="p-6 pt-0">
               {form.formState.errors.installments?.root && (
@@ -534,38 +982,6 @@ const PaymentTermForm = () => {
                                 step="0.01"
                                 min={0.01}
                                 max={100}
-                                {...field}
-                                onChange={(e) => {
-                                  const value = e.target.value;
-                                  if (
-                                    value === '' ||
-                                    value === null ||
-                                    value === undefined
-                                  ) {
-                                    field.onChange(0);
-                                  } else {
-                                    const parsed = parseFloat(value);
-                                    field.onChange(isNaN(parsed) ? 0 : parsed);
-                                  }
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name={`installments.${index}.interestRate`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Taxa de Juros (%)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                min={0}
                                 {...field}
                                 onChange={(e) => {
                                   const value = e.target.value;

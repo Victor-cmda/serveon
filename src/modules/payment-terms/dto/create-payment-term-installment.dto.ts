@@ -12,6 +12,7 @@ export class CreatePaymentTermInstallmentDto {
   @IsNumber()
   @IsPositive()
   installmentNumber: number;
+  
   @IsNotEmpty()
   @IsNumber()
   @IsPositive()
@@ -26,11 +27,6 @@ export class CreatePaymentTermInstallmentDto {
   @IsNumber()
   @IsPositive()
   percentageValue: number;
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  interestRate: number = 0;
 
   @IsOptional()
   @IsBoolean()

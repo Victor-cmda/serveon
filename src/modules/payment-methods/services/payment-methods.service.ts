@@ -17,7 +17,7 @@ export class PaymentMethodsService {
       `INSERT INTO dbo.forma_pagamento (descricao, codigo, tipo, ativo)
         VALUES ($1, $2, $3, $4)
         RETURNING id, descricao as description, codigo as code, tipo as type, 
-                ativo as active, created_at as "createdAt", updated_at as "updatedAt"`,
+                ativo, created_at as "createdAt", updated_at as "updatedAt"`,
       [description, code, type, ativo], // Usar ativo
     );
 
@@ -27,7 +27,7 @@ export class PaymentMethodsService {
   async findAll(): Promise<PaymentMethod[]> {
     const result = await this.databaseService.query(
       `SELECT id, descricao as description, codigo as code, tipo as type,
-              ativo as active, created_at as "createdAt", updated_at as "updatedAt"
+              ativo, created_at as "createdAt", updated_at as "updatedAt"
       FROM dbo.forma_pagamento
       ORDER BY description`,
     );
@@ -37,7 +37,7 @@ export class PaymentMethodsService {
   async findOne(id: number): Promise<PaymentMethod> {
     const result = await this.databaseService.query(
       `SELECT id, descricao as description, codigo as code, tipo as type,
-              ativo as active, created_at as "createdAt", updated_at as "updatedAt"
+              ativo, created_at as "createdAt", updated_at as "updatedAt"
       FROM dbo.forma_pagamento
       WHERE id = $1`,
       [id],
@@ -98,7 +98,7 @@ export class PaymentMethodsService {
         SET ${updates.join(', ')}
         WHERE id = $${paramCount}
         RETURNING id, descricao as description, codigo as code, tipo as type,
-                ativo as active, created_at as "createdAt", updated_at as "updatedAt"`,
+                ativo, created_at as "createdAt", updated_at as "updatedAt"`,
       values,
     );
 

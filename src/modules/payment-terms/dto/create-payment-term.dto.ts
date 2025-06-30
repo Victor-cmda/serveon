@@ -2,8 +2,10 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -17,6 +19,21 @@ export class CreatePaymentTermDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  interestRate?: number = 0;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  fineRate?: number = 0;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  discountPercentage?: number = 0;
 
   @IsOptional()
   @IsBoolean()
