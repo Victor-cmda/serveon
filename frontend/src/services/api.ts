@@ -377,12 +377,12 @@ export const paymentMethodApi = {
 
 // Função para transformar dados de payment term entre frontend (isActive) e backend (ativo)
 const transformPaymentTermToBackend = (data: CreatePaymentTermDto | UpdatePaymentTermDto) => {
-  const { isActive, installments, ...rest } = data as any;
+  const { ativo, installments, ...rest } = data as any;
   return {
     ...rest,
-    ativo: isActive, // Transformar isActive para ativo para o backend
+    ativo: ativo, // Transformar isActive para ativo para o backend
     installments: installments?.map((inst: any) => {
-      const { isActive: instIsActive, percentageValue, interestRate, ...instRest } = inst;
+      const { ativo: instIsActive, percentageValue, interestRate, ...instRest } = inst;
       return {
         ...instRest,
         ativo: instIsActive, // Transformar isActive para ativo nas parcelas

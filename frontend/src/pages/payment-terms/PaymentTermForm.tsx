@@ -42,7 +42,12 @@ const installmentSchema = z.object({
       }
       return val;
     })
-    .pipe(z.number().min(0.01, 'Percentual obrigatório').max(100, 'Percentual não pode ser maior que 100%')),
+    .pipe(
+      z
+        .number()
+        .min(0.01, 'Percentual obrigatório')
+        .max(100, 'Percentual não pode ser maior que 100%'),
+    ),
   interestRate: z
     .union([z.number(), z.string()])
     .transform((val) => {
@@ -54,14 +59,14 @@ const installmentSchema = z.object({
     })
     .pipe(z.number().min(0, 'Taxa de juros não pode ser negativa'))
     .default(0),
-  isActive: z.boolean().default(true),
+  ativo: z.boolean().default(true),
 });
 
 // Schema para validação do formulário principal
 const formSchema = z.object({
   name: z.string().min(1, { message: 'O nome é obrigatório' }).max(100),
   description: z.string().max(255).optional(),
-  isActive: z.boolean().default(true),
+  ativo: z.boolean().default(true),
   installments: z
     .array(installmentSchema)
     .min(1, { message: 'Adicione pelo menos uma parcela' })
@@ -86,8 +91,11 @@ const PaymentTermForm = () => {
   const [isLoadingData, setIsLoadingData] = useState(id ? true : false);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [paymentMethodDialogOpen, setPaymentMethodDialogOpen] = useState(false);
-  const [paymentMethodSearchOpen, setPaymentMethodSearchOpen] = useState<number | null>(null);
-  const [paymentMethodToEdit, setPaymentMethodToEdit] = useState<PaymentMethod | null>(null);
+  const [paymentMethodSearchOpen, setPaymentMethodSearchOpen] = useState<
+    number | null
+  >(null);
+  const [paymentMethodToEdit, setPaymentMethodToEdit] =
+    useState<PaymentMethod | null>(null);
   const [paymentTermData, setPaymentTermData] = useState<any>(null);
 
   const form = useForm<FormValues>({
@@ -95,14 +103,15 @@ const PaymentTermForm = () => {
     defaultValues: {
       name: '',
       description: '',
-      isActive: true,      installments: [
+      ativo: true,
+      installments: [
         {
           installmentNumber: 1,
           paymentMethodId: 0,
           daysToPayment: 0,
           percentageValue: 100,
           interestRate: 0,
-          isActive: true,
+          ativo: true,
         },
       ],
     },
@@ -146,18 +155,20 @@ const PaymentTermForm = () => {
       form.reset({
         name: data.name,
         description: data.description || '',
-        isActive: data.ativo, 
+        ativo: data.ativo,
         installments: sortedInstallments.map((inst) => ({
           installmentNumber: inst.installmentNumber,
           paymentMethodId: inst.paymentMethodId,
           daysToPayment: inst.daysToPayment,
-          percentageValue: typeof inst.percentageValue === 'string' 
-            ? parseFloat(inst.percentageValue) 
-            : inst.percentageValue,
-          interestRate: typeof inst.interestRate === 'string' 
-            ? parseFloat(inst.interestRate) 
-            : inst.interestRate,
-          isActive: inst.ativo, 
+          percentageValue:
+            typeof inst.percentageValue === 'string'
+              ? parseFloat(inst.percentageValue)
+              : inst.percentageValue,
+          interestRate:
+            typeof inst.interestRate === 'string'
+              ? parseFloat(inst.interestRate)
+              : inst.interestRate,
+          ativo: inst.ativo,
         })),
       });
     } catch (error) {
@@ -176,13 +187,14 @@ const PaymentTermForm = () => {
     const lastInstallment = form.getValues('installments').slice(-1)[0];
     const nextNumber = lastInstallment
       ? lastInstallment.installmentNumber + 1
-      : 1;    append({
+      : 1;
+    append({
       installmentNumber: nextNumber,
       paymentMethodId: 0,
       daysToPayment: lastInstallment ? lastInstallment.daysToPayment + 30 : 30,
       percentageValue: 0,
       interestRate: 0,
-      isActive: true,
+      ativo: true,
     });
   };
 
@@ -192,31 +204,36 @@ const PaymentTermForm = () => {
       const paymentTermData: CreatePaymentTermDto = {
         name: values.name,
         description: values.description,
-        ativo: values.isActive,
+        ativo: values.ativo,
         installments: values.installments.map((inst) => ({
           installmentNumber: inst.installmentNumber,
           paymentMethodId: inst.paymentMethodId,
           daysToPayment: inst.daysToPayment,
-          percentageValue: typeof inst.percentageValue === 'string' 
-            ? parseFloat(inst.percentageValue) 
-            : inst.percentageValue,
-          interestRate: typeof inst.interestRate === 'string' 
-            ? parseFloat(inst.interestRate) 
-            : inst.interestRate,
-          ativo: inst.isActive,
+          percentageValue:
+            typeof inst.percentageValue === 'string'
+              ? parseFloat(inst.percentageValue)
+              : inst.percentageValue,
+          interestRate:
+            typeof inst.interestRate === 'string'
+              ? parseFloat(inst.interestRate)
+              : inst.interestRate,
+          ativo: inst.ativo,
         })),
-      };      // Verifica se existe algum método de pagamento não selecionado
+      }; 
+      // Verifica se existe algum método de pagamento não selecionado
       const hasInvalidPaymentMethod = paymentTermData.installments.some(
-        (inst) => !inst.paymentMethodId || inst.paymentMethodId <= 0
+        (inst) => !inst.paymentMethodId || inst.paymentMethodId <= 0,
       );
-      
+
       if (hasInvalidPaymentMethod) {
         toast.error('Erro', {
-          description: 'Selecione um método de pagamento válido para todas as parcelas.',
+          description:
+            'Selecione um método de pagamento válido para todas as parcelas.',
         });
         setIsLoading(false);
         return;
-      }      if (id) {
+      }
+      if (id) {
         await paymentTermApi.update(Number(id), paymentTermData);
         toast.success('Sucesso', {
           description: 'Condição de pagamento atualizada com sucesso!',
@@ -227,7 +244,7 @@ const PaymentTermForm = () => {
           description: 'Condição de pagamento criada com sucesso!',
         });
       }
-      
+
       // Check if we need to return to a parent form in a cascading scenario
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
@@ -237,7 +254,10 @@ const PaymentTermForm = () => {
       }
     } catch (error: unknown) {
       console.error('Erro ao salvar condição de pagamento:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar a condição de pagamento.';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Ocorreu um erro ao salvar a condição de pagamento.';
       toast.error('Erro', {
         description: errorMessage,
       });
@@ -248,21 +268,24 @@ const PaymentTermForm = () => {
 
   const handlePaymentMethodCreated = (newPaymentMethod: PaymentMethod) => {
     setPaymentMethods((prev) => [...prev, newPaymentMethod]);
-    
+
     // Se houver um índice de parcela ativo, atualize o método de pagamento para essa parcela
     if (paymentMethodSearchOpen !== null) {
-      form.setValue(`installments.${paymentMethodSearchOpen}.paymentMethodId`, newPaymentMethod.id);
+      form.setValue(
+        `installments.${paymentMethodSearchOpen}.paymentMethodId`,
+        newPaymentMethod.id,
+      );
     }
-    
+
     setPaymentMethodDialogOpen(false);
   };
 
   const handlePaymentMethodUpdated = (updatedPaymentMethod: PaymentMethod) => {
     // Atualiza o método de pagamento na lista
-    setPaymentMethods((prev) => 
-      prev.map((method) => 
-        method.id === updatedPaymentMethod.id ? updatedPaymentMethod : method
-      )
+    setPaymentMethods((prev) =>
+      prev.map((method) =>
+        method.id === updatedPaymentMethod.id ? updatedPaymentMethod : method,
+      ),
     );
     setPaymentMethodToEdit(null);
   };
@@ -297,7 +320,9 @@ const PaymentTermForm = () => {
           </Link>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {id ? 'Editar Condição de Pagamento' : 'Nova Condição de Pagamento'}
+              {id
+                ? 'Editar Condição de Pagamento'
+                : 'Nova Condição de Pagamento'}
             </h1>
             <p className="text-muted-foreground">
               {id
@@ -306,14 +331,14 @@ const PaymentTermForm = () => {
             </p>
           </div>
         </div>
-        
+
         {/* AuditSection no header */}
-        <AuditSection 
-          form={form} 
+        <AuditSection
+          form={form}
           data={paymentTermData}
-          variant="header" 
+          variant="header"
           isEditing={!!id}
-          statusFieldName="isActive" // Campo de status é 'isActive' para PaymentTerm
+          statusFieldName="ativo" // Campo de status é 'ativo' para PaymentTerm
         />
       </div>
 
@@ -338,7 +363,10 @@ const PaymentTermForm = () => {
                       <FormItem>
                         <FormLabel>Nome *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Nome da condição de pagamento" {...field} />
+                          <Input
+                            placeholder="Nome da condição de pagamento"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -374,7 +402,11 @@ const PaymentTermForm = () => {
                 <h3 className="text-2xl font-semibold leading-none tracking-tight">
                   Parcelas
                 </h3>
-                <Button type="button" onClick={addInstallment} variant="outline">
+                <Button
+                  type="button"
+                  onClick={addInstallment}
+                  variant="outline"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Adicionar Parcela
                 </Button>
@@ -384,194 +416,205 @@ const PaymentTermForm = () => {
               </p>
             </div>
             <div className="p-6 pt-0">
-                {form.formState.errors.installments?.root && (
-                  <p className="text-sm font-medium text-destructive">
-                    {form.formState.errors.installments.root.message}
-                  </p>
-                )}
+              {form.formState.errors.installments?.root && (
+                <p className="text-sm font-medium text-destructive">
+                  {form.formState.errors.installments.root.message}
+                </p>
+              )}
 
-                {fields.map((field, index) => (
-                  <Card key={field.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between">
-                        <CardTitle className="text-lg">
-                          Parcela {index + 1}
-                        </CardTitle>
-                        {fields.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => remove(index)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pb-2 pt-0">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name={`installments.${index}.installmentNumber`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Número da Parcela</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min={1}
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(parseInt(e.target.value) || 0)
-                              }
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+              {fields.map((field, index) => (
+                <Card key={field.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between">
+                      <CardTitle className="text-lg">
+                        Parcela {index + 1}
+                      </CardTitle>
+                      {fields.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => remove(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`installments.${index}.paymentMethodId`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Método de Pagamento</FormLabel>
-                          <div className="flex gap-2">
-                            <div className="w-full flex-1">
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pb-2 pt-0">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name={`installments.${index}.installmentNumber`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Número da Parcela</FormLabel>
+                            <FormControl>
                               <Input
-                                value={
-                                  paymentMethods.find((m) => m.id === field.value)?.description ||
-                                  ''
+                                type="number"
+                                min={1}
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(parseInt(e.target.value) || 0)
                                 }
-                                readOnly
-                                placeholder="Selecione um método de pagamento"
-                                className="cursor-pointer h-11 text-base"
-                                onClick={() => openPaymentMethodSearch(index)}
                               />
-                              <input type="hidden" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`installments.${index}.paymentMethodId`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Método de Pagamento</FormLabel>
+                            <div className="flex gap-2">
+                              <div className="w-full flex-1">
+                                <Input
+                                  value={
+                                    paymentMethods.find(
+                                      (m) => m.id === field.value,
+                                    )?.description || ''
+                                  }
+                                  readOnly
+                                  placeholder="Selecione um método de pagamento"
+                                  className="cursor-pointer h-11 text-base"
+                                  onClick={() => openPaymentMethodSearch(index)}
+                                />
+                                <input type="hidden" {...field} />
+                              </div>
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="outline"
+                                onClick={() => openPaymentMethodSearch(index)}
+                                disabled={isLoading}
+                                className="h-11 w-11"
+                              >
+                                <Search className="h-5 w-5" />
+                              </Button>
                             </div>
-                            <Button
-                              type="button"
-                              size="icon"
-                              variant="outline"
-                              onClick={() => openPaymentMethodSearch(index)}
-                              disabled={isLoading}
-                              className="h-11 w-11"
-                            >
-                              <Search className="h-5 w-5" />
-                            </Button>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={form.control}
-                      name={`installments.${index}.daysToPayment`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Dias para Pagamento</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min={0}
-                              {...field}
-                              onChange={(e) =>
-                                field.onChange(parseInt(e.target.value) || 0)
-                              }
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`installments.${index}.percentageValue`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Percentual do Valor (%)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min={0.01}
-                              max={100}
-                              {...field}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                if (value === '' || value === null || value === undefined) {
-                                  field.onChange(0);
-                                } else {
-                                  const parsed = parseFloat(value);
-                                  field.onChange(isNaN(parsed) ? 0 : parsed);
+                      <FormField
+                        control={form.control}
+                        name={`installments.${index}.daysToPayment`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Dias para Pagamento</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={0}
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(parseInt(e.target.value) || 0)
                                 }
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={form.control}
-                      name={`installments.${index}.interestRate`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Taxa de Juros (%)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min={0}
-                              {...field}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                if (value === '' || value === null || value === undefined) {
-                                  field.onChange(0);
-                                } else {
-                                  const parsed = parseFloat(value);
-                                  field.onChange(isNaN(parsed) ? 0 : parsed);
+                      <FormField
+                        control={form.control}
+                        name={`installments.${index}.percentageValue`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Percentual do Valor (%)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min={0.01}
+                                max={100}
+                                {...field}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  if (
+                                    value === '' ||
+                                    value === null ||
+                                    value === undefined
+                                  ) {
+                                    field.onChange(0);
+                                  } else {
+                                    const parsed = parseFloat(value);
+                                    field.onChange(isNaN(parsed) ? 0 : parsed);
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`installments.${index}.interestRate`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Taxa de Juros (%)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min={0}
+                                {...field}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  if (
+                                    value === '' ||
+                                    value === null ||
+                                    value === undefined
+                                  ) {
+                                    field.onChange(0);
+                                  } else {
+                                    const parsed = parseFloat(value);
+                                    field.onChange(isNaN(parsed) ? 0 : parsed);
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`installments.${index}.ativo`}
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                            <FormControl>
+                              <input
+                                type="checkbox"
+                                checked={field.value}
+                                onChange={(e) =>
+                                  field.onChange(e.target.checked)
                                 }
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name={`installments.${index}.isActive`}
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                          <FormControl>
-                            <input
-                              type="checkbox"
-                              checked={field.value}
-                              onChange={(e) => field.onChange(e.target.checked)}
-                              className="h-4 w-4 text-primary border border-gray-300 rounded focus:ring-primary"
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Ativa</FormLabel>
-                            <FormDescription>
-                              Indica se a parcela está ativa
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                                className="h-4 w-4 text-primary border border-gray-300 rounded focus:ring-primary"
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel>Ativa</FormLabel>
+                              <FormDescription>
+                                Indica se a parcela está ativa
+                              </FormDescription>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
 
@@ -594,7 +637,11 @@ const PaymentTermForm = () => {
       <PaymentMethodCreationDialog
         open={paymentMethodDialogOpen}
         onOpenChange={setPaymentMethodDialogOpen}
-        onSuccess={paymentMethodToEdit ? handlePaymentMethodUpdated : handlePaymentMethodCreated}
+        onSuccess={
+          paymentMethodToEdit
+            ? handlePaymentMethodUpdated
+            : handlePaymentMethodCreated
+        }
         paymentMethod={paymentMethodToEdit}
       />
 
@@ -611,8 +658,8 @@ const PaymentTermForm = () => {
           onSelect={(method) => {
             if (paymentMethodSearchOpen !== null) {
               form.setValue(
-                `installments.${paymentMethodSearchOpen}.paymentMethodId`, 
-                method.id
+                `installments.${paymentMethodSearchOpen}.paymentMethodId`,
+                method.id,
               );
               setPaymentMethodSearchOpen(null);
             }
@@ -625,7 +672,7 @@ const PaymentTermForm = () => {
           displayColumns={[
             { key: 'description', header: 'Descrição' },
             { key: 'code', header: 'Código' },
-            { key: 'type', header: 'Tipo' }
+            { key: 'type', header: 'Tipo' },
           ]}
           searchKeys={['description', 'code', 'type']}
           entityType="metodos-pagamento"

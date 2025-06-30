@@ -25,7 +25,7 @@ const formSchema = z.object({
   description: z.string().min(1, { message: 'A descrição é obrigatória' }).max(100),
   code: z.string().max(20).optional(),
   type: z.string().max(30).optional(),
-  active: z.boolean().default(true),
+  ativo: z.boolean().default(true),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -43,7 +43,7 @@ const PaymentMethodForm = () => {
       description: '',
       code: '',
       type: '',
-      active: true,
+      ativo: true,
     },
   });
 
@@ -56,7 +56,7 @@ const PaymentMethodForm = () => {
         description: data.description,
         code: data.code || '',
         type: data.type || '',
-        active: data.ativo,
+        ativo: data.ativo,
       });
     } catch (error) {
       console.error('Erro ao buscar método de pagamento:', error);
@@ -80,7 +80,7 @@ const PaymentMethodForm = () => {
     try {
       const paymentMethodData: CreatePaymentMethodDto | UpdatePaymentMethodDto = {
         description: values.description,
-        ativo: values.active
+        ativo: values.ativo
       };
       
       // Somente incluir código e tipo se não estiverem vazios
@@ -156,7 +156,7 @@ const PaymentMethodForm = () => {
           data={paymentMethodData}
           variant="header" 
           isEditing={!!id}
-          statusFieldName="active" // Campo de status é 'active' para PaymentMethod
+          statusFieldName="ativo" // Campo de status é 'ativo' para PaymentMethod
         />
       </div>
 

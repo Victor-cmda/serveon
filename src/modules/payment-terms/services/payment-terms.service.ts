@@ -90,7 +90,6 @@ export class PaymentTermsService {
       `SELECT id, nome as name, descricao as description, ativo, 
               created_at as "createdAt", updated_at as "updatedAt"
         FROM dbo.condicao_pagamento
-        WHERE ativo = true
         ORDER BY name`,
     );
 
@@ -104,7 +103,7 @@ export class PaymentTermsService {
                 percentual_valor as "percentageValue", taxa_juros as "interestRate", 
                 ativo, created_at as "createdAt", updated_at as "updatedAt"
           FROM dbo.parcela_condicao_pagamento
-          WHERE condicao_pagamento_id = $1 AND ativo = true
+          WHERE condicao_pagamento_id = $1
           ORDER BY numero_parcela`,
         [paymentTerm.id],
       );
