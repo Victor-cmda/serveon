@@ -34,12 +34,25 @@ const installmentSchema = z.object({
     .number()
     .min(0, 'Dias para pagamento deve ser maior ou igual a 0'),
   percentageValue: z
-    .number()
-    .min(0.01, 'Percentual obrigatório')
-    .max(100, 'Percentual não pode ser maior que 100%'),
+    .union([z.number(), z.string()])
+    .transform((val) => {
+      if (typeof val === 'string') {
+        const parsed = parseFloat(val);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+      return val;
+    })
+    .pipe(z.number().min(0.01, 'Percentual obrigatório').max(100, 'Percentual não pode ser maior que 100%')),
   interestRate: z
-    .number()
-    .min(0, 'Taxa de juros não pode ser negativa')
+    .union([z.number(), z.string()])
+    .transform((val) => {
+      if (typeof val === 'string') {
+        const parsed = parseFloat(val);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+      return val;
+    })
+    .pipe(z.number().min(0, 'Taxa de juros não pode ser negativa'))
     .default(0),
   isActive: z.boolean().default(true),
 });
@@ -138,8 +151,12 @@ const PaymentTermForm = () => {
           installmentNumber: inst.installmentNumber,
           paymentMethodId: inst.paymentMethodId,
           daysToPayment: inst.daysToPayment,
-          percentageValue: inst.percentageValue,
-          interestRate: inst.interestRate,
+          percentageValue: typeof inst.percentageValue === 'string' 
+            ? parseFloat(inst.percentageValue) 
+            : inst.percentageValue,
+          interestRate: typeof inst.interestRate === 'string' 
+            ? parseFloat(inst.interestRate) 
+            : inst.interestRate,
           isActive: inst.ativo, 
         })),
       });
@@ -180,9 +197,13 @@ const PaymentTermForm = () => {
           installmentNumber: inst.installmentNumber,
           paymentMethodId: inst.paymentMethodId,
           daysToPayment: inst.daysToPayment,
-          percentageValue: inst.percentageValue,
-          interestRate: inst.interestRate,
-          isActive: inst.isActive,
+          percentageValue: typeof inst.percentageValue === 'string' 
+            ? parseFloat(inst.percentageValue) 
+            : inst.percentageValue,
+          interestRate: typeof inst.interestRate === 'string' 
+            ? parseFloat(inst.interestRate) 
+            : inst.interestRate,
+          ativo: inst.isActive,
         })),
       };      // Verifica se existe algum método de pagamento não selecionado
       const hasInvalidPaymentMethod = paymentTermData.installments.some(
@@ -481,9 +502,15 @@ const PaymentTermForm = () => {
                               min={0.01}
                               max={100}
                               {...field}
-                              onChange={(e) =>
-                                field.onChange(parseFloat(e.target.value) || 0)
-                              }
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (value === '' || value === null || value === undefined) {
+                                  field.onChange(0);
+                                } else {
+                                  const parsed = parseFloat(value);
+                                  field.onChange(isNaN(parsed) ? 0 : parsed);
+                                }
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
@@ -503,9 +530,15 @@ const PaymentTermForm = () => {
                               step="0.01"
                               min={0}
                               {...field}
-                              onChange={(e) =>
-                                field.onChange(parseFloat(e.target.value) || 0)
-                              }
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (value === '' || value === null || value === undefined) {
+                                  field.onChange(0);
+                                } else {
+                                  const parsed = parseFloat(value);
+                                  field.onChange(isNaN(parsed) ? 0 : parsed);
+                                }
+                              }}
                             />
                           </FormControl>
                           <FormMessage />

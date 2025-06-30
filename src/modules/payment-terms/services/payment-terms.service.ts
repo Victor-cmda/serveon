@@ -23,12 +23,12 @@ export class PaymentTermsService {
       const result = await this.databaseService.query(
         `INSERT INTO dbo.condicao_pagamento (nome, descricao, ativo, created_at)
           VALUES ($1, $2, $3, NOW())
-          RETURNING id, nome as name, descricao as description, ativo as "isActive", 
+          RETURNING id, nome as name, descricao as description, ativo, 
                   created_at as "createdAt", updated_at as "updatedAt"`,
         [
           createPaymentTermDto.name,
           createPaymentTermDto.description,
-          createPaymentTermDto.ativo, // Usar ativo em vez de isActive
+          createPaymentTermDto.ativo,
         ],
       );
 
@@ -44,12 +44,12 @@ export class PaymentTermsService {
             VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
           [
             paymentTermId,
-            installment.installmentNumber,
-            installment.paymentMethodId,
-            installment.daysToPayment,
-            installment.percentageValue,
-            installment.interestRate || 0,
-            installment.ativo !== undefined ? installment.ativo : true, // Usar ativo
+            Number(installment.installmentNumber),
+            Number(installment.paymentMethodId),
+            Number(installment.daysToPayment),
+            Number(installment.percentageValue),
+            Number(installment.interestRate || 0),
+            Boolean(installment.ativo !== undefined ? installment.ativo : true),
           ],
         );
       }
@@ -59,7 +59,7 @@ export class PaymentTermsService {
         `SELECT id, condicao_pagamento_id as "paymentTermId", numero_parcela as "installmentNumber", 
                 forma_pagamento_id as "paymentMethodId", dias_para_pagamento as "daysToPayment", 
                 percentual_valor as "percentageValue", taxa_juros as "interestRate", 
-                ativo as "isActive", created_at as "createdAt", updated_at as "updatedAt"
+                ativo, created_at as "createdAt", updated_at as "updatedAt"
           FROM dbo.parcela_condicao_pagamento
           WHERE condicao_pagamento_id = $1
           ORDER BY numero_parcela`,
@@ -87,7 +87,7 @@ export class PaymentTermsService {
 
   async findAll(): Promise<PaymentTerm[]> {
     const paymentTermsResult = await this.databaseService.query(
-      `SELECT id, nome as name, descricao as description, ativo as "isActive", 
+      `SELECT id, nome as name, descricao as description, ativo, 
               created_at as "createdAt", updated_at as "updatedAt"
         FROM dbo.condicao_pagamento
         WHERE ativo = true
@@ -102,7 +102,7 @@ export class PaymentTermsService {
         `SELECT id, condicao_pagamento_id as "paymentTermId", numero_parcela as "installmentNumber", 
                 forma_pagamento_id as "paymentMethodId", dias_para_pagamento as "daysToPayment", 
                 percentual_valor as "percentageValue", taxa_juros as "interestRate", 
-                ativo as "isActive", created_at as "createdAt", updated_at as "updatedAt"
+                ativo, created_at as "createdAt", updated_at as "updatedAt"
           FROM dbo.parcela_condicao_pagamento
           WHERE condicao_pagamento_id = $1 AND ativo = true
           ORDER BY numero_parcela`,
@@ -116,10 +116,10 @@ export class PaymentTermsService {
   }
   async findOne(id: number): Promise<PaymentTerm> {
     const result = await this.databaseService.query(
-      `SELECT id, nome as name, descricao as description, ativo as "isActive", 
+      `SELECT id, nome as name, descricao as description, ativo, 
               created_at as "createdAt", updated_at as "updatedAt"
         FROM dbo.condicao_pagamento
-        WHERE id = $1 AND ativo = true`,
+        WHERE id = $1`,
       [id],
     );
 
@@ -129,14 +129,14 @@ export class PaymentTermsService {
 
     const paymentTerm = result.rows[0];
 
-    // Get installments
+    // Get installments (including inactive ones for editing)
     const installmentsResult = await this.databaseService.query(
       `SELECT id, condicao_pagamento_id as "paymentTermId", numero_parcela as "installmentNumber", 
               forma_pagamento_id as "paymentMethodId", dias_para_pagamento as "daysToPayment", 
               percentual_valor as "percentageValue", taxa_juros as "interestRate", 
-              ativo as "isActive", created_at as "createdAt", updated_at as "updatedAt"
+              ativo, created_at as "createdAt", updated_at as "updatedAt"
         FROM dbo.parcela_condicao_pagamento
-        WHERE condicao_pagamento_id = $1 AND ativo = true
+        WHERE condicao_pagamento_id = $1
         ORDER BY numero_parcela`,
       [id],
     );
@@ -177,7 +177,7 @@ export class PaymentTermsService {
 
       if (updatePaymentTermDto.ativo !== undefined) { // Usar ativo
         updates.push(`ativo = $${paramCount}`);
-        values.push(updatePaymentTermDto.ativo); // Usar ativo
+        values.push(Boolean(updatePaymentTermDto.ativo)); // Usar ativo com conversão explícita
         paramCount++;
       }
 
@@ -196,7 +196,7 @@ export class PaymentTermsService {
         `UPDATE dbo.condicao_pagamento
           SET ${updates.join(', ')}
           WHERE id = $${paramCount}
-          RETURNING id, nome as name, descricao as description, ativo as "isActive", 
+          RETURNING id, nome as name, descricao as description, ativo, 
                   created_at as "createdAt", updated_at as "updatedAt"`,
         values,
       );
@@ -225,12 +225,12 @@ export class PaymentTermsService {
               VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
             [
               id,
-              installment.installmentNumber,
-              installment.paymentMethodId,
-              installment.daysToPayment,
-              installment.percentageValue,
-              installment.interestRate || 0,
-              installment.ativo !== undefined ? installment.ativo : true, // Usar ativo
+              Number(installment.installmentNumber),
+              Number(installment.paymentMethodId),
+              Number(installment.daysToPayment),
+              Number(installment.percentageValue),
+              Number(installment.interestRate || 0),
+              Boolean(installment.ativo !== undefined ? installment.ativo : true),
             ],
           );
         }
@@ -241,9 +241,9 @@ export class PaymentTermsService {
         `SELECT id, condicao_pagamento_id as "paymentTermId", numero_parcela as "installmentNumber", 
                 forma_pagamento_id as "paymentMethodId", dias_para_pagamento as "daysToPayment", 
                 percentual_valor as "percentageValue", taxa_juros as "interestRate", 
-                ativo as "isActive", created_at as "createdAt", updated_at as "updatedAt"
+                ativo, created_at as "createdAt", updated_at as "updatedAt"
           FROM dbo.parcela_condicao_pagamento
-          WHERE condicao_pagamento_id = $1 AND ativo = true
+          WHERE condicao_pagamento_id = $1
           ORDER BY numero_parcela`,
         [id],
       );

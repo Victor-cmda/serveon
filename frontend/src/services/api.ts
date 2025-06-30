@@ -382,10 +382,12 @@ const transformPaymentTermToBackend = (data: CreatePaymentTermDto | UpdatePaymen
     ...rest,
     ativo: isActive, // Transformar isActive para ativo para o backend
     installments: installments?.map((inst: any) => {
-      const { isActive: instIsActive, ...instRest } = inst;
+      const { isActive: instIsActive, percentageValue, interestRate, ...instRest } = inst;
       return {
         ...instRest,
         ativo: instIsActive, // Transformar isActive para ativo nas parcelas
+        percentageValue: typeof percentageValue === 'string' ? parseFloat(percentageValue) : percentageValue,
+        interestRate: typeof interestRate === 'string' ? parseFloat(interestRate) : interestRate,
       };
     }),
   };
@@ -395,12 +397,14 @@ const transformPaymentTermFromBackend = (data: any): PaymentTerm => {
   const { ativo, installments, ...rest } = data;
   return {
     ...rest,
-    isActive: ativo, // Transformar ativo para isActive no frontend
+    ativo: ativo,
     installments: installments?.map((inst: any) => {
-      const { ativo: instAtivo, ...instRest } = inst;
+      const { ativo: instAtivo, percentageValue, interestRate, ...instRest } = inst;
       return {
         ...instRest,
-        isActive: instAtivo, // Transformar ativo para isActive nas parcelas
+        ativo: instAtivo,
+        percentageValue: typeof percentageValue === 'string' ? parseFloat(percentageValue) : percentageValue,
+        interestRate: typeof interestRate === 'string' ? parseFloat(interestRate) : interestRate,
       };
     }) || [],
   };
