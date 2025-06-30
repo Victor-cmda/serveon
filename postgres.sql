@@ -264,8 +264,8 @@ CREATE TABLE categoria (
 -- Tabela unidade_medida
 CREATE TABLE unidade_medida (
     id SERIAL PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL,
     sigla VARCHAR(6) NOT NULL UNIQUE,
-    descricao VARCHAR(50) NOT NULL,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -571,22 +571,22 @@ VALUES ('À VISTA', 'PAGAMENTO À VISTA', true),
     ('ENTRADA + 30 DIAS', 'PAGAMENTO COM ENTRADA E MAIS 30 DIAS', true);
 
 -- Inserir unidades de medida comuns
-INSERT INTO unidade_medida (sigla, descricao, ativo)
-VALUES ('UN', 'UNIDADE', true),
-    ('KG', 'QUILOGRAMA', true),
-    ('G', 'GRAMA', true),
-    ('L', 'LITRO', true),
-    ('ML', 'MILILITRO', true),
-    ('M', 'METRO', true),
-    ('CM', 'CENTÍMETRO', true),
-    ('M2', 'METRO QUADRADO', true),
-    ('M3', 'METRO CÚBICO', true),
-    ('PC', 'PEÇA', true),
-    ('CX', 'CAIXA', true),
-    ('PCT', 'PACOTE', true),
+INSERT INTO unidade_medida (nome, sigla, ativo)
+VALUES ('UNIDADE', 'UN', true),
+    ('QUILOGRAMA', 'KG', true),
+    ('GRAMA', 'G', true),
+    ('LITRO', 'L', true),
+    ('MILILITRO', 'ML', true),
+    ('METRO', 'M', true),
+    ('CENTÍMETRO', 'CM', true),
+    ('METRO QUADRADO', 'M2', true),
+    ('METRO CÚBICO', 'M3', true),
+    ('PEÇA', 'PC', true),
+    ('CAIXA', 'CX', true),
+    ('PACOTE', 'PCT', true),
     ('PAR', 'PAR', true),
-    ('DZ', 'DÚZIA', true),
-    ('CT', 'CENTO', true);
+    ('DÚZIA', 'DZ', true),
+    ('CENTO', 'CT', true);
 
 -- Inserir marcas exemplo
 INSERT INTO marca (nome, descricao, ativo)
@@ -614,6 +614,12 @@ COMMENT ON TABLE dbo.forma_pagamento IS 'Formas de pagamento das parcelas de not
 COMMENT ON TABLE dbo.marca IS 'Cadastro de marcas de produtos';
 COMMENT ON TABLE dbo.categoria IS 'Cadastro de categorias de produtos';
 COMMENT ON TABLE dbo.unidade_medida IS 'Cadastro de unidades de medida';
+COMMENT ON COLUMN dbo.unidade_medida.id IS 'ID único da unidade de medida';
+COMMENT ON COLUMN dbo.unidade_medida.nome IS 'Nome da unidade de medida';
+COMMENT ON COLUMN dbo.unidade_medida.sigla IS 'Sigla da unidade de medida';
+COMMENT ON COLUMN dbo.unidade_medida.ativo IS 'Indica se a unidade de medida está ativa';
+COMMENT ON COLUMN dbo.unidade_medida.created_at IS 'Data de criação do registro';
+COMMENT ON COLUMN dbo.unidade_medida.updated_at IS 'Data da última atualização do registro';
 COMMENT ON TABLE dbo.produto IS 'Cadastro de produtos';
 COMMENT ON COLUMN dbo.produto.id IS 'ID único do produto';
 COMMENT ON COLUMN dbo.produto.produto IS 'Nome/descrição do produto';

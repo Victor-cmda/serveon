@@ -44,12 +44,12 @@ const UnitMeasuresList: React.FC = () => {
         });
       }
     }
-  };  const filteredUnitMeasures = unitMeasures.filter(
+  };
+
+  const filteredUnitMeasures = unitMeasures.filter(
     (unitMeasure) =>
       (unitMeasure.nome && unitMeasure.nome.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (unitMeasure.sigla && unitMeasure.sigla.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (unitMeasure.descricao && unitMeasure.descricao.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      unitMeasure.id.toString().includes(searchTerm)
+      (unitMeasure.sigla && unitMeasure.sigla.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (loading) {
@@ -108,9 +108,6 @@ const UnitMeasuresList: React.FC = () => {
                   Sigla
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                  Descrição
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Status
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
@@ -121,7 +118,7 @@ const UnitMeasuresList: React.FC = () => {
             <tbody>
               {filteredUnitMeasures.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="h-24 text-center">
+                  <td colSpan={5} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Scale className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -131,9 +128,10 @@ const UnitMeasuresList: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredUnitMeasures.map((unitMeasure) => (                  <tr key={unitMeasure.id} className="border-b">
+                filteredUnitMeasures.map((unitMeasure) => (
+                  <tr key={unitMeasure.id} className="border-b">
                     <td className="p-4">
-                      <div className="font-mono text-sm text-muted-foreground">{unitMeasure.id}</div>
+                      <div className="font-medium">{unitMeasure.id}</div>
                     </td>
                     <td className="p-4">
                       <div className="font-medium">{unitMeasure.nome}</div>
@@ -142,9 +140,6 @@ const UnitMeasuresList: React.FC = () => {
                       <code className="text-sm font-mono bg-muted px-1 py-0.5 rounded">
                         {unitMeasure.sigla}
                       </code>
-                    </td>
-                    <td className="p-4">
-                      <div className="text-sm">{unitMeasure.descricao || '-'}</div>
                     </td>
                     <td className="p-4">
                       <div className="text-sm">

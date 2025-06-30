@@ -4793,15 +4793,15 @@
       "CreateUnitMeasureDto": {
         "type": "object",
         "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome da unidade de medida",
+            "example": "Unidade"
+          },
           "sigla": {
             "type": "string",
             "description": "Sigla da unidade de medida",
             "example": "UN"
-          },
-          "descricao": {
-            "type": "string",
-            "description": "Descrição da unidade de medida",
-            "example": "Unidade"
           },
           "ativo": {
             "type": "boolean",
@@ -4811,6 +4811,7 @@
           }
         },
         "required": [
+          "nome",
           "sigla",
           "ativo"
         ]
@@ -4839,15 +4840,15 @@
             "description": "Data da última atualização do registro",
             "example": "2025-06-19T10:00:00Z"
           },
+          "nome": {
+            "type": "string",
+            "description": "Nome da unidade de medida",
+            "example": "Unidade"
+          },
           "sigla": {
             "type": "string",
             "description": "Sigla da unidade de medida",
             "example": "UN"
-          },
-          "descricao": {
-            "type": "string",
-            "description": "Descrição da unidade de medida",
-            "example": "Unidade"
           }
         },
         "required": [
@@ -4855,21 +4856,22 @@
           "ativo",
           "createdAt",
           "updatedAt",
+          "nome",
           "sigla"
         ]
       },
       "UpdateUnitMeasureDto": {
         "type": "object",
         "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome da unidade de medida",
+            "example": "Unidade"
+          },
           "sigla": {
             "type": "string",
             "description": "Sigla da unidade de medida",
             "example": "UN"
-          },
-          "descricao": {
-            "type": "string",
-            "description": "Descrição da unidade de medida",
-            "example": "Unidade"
           },
           "ativo": {
             "type": "boolean",

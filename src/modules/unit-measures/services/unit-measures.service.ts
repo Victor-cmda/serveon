@@ -37,12 +37,12 @@ export class UnitMeasuresService {
 
         // Inserir a nova unidade de medida
         const result = await client.query(
-          `INSERT INTO dbo.unidade_medida (sigla, descricao, ativo)
+          `INSERT INTO dbo.unidade_medida (nome, sigla, ativo)
           VALUES ($1, $2, $3)
           RETURNING *`,
           [
+            createUnitMeasureDto.nome,
             createUnitMeasureDto.sigla.toUpperCase(),
-            createUnitMeasureDto.descricao || null,
             createUnitMeasureDto.ativo !== undefined
               ? createUnitMeasureDto.ativo
               : true,
@@ -196,15 +196,15 @@ export class UnitMeasuresService {
         const updateValues: any[] = [];
         let paramCounter = 1;
 
-        if (updateUnitMeasureDto.sigla !== undefined) {
-          updateFields.push(`sigla = $${paramCounter}`);
-          updateValues.push(updateUnitMeasureDto.sigla.toUpperCase());
+        if (updateUnitMeasureDto.nome !== undefined) {
+          updateFields.push(`nome = $${paramCounter}`);
+          updateValues.push(updateUnitMeasureDto.nome);
           paramCounter++;
         }
 
-        if (updateUnitMeasureDto.descricao !== undefined) {
-          updateFields.push(`descricao = $${paramCounter}`);
-          updateValues.push(updateUnitMeasureDto.descricao);
+        if (updateUnitMeasureDto.sigla !== undefined) {
+          updateFields.push(`sigla = $${paramCounter}`);
+          updateValues.push(updateUnitMeasureDto.sigla.toUpperCase());
           paramCounter++;
         }
 
@@ -344,9 +344,9 @@ export class UnitMeasuresService {
   private mapDatabaseToEntity(row: any): UnitMeasure {
     return {
       id: row.id,
+      nome: row.nome,
       sigla: row.sigla,
-      descricao: row.descricao,
-      ativo: row.status,
+      ativo: row.ativo,
       createdAt: row.created_at?.toISOString(),
       updatedAt: row.updated_at?.toISOString(),
     };

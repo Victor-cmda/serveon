@@ -9,6 +9,17 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUnitMeasureDto {
   @ApiProperty({
+    description: 'Nome da unidade de medida',
+    example: 'Unidade',
+  })
+  @IsNotEmpty({ message: 'Nome da unidade de medida é obrigatório' })
+  @IsString({ message: 'Nome da unidade de medida deve ser uma string' })
+  @MaxLength(50, {
+    message: 'Nome da unidade de medida deve ter no máximo 50 caracteres',
+  })
+  nome: string;
+
+  @ApiProperty({
     description: 'Sigla da unidade de medida',
     example: 'UN',
   })
@@ -18,16 +29,6 @@ export class CreateUnitMeasureDto {
     message: 'Sigla da unidade de medida deve ter no máximo 6 caracteres',
   })
   sigla: string;
-
-  @ApiProperty({
-    description: 'Descrição da unidade de medida',
-    example: 'Unidade',
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'Descrição deve ser uma string' })
-  @MaxLength(50, { message: 'Descrição deve ter no máximo 50 caracteres' })
-  descricao?: string;
 
   @ApiProperty({
     description: 'Status da unidade de medida (ativo/inativo)',

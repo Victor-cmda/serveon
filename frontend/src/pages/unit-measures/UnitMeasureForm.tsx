@@ -17,7 +17,6 @@ const formSchema = z.object({
   id: z.number().optional(),
   nome: z.string().min(2, 'Nome é obrigatório'),
   sigla: z.string().min(1, 'Sigla é obrigatória'),
-  descricao: z.string().optional(),
   ativo: z.boolean().default(true),
 });
 
@@ -34,7 +33,6 @@ const UnitMeasureForm = () => {
     defaultValues: {
       nome: '',
       sigla: '',
-      descricao: '',
       ativo: true,
     },
   });
@@ -51,7 +49,6 @@ const UnitMeasureForm = () => {
           id: unitMeasure.id || 0,
           nome: unitMeasure.nome || '',
           sigla: unitMeasure.sigla || '',
-          descricao: unitMeasure.descricao || '',
           ativo: unitMeasure.ativo !== false,
         });
       } catch (error) {
@@ -72,7 +69,6 @@ const UnitMeasureForm = () => {
 
       const unitMeasureData = {
         ...data,
-        descricao: data.descricao || undefined,
       };
 
       if (id) {
