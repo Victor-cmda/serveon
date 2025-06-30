@@ -5,13 +5,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { customerApi, cityApi, stateApi, paymentTermApi } from '@/services/api';
 import { State, City } from '@/types/location';
 import { PaymentTerm } from '@/types/payment-term';
 import { toast } from 'sonner';
 import { SearchDialog } from '@/components/SearchDialog';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Form } from '@/components/ui/form';
 import AuditSection from '@/components/AuditSection';
 
 import StateCreationDialog from '@/components/dialogs/StateCreationDialog';
@@ -441,7 +440,10 @@ const CustomerForm = () => {
       }
     } catch (error: unknown) {
       console.error('Erro ao salvar cliente:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar o cliente';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Ocorreu um erro ao salvar o cliente';
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -573,27 +575,19 @@ const CustomerForm = () => {
             </p>
           </div>
         </div>
-        
-        {id && (
-          <FormField
-            control={form.control}
-            name="ativo"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center space-x-2 space-y-0 flex-shrink-0">
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    disabled={isLoading}
-                  />
-                </FormControl>
-                <FormLabel className="text-sm font-medium whitespace-nowrap">
-                  Cliente Ativo
-                </FormLabel>
-              </FormItem>
-            )}
-          />
-        )}
+
+        {/* AuditSection no header - não ocupa espaço do formulário */}
+        <AuditSection
+          form={form}
+          data={{
+            id: id ? customerData?.id : undefined,
+            ativo: form.watch('ativo'),
+            createdAt: customerData?.createdAt,
+            updatedAt: customerData?.updatedAt,
+          }}
+          variant="header"
+          isEditing={!!id}
+        />
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -613,7 +607,7 @@ const CustomerForm = () => {
                 watchTipo={watchTipo}
                 id={id}
               />
-              
+
               <DocumentsSection
                 form={form}
                 isLoading={isLoading}
@@ -621,7 +615,7 @@ const CustomerForm = () => {
                 watchTipo={watchTipo}
                 watchIsEstrangeiro={watchIsEstrangeiro}
               />
-              
+
               <AddressSection
                 form={form}
                 isLoading={isLoading}
@@ -630,29 +624,18 @@ const CustomerForm = () => {
                 watchIsEstrangeiro={watchIsEstrangeiro}
                 setCitySearchOpen={setCitySearchOpen}
               />
-              
+
               <ContactSection
                 form={form}
                 isLoading={isLoading}
                 formatters={formatters}
               />
-              
+
               <PaymentSection
                 form={form}
                 isLoading={isLoading}
                 selectedPaymentTerm={selectedPaymentTerm}
                 setPaymentTermSearchOpen={setPaymentTermSearchOpen}
-              />
-              
-              <AuditSection
-                form={form}
-                data={{
-                  id: id ? customerData?.id : undefined,
-                  ativo: form.watch('ativo'),
-                  createdAt: customerData?.createdAt,
-                  updatedAt: customerData?.updatedAt,
-                }}
-                isEditing={!!id}
               />
             </div>
           </div>

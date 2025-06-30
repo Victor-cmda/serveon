@@ -32,10 +32,6 @@ const DocumentsSection = ({
 }: DocumentsSectionProps) => {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <h4 className="text-lg font-semibold text-foreground">Documentos</h4>
-        <div className="flex-1 h-px bg-border"></div>
-      </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         <div className="lg:col-span-8">
           <FormField

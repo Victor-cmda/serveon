@@ -1,8 +1,8 @@
-import { Clock, Calendar, Eye } from "lucide-react";
-import { FormControl, FormField, FormItem, FormLabel } from "./ui/form";
-import { Input } from "./ui/input";
-import { Switch } from "./ui/switch";
-import { UseFormReturn } from "react-hook-form";
+import { Clock, Calendar, Eye } from 'lucide-react';
+import { FormControl, FormField, FormItem, FormLabel } from './ui/form';
+import { Input } from './ui/input';
+import { Switch } from './ui/switch';
+import { UseFormReturn } from 'react-hook-form';
 
 interface AuditSectionProps {
   form: UseFormReturn<any>;
@@ -13,9 +13,10 @@ interface AuditSectionProps {
     updatedAt?: string;
   };
   isEditing?: boolean;
+  variant?: 'header' | 'section'; // Nova prop para controlar layout
 }
 
-const AuditSection = ({ form, data, isEditing = false }: AuditSectionProps) => {
+const AuditSection = ({ form, data, isEditing = false, variant = 'section' }: AuditSectionProps) => {
   const formatDateTime = (dateString?: string) => {
     if (!dateString) return '--';
     try {
@@ -32,88 +33,131 @@ const AuditSection = ({ form, data, isEditing = false }: AuditSectionProps) => {
     }
   };
 
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <h4 className="text-lg font-semibold text-foreground">Informações do Sistema</h4>
-        <div className="flex-1 h-px bg-border"></div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Campo ID - apenas leitura em edição */}
-        {isEditing && data?.id && (
-          <FormItem className="space-y-2">
-            <FormLabel className="text-base font-medium flex items-center gap-2">
-              <Eye className="h-4 w-4" />
-              ID
-            </FormLabel>
-            <FormControl>
-              <Input
-                value={data.id.toString()}
-                disabled
-                className="bg-muted"
-              />
-            </FormControl>
-          </FormItem>
-        )}
-
-        {/* Campo Ativo */}
+  // Versão compacta para header
+  if (variant === 'header') {
+    return (
+      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        {/* Status */}
         <FormField
           control={form.control}
           name="ativo"
           render={({ field }) => (
-            <FormItem className="space-y-2">
-              <FormLabel className="text-base font-medium flex items-center gap-2">
-                <Eye className="h-4 w-4" />
-                Status
-              </FormLabel>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-                <span className="text-sm">
-                  {field.value ? 'Ativo' : 'Inativo'}
-                </span>
-              </div>
-            </FormItem>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium">Status:</span>
+              <Switch 
+                checked={field.value} 
+                onCheckedChange={field.onChange}
+                className="scale-75"
+              />
+              <span className={`text-xs font-medium ${field.value ? 'text-green-600' : 'text-red-500'}`}>
+                {field.value ? 'Ativo' : 'Inativo'}
+              </span>
+            </div>
           )}
         />
 
-        {/* Data de Criação - apenas leitura */}
-        {isEditing && data?.createdAt && (
-          <FormItem className="space-y-2">
-            <FormLabel className="text-base font-medium flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Criado em
-            </FormLabel>
-            <FormControl>
-              <Input
-                value={formatDateTime(data.createdAt)}
-                disabled
-                className="bg-muted"
-              />
-            </FormControl>
-          </FormItem>
-        )}
-
-        {/* Data de Atualização - apenas leitura */}
-        {isEditing && data?.updatedAt && (
-          <FormItem className="space-y-2">
-            <FormLabel className="text-base font-medium flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Atualizado em
-            </FormLabel>
-            <FormControl>
-              <Input
-                value={formatDateTime(data.updatedAt)}
-                disabled
-                className="bg-muted"
-              />
-            </FormControl>
-          </FormItem>
+        {/* Informações de auditoria em modo edição */}
+        {isEditing && (
+          <>
+            {data?.id && (
+              <div className="flex items-center gap-1">
+                <Eye className="h-3 w-3" />
+                <span>ID: {data.id}</span>
+              </div>
+            )}
+            
+            {data?.createdAt && (
+              <div className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                <span>Criado: {formatDateTime(data.createdAt)}</span>
+              </div>
+            )}
+            
+            {data?.updatedAt && (
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                <span>Atualizado: {formatDateTime(data.updatedAt)}</span>
+              </div>
+            )}
+          </>
         )}
       </div>
+    );
+  }
+
+  // Versão original para seção
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {/* Status - sempre visível */}
+      <FormField
+        control={form.control}
+        name="ativo"
+        render={({ field }) => (
+          <FormItem className="space-y-1">
+            <FormLabel className="text-xs font-medium flex items-center gap-1">
+              <Eye className="h-3 w-3" />
+              Status
+            </FormLabel>
+            <div className="flex items-center space-x-2">
+              <Switch checked={field.value} onCheckedChange={field.onChange} />
+              <span className="text-xs">
+                {field.value ? 'Ativo' : 'Inativo'}
+              </span>
+            </div>
+          </FormItem>
+        )}
+      />
+
+      {/* ID - apenas em edição */}
+      {isEditing && data?.id && (
+        <FormItem className="space-y-1">
+          <FormLabel className="text-xs font-medium flex items-center gap-1">
+            <Eye className="h-3 w-3" />
+            ID
+          </FormLabel>
+          <FormControl>
+            <Input
+              value={data.id.toString()}
+              disabled
+              className="bg-muted text-xs h-8"
+            />
+          </FormControl>
+        </FormItem>
+      )}
+
+      {/* Data de Criação - apenas em edição e formato compacto */}
+      {isEditing && data?.createdAt && (
+        <FormItem className="space-y-1">
+          <FormLabel className="text-xs font-medium flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            Criado
+          </FormLabel>
+          <FormControl>
+            <Input
+              value={formatDateTime(data.createdAt)}
+              disabled
+              className="bg-muted text-xs h-8"
+            />
+          </FormControl>
+        </FormItem>
+      )}
+
+      {/* Data de Atualização - apenas em edição e formato compacto */}
+      {isEditing && data?.updatedAt && (
+        <FormItem className="space-y-1">
+          <FormLabel className="text-xs font-medium flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            Atualizado
+          </FormLabel>
+          <FormControl>
+            <Input
+              value={formatDateTime(data.updatedAt)}
+              disabled
+              className="bg-muted text-xs h-8"
+            />
+          </FormControl>
+        </FormItem>
+      )}
     </div>
   );
 };
