@@ -39,11 +39,16 @@ export class StatesService {
 
       const result = await this.databaseService.query(
         `INSERT INTO dbo.estado
-                    (nome, uf, pais_id)
+                    (nome, uf, pais_id, ativo)
                 VALUES
-                    ($1, $2, $3)
+                    ($1, $2, $3, $4)
                 RETURNING *`,
-        [createStateDto.nome, createStateDto.uf, createStateDto.paisId],
+        [
+          createStateDto.nome,
+          createStateDto.uf,
+          createStateDto.paisId,
+          createStateDto.ativo ?? true,
+        ],
       );
 
       return this.mapToStateEntity(result.rows[0]);
@@ -251,6 +256,11 @@ export class StatesService {
         values.push(updateStateDto.paisId);
       }
 
+      if (updateStateDto.ativo !== undefined) {
+        updates.push(`ativo = $${paramCounter++}`);
+        values.push(updateStateDto.ativo);
+      }
+
       if (updates.length === 0) {
         return this.findOne(id);
       }
@@ -324,7 +334,7 @@ export class StatesService {
       paisNome: dbRecord.pais_nome,
       createdAt: dbRecord.created_at,
       updatedAt: dbRecord.updated_at,
-      ativo: dbRecord.status
+      ativo: dbRecord.status,
     };
   }
 }

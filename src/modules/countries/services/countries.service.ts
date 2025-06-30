@@ -39,14 +39,15 @@ export class CountriesService {
 
       const result = await this.databaseService.query(
         `INSERT INTO dbo.pais
-                    (nome, codigo, sigla)
+                    (nome, codigo, sigla, ativo)
                 VALUES
-                    ($1, $2, $3)
+                    ($1, $2, $3, $4)
                 RETURNING *`,
         [
           createCountryDto.nome,
           createCountryDto.codigo,
           createCountryDto.sigla,
+          createCountryDto.ativo ?? true,
         ],
       );
 
@@ -197,6 +198,11 @@ export class CountriesService {
       if (updateCountryDto.sigla !== undefined) {
         updates.push(`sigla = $${paramCounter++}`);
         values.push(updateCountryDto.sigla);
+      }
+
+      if (updateCountryDto.ativo !== undefined) {
+        updates.push(`ativo = $${paramCounter++}`);
+        values.push(updateCountryDto.ativo);
       }
 
       if (updates.length === 0) {

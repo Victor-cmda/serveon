@@ -5,6 +5,8 @@ import {
   Length,
   Matches,
   MaxLength,
+  IsOptional,
+  IsBoolean,
 } from 'class-validator';
 
 export class CreateCountryDto {
@@ -38,4 +40,8 @@ export class CreateCountryDto {
     message: 'Sigla do país deve conter apenas letras maiúsculas',
   })
   sigla: string;
+
+  @IsOptional()
+  @IsBoolean()
+  ativo?: boolean = true;
 }

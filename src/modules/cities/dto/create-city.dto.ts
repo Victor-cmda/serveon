@@ -6,6 +6,7 @@ import {
   IsNumber,
   Matches,
   MaxLength,
+  IsBoolean,
 } from 'class-validator';
 
 export class CreateCityDto {
@@ -39,4 +40,8 @@ export class CreateCityDto {
   @IsNotEmpty({ message: 'ID do estado é obrigatório' })
   @IsNumber({}, { message: 'ID do estado deve ser um número válido' })
   estadoId: number;
+
+  @IsOptional()
+  @IsBoolean()
+  ativo?: boolean = true;
 }

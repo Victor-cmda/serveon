@@ -42,6 +42,7 @@ export interface UpdateCountryDto {
   nome?: string;
   codigo?: string;
   sigla?: string;
+  ativo?: boolean;
 }
 
 export interface CreateStateDto {
@@ -54,6 +55,7 @@ export interface UpdateStateDto {
   nome?: string;
   uf?: string;
   paisId?: number;
+  ativo?: boolean;
 }
 
 export interface CreateCityDto {
@@ -64,6 +66,7 @@ export interface CreateCityDto {
 
 export interface UpdateCityDto {
   nome?: string;
+  ativo?: boolean;
   codigoIbge?: string;
   estadoId?: number;
 }

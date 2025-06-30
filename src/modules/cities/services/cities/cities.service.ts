@@ -56,14 +56,15 @@ export class CitiesService {
       // Inserir a nova cidade
       const resultado = await this.databaseService.query(
         `INSERT INTO dbo.cidade
-        (nome, codigo_ibge, estado_id)
+        (nome, codigo_ibge, estado_id, ativo)
         VALUES
-        ($1, $2, $3)
+        ($1, $2, $3, $4)
         RETURNING *`,
         [
           createCityDto.nome,
           createCityDto.codigoIbge || null,
           createCityDto.estadoId,
+          createCityDto.ativo ?? true,
         ],
       );
 
@@ -284,6 +285,11 @@ export class CitiesService {
       if (updateCityDto.estadoId !== undefined) {
         updates.push(`estado_id = $${paramCounter++}`);
         values.push(updateCityDto.estadoId);
+      }
+
+      if (updateCityDto.ativo !== undefined) {
+        updates.push(`ativo = $${paramCounter++}`);
+        values.push(updateCityDto.ativo);
       }
 
       // Se não houver campos para atualizar, retornar a cidade atual
