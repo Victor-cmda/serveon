@@ -334,7 +334,7 @@ export class StatesService {
       paisNome: dbRecord.pais_nome,
       createdAt: dbRecord.created_at,
       updatedAt: dbRecord.updated_at,
-      ativo: dbRecord.status,
+      ativo: dbRecord.ativo,
     };
   }
 }

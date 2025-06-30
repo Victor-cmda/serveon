@@ -102,7 +102,8 @@ const CountryForm = () => {
       const formattedData = {
         nome: data.nome.trim(),
         sigla: data.sigla.trim(),
-        codigo: data.codigo.trim()
+        codigo: data.codigo.trim(),
+        ativo: data.ativo
       };
 
       if (id) {

@@ -109,7 +109,10 @@ const StateForm = () => {
       const formattedData = {
         nome: data.nome.trim(),
         uf: data.uf.trim(),
-        paisId: data.paisId,      };      if (id) {
+        paisId: data.paisId,
+        ativo: data.ativo,
+      };
+      if (id) {
         await stateApi.update(Number(id), formattedData);
         toast.success('Estado atualizado com sucesso!');
         createdOrUpdatedId = Number(id);
@@ -129,16 +132,22 @@ const StateForm = () => {
       }
     } catch (error: unknown) {
       console.error('Erro ao salvar estado:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar o estado.';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Ocorreu um erro ao salvar o estado.';
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  };  const handleCountryCreated = (newCountry: Country) => {
+  };
+  const handleCountryCreated = (newCountry: Country) => {
     setCountries((prev) => [...prev, newCountry]);
     setCountryDialogOpen(false);
     setCountrySearchOpen(true);
-    toast.success(`País ${newCountry.nome} criado com sucesso! Selecione-o na lista.`);
+    toast.success(
+      `País ${newCountry.nome} criado com sucesso! Selecione-o na lista.`,
+    );
   };
 
   const handleCountryUpdated = (updatedCountry: Country) => {
@@ -178,14 +187,14 @@ const StateForm = () => {
             </p>
           </div>
         </div>
-        
+
         {/* AuditSection no header */}
-        <AuditSection 
-          form={form} 
+        <AuditSection
+          form={form}
           data={stateData}
-          variant="header" 
+          variant="header"
           isEditing={!!id}
-          statusFieldName="ativo" // Campo de status é 'ativo' para State
+          statusFieldName="ativo"
         />
       </div>
 
@@ -213,8 +222,8 @@ const StateForm = () => {
                           <div className="w-full flex-1">
                             <Input
                               value={
-                                countries.find((c) => c.id === field.value)?.nome ||
-                                ''
+                                countries.find((c) => c.id === field.value)
+                                  ?.nome || ''
                               }
                               readOnly
                               placeholder="Selecione um país"
