@@ -515,7 +515,6 @@ const PaymentTermForm = () => {
       );
     }
 
-    setPaymentMethodDialogOpen(false);
   };
 
   const handlePaymentMethodUpdated = (updatedPaymentMethod: PaymentMethod) => {
@@ -530,7 +529,6 @@ const PaymentTermForm = () => {
 
   const handleEditPaymentMethod = (method: PaymentMethod) => {
     setPaymentMethodToEdit(method);
-    setPaymentMethodSearchOpen(null);
     setPaymentMethodDialogOpen(true);
   };
 

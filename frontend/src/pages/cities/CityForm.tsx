@@ -49,7 +49,8 @@ const CityForm = () => {
   const location = useLocation();
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),    defaultValues: {
+    resolver: zodResolver(formSchema),
+    defaultValues: {
       nome: '',
       codigoIbge: '',
       estadoId: undefined,
@@ -124,7 +125,8 @@ const CityForm = () => {
           data.codigoIbge && data.codigoIbge.trim() !== ''
             ? data.codigoIbge
             : undefined,
-      };      let createdOrUpdatedId: number;
+      };
+      let createdOrUpdatedId: number;
 
       if (id) {
         await cityApi.update(Number(id), formattedData as UpdateCityDto);
@@ -149,16 +151,21 @@ const CityForm = () => {
       }
     } catch (error: unknown) {
       console.error('Erro ao salvar cidade:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar a cidade.';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Ocorreu um erro ao salvar a cidade.';
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  };  const handleStateCreated = (newState: State) => {
+  };
+  const handleStateCreated = (newState: State) => {
     setStates((prev) => [...prev, newState]);
-    setStateDialogOpen(false);
     setStateSearchOpen(true);
-    toast.success(`Estado ${newState.nome} criado com sucesso! Selecione-o na lista.`);
+    toast.success(
+      `Estado ${newState.nome} criado com sucesso! Selecione-o na lista.`,
+    );
   };
 
   const handleStateUpdated = (updatedState: State) => {
@@ -173,7 +180,6 @@ const CityForm = () => {
 
   const handleEditState = (state: State) => {
     setStateToEdit(state);
-    setStateSearchOpen(false);
     setStateDialogOpen(true);
   };
 
@@ -198,17 +204,16 @@ const CityForm = () => {
             </p>
           </div>
         </div>
-        
+
         {/* AuditSection no header */}
-        <AuditSection 
-          form={form} 
+        <AuditSection
+          form={form}
           data={cityData}
-          variant="header" 
+          variant="header"
           isEditing={!!id}
           statusFieldName="ativo" // Campo de status é 'ativo' para City
         />
       </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid gap-6">
@@ -233,7 +238,8 @@ const CityForm = () => {
                           <div className="w-full flex-1">
                             <Input
                               value={
-                                states.find((s) => s.id === field.value)?.nome || ''
+                                states.find((s) => s.id === field.value)
+                                  ?.nome || ''
                               }
                               readOnly
                               placeholder="Selecione um estado"
@@ -312,15 +318,14 @@ const CityForm = () => {
           </div>
         </form>
       </Form>
-
-      {/* Dialogs */}      <StateCreationDialog
+      {/* Dialogs */}{' '}
+      <StateCreationDialog
         open={stateDialogOpen}
         onOpenChange={setStateDialogOpen}
         onSuccess={stateToEdit ? handleStateUpdated : handleStateCreated}
         selectedCountryId={undefined}
         state={stateToEdit}
       />
-
       <SearchDialog
         open={stateSearchOpen}
         onOpenChange={setStateSearchOpen}
@@ -332,7 +337,6 @@ const CityForm = () => {
           setStateSearchOpen(false);
         }}
         onCreateNew={() => {
-          setStateSearchOpen(false);
           setStateDialogOpen(true);
         }}
         onEdit={(state) => handleEditState(state)}
