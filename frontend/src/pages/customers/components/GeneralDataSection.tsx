@@ -24,22 +24,22 @@ const GeneralDataSection = ({
 }: GeneralDataSectionProps) => {
   return (
     <div className="space-y-4"> 
-      {id && (
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
         <FormItem>
           <FormLabel>Código</FormLabel>
           <FormControl>
-            <Input value={id} disabled className="bg-muted" />
+            <Input value={id || 'Novo'} disabled className="bg-muted" />
           </FormControl>
           <p className="text-sm text-muted-foreground">
-            Código único do cliente
+            {id ? 'Código' : 'Automático'}
           </p>
         </FormItem>
-      )}
-      
-      <FormField
-        control={form.control}
-        name="tipo"
-        render={({ field }) => (
+        
+        <div className="md:col-span-5">
+          <FormField
+            control={form.control}
+            name="tipo"
+            render={({ field }) => (
           <FormItem className="space-y-2">
             <FormLabel className="text-base font-medium">
               Tipo de Pessoa
@@ -81,22 +81,16 @@ const GeneralDataSection = ({
             <FormMessage className="text-sm" />
           </FormItem>
         )}
-      />{' '}{' '}      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-        {id && (
-          <FormItem className="md:col-span-1">
-            <FormLabel className="text-base font-medium">Código</FormLabel>
-            <FormControl>
-              <Input value={id} disabled className="bg-muted h-10 text-base" />
-            </FormControl>
-            <p className="text-sm text-muted-foreground">
-              ID único do cliente
-            </p>
-          </FormItem>
-        )}        <FormField
+      />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <FormField
           control={form.control}
           name="razaoSocial"
           render={({ field }) => (
-            <FormItem className={id ? "md:col-span-7" : "md:col-span-8"}>
+            <FormItem className="md:col-span-8">
               <FormLabel className="text-base font-medium">
                 {watchTipo === 'J' ? 'Razão Social' : 'Nome Completo'}
               </FormLabel>

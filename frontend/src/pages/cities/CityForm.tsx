@@ -225,25 +225,24 @@ const CityForm = () => {
                 <p className="text-sm text-muted-foreground">
                   Informações básicas da cidade
                 </p>
-              </div>
-              <div className="p-6 pt-0">
+              </div>              <div className="p-6 pt-0">
                 <div className="space-y-4">
-                  {id && (
+                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
                     <FormItem>
                       <FormLabel>Código</FormLabel>
                       <FormControl>
-                        <Input value={id} disabled className="bg-muted" />
+                        <Input value={id || 'Novo'} disabled className="bg-muted" />
                       </FormControl>
                       <p className="text-sm text-muted-foreground">
-                        Código único da cidade
+                        {id ? 'Código' : 'Automático'}
                       </p>
                     </FormItem>
-                  )}
-
-                  <FormField
-                    control={form.control}
-                    name="estadoId"
-                    render={({ field }) => (
+                    
+                    <div className="md:col-span-5">
+                      <FormField
+                        control={form.control}
+                        name="estadoId"
+                        render={({ field }) => (
                       <FormItem>
                         <FormLabel>Estado</FormLabel>
                         <div className="flex gap-2">
@@ -274,6 +273,8 @@ const CityForm = () => {
                       </FormItem>
                     )}
                   />
+                    </div>
+                  </div>
 
                   <FormField
                     control={form.control}

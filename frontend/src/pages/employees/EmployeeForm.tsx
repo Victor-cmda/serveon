@@ -393,26 +393,23 @@ const EmployeeForm: React.FC = () => {
                   </div>
                 </div>
                 
-                {id && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormItem>
-                      <FormLabel className="text-base font-medium">Código</FormLabel>
-                      <FormControl>
-                        <Input 
-                          value={id} 
-                          disabled 
-                          className="bg-muted h-11 text-base font-mono text-muted-foreground" 
-                        />
-                      </FormControl>
-                      <p className="text-sm text-muted-foreground">
-                        Código único do funcionário
-                      </p>
-                    </FormItem>
-                    <div></div> {/* Espaço vazio para manter o grid */}
-                  </div>
-                )}
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+                  <FormItem>
+                    <FormLabel className="text-base font-medium">Código</FormLabel>
+                    <FormControl>
+                      <Input 
+                        value={id || 'Novo'} 
+                        disabled 
+                        className="bg-muted h-11 text-base font-mono text-muted-foreground" 
+                      />
+                    </FormControl>
+                    <p className="text-sm text-muted-foreground">
+                      {id ? 'Código' : 'Automático'}
+                    </p>
+                  </FormItem>
+                  
+                  <div className="md:col-span-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="nome"
@@ -489,6 +486,8 @@ const EmployeeForm: React.FC = () => {
                       </FormItem>
                     )}
                   />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

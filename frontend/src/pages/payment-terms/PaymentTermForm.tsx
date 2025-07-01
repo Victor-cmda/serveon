@@ -592,34 +592,36 @@ const PaymentTermForm = () => {
               </div>
               <div className="p-6 pt-0">
                 <div className="space-y-4">
-                  {id && (
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <FormItem>
                       <FormLabel>Código</FormLabel>
                       <FormControl>
-                        <Input value={id} disabled className="bg-muted" />
+                        <Input value={id || 'Novo'} disabled className="bg-muted" />
                       </FormControl>
                       <p className="text-sm text-muted-foreground">
-                        Código único da condição de pagamento
+                        {id ? 'Código' : 'Automático'}
                       </p>
                     </FormItem>
-                  )}
-                  
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome *</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Nome da condição de pagamento"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    
+                    <div className="md:col-span-3">
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nome *</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Nome da condição de pagamento"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
 
                   <FormField
                     control={form.control}

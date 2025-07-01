@@ -28,35 +28,37 @@ const CategoryGeneralSection = ({
         </div>
       </div>
       
-      {id && (
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <FormItem>
           <FormLabel>Código</FormLabel>
           <FormControl>
-            <Input value={id} disabled className="bg-muted" />
+            <Input value={id || 'Novo'} disabled className="bg-muted" />
           </FormControl>
           <p className="text-sm text-muted-foreground">
-            Código único da categoria
+            {id ? 'Código da categoria' : 'Automático'}
           </p>
         </FormItem>
-      )}
-      
-      <FormField
-        control={form.control}
-        name="nome"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Nome *</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="Nome da categoria"
-                disabled={isLoading}
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        
+        <div className="md:col-span-3">
+          <FormField
+            control={form.control}
+            name="nome"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nome *</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Nome da categoria"
+                    disabled={isLoading}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
 
       <FormField
         control={form.control}

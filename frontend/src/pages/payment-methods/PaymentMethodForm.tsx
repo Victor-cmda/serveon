@@ -174,31 +174,33 @@ const PaymentMethodForm = () => {
               </div>
               <div className="p-6 pt-0">
                 <div className="space-y-4">
-                  {id && (
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <FormItem>
                       <FormLabel>ID</FormLabel>
                       <FormControl>
-                        <Input value={id} disabled className="bg-muted" />
+                        <Input value={id || 'Novo'} disabled className="bg-muted" />
                       </FormControl>
                       <p className="text-sm text-muted-foreground">
-                        ID único do método de pagamento
+                        {id ? 'ID' : 'Automático'}
                       </p>
                     </FormItem>
-                  )}
-                  
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Descrição *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Nome do método de pagamento" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    
+                    <div className="md:col-span-3">
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Descrição *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Nome do método de pagamento" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField

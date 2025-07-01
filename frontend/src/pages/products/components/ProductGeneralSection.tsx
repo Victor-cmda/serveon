@@ -44,19 +44,19 @@ const ProductGeneralSection = ({
         <div className="flex-1 h-px bg-border"></div>
       </div>
       
-      {id && (
-        <FormItem>
-          <FormLabel>ID</FormLabel>
-          <FormControl>
-            <Input value={id} disabled className="bg-muted" />
-          </FormControl>
-          <p className="text-sm text-muted-foreground">
-            ID único do produto
-          </p>
-        </FormItem>
-      )}
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="md:col-span-1">
+          <FormItem>
+            <FormLabel>ID</FormLabel>
+            <FormControl>
+              <Input value={id || 'Novo'} disabled className="bg-muted" />
+            </FormControl>
+            <p className="text-sm text-muted-foreground">
+              {id ? 'ID do produto' : 'Automático'}
+            </p>
+          </FormItem>
+        </div>
+        
         <FormField
           control={form.control}
           name="codigo"
@@ -66,6 +66,44 @@ const ProductGeneralSection = ({
               <FormControl>
                 <Input
                   placeholder="Código do produto"
+                  disabled={isLoading}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="nome"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome *</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Nome do produto"
+                  disabled={isLoading}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="codigoBarras"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Código de Barras</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Código de barras"
                   disabled={isLoading}
                   {...field}
                 />

@@ -20,26 +20,26 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSecti
   return (
     <div className="space-y-4">
       
-      {id && (
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
         <FormItem>
           <FormLabel>Código</FormLabel>
           <FormControl>
-            <Input value={id} disabled className="bg-muted" />
+            <Input value={id || 'Novo'} disabled className="bg-muted" />
           </FormControl>
           <p className="text-sm text-muted-foreground">
-            Código único do fornecedor
+            {id ? 'Código' : 'Automático'}
           </p>
         </FormItem>
-      )}
-      
-      <FormField
-        control={form.control}
-        name="tipo"
-        render={({ field }) => (
-          <FormItem className="space-y-2">
-            <FormLabel className="text-base font-medium">
-              Tipo de Pessoa
-            </FormLabel>
+        
+        <div className="md:col-span-5">
+          <FormField
+            control={form.control}
+            name="tipo"
+            render={({ field }) => (
+              <FormItem className="space-y-2">
+                <FormLabel className="text-base font-medium">
+                  Tipo de Pessoa
+                </FormLabel>
             <div className="flex space-x-4">
               <div className="flex items-center space-x-2">
                 <input
@@ -71,7 +71,11 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSecti
             <FormMessage className="text-sm" />
           </FormItem>
         )}
-      />      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+      />
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
         
         <FormField
           control={form.control}

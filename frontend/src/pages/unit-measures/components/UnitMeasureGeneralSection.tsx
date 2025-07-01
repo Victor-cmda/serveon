@@ -28,19 +28,17 @@ const UnitMeasureGeneralSection = ({
         </div>
       </div>
       
-      {id && (
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <FormItem>
           <FormLabel>Código</FormLabel>
           <FormControl>
-            <Input value={id} disabled className="bg-muted" />
+            <Input value={id || 'Novo'} disabled className="bg-muted" />
           </FormControl>
           <p className="text-sm text-muted-foreground">
-            Código único da unidade de medida
+            {id ? 'Código da unidade' : 'Automático'}
           </p>
         </FormItem>
-      )}
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
         <div className="md:col-span-2">
           <FormField
             control={form.control}

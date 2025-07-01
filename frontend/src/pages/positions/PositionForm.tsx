@@ -273,22 +273,22 @@ const PositionForm: React.FC = () => {
               </div>
               <div className="p-6 pt-0">
                 <div className="space-y-4">
-                  {id && (
+                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
                     <FormItem>
                       <FormLabel>Código</FormLabel>
                       <FormControl>
-                        <Input value={id} disabled className="bg-muted" />
+                        <Input value={id || 'Novo'} disabled className="bg-muted" />
                       </FormControl>
                       <p className="text-sm text-muted-foreground">
-                        Código único do cargo
+                        {id ? 'Código' : 'Automático'}
                       </p>
                     </FormItem>
-                  )}
-                  
-                  <FormField
-                    control={form.control}
-                    name="departamentoId"
-                    render={({ field }) => (
+                    
+                    <div className="md:col-span-5">
+                      <FormField
+                        control={form.control}
+                        name="departamentoId"
+                        render={({ field }) => (
                       <FormItem>
                         <FormLabel>Departamento</FormLabel>
                         <div className="flex gap-2">
@@ -343,6 +343,8 @@ const PositionForm: React.FC = () => {
                       </FormItem>
                     )}
                   />
+                    </div>
+                  </div>
 
                   <FormField
                     control={form.control}
