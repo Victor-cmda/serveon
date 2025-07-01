@@ -174,6 +174,18 @@ const PaymentMethodForm = () => {
               </div>
               <div className="p-6 pt-0">
                 <div className="space-y-4">
+                  {id && (
+                    <FormItem>
+                      <FormLabel>ID</FormLabel>
+                      <FormControl>
+                        <Input value={id} disabled className="bg-muted" />
+                      </FormControl>
+                      <p className="text-sm text-muted-foreground">
+                        ID único do método de pagamento
+                      </p>
+                    </FormItem>
+                  )}
+                  
                   <FormField
                     control={form.control}
                     name="description"
@@ -241,4 +253,4 @@ const PaymentMethodForm = () => {
   );
 };
 
-export default PaymentMethodForm; 
+export default PaymentMethodForm;

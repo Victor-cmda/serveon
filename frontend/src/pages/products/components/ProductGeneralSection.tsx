@@ -23,6 +23,7 @@ interface ProductGeneralSectionProps {
   setCategorySearchOpen: (open: boolean) => void;
   setBrandSearchOpen: (open: boolean) => void;
   setUnitMeasureSearchOpen: (open: boolean) => void;
+  id?: string;
 }
 
 const ProductGeneralSection = ({
@@ -34,6 +35,7 @@ const ProductGeneralSection = ({
   setCategorySearchOpen,
   setBrandSearchOpen,
   setUnitMeasureSearchOpen,
+  id,
 }: ProductGeneralSectionProps) => {
   return (
     <div className="space-y-4">
@@ -41,6 +43,19 @@ const ProductGeneralSection = ({
         <h4 className="text-lg font-semibold text-foreground">Dados Gerais</h4>
         <div className="flex-1 h-px bg-border"></div>
       </div>
+      
+      {id && (
+        <FormItem>
+          <FormLabel>ID</FormLabel>
+          <FormControl>
+            <Input value={id} disabled className="bg-muted" />
+          </FormControl>
+          <p className="text-sm text-muted-foreground">
+            ID único do produto
+          </p>
+        </FormItem>
+      )}
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}

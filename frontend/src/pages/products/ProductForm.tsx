@@ -361,6 +361,7 @@ const ProductForm = () => {
                 setCategorySearchOpen={setCategorySearchOpen}
                 setBrandSearchOpen={setBrandSearchOpen}
                 setUnitMeasureSearchOpen={setUnitMeasureSearchOpen}
+                id={id}
               />
               
               <ProductAdditionalSection
@@ -434,9 +435,8 @@ const ProductForm = () => {
         displayColumns={[
           { key: 'nome', header: 'Nome' },
           { key: 'sigla', header: 'Sigla' },
-          { key: 'descricao', header: 'Descrição' },
         ]}
-        searchKeys={['nome', 'sigla', 'descricao']}
+        searchKeys={['nome', 'sigla']}
         entityType="unidades de medida"
         description="Selecione uma unidade de medida para o produto ou crie uma nova."
       />

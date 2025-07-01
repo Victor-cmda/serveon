@@ -20,6 +20,17 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSecti
   return (
     <div className="space-y-4">
       
+      {id && (
+        <FormItem>
+          <FormLabel>Código</FormLabel>
+          <FormControl>
+            <Input value={id} disabled className="bg-muted" />
+          </FormControl>
+          <p className="text-sm text-muted-foreground">
+            Código único do fornecedor
+          </p>
+        </FormItem>
+      )}
       
       <FormField
         control={form.control}
@@ -61,17 +72,6 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSecti
           </FormItem>
         )}
       />      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-        {id && (
-          <FormItem className="md:col-span-1">
-            <FormLabel className="text-base font-medium">Código</FormLabel>
-            <FormControl>
-              <Input value={id} disabled className="bg-muted h-10 text-base" />
-            </FormControl>
-            <p className="text-sm text-muted-foreground">
-              ID único do fornecedor
-            </p>
-          </FormItem>
-        )}
         
         <FormField
           control={form.control}

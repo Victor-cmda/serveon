@@ -212,6 +212,18 @@ const StateForm = () => {
               </div>
               <div className="p-6 pt-0">
                 <div className="space-y-4">
+                  {id && (
+                    <FormItem>
+                      <FormLabel>Código</FormLabel>
+                      <FormControl>
+                        <Input value={id} disabled className="bg-muted" />
+                      </FormControl>
+                      <p className="text-sm text-muted-foreground">
+                        Código único do estado
+                      </p>
+                    </FormItem>
+                  )}
+
                   <FormField
                     control={form.control}
                     name="paisId"
