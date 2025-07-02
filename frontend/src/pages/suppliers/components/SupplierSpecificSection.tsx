@@ -1,14 +1,14 @@
-import { Globe, User2, Phone, Clipboard } from "lucide-react";
-import { 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from "../../../components/ui/form";
-import { Input } from "../../../components/ui/input";
-import { Textarea } from "../../../components/ui/textarea";
-import { UseFormReturn } from "react-hook-form";
+import { Globe, User2, Phone, Clipboard } from 'lucide-react';
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../../../components/ui/form';
+import { Input } from '../../../components/ui/input';
+import { Textarea } from '../../../components/ui/textarea';
+import { UseFormReturn } from 'react-hook-form';
 
 interface Formatters {
   telefone: (value: string | undefined) => string;
@@ -20,27 +20,21 @@ interface SupplierSpecificSectionProps {
   formatters: Formatters;
 }
 
-const SupplierSpecificSection = ({ 
-  form, 
-  isLoading, 
-  formatters 
+const SupplierSpecificSection = ({
+  form,
+  isLoading,
+  formatters,
 }: SupplierSpecificSectionProps) => {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <h4 className="text-lg font-semibold text-foreground">Informações Adicionais</h4>
-        <div className="flex-1 h-px bg-border"></div>
-      </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div className="lg:col-span-6">
+        <div className="lg:col-span-4">
           <FormField
             control={form.control}
             name="website"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base font-medium">
-                  Website
-                </FormLabel>
+                <FormLabel className="text-base font-medium">Website</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
@@ -57,7 +51,7 @@ const SupplierSpecificSection = ({
           />
         </div>
 
-        <div className="lg:col-span-6">
+        <div className="lg:col-span-4">
           <FormField
             control={form.control}
             name="responsavel"
@@ -81,10 +75,7 @@ const SupplierSpecificSection = ({
             )}
           />
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div className="lg:col-span-6">
+        <div className="lg:col-span-4">
           <FormField
             control={form.control}
             name="celularResponsavel"
@@ -111,7 +102,6 @@ const SupplierSpecificSection = ({
           />
         </div>
       </div>
-
       <div className="grid grid-cols-1 gap-4">
         <FormField
           control={form.control}

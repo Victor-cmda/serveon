@@ -42,7 +42,7 @@ const AddressSection = ({
             control={form.control}
             name="endereco"
             render={({ field }) => (
-              <FormItem className="md:col-span-9">
+              <FormItem className="md:col-span-5">
                 <FormLabel className="text-base font-medium">
                   Endereço
                 </FormLabel>
@@ -65,7 +65,7 @@ const AddressSection = ({
             control={form.control}
             name="numero"
             render={({ field }) => (
-              <FormItem className="md:col-span-3">
+              <FormItem className="md:col-span-2">
                 <FormLabel className="text-base font-medium">Número</FormLabel>
                 <FormControl>
                   <Input
@@ -80,14 +80,11 @@ const AddressSection = ({
               </FormItem>
             )}
           />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
           <FormField
             control={form.control}
             name="complemento"
             render={({ field }) => (
-              <FormItem className="md:col-span-6">
+              <FormItem className="md:col-span-2">
                 <FormLabel className="text-base font-medium">
                   Complemento
                 </FormLabel>
@@ -102,12 +99,11 @@ const AddressSection = ({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="bairro"
             render={({ field }) => (
-              <FormItem className="md:col-span-6">
+              <FormItem className="md:col-span-3">
                 <FormLabel className="text-base font-medium">Bairro</FormLabel>
                 <FormControl>
                   <Input
@@ -123,26 +119,6 @@ const AddressSection = ({
         </div>
 
         <div className="grid grid-cols-12 gap-4">
-          <FormField
-            control={form.control}
-            name="cep"
-            render={({ field }) => (
-              <FormItem className="col-span-4">
-                <FormLabel className="text-base font-medium">CEP</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    value={formatters.cep(field.value)}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    disabled={isLoading}
-                    className="h-10 text-base"
-                  />
-                </FormControl>
-                <FormMessage className="text-sm" />
-              </FormItem>
-            )}
-          />
-
           <FormField
             control={form.control}
             name="cidadeId"
@@ -209,6 +185,25 @@ const AddressSection = ({
                     </Badge>
                   </div>
                 )}
+                <FormMessage className="text-sm" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="cep"
+            render={({ field }) => (
+              <FormItem className="col-span-4">
+                <FormLabel className="text-base font-medium">CEP</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    value={formatters.cep(field.value)}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    disabled={isLoading}
+                    className="h-10 text-base"
+                  />
+                </FormControl>
                 <FormMessage className="text-sm" />
               </FormItem>
             )}

@@ -137,7 +137,8 @@ export default function SupplierForm() {
 
   // Estados para edição de cidades e condições de pagamento
   const [cityToEdit, setCityToEdit] = useState<City | null>(null);
-  const [paymentTermToEdit, setPaymentTermToEdit] = useState<PaymentTerm | null>(null);
+  const [paymentTermToEdit, setPaymentTermToEdit] =
+    useState<PaymentTerm | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -271,7 +272,8 @@ export default function SupplierForm() {
       setStateCreationOpen(false);
     } catch (error) {
       console.error('Erro ao atualizar estados após criação:', error);
-      toast.error('Erro ao atualizar estados após criação');    }
+      toast.error('Erro ao atualizar estados após criação');
+    }
   }
 
   // Funções para edição de cidades
@@ -297,7 +299,9 @@ export default function SupplierForm() {
     setCities((prev) => [...prev, newCity]);
     setCityCreationOpen(false);
     setCitySearchOpen(true);
-    toast.success(`Cidade ${newCity.nome} criada com sucesso! Selecione-a na lista.`);
+    toast.success(
+      `Cidade ${newCity.nome} criada com sucesso! Selecione-a na lista.`,
+    );
   };
 
   // Funções para edição de condições de pagamento
@@ -310,7 +314,9 @@ export default function SupplierForm() {
     setPaymentTerms((prev) => [...prev, newPaymentTerm]);
     setPaymentTermCreationOpen(false);
     setPaymentTermSearchOpen(true);
-    toast.success(`Condição de pagamento ${newPaymentTerm.name} criada com sucesso! Selecione-a na lista.`);
+    toast.success(
+      `Condição de pagamento ${newPaymentTerm.name} criada com sucesso! Selecione-a na lista.`,
+    );
   };
 
   const handlePaymentTermUpdated = (updatedPaymentTerm: PaymentTerm) => {
@@ -328,7 +334,9 @@ export default function SupplierForm() {
     }
 
     setPaymentTermToEdit(null);
-    toast.success(`Condição de pagamento ${updatedPaymentTerm.name} atualizada com sucesso!`);
+    toast.success(
+      `Condição de pagamento ${updatedPaymentTerm.name} atualizada com sucesso!`,
+    );
   };
   return (
     <div className="space-y-6">
@@ -351,12 +359,12 @@ export default function SupplierForm() {
             </p>
           </div>
         </div>
-        
+
         {/* AuditSection no header */}
-        <AuditSection 
-          form={form} 
+        <AuditSection
+          form={form}
           data={supplierData}
-          variant="header" 
+          variant="header"
           isEditing={isEditing}
           statusFieldName="ativo" // Campo de status é 'ativo' para Supplier
         />
@@ -379,15 +387,7 @@ export default function SupplierForm() {
                 watchTipo={watchTipo}
                 id={id}
               />
-              
-              <DocumentsSection
-                form={form}
-                isLoading={isLoading}
-                formatters={formatters}
-                watchTipo={watchTipo}
-                watchIsEstrangeiro={watchIsEstrangeiro}
-              />
-              
+
               <AddressSection
                 form={form}
                 isLoading={isLoading}
@@ -395,6 +395,14 @@ export default function SupplierForm() {
                 selectedCity={selectedCity}
                 watchIsEstrangeiro={watchIsEstrangeiro}
                 setCitySearchOpen={setCitySearchOpen}
+              />
+
+              <DocumentsSection
+                form={form}
+                isLoading={isLoading}
+                formatters={formatters}
+                watchTipo={watchTipo}
+                watchIsEstrangeiro={watchIsEstrangeiro}
               />
               
               <ContactSection
@@ -408,7 +416,7 @@ export default function SupplierForm() {
                 isLoading={isLoading}
                 formatters={formatters}
               />
-              
+
               <PaymentSection
                 form={form}
                 isLoading={isLoading}
@@ -431,7 +439,8 @@ export default function SupplierForm() {
             </Button>
           </div>
         </form>
-      </Form>      <SearchDialog
+      </Form>{' '}
+      <SearchDialog
         title="Selecione uma cidade"
         open={citySearchOpen}
         onOpenChange={setCitySearchOpen}
@@ -452,7 +461,8 @@ export default function SupplierForm() {
         ]}
         entityType="cidades"
         description="Selecione uma cidade para o cadastro do fornecedor ou edite uma cidade existente."
-      />      <SearchDialog
+      />{' '}
+      <SearchDialog
         title="Selecione uma condição de pagamento"
         open={paymentTermSearchOpen}
         onOpenChange={setPaymentTermSearchOpen}
@@ -484,14 +494,11 @@ export default function SupplierForm() {
         onSuccess={() => {
           onStateCreated();
         }}
-      />      <CityCreationDialog
+      />{' '}
+      <CityCreationDialog
         open={cityCreationOpen}
         onOpenChange={setCityCreationOpen}
-        onSuccess={
-          cityToEdit
-            ? handleCityUpdated
-            : handleCityCreated
-        }
+        onSuccess={cityToEdit ? handleCityUpdated : handleCityCreated}
         selectedStateId={undefined}
         city={cityToEdit}
       />
