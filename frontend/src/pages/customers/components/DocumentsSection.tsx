@@ -86,32 +86,7 @@ const DocumentsSection = ({
             )}
           />
         </div>
-      </div>      {watchTipo === 'J' && (
-        <div className="grid grid-cols-1 gap-4">
-          <FormField
-            control={form.control}
-            name="inscricaoMunicipal"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-base font-medium">
-                  {watchIsEstrangeiro
-                    ? 'Registro comercial'
-                    : 'Inscrição Municipal'}
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    value={formatters.inscricaoEstadual(field.value)}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    disabled={isLoading}
-                    className="h-10 text-base"
-                  />
-                </FormControl>
-                <FormMessage className="text-sm" />              </FormItem>
-            )}
-          />
-        </div>
-      )}
+      </div>
     </div>
   );
 };

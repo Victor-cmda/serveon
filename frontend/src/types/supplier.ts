@@ -5,7 +5,6 @@ export interface Supplier {
   razaoSocial: string;
   nomeFantasia?: string;
   inscricaoEstadual?: string;
-  inscricaoMunicipal?: string;
   endereco?: string;
   numero?: string;
   complemento?: string;
@@ -39,7 +38,6 @@ export interface CreateSupplierDto {
   razaoSocial: string;
   nomeFantasia?: string;
   inscricaoEstadual?: string;
-  inscricaoMunicipal?: string;
   endereco?: string;
   numero?: string;
   complemento?: string;
@@ -66,7 +64,6 @@ export interface UpdateSupplierDto {
   razaoSocial?: string;
   nomeFantasia?: string;
   inscricaoEstadual?: string;
-  inscricaoMunicipal?: string;
   endereco?: string;
   numero?: string;
   complemento?: string;

@@ -85,18 +85,6 @@ export class CreateSupplierDto {
     message: 'Inscrição Estadual deve ter no máximo 20 caracteres',
   })
   inscricaoEstadual?: string;
-
-  @ApiProperty({
-    description: 'Inscrição Municipal ou registro comercial internacional',
-    example: '123456',
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'Inscrição Municipal deve ser uma string' })
-  @MaxLength(20, {
-    message: 'Inscrição Municipal deve ter no máximo 20 caracteres',
-  })
-  inscricaoMunicipal?: string;
   @ApiProperty({
     description: 'ID do país',
     example: 1,

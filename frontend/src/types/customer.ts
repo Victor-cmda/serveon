@@ -5,7 +5,6 @@ export interface Customer {
   razaoSocial: string;
   nomeFantasia?: string;
   inscricaoEstadual?: string;
-  inscricaoMunicipal?: string;
   endereco?: string;
   numero?: string;
   complemento?: string;
@@ -32,7 +31,6 @@ export interface CreateCustomerDto {
   razaoSocial: string;
   nomeFantasia?: string;
   inscricaoEstadual?: string;
-  inscricaoMunicipal?: string;
   endereco?: string;
   numero?: string;
   complemento?: string;
@@ -49,7 +47,6 @@ export interface UpdateCustomerDto {
   tipo?: 'F' | 'J';
   razaoSocial?: string;
   nomeFantasia?: string;  inscricaoEstadual?: string;
-  inscricaoMunicipal?: string;
   endereco?: string;
   numero?: string;
   complemento?: string;

@@ -36,11 +36,11 @@ export class CustomersService {
         const result = await client.query(
           `INSERT INTO dbo.cliente
             (cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
-            nome_fantasia, inscricao_estadual, inscricao_municipal, 
+            nome_fantasia, inscricao_estadual, 
             endereco, numero, complemento, bairro, 
             cidade_id, cep, telefone, email, is_destinatario, ativo)
           VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
           RETURNING *`,
           [
             createCustomerDto.cnpjCpf,
@@ -50,7 +50,6 @@ export class CustomersService {
             createCustomerDto.razaoSocial,
             createCustomerDto.nomeFantasia || null,
             createCustomerDto.inscricaoEstadual || null,
-            createCustomerDto.inscricaoMunicipal || null,
             createCustomerDto.endereco || null,
             createCustomerDto.numero || null,
             createCustomerDto.complemento || null,
@@ -72,11 +71,11 @@ export class CustomersService {
           await client.query(
             `INSERT INTO dbo.destinatario
               (cliente_id, cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
-              nome_fantasia, inscricao_estadual, inscricao_municipal, 
+              nome_fantasia, inscricao_estadual, 
               endereco, numero, complemento, bairro, 
               cidade_id, cep, telefone, email, ativo)
             VALUES
-              ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+              ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
             [
               result.rows[0].id,
               createCustomerDto.cnpjCpf,
@@ -86,7 +85,6 @@ export class CustomersService {
               createCustomerDto.razaoSocial,
               createCustomerDto.nomeFantasia || null,
               createCustomerDto.inscricaoEstadual || null,
-              createCustomerDto.inscricaoMunicipal || null,
               createCustomerDto.endereco || null,
               createCustomerDto.numero || null,
               createCustomerDto.complemento || null,
@@ -350,11 +348,6 @@ export class CustomersService {
           values.push(updateCustomerDto.inscricaoEstadual);
         }
 
-        if (updateCustomerDto.inscricaoMunicipal !== undefined) {
-          updates.push(`inscricao_municipal = $${paramCounter++}`);
-          values.push(updateCustomerDto.inscricaoMunicipal);
-        }
-
         if (updateCustomerDto.endereco !== undefined) {
           updates.push(`endereco = $${paramCounter++}`);
           values.push(updateCustomerDto.endereco);
@@ -461,11 +454,6 @@ export class CustomersService {
               if (updateCustomerDto.inscricaoEstadual !== undefined) {
                 destUpdates.push(`inscricao_estadual = $${paramCounter++}`);
                 destValues.push(updateCustomerDto.inscricaoEstadual);
-              }
-
-              if (updateCustomerDto.inscricaoMunicipal !== undefined) {
-                destUpdates.push(`inscricao_municipal = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.inscricaoMunicipal);
               }
 
               if (updateCustomerDto.endereco !== undefined) {
@@ -664,7 +652,6 @@ export class CustomersService {
       razaoSocial: dbRecord.razao_social,
       nomeFantasia: dbRecord.nome_fantasia,
       inscricaoEstadual: dbRecord.inscricao_estadual,
-      inscricaoMunicipal: dbRecord.inscricao_municipal,
       endereco: dbRecord.endereco,
       numero: dbRecord.numero,
       complemento: dbRecord.complemento,

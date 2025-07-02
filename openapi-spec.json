@@ -3228,11 +3228,6 @@
             "description": "Inscrição Estadual ou dados adicionais do documento estrangeiro",
             "example": "123456789"
           },
-          "inscricaoMunicipal": {
-            "type": "string",
-            "description": "Inscrição Municipal (opcional)",
-            "example": "123456"
-          },
           "paisId": {
             "type": "number",
             "description": "ID do país",
@@ -3378,11 +3373,6 @@
             "description": "Inscrição Estadual ou informações complementares do documento",
             "example": "123456789"
           },
-          "inscricaoMunicipal": {
-            "type": "string",
-            "description": "Inscrição Municipal ou registro comercial internacional",
-            "example": "123456"
-          },
           "paisId": {
             "type": "number",
             "description": "ID do país",
@@ -3482,7 +3472,6 @@
           "razaoSocial",
           "nomeFantasia",
           "inscricaoEstadual",
-          "inscricaoMunicipal",
           "paisId",
           "paisNome",
           "estadoId",
@@ -3851,11 +3840,6 @@
             "description": "Inscrição Estadual ou informações complementares do documento",
             "example": "123456789"
           },
-          "inscricaoMunicipal": {
-            "type": "string",
-            "description": "Inscrição Municipal ou registro comercial internacional",
-            "example": "123456"
-          },
           "paisId": {
             "type": "number",
             "description": "ID do país",
@@ -4002,11 +3986,6 @@
             "description": "Inscrição Estadual ou informações complementares do documento",
             "example": "123456789"
           },
-          "inscricaoMunicipal": {
-            "type": "string",
-            "description": "Inscrição Municipal ou registro comercial internacional",
-            "example": "123456"
-          },
           "paisId": {
             "type": "number",
             "description": "ID do país",
@@ -4114,7 +4093,6 @@
           "razaoSocial",
           "nomeFantasia",
           "inscricaoEstadual",
-          "inscricaoMunicipal",
           "paisId",
           "paisNome",
           "estadoId",

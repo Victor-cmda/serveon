@@ -90,7 +90,6 @@ CREATE TABLE emitente (
     nome_fantasia VARCHAR(60),
     inscricao_estadual VARCHAR(20),
     inscricao_estadual_st VARCHAR(20),
-    inscricao_municipal VARCHAR(20),
     endereco VARCHAR(100),
     numero VARCHAR(10),
     complemento VARCHAR(60),
@@ -116,7 +115,6 @@ CREATE TABLE cliente (
     razao_social VARCHAR(100) NOT NULL,
     nome_fantasia VARCHAR(60),
     inscricao_estadual VARCHAR(50),
-    inscricao_municipal VARCHAR(20),
     endereco VARCHAR(100),
     numero VARCHAR(10),
     complemento VARCHAR(60),
@@ -141,7 +139,6 @@ CREATE TABLE fornecedor (
     razao_social VARCHAR(100) NOT NULL,
     nome_fantasia VARCHAR(60),
     inscricao_estadual VARCHAR(50),
-    inscricao_municipal VARCHAR(20),
     endereco VARCHAR(100),
     numero VARCHAR(10),
     complemento VARCHAR(60),
@@ -171,7 +168,6 @@ CREATE TABLE destinatario (
     razao_social VARCHAR(100) NOT NULL,
     nome_fantasia VARCHAR(60),
     inscricao_estadual VARCHAR(50),
-    inscricao_municipal VARCHAR(20),
     endereco VARCHAR(100),
     numero VARCHAR(10),
     complemento VARCHAR(60),
@@ -679,7 +675,6 @@ COMMENT ON COLUMN dbo.fornecedor.tipo_documento IS 'Tipo de documento para forne
 COMMENT ON COLUMN dbo.fornecedor.razao_social IS 'Razão social ou nome completo do fornecedor';
 COMMENT ON COLUMN dbo.fornecedor.nome_fantasia IS 'Nome fantasia do fornecedor';
 COMMENT ON COLUMN dbo.fornecedor.inscricao_estadual IS 'Inscrição estadual do fornecedor';
-COMMENT ON COLUMN dbo.fornecedor.inscricao_municipal IS 'Inscrição municipal do fornecedor';
 COMMENT ON COLUMN dbo.fornecedor.endereco IS 'Endereço do fornecedor';
 COMMENT ON COLUMN dbo.fornecedor.numero IS 'Número do endereço do fornecedor';
 COMMENT ON COLUMN dbo.fornecedor.complemento IS 'Complemento do endereço do fornecedor';

@@ -38,13 +38,13 @@ export class SuppliersService {
         const result = await client.query(
           `INSERT INTO dbo.fornecedor
             (cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
-            nome_fantasia, inscricao_estadual, inscricao_municipal, 
+            nome_fantasia, inscricao_estadual, 
             endereco, numero, complemento, bairro, 
             cidade_id, cep, telefone, email, website, responsavel, 
             celular_responsavel, observacoes, condicao_pagamento_id, ativo)
           VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 
-            $15, $16, $17, $18, $19, $20, $21, $22)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 
+            $14, $15, $16, $17, $18, $19, $20, $21)
           RETURNING *`,
           [
             createSupplierDto.cnpjCpf,
@@ -54,7 +54,6 @@ export class SuppliersService {
             createSupplierDto.razaoSocial,
             createSupplierDto.nomeFantasia || null,
             createSupplierDto.inscricaoEstadual || null,
-            createSupplierDto.inscricaoMunicipal || null,
             createSupplierDto.endereco || null,
             createSupplierDto.numero || null,
             createSupplierDto.complemento || null,
@@ -257,7 +256,6 @@ export class SuppliersService {
           razaoSocial: 'razao_social',
           nomeFantasia: 'nome_fantasia',
           inscricaoEstadual: 'inscricao_estadual',
-          inscricaoMunicipal: 'inscricao_municipal',
           endereco: 'endereco',
           numero: 'numero',
           complemento: 'complemento',
@@ -428,7 +426,6 @@ export class SuppliersService {
       razaoSocial: row.razao_social,
       nomeFantasia: row.nome_fantasia,
       inscricaoEstadual: row.inscricao_estadual,
-      inscricaoMunicipal: row.inscricao_municipal,
       paisId: row.pais_id,
       paisNome: row.pais_nome,
       estadoId: row.estado_id,

@@ -47,12 +47,6 @@ export class Customer extends BaseEntity {
     example: '123456789',
   })
   inscricaoEstadual?: string;
-
-  @ApiProperty({
-    description: 'Inscrição Municipal ou registro comercial internacional',
-    example: '123456',
-  })
-  inscricaoMunicipal?: string;
   @ApiProperty({
     description: 'ID do país',
     example: 1,
