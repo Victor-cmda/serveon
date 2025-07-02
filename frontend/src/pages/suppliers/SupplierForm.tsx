@@ -24,8 +24,55 @@ import ContactSection from './components/ContactSection';
 import DocumentsSection from './components/DocumentsSection';
 import PaymentSection from './components/PaymentSection';
 import SupplierSpecificSection from './components/SupplierSpecificSection';
+import FormValidationStatus from './components/FormValidationStatus';
 
-// Formatadores de texto
+// Funções de validação personalizadas
+const validateCPF = (cpf: string): boolean => {
+  if (!cpf) return false;
+  const digits = cpf.replace(/\D/g, '');
+  if (digits.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(digits)) return false;
+  
+  const calcDigit = (base: string): number => {
+    let sum = 0;
+    for (let i = 0; i < base.length; i++) {
+      sum += parseInt(base[i]) * (base.length + 1 - i);
+    }
+    const remainder = sum % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+  };
+  
+  const digit1 = calcDigit(digits.slice(0, 9));
+  const digit2 = calcDigit(digits.slice(0, 10));
+  
+  return digit1 === parseInt(digits[9]) && digit2 === parseInt(digits[10]);
+};
+
+const validateCNPJ = (cnpj: string): boolean => {
+  if (!cnpj) return false;
+  const digits = cnpj.replace(/\D/g, '');
+  if (digits.length !== 14) return false;
+  if (/^(\d)\1{13}$/.test(digits)) return false;
+  
+  const calcDigit = (base: string, weights: number[]): number => {
+    let sum = 0;
+    for (let i = 0; i < base.length; i++) {
+      sum += parseInt(base[i]) * weights[i];
+    }
+    const remainder = sum % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+  };
+  
+  const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+  const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+  
+  const digit1 = calcDigit(digits.slice(0, 12), weights1);
+  const digit2 = calcDigit(digits.slice(0, 13), weights2);
+  
+  return digit1 === parseInt(digits[12]) && digit2 === parseInt(digits[13]);
+};
+
+// Formatadores de texto aprimorados
 const formatters = {
   cpf: (value: string | undefined): string => {
     if (!value) return '';
@@ -62,10 +109,14 @@ const formatters = {
     const tel = digits.slice(0, 11);
     if (tel.length > 10) {
       return tel.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-    } else {
+    } else if (tel.length > 6) {
       return tel.replace(/(\d{2})(\d{4})(\d{0,4})/, (_, p1, p2, p3) => {
         if (p3) return `(${p1}) ${p2}-${p3}`;
         if (p2) return `(${p1}) ${p2}`;
+        return p1;
+      });
+    } else {
+      return tel.replace(/(\d{0,2})/, (_, p1) => {
         if (p1.length === 2) return `(${p1})`;
         return p1;
       });
@@ -82,11 +133,39 @@ const formatters = {
   },
   numero: (value: string | undefined): string => {
     if (!value) return '';
-    return value.replace(/[^0-9a-zA-Z/-]/g, '');
+    // Permite números, letras e alguns caracteres especiais comuns em números de endereço
+    return value.replace(/[^0-9a-zA-Z\s\-\/]/g, '').slice(0, 10);
   },
   inscricaoEstadual: (value: string | undefined): string => {
     if (!value) return '';
-    return value.replace(/[^\w]/g, '');
+    // Remove caracteres especiais exceto letras, números, pontos e hífens
+    return value.replace(/[^\w\.\-]/g, '').slice(0, 20);
+  },
+  rg: (value: string | undefined): string => {
+    if (!value) return '';
+    // Formato mais comum: 12.345.678-9 (permite variações por estado)
+    const digits = value.replace(/\D/g, '');
+    const rg = digits.slice(0, 9);
+    return rg.replace(/(\d{2})(\d{3})(\d{3})(\d{0,1})/, (_, p1, p2, p3, p4) => {
+      if (p4) return `${p1}.${p2}.${p3}-${p4}`;
+      if (p3) return `${p1}.${p2}.${p3}`;
+      if (p2) return `${p1}.${p2}`;
+      return p1;
+    });
+  },
+  text: (value: string | undefined, maxLength: number = 100): string => {
+    if (!value) return '';
+    return value.slice(0, maxLength);
+  },
+  email: (value: string | undefined): string => {
+    if (!value) return '';
+    // Remove espaços e limita o tamanho
+    return value.replace(/\s/g, '').slice(0, 100);
+  },
+  website: (value: string | undefined): string => {
+    if (!value) return '';
+    // Remove espaços e limita o tamanho
+    return value.replace(/\s/g, '').slice(0, 200);
   },
   clearFormat: (value: string | undefined): string => {
     if (!value) return '';
@@ -95,26 +174,123 @@ const formatters = {
 };
 
 const formSchema = z.object({
-  cnpjCpf: z.string().min(1, 'CNPJ/CPF é obrigatório'),
   tipo: z.enum(['F', 'J']),
   isEstrangeiro: z.boolean().default(false),
-  razaoSocial: z.string().min(1, 'Razão Social/Nome é obrigatório'),
-  nomeFantasia: z.string().optional(),
-  inscricaoEstadual: z.string().optional(),
-  endereco: z.string().optional(),
-  numero: z.string().optional(),
-  complemento: z.string().optional(),
-  bairro: z.string().optional(),
+  cnpjCpf: z.string()
+    .min(1, 'CNPJ/CPF é obrigatório')
+    .refine((value) => {
+      const digits = value.replace(/\D/g, '');
+      return digits.length >= 11;
+    }, 'Documento deve ter pelo menos 11 dígitos'),
+  razaoSocial: z.string()
+    .min(2, 'Razão Social/Nome deve ter pelo menos 2 caracteres')
+    .max(100, 'Razão Social/Nome deve ter no máximo 100 caracteres')
+    .refine((value) => value.trim().length > 0, 'Razão Social/Nome é obrigatório'),
+  nomeFantasia: z.string()
+    .max(100, 'Nome Fantasia/Apelido deve ter no máximo 100 caracteres')
+    .optional(),
+  inscricaoEstadual: z.string()
+    .max(20, 'Inscrição Estadual/RG deve ter no máximo 20 caracteres')
+    .optional(),
+  endereco: z.string()
+    .max(100, 'Endereço deve ter no máximo 100 caracteres')
+    .optional(),
+  numero: z.string()
+    .max(10, 'Número deve ter no máximo 10 caracteres')
+    .optional(),
+  complemento: z.string()
+    .max(50, 'Complemento deve ter no máximo 50 caracteres')
+    .optional(),
+  bairro: z.string()
+    .max(50, 'Bairro deve ter no máximo 50 caracteres')
+    .optional(),
   cidadeId: z.number().optional(),
-  cep: z.string().optional(),
-  telefone: z.string().optional(),
-  email: z.string().email('Email inválido').optional().or(z.literal('')),
+  cep: z.string()
+    .optional()
+    .refine((value) => {
+      if (!value) return true;
+      const digits = value.replace(/\D/g, '');
+      return digits.length === 0 || digits.length === 8;
+    }, 'CEP deve ter 8 dígitos'),
+  telefone: z.string()
+    .optional()
+    .refine((value) => {
+      if (!value) return true;
+      const digits = value.replace(/\D/g, '');
+      return digits.length === 0 || digits.length >= 10;
+    }, 'Telefone deve ter pelo menos 10 dígitos'),
+  email: z.string()
+    .optional()
+    .refine((value) => {
+      if (!value) return true;
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    }, 'Email inválido'),
   ativo: z.boolean().default(true),
-  website: z.string().optional(),
-  observacoes: z.string().optional(),
-  responsavel: z.string().optional(),
-  celularResponsavel: z.string().optional(),
+  website: z.string()
+    .nullish()
+    .default('')
+    .transform(val => val || '')
+    .refine((value) => {
+      if (!value) return true;
+      
+      const trimmedWebsite = value.trim();
+      if (!trimmedWebsite) return true;
+      
+      try {
+        // Converte para lowercase para verificação de protocolo
+        const lowerWebsite = trimmedWebsite.toLowerCase();
+        const urlWithProtocol = lowerWebsite.startsWith('http://') || lowerWebsite.startsWith('https://') 
+          ? trimmedWebsite 
+          : `https://${trimmedWebsite}`;
+        
+        const url = new URL(urlWithProtocol);
+        return url.hostname.includes('.');
+      } catch {
+        // Remove protocolo case-insensitive para regex
+        const withoutProtocol = trimmedWebsite.replace(/^https?:\/\//i, '');
+        const simpleRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.([a-zA-Z]{2,}|[0-9]{1,3})$/i;
+        return simpleRegex.test(withoutProtocol);
+      }
+    }, 'URL inválida (ex: https://exemplo.com)')
+    .refine((value) => {
+      return !value || value.length <= 200;
+    }, 'Website deve ter no máximo 200 caracteres'),
+  observacoes: z.string()
+    .nullish()
+    .default('')
+    .transform(val => val || '')
+    .refine((value) => {
+      return !value || value.length <= 500;
+    }, 'Observações deve ter no máximo 500 caracteres'),
+  responsavel: z.string()
+    .nullish()
+    .default('')
+    .transform(val => val || '')
+    .refine((value) => {
+      return !value || value.length <= 100;
+    }, 'Nome do responsável deve ter no máximo 100 caracteres'),
+  celularResponsavel: z.string()
+    .nullish()
+    .default('')
+    .transform(val => val || '')
+    .refine((value) => {
+      if (!value) return true;
+      const digits = value.replace(/\D/g, '');
+      return digits.length === 0 || digits.length >= 10;
+    }, 'Celular deve ter pelo menos 10 dígitos'),
   condicaoPagamentoId: z.number().optional(),
+}).refine((data) => {
+  // Validação específica para CPF/CNPJ baseada no tipo
+  if (data.isEstrangeiro) return true;
+  
+  if (data.tipo === 'F') {
+    return validateCPF(data.cnpjCpf);
+  } else {
+    return validateCNPJ(data.cnpjCpf);
+  }
+}, {
+  message: 'Documento inválido',
+  path: ['cnpjCpf']
 });
 
 export default function SupplierForm() {
@@ -386,6 +562,7 @@ export default function SupplierForm() {
                 isLoading={isLoading}
                 watchTipo={watchTipo}
                 id={id}
+                formatters={formatters}
               />
 
               <AddressSection
@@ -410,7 +587,7 @@ export default function SupplierForm() {
                 isLoading={isLoading}
                 formatters={formatters}
               />
-              
+
               <SupplierSpecificSection
                 form={form}
                 isLoading={isLoading}

@@ -11,10 +11,13 @@ import { UseFormReturn } from 'react-hook-form';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { City } from '../../../types/location';
+import { getFieldValidationClass, getValidationMessage } from '../utils/validationUtils';
+import { cn } from '../../../lib/utils';
 
 interface Formatters {
   numero: (value: string | undefined) => string;
   cep: (value: string | undefined) => string;
+  text: (value: string | undefined, maxLength?: number) => string;
 }
 
 interface AddressSectionProps {
@@ -50,8 +53,11 @@ const AddressSection = ({
                   <div className="relative">
                     <Input
                       {...field}
+                      value={formatters.text(field.value || '', 100)}
+                      onChange={(e) => field.onChange(formatters.text(e.target.value || '', 100))}
                       disabled={isLoading}
                       className="h-10 text-base pl-9"
+                      placeholder="Digite o endereço (opcional)"
                     />
                     <Home className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                   </div>
@@ -70,10 +76,11 @@ const AddressSection = ({
                 <FormControl>
                   <Input
                     {...field}
-                    value={formatters.numero(field.value)}
-                    onChange={(e) => field.onChange(e.target.value)}
+                    value={formatters.numero(field.value || '')}
+                    onChange={(e) => field.onChange(formatters.numero(e.target.value || ''))}
                     disabled={isLoading}
                     className="h-10 text-base"
+                    placeholder="123"
                   />
                 </FormControl>
                 <FormMessage className="text-sm" />
@@ -91,8 +98,11 @@ const AddressSection = ({
                 <FormControl>
                   <Input
                     {...field}
+                    value={formatters.text(field.value || '', 50)}
+                    onChange={(e) => field.onChange(formatters.text(e.target.value || '', 50))}
                     disabled={isLoading}
                     className="h-10 text-base"
+                    placeholder="Apto, sala, etc."
                   />
                 </FormControl>
                 <FormMessage className="text-sm" />
@@ -108,8 +118,11 @@ const AddressSection = ({
                 <FormControl>
                   <Input
                     {...field}
+                    value={formatters.text(field.value || '', 50)}
+                    onChange={(e) => field.onChange(formatters.text(e.target.value || '', 50))}
                     disabled={isLoading}
                     className="h-10 text-base"
+                    placeholder="Digite o bairro (opcional)"
                   />
                 </FormControl>
                 <FormMessage className="text-sm" />
@@ -192,21 +205,40 @@ const AddressSection = ({
           <FormField
             control={form.control}
             name="cep"
-            render={({ field }) => (
-              <FormItem className="col-span-4">
-                <FormLabel className="text-base font-medium">CEP</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    value={formatters.cep(field.value)}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    disabled={isLoading}
-                    className="h-10 text-base"
-                  />
-                </FormControl>
-                <FormMessage className="text-sm" />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const validationClass = getFieldValidationClass(field.value, 'cep');
+              const validationMessage = getValidationMessage(field.value, 'cep');
+              
+              return (
+                <FormItem className="col-span-4">
+                  <FormLabel className="text-base font-medium">CEP</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={formatters.cep(field.value)}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      disabled={isLoading}
+                      placeholder="00000-000"
+                      className={cn(
+                        "h-10 text-base transition-colors duration-200",
+                        validationClass
+                      )}
+                    />
+                  </FormControl>
+                  {validationMessage && (
+                    <p className={cn(
+                      "text-sm font-medium transition-colors duration-200",
+                      validationMessage.includes('✓') 
+                        ? "text-green-600" 
+                        : "text-orange-600"
+                    )}>
+                      {validationMessage}
+                    </p>
+                  )}
+                  <FormMessage className="text-sm" />
+                </FormItem>
+              );
+            }}
           />
         </div>
       </div>

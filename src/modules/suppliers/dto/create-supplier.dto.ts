@@ -197,7 +197,6 @@ export class CreateSupplierDto {
     required: false,
   })
   @IsOptional()
-  @IsUrl({}, { message: 'Website deve ser uma URL válida' })
   @MaxLength(100, { message: 'Website deve ter no máximo 100 caracteres' })
   website?: string;
 

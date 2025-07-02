@@ -14,9 +14,12 @@ interface GeneralDataSectionProps {
   isLoading: boolean;
   watchTipo: 'J' | 'F';
   id?: string;
+  formatters: {
+    text: (value: string | undefined, maxLength?: number) => string;
+  };
 }
 
-const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSectionProps) => {
+const GeneralDataSection = ({ form, isLoading, watchTipo, id, formatters }: GeneralDataSectionProps) => {
   return (
     <div className="space-y-4">
       <FormField
@@ -80,8 +83,11 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSecti
                 <div className="relative">
                   <Input
                     {...field}
+                    value={formatters.text(field.value, 100)}
+                    onChange={(e) => field.onChange(formatters.text(e.target.value, 100))}
                     disabled={isLoading}
                     className="h-10 text-base pl-9"
+                    placeholder={watchTipo === 'J' ? 'Digite a razão social' : 'Digite o nome completo'}
                   />
                   {watchTipo === 'J' ? 
                     <Building2 className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" /> : 
@@ -105,8 +111,11 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id }: GeneralDataSecti
               <FormControl>
                 <Input
                   {...field}
+                  value={formatters.text(field.value, 100)}
+                  onChange={(e) => field.onChange(formatters.text(e.target.value, 100))}
                   disabled={isLoading}
                   className="h-10 text-base"
+                  placeholder={watchTipo === 'J' ? 'Digite o nome fantasia (opcional)' : 'Digite o apelido (opcional)'}
                 />
               </FormControl>
               <FormMessage className="text-sm" />
