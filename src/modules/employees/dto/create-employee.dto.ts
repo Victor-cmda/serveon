@@ -9,6 +9,7 @@ import {
   MaxLength,
   IsBoolean,
   IsNumber,
+  IsDecimal,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -52,6 +53,16 @@ export class CreateEmployeeDto {
   telefone?: string;
 
   @ApiProperty({
+    description: 'Telefone celular',
+    example: '11999887766',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Celular deve ser uma string' })
+  @MaxLength(20, { message: 'Celular deve ter no máximo 20 caracteres' })
+  celular?: string;
+
+  @ApiProperty({
     description: 'RG do funcionário',
     example: '123456789',
     required: false,
@@ -60,6 +71,97 @@ export class CreateEmployeeDto {
   @IsString({ message: 'RG deve ser uma string' })
   @MaxLength(20, { message: 'RG deve ter no máximo 20 caracteres' })
   rg?: string;
+
+  @ApiProperty({
+    description: 'Órgão emissor do RG',
+    example: 'SSP/SP',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Órgão emissor deve ser uma string' })
+  @MaxLength(20, { message: 'Órgão emissor deve ter no máximo 20 caracteres' })
+  orgaoEmissor?: string;
+
+  @ApiProperty({
+    description: 'Data de nascimento',
+    example: '1990-05-15',
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate({ message: 'Data de nascimento deve ser uma data válida' })
+  dataNascimento?: Date;
+
+  @ApiProperty({
+    description: 'Estado civil',
+    example: 'Solteiro',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Estado civil deve ser uma string' })
+  @MaxLength(20, { message: 'Estado civil deve ter no máximo 20 caracteres' })
+  estadoCivil?: string;
+
+  @ApiProperty({
+    description: 'Nacionalidade',
+    example: 'Brasileira',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Nacionalidade deve ser uma string' })
+  @MaxLength(30, { message: 'Nacionalidade deve ter no máximo 30 caracteres' })
+  nacionalidade?: string;
+
+  // Campos de Endereço
+  @ApiProperty({
+    description: 'CEP',
+    example: '01234567',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'CEP deve ser uma string' })
+  @MaxLength(10, { message: 'CEP deve ter no máximo 10 caracteres' })
+  cep?: string;
+
+  @ApiProperty({
+    description: 'Endereço',
+    example: 'Rua das Flores',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Endereço deve ser uma string' })
+  @MaxLength(200, { message: 'Endereço deve ter no máximo 200 caracteres' })
+  endereco?: string;
+
+  @ApiProperty({
+    description: 'Número do endereço',
+    example: '123',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Número deve ser uma string' })
+  @MaxLength(10, { message: 'Número deve ter no máximo 10 caracteres' })
+  numero?: string;
+
+  @ApiProperty({
+    description: 'Complemento do endereço',
+    example: 'Apto 45',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Complemento deve ser uma string' })
+  @MaxLength(100, { message: 'Complemento deve ter no máximo 100 caracteres' })
+  complemento?: string;
+
+  @ApiProperty({
+    description: 'Bairro',
+    example: 'Centro',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Bairro deve ser uma string' })
+  @MaxLength(100, { message: 'Bairro deve ter no máximo 100 caracteres' })
+  bairro?: string;
 
   @ApiProperty({
     description: 'ID da cidade do funcionário',
@@ -96,6 +198,25 @@ export class CreateEmployeeDto {
   @Type(() => Date)
   @IsDate({ message: 'Data de admissão deve ser uma data válida' })
   dataAdmissao: Date;
+
+  @ApiProperty({
+    description: 'Salário do funcionário',
+    example: 5000.00,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Salário deve ser um número com no máximo 2 casas decimais' })
+  salario?: number;
+
+  @ApiProperty({
+    description: 'Observações sobre o funcionário',
+    example: 'Funcionário exemplar',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Observações devem ser uma string' })
+  @MaxLength(500, { message: 'Observações devem ter no máximo 500 caracteres' })
+  observacoes?: string;
 
   @ApiProperty({
     description: 'Status ativo/inativo do funcionário',

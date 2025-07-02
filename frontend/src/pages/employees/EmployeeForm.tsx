@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Save, Loader2, Search, MapPin, Users, Briefcase } from 'lucide-react';
+import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { employeeApi } from '../../services/api';
 import { toast } from '../../lib/toast';
 import type { Department } from '../../types/department';
@@ -11,31 +11,49 @@ import type { Position } from '../../types/position';
 import type { City } from '../../types/location';
 import {
   Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
 } from '../../components/ui/form';
-import { Input } from '../../components/ui/input';
 import AuditSection from '@/components/AuditSection';
 import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
 import { SearchDialog } from '../../components/SearchDialog';
 import DepartmentCreationDialog from '../../components/dialogs/DepartmentCreationDialog';
+import PositionCreationDialog from '../../components/dialogs/PositionCreationDialog';
 import CityCreationDialog from '../../components/dialogs/CityCreationDialog';
+
+// Componentes modulares
+import EmployeePersonalSection from './components/EmployeePersonalSection';
+import EmployeeDocumentsSection from './components/EmployeeDocumentsSection';
+import EmployeeContactSection from './components/EmployeeContactSection';
+import EmployeeAddressSection from './components/EmployeeAddressSection';
+import EmployeeProfessionalSection from './components/EmployeeProfessionalSection';
 
 const employeeSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório').max(100, 'Nome deve ter no máximo 100 caracteres'),
   cpf: z.string().regex(/^\d{11}$/, 'CPF deve conter exatamente 11 dígitos'),
   email: z.string().email('Email inválido').max(100, 'Email deve ter no máximo 100 caracteres'),
   telefone: z.string().max(20, 'Telefone deve ter no máximo 20 caracteres').optional(),
+  celular: z.string().max(20, 'Celular deve ter no máximo 20 caracteres').optional(),
   rg: z.string().max(20, 'RG deve ter no máximo 20 caracteres').optional(),
+  orgaoEmissor: z.string().max(20, 'Órgão emissor deve ter no máximo 20 caracteres').optional(),
+  dataNascimento: z.string().optional(),
+  estadoCivil: z.string().optional(),
+  nacionalidade: z.string().max(30, 'Nacionalidade deve ter no máximo 30 caracteres').optional(),
+  
+  // Endereço
+  cep: z.string().max(10, 'CEP deve ter no máximo 10 caracteres').optional(),
+  endereco: z.string().max(200, 'Endereço deve ter no máximo 200 caracteres').optional(),
+  numero: z.string().max(10, 'Número deve ter no máximo 10 caracteres').optional(),
+  complemento: z.string().max(100, 'Complemento deve ter no máximo 100 caracteres').optional(),
+  bairro: z.string().max(100, 'Bairro deve ter no máximo 100 caracteres').optional(),
   cidadeId: z.number().optional(),
+  
+  // Profissional
   cargoId: z.number().optional(),
   departamentoId: z.number().optional(),
   dataAdmissao: z.string().min(1, 'Data de admissão é obrigatória'),
   dataDemissao: z.string().optional(),
+  salario: z.number().min(0, 'Salário deve ser maior ou igual a zero').optional(),
+  observacoes: z.string().max(500, 'Observações devem ter no máximo 500 caracteres').optional(),
+  
   ativo: z.boolean().default(true),
 });
 
@@ -46,18 +64,26 @@ const defaultValues: EmployeeFormData = {
   cpf: '',
   email: '',
   telefone: '',
+  celular: '',
   rg: '',
+  orgaoEmissor: '',
+  dataNascimento: '',
+  estadoCivil: '',
+  nacionalidade: '',
+  cep: '',
+  endereco: '',
+  numero: '',
+  complemento: '',
+  bairro: '',
   cidadeId: undefined,
   cargoId: undefined,
   departamentoId: undefined,
   dataAdmissao: '',
   dataDemissao: '',
+  salario: undefined,
+  observacoes: '',
   ativo: true,
 };
-
-// Predefined options for cargo and departamento - Removido, agora carregamos do banco
-// const cargos = [...] - Removido
-// const departamentos = [...] - Removido
 
 const EmployeeForm: React.FC = () => {
   const navigate = useNavigate();
@@ -81,10 +107,12 @@ const EmployeeForm: React.FC = () => {
 
   // Estados para diálogos de criação
   const [departmentDialogOpen, setDepartmentDialogOpen] = useState(false);
+  const [positionDialogOpen, setPositionDialogOpen] = useState(false);
   const [cityDialogOpen, setCityDialogOpen] = useState(false);
 
   // Estados para edição
   const [departmentToEdit, setDepartmentToEdit] = useState<Department | null>(null);
+  const [positionToEdit, setPositionToEdit] = useState<Position | null>(null);
   const [cityToEdit, setCityToEdit] = useState<City | null>(null);
 
   const form = useForm<EmployeeFormData>({
@@ -191,12 +219,24 @@ const EmployeeForm: React.FC = () => {
         cpf: data.cpf,
         email: data.email,
         telefone: data.telefone || '',
+        celular: data.celular || '',
         rg: data.rg || '',
+        orgaoEmissor: data.orgaoEmissor || '',
+        dataNascimento: data.dataNascimento ? new Date(data.dataNascimento).toISOString().split('T')[0] : '',
+        estadoCivil: data.estadoCivil || '',
+        nacionalidade: data.nacionalidade || '',
+        cep: data.cep || '',
+        endereco: data.endereco || '',
+        numero: data.numero || '',
+        complemento: data.complemento || '',
+        bairro: data.bairro || '',
         cargoId: data.cargoId,
         departamentoId: data.departamentoId,
         cidadeId: data.cidadeId,
         dataAdmissao,
         dataDemissao,
+        salario: data.salario,
+        observacoes: data.observacoes || '',
         ativo: data.ativo,
       });
     } catch (error) {
@@ -217,7 +257,23 @@ const EmployeeForm: React.FC = () => {
       const submitData = {
         ...data,
         telefone: data.telefone || undefined,
+        celular: data.celular || undefined,
+        rg: data.rg || undefined,
+        orgaoEmissor: data.orgaoEmissor || undefined,
+        dataNascimento: data.dataNascimento || undefined,
+        estadoCivil: data.estadoCivil || undefined,
+        nacionalidade: data.nacionalidade || undefined,
+        cep: data.cep || undefined,
+        endereco: data.endereco || undefined,
+        numero: data.numero || undefined,
+        complemento: data.complemento || undefined,
+        bairro: data.bairro || undefined,
+        cidadeId: data.cidadeId || undefined,
+        cargoId: data.cargoId || undefined,
+        departamentoId: data.departamentoId || undefined,
         dataDemissao: data.dataDemissao || undefined,
+        salario: data.salario || undefined,
+        observacoes: data.observacoes || undefined,
       };
 
       if (id) {
@@ -252,14 +308,6 @@ const EmployeeForm: React.FC = () => {
     }
   };
 
-  const formatCPF = (value: string) => {
-    return value.replace(/\D/g, '').slice(0, 11);
-  };
-
-  const formatPhone = (value: string) => {
-    return value.replace(/\D/g, '').slice(0, 11);
-  };
-
   // Funções de seleção das entidades
   const onSelectDepartment = (department: Department) => {
     setSelectedDepartment(department);
@@ -287,26 +335,32 @@ const EmployeeForm: React.FC = () => {
   const onCreateNewDepartment = () => {
     setDepartmentToEdit(null);
     setDepartmentDialogOpen(true);
-    setDepartmentSearchOpen(false);
+  };
+
+  const onCreateNewPosition = () => {
+    setPositionToEdit(null);
+    setPositionDialogOpen(true);
   };
 
   const onCreateNewCity = () => {
     setCityToEdit(null);
     setCityDialogOpen(true);
-    setCitySearchOpen(false);
   };
 
   // Funções de edição
   const handleEditDepartment = (department: Department) => {
     setDepartmentToEdit(department);
     setDepartmentDialogOpen(true);
-    setDepartmentSearchOpen(false);
+  };
+
+  const handleEditPosition = (position: Position) => {
+    setPositionToEdit(position);
+    setPositionDialogOpen(true);
   };
 
   const handleEditCity = (city: City) => {
     setCityToEdit(city);
     setCityDialogOpen(true);
-    setCitySearchOpen(false);
   };
 
   // Funções de sucesso após criação/edição
@@ -324,6 +378,21 @@ const EmployeeForm: React.FC = () => {
       setSelectedDepartment(department);
     }
     setDepartmentDialogOpen(false);
+  };
+
+  const handlePositionCreated = (position: Position) => {
+    setPositions(prev => [...prev, position]);
+    setSelectedPosition(position);
+    form.setValue('cargoId', position.id);
+    setPositionDialogOpen(false);
+  };
+
+  const handlePositionUpdated = (position: Position) => {
+    setPositions(prev => prev.map(p => p.id === position.id ? position : p));
+    if (selectedPosition?.id === position.id) {
+      setSelectedPosition(position);
+    }
+    setPositionDialogOpen(false);
   };
 
   const handleCityCreated = (city: City) => {
@@ -385,339 +454,45 @@ const EmployeeForm: React.FC = () => {
             </div>
             <div className="p-6 pt-0 space-y-6">
               {/* Seção Informações Pessoais */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between gap-4 mb-2">
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-lg font-semibold text-foreground">Informações Pessoais</h4>
-                    <div className="flex-1 h-px bg-border"></div>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
-                  <FormItem>
-                    <FormLabel className="text-base font-medium">Código</FormLabel>
-                    <FormControl>
-                      <Input 
-                        value={id || 'Novo'} 
-                        disabled 
-                        className="bg-muted h-11 text-base font-mono text-muted-foreground" 
-                      />
-                    </FormControl>
-                    
-                  </FormItem>
-                  
-                  <div className="md:col-span-5">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="nome"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome Completo *</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Digite o nome completo" 
-                            {...field} 
-                            disabled={loading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="cpf"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>CPF *</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="12345678901"
-                            {...field}
-                            disabled={loading || !!id} // CPF não pode ser editado
-                            onChange={(e) => field.onChange(formatCPF(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email *</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="funcionario@empresa.com"
-                            {...field}
-                            disabled={loading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="telefone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Telefone</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="11987654321"
-                            {...field}
-                            disabled={loading}
-                            onChange={(e) => field.onChange(formatPhone(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="rg"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>RG</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Digite o RG"
-                            {...field}
-                            disabled={loading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="cidadeId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cidade</FormLabel>
-                        <div className="flex gap-2">
-                          <FormControl>
-                            <div className="flex w-full items-center gap-2">
-                              <div className="relative flex-grow">
-                                <Input
-                                  value={selectedCity?.nome || ''}
-                                  readOnly
-                                  placeholder="Selecione uma cidade"
-                                  className="cursor-pointer h-10 text-base pl-9"
-                                  onClick={() => setCitySearchOpen(true)}
-                                />
-                                <input
-                                  type="hidden"
-                                  name={field.name}
-                                  value={field.value || ''}
-                                  onChange={(e) => {
-                                    field.onChange(e);
-                                  }}
-                                  ref={field.ref}
-                                  onBlur={field.onBlur}
-                                />
-                                <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                              </div>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                onClick={() => setCitySearchOpen(true)}
-                                className="h-10 w-10"
-                              >
-                                <Search className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </FormControl>
-                        </div>
-                        {selectedCity && (
-                          <div className="mt-1">
-                            <Badge variant="outline">
-                              {selectedCity.nome} - {selectedCity.uf}
-                            </Badge>
-                          </div>
-                        )}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
+              <EmployeePersonalSection
+                form={form}
+                isLoading={loading}
+                id={id}
+              />
 
               {/* Seção Informações Profissionais */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <h4 className="text-lg font-semibold text-foreground">Informações Profissionais</h4>
-                  <div className="flex-1 h-px bg-border"></div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="departamentoId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Departamento</FormLabel>
-                        <div className="flex gap-2">
-                          <FormControl>
-                            <div className="flex w-full items-center gap-2">
-                              <div className="relative flex-grow">
-                                <Input
-                                  value={selectedDepartment?.nome || ''}
-                                  readOnly
-                                  placeholder="Selecione um departamento"
-                                  className="cursor-pointer h-10 text-base pl-9"
-                                  onClick={() => setDepartmentSearchOpen(true)}
-                                />
-                                <input
-                                  type="hidden"
-                                  name={field.name}
-                                  value={field.value || ''}
-                                  onChange={(e) => {
-                                    field.onChange(e);
-                                  }}
-                                  ref={field.ref}
-                                  onBlur={field.onBlur}
-                                />
-                                <Users className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                              </div>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                onClick={() => setDepartmentSearchOpen(true)}
-                                className="h-10 w-10"
-                              >
-                                <Search className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </FormControl>
-                        </div>
-                        {selectedDepartment && (
-                          <div className="mt-1">
-                            <Badge variant="outline">
-                              {selectedDepartment.nome}
-                            </Badge>
-                          </div>
-                        )}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              <EmployeeProfessionalSection
+                form={form}
+                isLoading={loading}
+                selectedDepartment={selectedDepartment}
+                selectedPosition={selectedPosition}
+                setDepartmentSearchOpen={setDepartmentSearchOpen}
+                setPositionSearchOpen={setPositionSearchOpen}
+                id={id}
+              />
 
-                  <FormField
-                    control={form.control}
-                    name="cargoId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cargo</FormLabel>
-                        <div className="flex gap-2">
-                          <FormControl>
-                            <div className="flex w-full items-center gap-2">
-                              <div className="relative flex-grow">
-                                <Input
-                                  value={selectedPosition?.nome || ''}
-                                  readOnly
-                                  placeholder="Selecione um cargo"
-                                  className="cursor-pointer h-10 text-base pl-9"
-                                  onClick={() => setPositionSearchOpen(true)}
-                                />
-                                <input
-                                  type="hidden"
-                                  name={field.name}
-                                  value={field.value || ''}
-                                  onChange={(e) => {
-                                    field.onChange(e);
-                                  }}
-                                  ref={field.ref}
-                                  onBlur={field.onBlur}
-                                />
-                                <Briefcase className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                              </div>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                onClick={() => setPositionSearchOpen(true)}
-                                className="h-10 w-10"
-                              >
-                                <Search className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </FormControl>
-                        </div>
-                        {selectedPosition && (
-                          <div className="mt-1">
-                            <Badge variant="outline">
-                              {selectedPosition.nome}
-                              {selectedPosition.departamentoNome && ` (${selectedPosition.departamentoNome})`}
-                            </Badge>
-                          </div>
-                        )}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              {/* Seção Endereço */}
+              <EmployeeAddressSection
+                form={form}
+                isLoading={loading}
+                selectedCity={selectedCity}
+                setCitySearchOpen={setCitySearchOpen}
+              />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="dataAdmissao"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data de Admissão *</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="date"
-                            {...field}
-                            disabled={loading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              {/* Seção Documentos */}
+              <EmployeeDocumentsSection
+                form={form}
+                isLoading={loading}
+                id={id}
+              />
 
-                  {id && (
-                    <FormField
-                      control={form.control}
-                      name="dataDemissao"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Data de Demissão</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="date"
-                              {...field}
-                              disabled={loading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-                </div>
-              </div>
+              {/* Seção Contato */}
+              <EmployeeContactSection
+                form={form}
+                isLoading={loading}
+              />
+
+              
             </div>
           </div>
 
@@ -762,15 +537,15 @@ const EmployeeForm: React.FC = () => {
         entities={positions}
         isLoading={loading}
         onSelect={onSelectPosition}
-        onCreateNew={() => {}} // Cargo não tem criação direta
-        onEdit={() => {}} // Cargo não tem edição direta
+        onCreateNew={onCreateNewPosition}
+        onEdit={handleEditPosition}
         displayColumns={[
           { key: 'nome', header: 'Nome' },
           { key: 'departamentoNome', header: 'Departamento' },
         ]}
         searchKeys={['nome', 'departamentoNome']}
         entityType="cargos"
-        description="Selecione um cargo para o funcionário."
+        description="Selecione um cargo para o funcionário ou crie um novo."
       />
 
       <SearchDialog
@@ -797,6 +572,13 @@ const EmployeeForm: React.FC = () => {
         onOpenChange={setDepartmentDialogOpen}
         onSuccess={departmentToEdit ? handleDepartmentUpdated : handleDepartmentCreated}
         department={departmentToEdit}
+      />
+
+      <PositionCreationDialog
+        open={positionDialogOpen}
+        onOpenChange={setPositionDialogOpen}
+        onSuccess={positionToEdit ? handlePositionUpdated : handlePositionCreated}
+        position={positionToEdit}
       />
 
       <CityCreationDialog

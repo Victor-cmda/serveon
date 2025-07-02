@@ -27,10 +27,71 @@ export class Employee extends BaseEntity {
   telefone?: string;
 
   @ApiProperty({
+    description: 'Telefone celular',
+    example: '11999887766',
+  })
+  celular?: string;
+
+  @ApiProperty({
     description: 'RG do funcionário',
     example: '123456789',
   })
   rg?: string;
+
+  @ApiProperty({
+    description: 'Órgão emissor do RG',
+    example: 'SSP/SP',
+  })
+  orgaoEmissor?: string;
+
+  @ApiProperty({
+    description: 'Data de nascimento',
+    example: '1990-05-15',
+  })
+  dataNascimento?: Date;
+
+  @ApiProperty({
+    description: 'Estado civil',
+    example: 'Solteiro',
+  })
+  estadoCivil?: string;
+
+  @ApiProperty({
+    description: 'Nacionalidade',
+    example: 'Brasileira',
+  })
+  nacionalidade?: string;
+
+  // Campos de Endereço
+  @ApiProperty({
+    description: 'CEP',
+    example: '01234567',
+  })
+  cep?: string;
+
+  @ApiProperty({
+    description: 'Endereço',
+    example: 'Rua das Flores, 123',
+  })
+  endereco?: string;
+
+  @ApiProperty({
+    description: 'Número do endereço',
+    example: '123',
+  })
+  numero?: string;
+
+  @ApiProperty({
+    description: 'Complemento do endereço',
+    example: 'Apto 45',
+  })
+  complemento?: string;
+
+  @ApiProperty({
+    description: 'Bairro',
+    example: 'Centro',
+  })
+  bairro?: string;
 
   @ApiProperty({
     description: 'ID da cidade do funcionário',
@@ -43,6 +104,18 @@ export class Employee extends BaseEntity {
     example: 'São Paulo',
   })
   cidadeNome?: string;
+
+  @ApiProperty({
+    description: 'Nome do estado',
+    example: 'São Paulo',
+  })
+  estadoNome?: string;
+
+  @ApiProperty({
+    description: 'UF do estado',
+    example: 'SP',
+  })
+  uf?: string;
 
   @ApiProperty({
     description: 'ID do cargo do funcionário',
@@ -79,4 +152,16 @@ export class Employee extends BaseEntity {
     example: null,
   })
   dataDemissao?: Date;
+
+  @ApiProperty({
+    description: 'Salário do funcionário',
+    example: 5000.00,
+  })
+  salario?: number;
+
+  @ApiProperty({
+    description: 'Observações sobre o funcionário',
+    example: 'Funcionário exemplar',
+  })
+  observacoes?: string;
 }

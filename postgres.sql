@@ -313,12 +313,29 @@ CREATE TABLE funcionario (
     cpf VARCHAR(11) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     telefone VARCHAR(20),
+    celular VARCHAR(20),
     rg VARCHAR(20),
+    orgao_emissor VARCHAR(20),
+    data_nascimento DATE,
+    estado_civil VARCHAR(20),
+    nacionalidade VARCHAR(30),
+    
+    -- Campos de endereço
+    cep VARCHAR(10),
+    endereco VARCHAR(200),
+    numero VARCHAR(10),
+    complemento VARCHAR(100),
+    bairro VARCHAR(100),
+    cidade_id INTEGER REFERENCES cidade(id),
+    
+    -- Campos profissionais
     cargo_id INTEGER REFERENCES cargo(id),
     departamento_id INTEGER REFERENCES departamento(id),
-    cidade_id INTEGER REFERENCES cidade(id),
     data_admissao DATE NOT NULL,
     data_demissao DATE,
+    salario DECIMAL(10, 2),
+    observacoes TEXT,
+    
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -700,12 +717,24 @@ COMMENT ON COLUMN dbo.funcionario.nome IS 'Nome completo do funcionário';
 COMMENT ON COLUMN dbo.funcionario.cpf IS 'CPF do funcionário (apenas números)';
 COMMENT ON COLUMN dbo.funcionario.email IS 'Email profissional do funcionário';
 COMMENT ON COLUMN dbo.funcionario.telefone IS 'Telefone de contato do funcionário';
+COMMENT ON COLUMN dbo.funcionario.celular IS 'Telefone celular do funcionário';
 COMMENT ON COLUMN dbo.funcionario.rg IS 'RG do funcionário';
+COMMENT ON COLUMN dbo.funcionario.orgao_emissor IS 'Órgão emissor do RG';
+COMMENT ON COLUMN dbo.funcionario.data_nascimento IS 'Data de nascimento do funcionário';
+COMMENT ON COLUMN dbo.funcionario.estado_civil IS 'Estado civil do funcionário';
+COMMENT ON COLUMN dbo.funcionario.nacionalidade IS 'Nacionalidade do funcionário';
+COMMENT ON COLUMN dbo.funcionario.cep IS 'CEP do endereço do funcionário';
+COMMENT ON COLUMN dbo.funcionario.endereco IS 'Endereço do funcionário';
+COMMENT ON COLUMN dbo.funcionario.numero IS 'Número do endereço do funcionário';
+COMMENT ON COLUMN dbo.funcionario.complemento IS 'Complemento do endereço do funcionário';
+COMMENT ON COLUMN dbo.funcionario.bairro IS 'Bairro do funcionário';
+COMMENT ON COLUMN dbo.funcionario.cidade_id IS 'ID da cidade do funcionário';
 COMMENT ON COLUMN dbo.funcionario.cargo_id IS 'ID do cargo do funcionário';
 COMMENT ON COLUMN dbo.funcionario.departamento_id IS 'ID do departamento do funcionário';
-COMMENT ON COLUMN dbo.funcionario.cidade_id IS 'ID da cidade do funcionário';
 COMMENT ON COLUMN dbo.funcionario.data_admissao IS 'Data de admissão do funcionário';
 COMMENT ON COLUMN dbo.funcionario.data_demissao IS 'Data de demissão do funcionário (se aplicável)';
+COMMENT ON COLUMN dbo.funcionario.salario IS 'Salário do funcionário';
+COMMENT ON COLUMN dbo.funcionario.observacoes IS 'Observações sobre o funcionário';
 COMMENT ON COLUMN dbo.funcionario.ativo IS 'Indica se o funcionário está ativo';
 COMMENT ON COLUMN dbo.funcionario.created_at IS 'Data de criação do registro';
 COMMENT ON COLUMN dbo.funcionario.updated_at IS 'Data da última atualização do registro';
