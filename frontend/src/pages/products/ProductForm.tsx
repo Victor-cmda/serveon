@@ -25,30 +25,29 @@ import UnitMeasureCreationDialog from '../../components/dialogs/UnitMeasureCreat
 
 const formSchema = z.object({
   id: z.number().optional(),
-  codigo: z.string().optional(),
   produto: z.string().min(2, 'Nome do produto é obrigatório'),
-  descricao: z.string().optional(),
-  codigoBarras: z.string().optional(),
-  referencia: z.string().optional(),
-  valorVenda: z.number().min(0, 'Valor de venda deve ser maior ou igual a zero'),
-  valorCompra: z.number().min(0, 'Valor de compra deve ser maior ou igual a zero'),
-  quantidadeMinima: z.number().min(0, 'Quantidade mínima deve ser maior ou igual a zero'),
-  quantidade: z.number().min(0, 'Quantidade atual deve ser maior ou igual a zero'),
+  descricao: z.string().nullable().optional(),
+  codigoBarras: z.string().nullable().optional(),
+  referencia: z.string().nullable().optional(),
+  valorVenda: z.number().min(0, 'Valor de venda deve ser maior ou igual a zero').optional(),
+  valorCompra: z.number().min(0, 'Valor de compra deve ser maior ou igual a zero').optional(),
+  quantidadeMinima: z.number().min(0, 'Quantidade mínima deve ser maior ou igual a zero').optional(),
+  quantidade: z.number().min(0, 'Quantidade atual deve ser maior ou igual a zero').optional(),
   categoriaId: z.number().min(1, 'Categoria é obrigatória'),
-  marcaId: z.number().optional(),
+  marcaId: z.number().nullable().optional(),
   unidadeMedidaId: z.number().min(1, 'Unidade de medida é obrigatória'),
   ativo: z.boolean().default(true),
-  percentualLucro: z.number().min(0, 'Percentual de lucro deve ser maior ou igual a zero').optional(),
-  pesoLiquido: z.number().min(0, 'Peso líquido deve ser maior ou igual a zero').optional(),
-  pesoBruto: z.number().min(0, 'Peso bruto deve ser maior ou igual a zero').optional(),
-  ncm: z.string().optional(),
-  cest: z.string().optional(),
-  gtin: z.string().optional(),
-  gtinTributavel: z.string().optional(),
-  unidade: z.string().optional(),
-  valorUnitario: z.number().min(0, 'Valor unitário deve ser maior ou igual a zero').optional(),
-  situacao: z.string().optional(),
-  observacoes: z.string().optional(),
+  percentualLucro: z.number().min(0, 'Percentual de lucro deve ser maior ou igual a zero').nullable().optional(),
+  pesoLiquido: z.number().min(0, 'Peso líquido deve ser maior ou igual a zero').nullable().optional(),
+  pesoBruto: z.number().min(0, 'Peso bruto deve ser maior ou igual a zero').nullable().optional(),
+  ncm: z.string().nullable().optional(),
+  cest: z.string().nullable().optional(),
+  gtin: z.string().nullable().optional(),
+  gtinTributavel: z.string().nullable().optional(),
+  unidade: z.string().nullable().optional(),
+  valorUnitario: z.number().min(0, 'Valor unitário deve ser maior ou igual a zero').nullable().optional(),
+  situacao: z.string().nullable().optional(),
+  observacoes: z.string().nullable().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -87,7 +86,6 @@ const ProductForm = () => {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      codigo: '',
       produto: '',
       descricao: '',
       codigoBarras: '',
@@ -102,6 +100,12 @@ const ProductForm = () => {
       pesoBruto: 0,
       valorUnitario: 0,
       observacoes: '',
+      ncm: '',
+      cest: '',
+      gtin: '',
+      gtinTributavel: '',
+      unidade: '',
+      situacao: '',
     },
   });
 
@@ -269,6 +273,24 @@ const ProductForm = () => {
           form.reset({
             ...product,
             id: product.id,
+            descricao: product.descricao || '',
+            codigoBarras: product.codigoBarras || '',
+            referencia: product.referencia || '',
+            observacoes: product.observacoes || '',
+            ncm: product.ncm || '',
+            cest: product.cest || '',
+            gtin: product.gtin || '',
+            gtinTributavel: product.gtinTributavel || '',
+            unidade: product.unidade || '',
+            situacao: product.situacao || '',
+            valorVenda: product.valorVenda || 0,
+            valorCompra: product.valorCompra || 0,
+            percentualLucro: product.percentualLucro || 0,
+            pesoLiquido: product.pesoLiquido || 0,
+            pesoBruto: product.pesoBruto || 0,
+            valorUnitario: product.valorUnitario || 0,
+            quantidadeMinima: product.quantidadeMinima || 0,
+            quantidade: product.quantidade || 0,
           });
 
           // Define as entidades selecionadas
@@ -306,11 +328,35 @@ const ProductForm = () => {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
+      // Limpar valores null/undefined para string vazia quando necessário
+      const cleanedData = {
+        ...data,
+        descricao: data.descricao || undefined,
+        codigoBarras: data.codigoBarras || undefined,
+        referencia: data.referencia || undefined,
+        observacoes: data.observacoes || undefined,
+        ncm: data.ncm || undefined,
+        cest: data.cest || undefined,
+        gtin: data.gtin || undefined,
+        gtinTributavel: data.gtinTributavel || undefined,
+        unidade: data.unidade || undefined,
+        situacao: data.situacao || undefined,
+        marcaId: data.marcaId || undefined,
+        valorCompra: data.valorCompra || undefined,
+        valorVenda: data.valorVenda || undefined,
+        percentualLucro: data.percentualLucro || undefined,
+        pesoLiquido: data.pesoLiquido || undefined,
+        pesoBruto: data.pesoBruto || undefined,
+        valorUnitario: data.valorUnitario || undefined,
+        quantidadeMinima: data.quantidadeMinima || 0,
+        quantidade: data.quantidade || 0,
+      };
+
       if (id) {
-        await productApi.update(Number(id), data);
+        await productApi.update(Number(id), cleanedData);
         toast.success('Produto atualizado com sucesso!');
       } else {
-        await productApi.create(data);
+        await productApi.create(cleanedData);
         toast.success('Produto criado com sucesso!');
       }
       navigate('/products');

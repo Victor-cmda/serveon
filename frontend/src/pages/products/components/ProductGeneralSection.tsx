@@ -44,34 +44,16 @@ const ProductGeneralSection = ({
         <div className="flex-1 h-px bg-border"></div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="md:col-span-1">
           <FormItem>
-            <FormLabel>ID</FormLabel>
+            <FormLabel>Código</FormLabel>
             <FormControl>
               <Input value={id || 'Novo'} disabled className="bg-muted" />
             </FormControl>
           </FormItem>
         </div>
         
-        <FormField
-          control={form.control}
-          name="codigo"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Código</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Código do produto"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="referencia"

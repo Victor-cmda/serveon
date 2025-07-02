@@ -48,7 +48,6 @@ const ProductsList: React.FC = () => {
   const filteredProducts = products.filter(
     (product) =>
       (product.produto && product.produto.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (product.codigo && product.codigo.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (product.descricao && product.descricao.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (product.categoriaNome && product.categoriaNome.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (product.marcaNome && product.marcaNome.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -149,7 +148,7 @@ const ProductsList: React.FC = () => {
                 filteredProducts.map((product) => (
                   <tr key={product.id} className="border-b">
                     <td className="p-4">
-                      <div className="font-medium">{product.codigo || product.id}</div>
+                      <div className="font-medium">{product.id}</div>
                     </td>
                     <td className="p-4">
                       <div className="font-medium">{product.produto}</div>

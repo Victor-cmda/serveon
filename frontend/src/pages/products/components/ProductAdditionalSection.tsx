@@ -29,7 +29,7 @@ const ProductAdditionalSection = ({
           name="valorVenda"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Valor de Venda *</FormLabel>
+              <FormLabel>Valor de Venda</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -38,7 +38,8 @@ const ProductAdditionalSection = ({
                   placeholder="0.00"
                   disabled={isLoading}
                   {...field}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
                 />
               </FormControl>
               <FormMessage />
@@ -60,7 +61,8 @@ const ProductAdditionalSection = ({
                   placeholder="0.00"
                   disabled={isLoading}
                   {...field}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
                 />
               </FormControl>
               <FormMessage />

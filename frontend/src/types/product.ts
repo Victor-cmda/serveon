@@ -1,7 +1,6 @@
 export interface Product {
   id: number;
   produto: string; // Nome/descrição do produto
-  codigo?: string;
   codigoBarras?: string;
   referencia?: string;
   descricao?: string;
@@ -43,54 +42,52 @@ export interface Product {
 
 export interface CreateProductDto {
   produto: string;
-  codigo?: string;
-  codigoBarras?: string;
-  referencia?: string;
-  descricao?: string;
-  observacoes?: string;
+  codigoBarras?: string | null;
+  referencia?: string | null;
+  descricao?: string | null;
+  observacoes?: string | null;
   quantidadeMinima?: number;
   quantidade?: number;
-  valorCompra?: number;
-  valorVenda?: number;
-  percentualLucro?: number;
-  pesoLiquido?: number;
-  pesoBruto?: number;
-  ncm?: string;
-  cest?: string;
-  gtin?: string;
-  gtinTributavel?: string;
-  unidade?: string;
-  valorUnitario?: number;
-  situacao?: string;
+  valorCompra?: number | null;
+  valorVenda?: number | null;
+  percentualLucro?: number | null;
+  pesoLiquido?: number | null;
+  pesoBruto?: number | null;
+  ncm?: string | null;
+  cest?: string | null;
+  gtin?: string | null;
+  gtinTributavel?: string | null;
+  unidade?: string | null;
+  valorUnitario?: number | null;
+  situacao?: string | null;
   ativo?: boolean;
   unidadeMedidaId?: number;
-  marcaId?: number;
+  marcaId?: number | null;
   categoriaId?: number;
 }
 
 export interface UpdateProductDto {
   produto?: string;
-  codigo?: string;
-  codigoBarras?: string;
-  referencia?: string;
-  descricao?: string;
-  observacoes?: string;
+  codigoBarras?: string | null;
+  referencia?: string | null;
+  descricao?: string | null;
+  observacoes?: string | null;
   quantidadeMinima?: number;
   quantidade?: number;
-  valorCompra?: number;
-  valorVenda?: number;
-  percentualLucro?: number;
-  pesoLiquido?: number;
-  pesoBruto?: number;
-  ncm?: string;
-  cest?: string;
-  gtin?: string;
-  gtinTributavel?: string;
-  unidade?: string;
-  valorUnitario?: number;
-  situacao?: string;
+  valorCompra?: number | null;
+  valorVenda?: number | null;
+  percentualLucro?: number | null;
+  pesoLiquido?: number | null;
+  pesoBruto?: number | null;
+  ncm?: string | null;
+  cest?: string | null;
+  gtin?: string | null;
+  gtinTributavel?: string | null;
+  unidade?: string | null;
+  valorUnitario?: number | null;
+  situacao?: string | null;
   ativo?: boolean;
   unidadeMedidaId?: number;
-  marcaId?: number;
+  marcaId?: number | null;
   categoriaId?: number;
 }
