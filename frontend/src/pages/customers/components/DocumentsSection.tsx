@@ -33,7 +33,7 @@ const DocumentsSection = ({
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div className="lg:col-span-8">
+        <div className="lg:col-span-6">
           <FormField
             control={form.control}
             name="cnpjCpf"
@@ -61,7 +61,7 @@ const DocumentsSection = ({
           />
         </div>
 
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-6">
           <FormField
             control={form.control}
             name="inscricaoEstadual"

@@ -602,14 +602,6 @@ const CustomerForm = () => {
                 id={id}
               />
 
-              <DocumentsSection
-                form={form}
-                isLoading={isLoading}
-                formatters={formatters}
-                watchTipo={watchTipo}
-                watchIsEstrangeiro={watchIsEstrangeiro}
-              />
-
               <AddressSection
                 form={form}
                 isLoading={isLoading}
@@ -619,6 +611,14 @@ const CustomerForm = () => {
                 setCitySearchOpen={setCitySearchOpen}
               />
 
+              <DocumentsSection
+                form={form}
+                isLoading={isLoading}
+                formatters={formatters}
+                watchTipo={watchTipo}
+                watchIsEstrangeiro={watchIsEstrangeiro}
+              />
+              
               <ContactSection
                 form={form}
                 isLoading={isLoading}
