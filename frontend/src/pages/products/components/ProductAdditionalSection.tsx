@@ -20,16 +20,16 @@ const ProductAdditionalSection = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-2">
-        <h4 className="text-lg font-semibold text-foreground">Informações Adicionais</h4>
+        <h4 className="text-lg font-semibold text-foreground">Valores e Estoque</h4>
         <div className="flex-1 h-px bg-border"></div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
-          name="preco"
+          name="valorVenda"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Preço de Venda *</FormLabel>
+              <FormLabel>Valor de Venda *</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -48,10 +48,10 @@ const ProductAdditionalSection = ({
 
         <FormField
           control={form.control}
-          name="custoMedio"
+          name="valorCompra"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Custo Médio</FormLabel>
+              <FormLabel>Valor de Compra</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -72,10 +72,10 @@ const ProductAdditionalSection = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <FormField
           control={form.control}
-          name="estoqueAtual"
+          name="quantidade"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Estoque Atual</FormLabel>
+              <FormLabel>Quantidade Atual</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -93,10 +93,10 @@ const ProductAdditionalSection = ({
 
         <FormField
           control={form.control}
-          name="estoqueMinimo"
+          name="quantidadeMinima"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Estoque Mínimo</FormLabel>
+              <FormLabel>Quantidade Mínima</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -114,18 +114,19 @@ const ProductAdditionalSection = ({
 
         <FormField
           control={form.control}
-          name="estoqueMaximo"
+          name="percentualLucro"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Estoque Máximo</FormLabel>
+              <FormLabel>Percentual de Lucro (%)</FormLabel>
               <FormControl>
                 <Input
                   type="number"
+                  step="0.01"
                   min="0"
-                  placeholder="0"
+                  placeholder="0.00"
                   disabled={isLoading}
                   {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                 />
               </FormControl>
               <FormMessage />
@@ -134,23 +135,134 @@ const ProductAdditionalSection = ({
         />
       </div>
 
-      <FormField
-        control={form.control}
-        name="dataUltimaVenda"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Data da Última Venda</FormLabel>
-            <FormControl>
-              <Input
-                type="date"
-                disabled={isLoading}
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="flex items-center gap-2 mb-2 mt-6">
+        <h4 className="text-lg font-semibold text-foreground">Informações Fiscais</h4>
+        <div className="flex-1 h-px bg-border"></div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <FormField
+          control={form.control}
+          name="ncm"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>NCM</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="0000.00.00"
+                  disabled={isLoading}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="cest"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>CEST</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="00.000.00"
+                  disabled={isLoading}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="gtin"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>GTIN/EAN</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="7891234567890"
+                  disabled={isLoading}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <FormField
+          control={form.control}
+          name="pesoLiquido"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Peso Líquido (kg)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  disabled={isLoading}
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="pesoBruto"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Peso Bruto (kg)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  disabled={isLoading}
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="valorUnitario"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Valor Unitário NFe</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  disabled={isLoading}
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
       <FormField
         control={form.control}

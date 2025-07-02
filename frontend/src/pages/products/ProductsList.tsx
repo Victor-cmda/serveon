@@ -47,11 +47,11 @@ const ProductsList: React.FC = () => {
   };
   const filteredProducts = products.filter(
     (product) =>
-      (product.nome && product.nome.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (product.produto && product.produto.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (product.codigo && product.codigo.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (product.descricao && product.descricao.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (product.categoria?.nome && product.categoria.nome.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (product.marca?.nome && product.marca.nome.toLowerCase().includes(searchTerm.toLowerCase()))
+      (product.categoriaNome && product.categoriaNome.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (product.marcaNome && product.marcaNome.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const formatPrice = (price: number) => {
@@ -152,20 +152,20 @@ const ProductsList: React.FC = () => {
                       <div className="font-medium">{product.codigo || product.id}</div>
                     </td>
                     <td className="p-4">
-                      <div className="font-medium">{product.nome}</div>
+                      <div className="font-medium">{product.produto}</div>
                       {product.descricao && (
                         <div className="text-sm text-muted-foreground">{product.descricao}</div>
                       )}
                     </td>
                     <td className="p-4">
-                      <div className="text-sm">{product.categoria?.nome || '-'}</div>
+                      <div className="text-sm">{product.categoriaNome || '-'}</div>
                     </td>
                     <td className="p-4">
-                      <div className="text-sm">{product.marca?.nome || '-'}</div>
+                      <div className="text-sm">{product.marcaNome || '-'}</div>
                     </td>
                     <td className="p-4">
                       <div className="font-medium">
-                        {formatPrice(product.valorVenda || product.preco || 0)}
+                        {formatPrice(product.valorVenda || 0)}
                       </div>
                     </td>
                     <td className="p-4">

@@ -51,7 +51,6 @@ const ProductGeneralSection = ({
             <FormControl>
               <Input value={id || 'Novo'} disabled className="bg-muted" />
             </FormControl>
-            
           </FormItem>
         </div>
         
@@ -60,7 +59,7 @@ const ProductGeneralSection = ({
           name="codigo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Código *</FormLabel>
+              <FormLabel>Código</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Código do produto"
@@ -75,13 +74,13 @@ const ProductGeneralSection = ({
 
         <FormField
           control={form.control}
-          name="nome"
+          name="referencia"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nome *</FormLabel>
+              <FormLabel>Referência</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Nome do produto"
+                  placeholder="Referência do produto"
                   disabled={isLoading}
                   {...field}
                 />
@@ -92,63 +91,43 @@ const ProductGeneralSection = ({
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="codigoBarras"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Código de Barras</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Código de barras"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <FormField
+        control={form.control}
+        name="produto"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Nome do Produto *</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="Nome/descrição do produto"
+                disabled={isLoading}
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <FormField
-          control={form.control}
-          name="nome"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome *</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Nome do produto"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      <FormField
+        control={form.control}
+        name="codigoBarras"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Código de Barras</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="Código de barras"
+                disabled={isLoading}
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="codigoBarras"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Código de Barras</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Código de barras"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="categoriaId"
@@ -208,9 +187,7 @@ const ProductGeneralSection = ({
             </FormItem>
           )}
         />
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
           name="marcaId"
@@ -270,67 +247,67 @@ const ProductGeneralSection = ({
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="unidadeMedidaId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Unidade de Medida *</FormLabel>
-              <div className="flex gap-2">
-                <FormControl>
-                  <div className="flex w-full items-center gap-2">
-                    <div className="relative flex-grow">
-                      <Input
-                        value={selectedUnitMeasure ? `${selectedUnitMeasure.nome} (${selectedUnitMeasure.sigla})` : ''}
-                        readOnly
-                        placeholder="Selecione uma unidade de medida"
-                        className="cursor-pointer h-10 text-base pl-9"
-                        onClick={() => setUnitMeasureSearchOpen(true)}
-                      />
-                      <input
-                        type="hidden"
-                        name={field.name}
-                        value={field.value || ''}
-                        onChange={(e) => {
-                          field.onChange(e);
-                        }}
-                        ref={field.ref}
-                        onBlur={field.onBlur}
-                      />
-                      <Ruler className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setUnitMeasureSearchOpen(true)}
-                      className="h-10 w-10"
-                    >
-                      <Search className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </FormControl>
-              </div>
-              {selectedUnitMeasure && (
-                <div className="mt-1">
-                  <Badge variant="outline">
-                    {selectedUnitMeasure.nome} ({selectedUnitMeasure.sigla})
-                  </Badge>
-                </div>
-              )}
-              {field.value && !selectedUnitMeasure && (
-                <div className="mt-1">
-                  <Badge variant="outline" className="bg-yellow-50">
-                    Unidade selecionada mas dados não carregados. ID: {field.value}
-                  </Badge>
-                </div>
-              )}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
       </div>
+
+      <FormField
+        control={form.control}
+        name="unidadeMedidaId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Unidade de Medida *</FormLabel>
+            <div className="flex gap-2">
+              <FormControl>
+                <div className="flex w-full items-center gap-2">
+                  <div className="relative flex-grow">
+                    <Input
+                      value={selectedUnitMeasure ? `${selectedUnitMeasure.nome} (${selectedUnitMeasure.sigla})` : ''}
+                      readOnly
+                      placeholder="Selecione uma unidade de medida"
+                      className="cursor-pointer h-10 text-base pl-9"
+                      onClick={() => setUnitMeasureSearchOpen(true)}
+                    />
+                    <input
+                      type="hidden"
+                      name={field.name}
+                      value={field.value || ''}
+                      onChange={(e) => {
+                        field.onChange(e);
+                      }}
+                      ref={field.ref}
+                      onBlur={field.onBlur}
+                    />
+                    <Ruler className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setUnitMeasureSearchOpen(true)}
+                    className="h-10 w-10"
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </div>
+              </FormControl>
+            </div>
+            {selectedUnitMeasure && (
+              <div className="mt-1">
+                <Badge variant="outline">
+                  {selectedUnitMeasure.nome} ({selectedUnitMeasure.sigla})
+                </Badge>
+              </div>
+            )}
+            {field.value && !selectedUnitMeasure && (
+              <div className="mt-1">
+                <Badge variant="outline" className="bg-yellow-50">
+                  Unidade selecionada mas dados não carregados. ID: {field.value}
+                </Badge>
+              </div>
+            )}
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       <FormField
         control={form.control}

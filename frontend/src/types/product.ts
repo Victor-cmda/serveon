@@ -1,6 +1,6 @@
 export interface Product {
   id: number;
-  nome: string; // Usando produto como nome
+  produto: string; // Nome/descrição do produto
   codigo?: string;
   codigoBarras?: string;
   referencia?: string;
@@ -10,7 +10,6 @@ export interface Product {
   quantidade: number;
   valorCompra?: number;
   valorVenda?: number;
-  preco: number; // Para compatibilidade com valorVenda
   percentualLucro?: number;
   pesoLiquido?: number;
   pesoBruto?: number;
@@ -18,28 +17,20 @@ export interface Product {
   cest?: string;
   gtin?: string;
   gtinTributavel?: string;
+  unidade?: string;
+  valorUnitario?: number;
   situacao?: string;
   ativo: boolean;
   
   // Relacionamentos
   unidadeMedidaId?: number;
-  unidadeMedida?: {
-    id: number;
-    nome: string;
-    sigla: string;
-  };
+  unidadeMedidaNome?: string;
   
   marcaId?: number;
-  marca?: {
-    id: number;
-    nome: string;
-  };
+  marcaNome?: string;
   
   categoriaId?: number;
-  categoria?: {
-    id: number;
-    nome: string;
-  };
+  categoriaNome?: string;
   
   // Campos de auditoria
   dataCriacao: string;
@@ -51,7 +42,7 @@ export interface Product {
 }
 
 export interface CreateProductDto {
-  nome: string; // produto -> nome
+  produto: string;
   codigo?: string;
   codigoBarras?: string;
   referencia?: string;
@@ -68,6 +59,8 @@ export interface CreateProductDto {
   cest?: string;
   gtin?: string;
   gtinTributavel?: string;
+  unidade?: string;
+  valorUnitario?: number;
   situacao?: string;
   ativo?: boolean;
   unidadeMedidaId?: number;
@@ -76,7 +69,7 @@ export interface CreateProductDto {
 }
 
 export interface UpdateProductDto {
-  nome?: string; // produto -> nome
+  produto?: string;
   codigo?: string;
   codigoBarras?: string;
   referencia?: string;
@@ -93,6 +86,8 @@ export interface UpdateProductDto {
   cest?: string;
   gtin?: string;
   gtinTributavel?: string;
+  unidade?: string;
+  valorUnitario?: number;
   situacao?: string;
   ativo?: boolean;
   unidadeMedidaId?: number;
