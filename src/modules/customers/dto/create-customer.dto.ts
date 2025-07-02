@@ -197,6 +197,16 @@ export class CreateCustomerDto {
   @IsOptional()
   @IsBoolean({ message: 'isDestinatario deve ser um valor booleano' })
   isDestinatario?: boolean = true;
+
+  @ApiProperty({
+    description: 'ID da condição de pagamento',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'condicaoPagamentoId deve ser um número válido' })
+  condicaoPagamentoId?: number;
+
   @ApiProperty({
     description:
       'Lista de IDs de destinatários associados (quando o cliente não é o destinatário)',

@@ -3290,6 +3290,11 @@
             "example": true,
             "default": true
           },
+          "condicaoPagamentoId": {
+            "type": "number",
+            "description": "ID da condição de pagamento",
+            "example": 1
+          },
           "destinatariosIds": {
             "description": "Lista de IDs de destinatários associados (quando o cliente não é o destinatário)",
             "example": [
@@ -3459,6 +3464,16 @@
             "type": "boolean",
             "description": "Se o cliente é também um destinatário",
             "example": true
+          },
+          "condicaoPagamentoId": {
+            "type": "number",
+            "description": "ID da condição de pagamento",
+            "example": 1
+          },
+          "condicaoPagamentoNome": {
+            "type": "string",
+            "description": "Nome da condição de pagamento",
+            "example": "À Vista"
           }
         },
         "required": [

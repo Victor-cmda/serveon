@@ -38,9 +38,9 @@ export class CustomersService {
             (cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
             nome_fantasia, inscricao_estadual, 
             endereco, numero, complemento, bairro, 
-            cidade_id, cep, telefone, email, is_destinatario, ativo)
+            cidade_id, cep, telefone, email, is_destinatario, condicao_pagamento_id, ativo)
           VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
           RETURNING *`,
           [
             createCustomerDto.cnpjCpf,
@@ -61,6 +61,7 @@ export class CustomersService {
             createCustomerDto.isDestinatario !== undefined
               ? createCustomerDto.isDestinatario
               : true,
+            createCustomerDto.condicaoPagamentoId || null,
             createCustomerDto.ativo !== undefined
               ? createCustomerDto.ativo
               : true,
@@ -152,10 +153,11 @@ export class CustomersService {
     try {
       const result = await this.databaseService.query(`
         SELECT c.*, cidade.nome as cidade_nome, estado.nome as estado_nome, estado.uf,
-               c.is_destinatario
+               c.is_destinatario, cp.nome as condicao_pagamento_nome
         FROM dbo.cliente c
         LEFT JOIN dbo.cidade ON c.cidade_id = cidade.id
         LEFT JOIN dbo.estado ON cidade.estado_id = estado.id
+        LEFT JOIN dbo.condicao_pagamento cp ON c.condicao_pagamento_id = cp.id
         ORDER BY c.razao_social
       `);
 
@@ -196,10 +198,11 @@ export class CustomersService {
       const result = await this.databaseService.query(
         `
         SELECT c.*, cidade.nome as cidade_nome, estado.nome as estado_nome, estado.uf,
-               c.is_destinatario
+               c.is_destinatario, cp.nome as condicao_pagamento_nome
         FROM dbo.cliente c
         LEFT JOIN dbo.cidade ON c.cidade_id = cidade.id
         LEFT JOIN dbo.estado ON cidade.estado_id = estado.id
+        LEFT JOIN dbo.condicao_pagamento cp ON c.condicao_pagamento_id = cp.id
         WHERE c.id = $1
       `,
         [id],
@@ -244,10 +247,11 @@ export class CustomersService {
       const result = await this.databaseService.query(
         `
         SELECT c.*, cidade.nome as cidade_nome, estado.nome as estado_nome, estado.uf,
-               c.is_destinatario
+               c.is_destinatario, cp.nome as condicao_pagamento_nome
         FROM dbo.cliente c
         LEFT JOIN dbo.cidade ON c.cidade_id = cidade.id
         LEFT JOIN dbo.estado ON cidade.estado_id = estado.id
+        LEFT JOIN dbo.condicao_pagamento cp ON c.condicao_pagamento_id = cp.id
         WHERE c.cnpj_cpf = $1
       `,
         [cnpjCpf],
@@ -396,6 +400,11 @@ export class CustomersService {
         if (updateCustomerDto.isDestinatario !== undefined) {
           updates.push(`is_destinatario = $${paramCounter++}`);
           values.push(updateCustomerDto.isDestinatario);
+        }
+
+        if (updateCustomerDto.condicaoPagamentoId !== undefined) {
+          updates.push(`condicao_pagamento_id = $${paramCounter++}`);
+          values.push(updateCustomerDto.condicaoPagamentoId);
         }
 
         if (updates.length > 0) {
@@ -674,6 +683,10 @@ export class CustomersService {
     if (dbRecord.uf) customer.uf = dbRecord.uf;
     if (dbRecord.tipo_documento)
       customer.tipoDocumento = dbRecord.tipo_documento;
+    if (dbRecord.condicao_pagamento_id)
+      customer.condicaoPagamentoId = dbRecord.condicao_pagamento_id;
+    if (dbRecord.condicao_pagamento_nome)
+      customer.condicaoPagamentoNome = dbRecord.condicao_pagamento_nome;
 
     return customer;
   }

@@ -142,4 +142,18 @@ export class Customer extends BaseEntity {
     example: true,
   })
   isDestinatario: boolean;
+
+  @ApiProperty({
+    description: 'ID da condição de pagamento',
+    example: 1,
+    required: false,
+  })
+  condicaoPagamentoId?: number;
+
+  @ApiProperty({
+    description: 'Nome da condição de pagamento',
+    example: 'À Vista',
+    required: false,
+  })
+  condicaoPagamentoNome?: string;
 }

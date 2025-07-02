@@ -124,6 +124,7 @@ CREATE TABLE cliente (
     telefone VARCHAR(20),
     email VARCHAR(100),
     is_destinatario BOOLEAN NOT NULL DEFAULT TRUE,
+    condicao_pagamento_id INTEGER REFERENCES condicao_pagamento(id),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -454,6 +455,7 @@ CREATE INDEX idx_destinatario_cliente_id ON destinatario(cliente_id);
 CREATE INDEX idx_cliente_destinatario_cliente_id ON cliente_destinatario(cliente_id);
 CREATE INDEX idx_cliente_destinatario_destinatario_id ON cliente_destinatario(destinatario_id);
 CREATE INDEX idx_cliente_cnpj_cpf ON cliente(cnpj_cpf);
+CREATE INDEX idx_cliente_condicao_pagamento_id ON cliente(condicao_pagamento_id);
 CREATE INDEX idx_fornecedor_cnpj_cpf ON fornecedor(cnpj_cpf);
 CREATE INDEX idx_fornecedor_razao_social ON fornecedor(razao_social);
 CREATE INDEX idx_fornecedor_cidade_id ON fornecedor(cidade_id);
@@ -564,8 +566,8 @@ VALUES ('DINHEIRO', '01', 'À VISTA'),
 INSERT INTO condicao_pagamento (nome, descricao, taxa_juros, taxa_multa, percentual_desconto, ativo)
 VALUES ('À VISTA', 'PAGAMENTO À VISTA', 0, 0, 5, true),
     ('30 DIAS', 'PAGAMENTO EM 30 DIAS', 1.5, 2, 0, true),
-    ('30/60', 'PAGAMENTO EM DUAS parcelaS DE 30 E 60 DIAS', 2, 2, 0, true),
-    ('30/60/90', 'PAGAMENTO EM TRÊS parcelaS DE 30, 60 e 90 DIAS', 2.5, 2, 0, true),
+    ('30/60', 'PAGAMENTO EM DUAS PARCELAS DE 30 E 60 DIAS', 2, 2, 0, true),
+    ('30/60/90', 'PAGAMENTO EM TRÊS PARCELAS DE 30, 60 e 90 DIAS', 2.5, 2, 0, true),
     ('ENTRADA + 30 DIAS', 'PAGAMENTO COM ENTRADA E MAIS 30 DIAS', 1, 2, 0, true);
 
 -- Inserir unidades de medida comuns
@@ -666,6 +668,7 @@ COMMENT ON COLUMN dbo.produto.created_at IS 'Data de criação do registro';
 COMMENT ON COLUMN dbo.produto.updated_at IS 'Data da última atualização do registro';
 COMMENT ON TABLE dbo.emitente IS 'Cadastro de empresas emitentes de notas fiscais';
 COMMENT ON TABLE dbo.cliente IS 'Cadastro de clientes';
+COMMENT ON COLUMN dbo.cliente.condicao_pagamento_id IS 'ID da condição de pagamento padrão do cliente';
 COMMENT ON TABLE dbo.fornecedor IS 'Cadastro de fornecedores';
 COMMENT ON COLUMN dbo.fornecedor.id IS 'ID único do fornecedor';
 COMMENT ON COLUMN dbo.fornecedor.cnpj_cpf IS 'CNPJ ou CPF do fornecedor';
