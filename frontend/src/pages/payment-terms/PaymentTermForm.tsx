@@ -598,9 +598,7 @@ const PaymentTermForm = () => {
                       <FormControl>
                         <Input value={id || 'Novo'} disabled className="bg-muted" />
                       </FormControl>
-                      <p className="text-sm text-muted-foreground">
-                        {id ? 'Código' : 'Automático'}
-                      </p>
+                      
                     </FormItem>
                     
                     <div className="md:col-span-3">
@@ -766,7 +764,6 @@ const PaymentTermForm = () => {
                 Configure as parcelas da condição de pagamento
               </p>
               
-              {/* Botões para cálculo automático */}
               <div className="space-y-3">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground mb-2 block">

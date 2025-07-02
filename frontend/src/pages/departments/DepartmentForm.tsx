@@ -168,9 +168,7 @@ const DepartmentForm: React.FC = () => {
                       <FormControl>
                         <Input value={id || 'Novo'} disabled className="bg-muted" />
                       </FormControl>
-                      <p className="text-sm text-muted-foreground">
-                        {id ? 'Código' : 'Automático'}
-                      </p>
+                      
                     </FormItem>
                     
                     <div className="md:col-span-3">

@@ -403,9 +403,7 @@ const EmployeeForm: React.FC = () => {
                         className="bg-muted h-11 text-base font-mono text-muted-foreground" 
                       />
                     </FormControl>
-                    <p className="text-sm text-muted-foreground">
-                      {id ? 'Código' : 'Automático'}
-                    </p>
+                    
                   </FormItem>
                   
                   <div className="md:col-span-5">

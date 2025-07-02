@@ -51,9 +51,7 @@ const ProductGeneralSection = ({
             <FormControl>
               <Input value={id || 'Novo'} disabled className="bg-muted" />
             </FormControl>
-            <p className="text-sm text-muted-foreground">
-              {id ? 'ID do produto' : 'Automático'}
-            </p>
+            
           </FormItem>
         </div>
         

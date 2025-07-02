@@ -23,22 +23,21 @@ const BrandGeneralSection = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4 mb-2">
         <div className="flex items-center gap-2">
-          <h4 className="text-lg font-semibold text-foreground">Dados Gerais</h4>
+          <h4 className="text-lg font-semibold text-foreground">
+            Dados Gerais
+          </h4>
           <div className="flex-1 h-px bg-border"></div>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <FormItem>
           <FormLabel>Código</FormLabel>
           <FormControl>
             <Input value={id || 'Novo'} disabled className="bg-muted" />
           </FormControl>
-          <p className="text-sm text-muted-foreground">
-            {id ? 'Código da marca' : 'Automático'}
-          </p>
         </FormItem>
-        
+
         <div className="md:col-span-3">
           <FormField
             control={form.control}
