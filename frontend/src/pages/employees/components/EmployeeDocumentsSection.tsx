@@ -7,6 +7,7 @@ import {
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
+import { formatCPF, formatRG, formatOrgaoEmissor, getFieldValidationClass, getValidationMessage } from '../utils/validationUtils';
 
 interface EmployeeDocumentsSectionProps {
   form: UseFormReturn<any>;
@@ -19,9 +20,8 @@ const EmployeeDocumentsSection = ({
   isLoading,
   id,
 }: EmployeeDocumentsSectionProps) => {
-  const formatCPF = (value: string) => {
-    return value.replace(/\D/g, '').slice(0, 11);
-  };
+  const cpfValue = form.watch('cpf');
+  const rgValue = form.watch('rg');
 
   return (
     <div className="space-y-4">
@@ -31,16 +31,29 @@ const EmployeeDocumentsSection = ({
           name="cpf"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>CPF *</FormLabel>
+              <FormLabel className="text-base font-medium">CPF *</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="12345678901"
                   {...field}
-                  disabled={isLoading || !!id} // CPF não pode ser editado
+                  value={formatCPF(field.value)}
                   onChange={(e) => field.onChange(formatCPF(e.target.value))}
+                  placeholder="000.000.000-00"
+                  disabled={isLoading || !!id} // CPF não pode ser editado após criação
+                  className={`h-10 text-base ${getFieldValidationClass(cpfValue, 'cpf')}`}
                 />
               </FormControl>
-              <FormMessage />
+              {cpfValue && (
+                <div className="mt-1 text-xs">
+                  <span className={
+                    getValidationMessage(cpfValue, 'cpf').includes('✓') 
+                      ? 'text-green-600' 
+                      : 'text-amber-600'
+                  }>
+                    {getValidationMessage(cpfValue, 'cpf')}
+                  </span>
+                </div>
+              )}
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -50,15 +63,29 @@ const EmployeeDocumentsSection = ({
           name="rg"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>RG</FormLabel>
+              <FormLabel className="text-base font-medium">RG</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Digite o RG"
                   {...field}
+                  value={formatRG(field.value)}
+                  onChange={(e) => field.onChange(formatRG(e.target.value))}
+                  placeholder="00.000.000-0"
                   disabled={isLoading}
+                  className={`h-10 text-base ${getFieldValidationClass(rgValue, 'rg')}`}
                 />
               </FormControl>
-              <FormMessage />
+              {rgValue && (
+                <div className="mt-1 text-xs">
+                  <span className={
+                    getValidationMessage(rgValue, 'rg').includes('✓') 
+                      ? 'text-green-600' 
+                      : 'text-amber-600'
+                  }>
+                    {getValidationMessage(rgValue, 'rg')}
+                  </span>
+                </div>
+              )}
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -68,15 +95,18 @@ const EmployeeDocumentsSection = ({
           name="orgaoEmissor"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Órgão Emissor</FormLabel>
+              <FormLabel className="text-base font-medium">Órgão Emissor</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Ex: SSP/SP"
                   {...field}
+                  value={formatOrgaoEmissor(field.value)}
+                  onChange={(e) => field.onChange(formatOrgaoEmissor(e.target.value))}
+                  placeholder="Ex: SSP/SP"
                   disabled={isLoading}
+                  className="h-10 text-base"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />

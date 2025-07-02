@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '../../../components/ui/select';
 import { UseFormReturn } from 'react-hook-form';
+import { formatText } from '../utils/validationUtils';
 
 interface EmployeePersonalSectionProps {
   form: UseFormReturn<any>;
@@ -27,24 +28,24 @@ const EmployeePersonalSection = ({
   id,
 }: EmployeePersonalSectionProps) => {
   const estadosCivis = [
-    'Solteiro(a)',
-    'Casado(a)',
-    'Divorciado(a)',
-    'Viúvo(a)',
-    'Separado(a)',
-    'União Estável',
+    'SOLTEIRO(A)',
+    'CASADO(A)',
+    'DIVORCIADO(A)',
+    'VIÚVO(A)',
+    'SEPARADO(A)',
+    'UNIÃO ESTÁVEL',
   ];
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
         <FormItem className="md:col-span-2">
-          <FormLabel>Código</FormLabel>
+          <FormLabel className="text-base font-medium">Código</FormLabel>
           <FormControl>
             <Input
               value={id || 'Novo'}
               disabled
-              className="bg-muted text-muted-foreground"
+              className="bg-muted text-muted-foreground h-10 text-base"
             />
           </FormControl>
         </FormItem>
@@ -54,15 +55,18 @@ const EmployeePersonalSection = ({
           name="nome"
           render={({ field }) => (
             <FormItem className="md:col-span-10">
-              <FormLabel>Nome Completo *</FormLabel>
+              <FormLabel className="text-base font-medium">Nome Completo *</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Digite o nome completo"
                   {...field}
+                  value={formatText(field.value, 100)}
+                  onChange={(e) => field.onChange(formatText(e.target.value, 100))}
+                  placeholder="Digite o nome completo"
                   disabled={isLoading}
+                  className="h-10 text-base"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -74,11 +78,16 @@ const EmployeePersonalSection = ({
           name="dataNascimento"
           render={({ field }) => (
             <FormItem className="md:col-span-4">
-              <FormLabel>Data de Nascimento</FormLabel>
+              <FormLabel className="text-base font-medium">Data de Nascimento</FormLabel>
               <FormControl>
-                <Input type="date" {...field} disabled={isLoading} />
+                <Input 
+                  type="date" 
+                  {...field} 
+                  disabled={isLoading}
+                  className="h-10 text-base"
+                />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -88,15 +97,18 @@ const EmployeePersonalSection = ({
           name="nacionalidade"
           render={({ field }) => (
             <FormItem className="md:col-span-4">
-              <FormLabel>Nacionalidade</FormLabel>
+              <FormLabel className="text-base font-medium">Nacionalidade</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Ex: Brasileira"
                   {...field}
+                  value={formatText(field.value, 50)}
+                  onChange={(e) => field.onChange(formatText(e.target.value, 50))}
+                  placeholder="Ex: BRASILEIRA"
                   disabled={isLoading}
+                  className="h-10 text-base"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -106,10 +118,10 @@ const EmployeePersonalSection = ({
           name="estadoCivil"
           render={({ field }) => (
             <FormItem className="md:col-span-4">
-              <FormLabel>Estado Civil</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormLabel className="text-base font-medium">Estado Civil</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full h-10 text-base">
                     <SelectValue placeholder="Selecione o estado civil" />
                   </SelectTrigger>
                 </FormControl>
@@ -121,7 +133,7 @@ const EmployeePersonalSection = ({
                   ))}
                 </SelectContent>
               </Select>
-              <FormMessage />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />

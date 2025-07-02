@@ -160,7 +160,7 @@ const ProductGeneralSection = ({
               )}
               {field.value && !selectedCategory && (
                 <div className="mt-1">
-                  <Badge variant="outline" className="bg-yellow-50">
+                  <Badge variant="outline">
                     Categoria selecionada mas dados não carregados. ID: {field.value}
                   </Badge>
                 </div>
@@ -220,7 +220,7 @@ const ProductGeneralSection = ({
               )}
               {field.value && !selectedBrand && (
                 <div className="mt-1">
-                  <Badge variant="outline" className="bg-yellow-50">
+                  <Badge variant="outline">
                     Marca selecionada mas dados não carregados. ID: {field.value}
                   </Badge>
                 </div>
@@ -281,7 +281,7 @@ const ProductGeneralSection = ({
             )}
             {field.value && !selectedUnitMeasure && (
               <div className="mt-1">
-                <Badge variant="outline" className="bg-yellow-50">
+                <Badge variant="outline">
                   Unidade selecionada mas dados não carregados. ID: {field.value}
                 </Badge>
               </div>

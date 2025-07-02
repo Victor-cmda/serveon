@@ -7,6 +7,7 @@ import {
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
+import { formatEmail, formatPhone, getFieldValidationClass, getValidationMessage } from '../utils/validationUtils';
 
 interface EmployeeContactSectionProps {
   form: UseFormReturn<any>;
@@ -17,9 +18,9 @@ const EmployeeContactSection = ({
   form,
   isLoading,
 }: EmployeeContactSectionProps) => {
-  const formatPhone = (value: string) => {
-    return value.replace(/\D/g, '').slice(0, 11);
-  };
+  const emailValue = form.watch('email');
+  const telefoneValue = form.watch('telefone');
+  const celularValue = form.watch('celular');
 
   return (
     <div className="space-y-4">
@@ -29,16 +30,30 @@ const EmployeeContactSection = ({
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email *</FormLabel>
+              <FormLabel className="text-base font-medium">Email *</FormLabel>
               <FormControl>
                 <Input
+                  {...field}
+                  value={formatEmail(field.value)}
+                  onChange={(e) => field.onChange(formatEmail(e.target.value))}
                   type="email"
                   placeholder="funcionario@empresa.com"
-                  {...field}
                   disabled={isLoading}
+                  className={`h-10 text-base ${getFieldValidationClass(emailValue, 'email')}`}
                 />
               </FormControl>
-              <FormMessage />
+              {emailValue && (
+                <div className="mt-1 text-xs">
+                  <span className={
+                    getValidationMessage(emailValue, 'email').includes('✓') 
+                      ? 'text-green-600' 
+                      : 'text-amber-600'
+                  }>
+                    {getValidationMessage(emailValue, 'email')}
+                  </span>
+                </div>
+              )}
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -48,16 +63,29 @@ const EmployeeContactSection = ({
           name="telefone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Telefone</FormLabel>
+              <FormLabel className="text-base font-medium">Telefone</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="11987654321"
                   {...field}
-                  disabled={isLoading}
+                  value={formatPhone(field.value)}
                   onChange={(e) => field.onChange(formatPhone(e.target.value))}
+                  placeholder="(11) 0000-0000"
+                  disabled={isLoading}
+                  className={`h-10 text-base ${getFieldValidationClass(telefoneValue, 'telefone')}`}
                 />
               </FormControl>
-              <FormMessage />
+              {telefoneValue && (
+                <div className="mt-1 text-xs">
+                  <span className={
+                    getValidationMessage(telefoneValue, 'telefone').includes('✓') 
+                      ? 'text-green-600' 
+                      : 'text-amber-600'
+                  }>
+                    {getValidationMessage(telefoneValue, 'telefone')}
+                  </span>
+                </div>
+              )}
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -67,16 +95,29 @@ const EmployeeContactSection = ({
           name="celular"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Celular</FormLabel>
+              <FormLabel className="text-base font-medium">Celular</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="11999887766"
                   {...field}
-                  disabled={isLoading}
+                  value={formatPhone(field.value)}
                   onChange={(e) => field.onChange(formatPhone(e.target.value))}
+                  placeholder="(11) 99999-9999"
+                  disabled={isLoading}
+                  className={`h-10 text-base ${getFieldValidationClass(celularValue, 'celular')}`}
                 />
               </FormControl>
-              <FormMessage />
+              {celularValue && (
+                <div className="mt-1 text-xs">
+                  <span className={
+                    getValidationMessage(celularValue, 'celular').includes('✓') 
+                      ? 'text-green-600' 
+                      : 'text-amber-600'
+                  }>
+                    {getValidationMessage(celularValue, 'celular')}
+                  </span>
+                </div>
+              )}
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />

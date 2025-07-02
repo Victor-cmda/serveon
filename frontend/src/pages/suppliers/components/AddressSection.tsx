@@ -192,7 +192,7 @@ const AddressSection = ({
                 )}
                 {field.value && !selectedCity && (
                   <div className="mt-1">
-                    <Badge variant="outline" className="bg-yellow-50">
+                    <Badge variant="outline">
                       Cidade selecionada mas dados não carregados. ID:{' '}
                       {field.value}
                     </Badge>

@@ -12,6 +12,7 @@ import { Badge } from '../../../components/ui/badge';
 import { UseFormReturn } from 'react-hook-form';
 import { Department } from '../../../types/department';
 import { Position } from '../../../types/position';
+import { formatText } from '../utils/validationUtils';
 
 interface EmployeeProfessionalSectionProps {
   form: UseFormReturn<any>;
@@ -20,7 +21,6 @@ interface EmployeeProfessionalSectionProps {
   selectedPosition: Position | null;
   setDepartmentSearchOpen: (open: boolean) => void;
   setPositionSearchOpen: (open: boolean) => void;
-  id?: string;
 }
 
 const EmployeeProfessionalSection = ({
@@ -30,7 +30,6 @@ const EmployeeProfessionalSection = ({
   selectedPosition,
   setDepartmentSearchOpen,
   setPositionSearchOpen,
-  id,
 }: EmployeeProfessionalSectionProps) => {
   return (
     <div className="space-y-4">
@@ -40,7 +39,7 @@ const EmployeeProfessionalSection = ({
           name="departamentoId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Departamento</FormLabel>
+              <FormLabel className="text-base font-medium">Departamento</FormLabel>
               <div className="flex gap-2">
                 <FormControl>
                   <div className="flex w-full items-center gap-2">
@@ -91,7 +90,7 @@ const EmployeeProfessionalSection = ({
           name="cargoId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cargo</FormLabel>
+              <FormLabel className="text-base font-medium">Cargo</FormLabel>
               <div className="flex gap-2">
                 <FormControl>
                   <div className="flex w-full items-center gap-2">
@@ -148,11 +147,16 @@ const EmployeeProfessionalSection = ({
           name="dataAdmissao"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Data de Admissão *</FormLabel>
+              <FormLabel className="text-base font-medium">Data de Admissão *</FormLabel>
               <FormControl>
-                <Input type="date" {...field} disabled={isLoading} />
+                <Input 
+                  type="date" 
+                  {...field} 
+                  disabled={isLoading}
+                  className="h-10 text-base"
+                />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -162,11 +166,16 @@ const EmployeeProfessionalSection = ({
           name="dataDemissao"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Data de Demissão</FormLabel>
+              <FormLabel className="text-base font-medium">Data de Demissão</FormLabel>
               <FormControl>
-                <Input type="date" {...field} disabled={isLoading} />
+                <Input 
+                  type="date" 
+                  {...field} 
+                  disabled={isLoading}
+                  className="h-10 text-base"
+                />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -176,7 +185,7 @@ const EmployeeProfessionalSection = ({
           name="salario"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Salário</FormLabel>
+              <FormLabel className="text-base font-medium">Salário</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -185,12 +194,13 @@ const EmployeeProfessionalSection = ({
                   placeholder="0.00"
                   {...field}
                   disabled={isLoading}
+                  className="h-10 text-base"
                   onChange={(e) =>
                     field.onChange(parseFloat(e.target.value) || undefined)
                   }
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -201,16 +211,18 @@ const EmployeeProfessionalSection = ({
         name="observacoes"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Observações</FormLabel>
+            <FormLabel className="text-base font-medium">Observações</FormLabel>
             <FormControl>
               <textarea
-                className="w-full min-h-[80px] px-3 py-2 text-sm border border-input rounded-md bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                placeholder="Observações sobre o funcionário"
-                disabled={isLoading}
                 {...field}
+                value={formatText(field.value, 500)}
+                onChange={(e) => field.onChange(formatText(e.target.value, 500))}
+                className="w-full min-h-[80px] px-3 py-2 text-sm border border-input rounded-md bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                placeholder="OBSERVAÇÕES SOBRE O FUNCIONÁRIO"
+                disabled={isLoading}
               />
             </FormControl>
-            <FormMessage />
+            <FormMessage className="text-sm" />
           </FormItem>
         )}
       />

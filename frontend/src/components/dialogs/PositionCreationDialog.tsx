@@ -30,6 +30,7 @@ import { employeeApi, positionApi } from '@/services/api';
 import { Position, CreatePositionDto } from '@/types/position';
 import { Department } from '@/types/department';
 import { SearchDialog } from '@/components/SearchDialog';
+import DepartmentCreationDialog from '@/components/dialogs/DepartmentCreationDialog';
 
 const formSchema = z.object({
   nome: z
@@ -61,6 +62,10 @@ const PositionCreationDialog = ({
   const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
   const [departmentSearchOpen, setDepartmentSearchOpen] = useState(false);
+  
+  // Estados para o diálogo de criação de departamento
+  const [departmentDialogOpen, setDepartmentDialogOpen] = useState(false);
+  const [departmentToEdit, setDepartmentToEdit] = useState<Department | null>(null);
 
   const isEditing = !!position;
   const dialogTitle = isEditing ? 'Editar Cargo' : 'Novo Cargo';
@@ -149,6 +154,21 @@ const PositionCreationDialog = ({
     setSelectedDepartment(department);
     form.setValue('departamentoId', department.id);
     setDepartmentSearchOpen(false);
+  };
+
+  const handleDepartmentCreated = async (department: Department) => {
+    // Recarregar lista de departamentos
+    await loadDepartments();
+    
+    // Selecionar o departamento criado/atualizado
+    setSelectedDepartment(department);
+    form.setValue('departamentoId', department.id);
+    
+    // Fechar o diálogo de departamento
+    setDepartmentDialogOpen(false);
+    setDepartmentToEdit(null);
+    
+    toast.success(departmentToEdit ? 'Departamento atualizado com sucesso!' : 'Departamento criado com sucesso!');
   };
 
   return (
@@ -304,15 +324,31 @@ const PositionCreationDialog = ({
         entities={departments}
         isLoading={loading}
         onSelect={onSelectDepartment}
-        onCreateNew={() => {}} // Não permite criar departamento aqui
-        onEdit={() => {}} // Não permite editar departamento aqui
+        onCreateNew={() => {
+          setDepartmentSearchOpen(false);
+          setDepartmentToEdit(null);
+          setDepartmentDialogOpen(true);
+        }}
+        onEdit={(department) => {
+          setDepartmentSearchOpen(false);
+          setDepartmentToEdit(department as Department);
+          setDepartmentDialogOpen(true);
+        }}
         displayColumns={[
           { key: 'nome', header: 'Nome' },
           { key: 'descricao', header: 'Descrição' },
         ]}
         searchKeys={['nome', 'descricao']}
         entityType="departamentos"
-        description="Selecione um departamento para o cargo."
+        description={`Selecione um departamento para o cargo. ${departments.length} departamentos disponíveis.`}
+      />
+
+      {/* Diálogo de criação/edição de departamento */}
+      <DepartmentCreationDialog
+        open={departmentDialogOpen}
+        onOpenChange={setDepartmentDialogOpen}
+        onSuccess={handleDepartmentCreated}
+        department={departmentToEdit}
       />
     </>
   );

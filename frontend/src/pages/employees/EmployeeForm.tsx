@@ -18,6 +18,7 @@ import { SearchDialog } from '../../components/SearchDialog';
 import DepartmentCreationDialog from '../../components/dialogs/DepartmentCreationDialog';
 import PositionCreationDialog from '../../components/dialogs/PositionCreationDialog';
 import CityCreationDialog from '../../components/dialogs/CityCreationDialog';
+import { clearFormat } from './utils/validationUtils';
 
 // Componentes modulares
 import EmployeePersonalSection from './components/EmployeePersonalSection';
@@ -28,7 +29,17 @@ import EmployeeProfessionalSection from './components/EmployeeProfessionalSectio
 
 const employeeSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório').max(100, 'Nome deve ter no máximo 100 caracteres'),
-  cpf: z.string().regex(/^\d{11}$/, 'CPF deve conter exatamente 11 dígitos'),
+  cpf: z.string()
+    .min(1, 'CPF é obrigatório')
+    .refine((value) => {
+      const digits = value.replace(/\D/g, '');
+      return digits.length === 11;
+    }, 'CPF deve conter exatamente 11 dígitos')
+    .refine((value) => {
+      const digits = value.replace(/\D/g, '');
+      // Validação básica de CPF (evitar sequências como 111.111.111-11)
+      return !/^(\d)\1{10}$/.test(digits);
+    }, 'CPF inválido'),
   email: z.string().email('Email inválido').max(100, 'Email deve ter no máximo 100 caracteres'),
   telefone: z.string().max(20, 'Telefone deve ter no máximo 20 caracteres').optional(),
   celular: z.string().max(20, 'Celular deve ter no máximo 20 caracteres').optional(),
@@ -211,7 +222,25 @@ const EmployeeForm: React.FC = () => {
       // Definir cidade selecionada
       if (data.cidadeId) {
         const city = cities.find(c => c.id === data.cidadeId);
-        setSelectedCity(city || null);
+        if (city) {
+          setSelectedCity(city);
+        } else if (data.cidadeNome) {
+          // Criar objeto cidade temporário com os dados disponíveis do funcionário
+          const tempCity: City = {
+            id: data.cidadeId,
+            nome: data.cidadeNome,
+            estadoId: 0, // Valor padrão
+            estadoNome: data.estadoNome || 'N/A',
+            uf: data.uf || 'N/A',
+            paisNome: 'Brasil', // Valor padrão
+            ativo: true,
+            createdAt: '',
+            updatedAt: ''
+          };
+          setSelectedCity(tempCity);
+        } else {
+          setSelectedCity(null);
+        }
       }
 
       form.reset({
@@ -256,14 +285,17 @@ const EmployeeForm: React.FC = () => {
       
       const submitData = {
         ...data,
-        telefone: data.telefone || undefined,
-        celular: data.celular || undefined,
-        rg: data.rg || undefined,
+        // Limpar formatação de campos que devem conter apenas dígitos
+        cpf: clearFormat(data.cpf),
+        telefone: data.telefone ? clearFormat(data.telefone) : undefined,
+        celular: data.celular ? clearFormat(data.celular) : undefined,
+        cep: data.cep ? clearFormat(data.cep) : undefined,
+        rg: data.rg ? clearFormat(data.rg) : undefined,
+        // Outros campos opcionais
         orgaoEmissor: data.orgaoEmissor || undefined,
         dataNascimento: data.dataNascimento || undefined,
         estadoCivil: data.estadoCivil || undefined,
         nacionalidade: data.nacionalidade || undefined,
-        cep: data.cep || undefined,
         endereco: data.endereco || undefined,
         numero: data.numero || undefined,
         complemento: data.complemento || undefined,
@@ -468,7 +500,6 @@ const EmployeeForm: React.FC = () => {
                 selectedPosition={selectedPosition}
                 setDepartmentSearchOpen={setDepartmentSearchOpen}
                 setPositionSearchOpen={setPositionSearchOpen}
-                id={id}
               />
 
               {/* Seção Endereço */}
