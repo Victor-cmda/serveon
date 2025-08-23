@@ -11,6 +11,7 @@ CREATE TABLE pais (
     nome VARCHAR(60) NOT NULL,
     codigo VARCHAR(3) NOT NULL,
     sigla VARCHAR(2) NOT NULL,
+    nacionalidade VARCHAR(100),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -47,6 +48,7 @@ CREATE TABLE cidade (
 -- Tabela FORMA DE PAGAMENTO (movida para antes da condição de pagamento)
 CREATE TABLE forma_pagamento (
     id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
     descricao VARCHAR(100) NOT NULL,
     codigo VARCHAR(20),
     tipo VARCHAR(30),
@@ -58,10 +60,17 @@ CREATE TABLE forma_pagamento (
 -- Tabela CONDIÇÃO DE PAGAMENTO
 CREATE TABLE condicao_pagamento (
     id SERIAL PRIMARY KEY,
+    condicao_pagamento VARCHAR(255),
     nome VARCHAR(100) NOT NULL UNIQUE,
     descricao TEXT,
+    numero_parcelas INTEGER DEFAULT 1,
+    parcelas INTEGER NOT NULL DEFAULT 1,
+    dias_primeira_parcela INTEGER DEFAULT 0,
+    dias_entre_parcelas INTEGER DEFAULT 0,
     taxa_juros DECIMAL(5,2) NOT NULL DEFAULT 0,
     taxa_multa DECIMAL(5,2) NOT NULL DEFAULT 0,
+    percentual_juros DECIMAL(10,2) DEFAULT 0.00,
+    percentual_multa DECIMAL(10,2) DEFAULT 0.00,
     percentual_desconto DECIMAL(5,2) NOT NULL DEFAULT 0,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -108,13 +117,17 @@ CREATE TABLE emitente (
 -- Tabela cliente
 CREATE TABLE cliente (
     id SERIAL PRIMARY KEY,
+    cliente VARCHAR(50) NOT NULL,
+    apelido VARCHAR(60),
     cnpj_cpf VARCHAR(20) NOT NULL UNIQUE,
+    cpf_cpnj VARCHAR(14) UNIQUE,
     tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J')),
     is_estrangeiro BOOLEAN NOT NULL DEFAULT FALSE,
     tipo_documento VARCHAR(50),
     razao_social VARCHAR(100) NOT NULL,
     nome_fantasia VARCHAR(60),
     inscricao_estadual VARCHAR(50),
+    rg_inscricao_estadual VARCHAR(14),
     endereco VARCHAR(100),
     numero VARCHAR(10),
     complemento VARCHAR(60),
@@ -123,6 +136,12 @@ CREATE TABLE cliente (
     cep VARCHAR(15),
     telefone VARCHAR(20),
     email VARCHAR(100),
+    data_nascimento DATE,
+    estado_civil VARCHAR(255),
+    sexo VARCHAR(1) CHECK (sexo IN ('M', 'F')),
+    nacionalidade_id INTEGER REFERENCES pais(id),
+    limite_credito DECIMAL(10,2) DEFAULT 0.00,
+    observacao VARCHAR(255),
     is_destinatario BOOLEAN NOT NULL DEFAULT TRUE,
     condicao_pagamento_id INTEGER REFERENCES condicao_pagamento(id),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
@@ -130,16 +149,67 @@ CREATE TABLE cliente (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Tabela transportador
+CREATE TABLE transportador (
+    cnpj_cpf VARCHAR(18) PRIMARY KEY,
+    tipo CHAR(1) NOT NULL,
+    -- F = Física, J = Jurídica
+    razao_social VARCHAR(100),
+    nome_fantasia VARCHAR(60),
+    inscricao_estadual VARCHAR(20),
+    endereco VARCHAR(100),
+    numero VARCHAR(10),
+    complemento VARCHAR(60),
+    bairro VARCHAR(50),
+    cidade_id INTEGER,
+    cep VARCHAR(10),
+    codigo_antt VARCHAR(20),
+    placa_veiculo VARCHAR(10),
+    uf_veiculo CHAR(2),    
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_transportador_cidade FOREIGN KEY (cidade_id) REFERENCES cidade (id),
+    CONSTRAINT ck_transportador_tipo CHECK (tipo IN ('F', 'J'))
+);
+
+-- Tabela transportadora
+CREATE TABLE transportadora (
+    id SERIAL PRIMARY KEY,
+    razao_social VARCHAR(150) NOT NULL,
+    nome_fantasia VARCHAR(100),
+    cnpj VARCHAR(18),
+    email VARCHAR(100),
+    telefone VARCHAR(20),
+    endereco VARCHAR(200),
+    numero VARCHAR(10),
+    complemento VARCHAR(100),
+    bairro VARCHAR(100),
+    cidade_id INTEGER REFERENCES cidade(id),
+    cep VARCHAR(10),
+    tipo CHAR(1) DEFAULT 'J' CHECK (tipo IN ('F', 'J')),
+    rg_ie VARCHAR(20),
+    condicao_pagamento_id INTEGER REFERENCES condicao_pagamento(id),
+    observacao VARCHAR(255),
+    ativo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Tabela fornecedor
 CREATE TABLE fornecedor (
     id SERIAL PRIMARY KEY,
+    fornecedor VARCHAR(255) NOT NULL,
+    apelido VARCHAR(255) NOT NULL,
     cnpj_cpf VARCHAR(20) NOT NULL UNIQUE,
+    cpf_cnpj VARCHAR(14),
     tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J')),
     is_estrangeiro BOOLEAN NOT NULL DEFAULT FALSE,
     tipo_documento VARCHAR(50),
     razao_social VARCHAR(100) NOT NULL,
     nome_fantasia VARCHAR(60),
     inscricao_estadual VARCHAR(50),
+    rg_inscricao_estadual VARCHAR(14),
     endereco VARCHAR(100),
     numero VARCHAR(10),
     complemento VARCHAR(60),
@@ -150,9 +220,12 @@ CREATE TABLE fornecedor (
     email VARCHAR(100),
     website VARCHAR(100),
     observacoes TEXT,
+    nacionalidade_id INTEGER REFERENCES pais(id),
     responsavel VARCHAR(100),
     celular_responsavel VARCHAR(20),
+    limite_credito DECIMAL(15,2) NOT NULL DEFAULT 0.00,
     condicao_pagamento_id INTEGER REFERENCES condicao_pagamento(id),
+    transportadora_id INTEGER REFERENCES transportadora(id),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -193,28 +266,70 @@ CREATE TABLE cliente_destinatario (
     CONSTRAINT uk_cliente_destinatario UNIQUE (cliente_id, destinatario_id)
 );
 
--- Tabela transportador
-CREATE TABLE transportador (
-    cnpj_cpf VARCHAR(18) PRIMARY KEY,
-    tipo CHAR(1) NOT NULL,
-    -- F = Física, J = Jurídica
-    razao_social VARCHAR(100),
-    nome_fantasia VARCHAR(60),
-    inscricao_estadual VARCHAR(20),
-    endereco VARCHAR(100),
-    numero VARCHAR(10),
-    complemento VARCHAR(60),
-    bairro VARCHAR(50),
-    cidade_id INTEGER,
-    cep VARCHAR(10),
-    codigo_antt VARCHAR(20),
-    placa_veiculo VARCHAR(10),
-    uf_veiculo CHAR(2),    
-    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+-- Tabelas auxiliares do fornecedor
+CREATE TABLE fornecedor_email (
+    id SERIAL PRIMARY KEY,
+    fornecedor_id INTEGER NOT NULL REFERENCES fornecedor(id) ON DELETE CASCADE,
+    email VARCHAR(255) NOT NULL,
+    tipo VARCHAR(20) DEFAULT 'COMERCIAL',
+    principal BOOLEAN DEFAULT FALSE,
+    ativo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_transportador_cidade FOREIGN KEY (cidade_id) REFERENCES cidade (id),
-    CONSTRAINT ck_transportador_tipo CHECK (tipo IN ('F', 'J'))
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE fornecedor_telefone (
+    id SERIAL PRIMARY KEY,
+    fornecedor_id INTEGER NOT NULL REFERENCES fornecedor(id) ON DELETE CASCADE,
+    telefone VARCHAR(20) NOT NULL,
+    tipo VARCHAR(20) DEFAULT 'COMERCIAL',
+    principal BOOLEAN DEFAULT FALSE,
+    ativo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabelas auxiliares da transportadora
+CREATE TABLE transportadora_emails (
+    id_email SERIAL PRIMARY KEY,
+    cod_trans INTEGER NOT NULL REFERENCES transportadora(id) ON DELETE CASCADE,
+    email VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE transportadora_telefones (
+    id_telefone SERIAL PRIMARY KEY,
+    cod_trans INTEGER NOT NULL REFERENCES transportadora(id) ON DELETE CASCADE,
+    telefone VARCHAR(20) NOT NULL
+);
+
+-- Tabela veiculo
+CREATE TABLE veiculo (
+    id SERIAL PRIMARY KEY,
+    placa VARCHAR(10) NOT NULL,
+    modelo VARCHAR(50),
+    marca VARCHAR(50),
+    ano INTEGER,
+    capacidade DECIMAL(10,2),
+    ativo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE transportadora_veiculo (
+    transportadora_id INTEGER NOT NULL REFERENCES transportadora(id),
+    veiculo_id INTEGER NOT NULL REFERENCES veiculo(id),
+    PRIMARY KEY (transportadora_id, veiculo_id)
+);
+
+CREATE TABLE transp_item (
+    id SERIAL PRIMARY KEY,
+    codigo VARCHAR(20) NOT NULL,
+    descricao VARCHAR(100),
+    transportadora_id INTEGER REFERENCES transportadora(id),
+    codigo_transp VARCHAR(20),
+    ativo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Tabelas de RH
@@ -224,6 +339,20 @@ CREATE TABLE departamento (
     nome VARCHAR(100) NOT NULL UNIQUE,
     descricao TEXT,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela funcao_funcionario
+CREATE TABLE funcao_funcionario (
+    id SERIAL PRIMARY KEY,
+    funcao_funcionario VARCHAR(255) NOT NULL,
+    descricao VARCHAR(255),
+    salario_base DECIMAL(10,2) DEFAULT 0.00,
+    requer_cnh BOOLEAN DEFAULT FALSE,
+    carga_horaria DECIMAL(10,2) NOT NULL,
+    observacao VARCHAR(255),
+    ativo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -263,6 +392,7 @@ CREATE TABLE categoria (
 -- Tabela unidade_medida
 CREATE TABLE unidade_medida (
     id SERIAL PRIMARY KEY,
+    unidade_medida VARCHAR(255) NOT NULL,
     nome VARCHAR(50) NOT NULL,
     sigla VARCHAR(6) NOT NULL UNIQUE,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
@@ -306,19 +436,50 @@ CREATE TABLE produto (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Tabela produto_fornecedor
+CREATE TABLE produto_fornecedor (
+    id SERIAL PRIMARY KEY,
+    produto_id INTEGER NOT NULL REFERENCES produto(id),
+    fornecedor_id INTEGER NOT NULL REFERENCES fornecedor(id),
+    codigo_prod VARCHAR(50),
+    custo DECIMAL(10,2),
+    ativo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela modalidade_nfe
+CREATE TABLE modalidade_nfe (
+    id SERIAL PRIMARY KEY,
+    codigo VARCHAR(10) NOT NULL,
+    descricao VARCHAR(100) NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Tabela funcionario
 CREATE TABLE funcionario (
     id SERIAL PRIMARY KEY,
+    funcionario VARCHAR(255) NOT NULL,
     nome VARCHAR(100) NOT NULL,
+    apelido VARCHAR(60),
     cpf VARCHAR(11) NOT NULL UNIQUE,
+    cpf_cpnj VARCHAR(14),
     email VARCHAR(100) NOT NULL UNIQUE,
     telefone VARCHAR(20),
     celular VARCHAR(20),
     rg VARCHAR(20),
+    rg_inscricao_estadual VARCHAR(14),
     orgao_emissor VARCHAR(20),
+    cnh VARCHAR(25),
+    data_validade_cnh DATE,
     data_nascimento DATE,
     estado_civil VARCHAR(20),
+    sexo INTEGER CHECK (sexo IN (1, 2)),
     nacionalidade VARCHAR(30),
+    nacionalidade_id INTEGER NOT NULL REFERENCES pais(id),
+    tipo INTEGER DEFAULT 1,
     
     -- Campos de endereço
     cep VARCHAR(10),
@@ -331,10 +492,12 @@ CREATE TABLE funcionario (
     -- Campos profissionais
     cargo_id INTEGER REFERENCES cargo(id),
     departamento_id INTEGER REFERENCES departamento(id),
+    funcao_funcionario_id INTEGER NOT NULL REFERENCES funcao_funcionario(id),
     data_admissao DATE NOT NULL,
     data_demissao DATE,
     salario DECIMAL(10, 2),
     observacoes TEXT,
+    observacao VARCHAR(255) NOT NULL,
     
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -343,7 +506,8 @@ CREATE TABLE funcionario (
 
 -- Tabela nfe
 CREATE TABLE nfe (
-    chave_acesso VARCHAR(44) PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
+    chave_acesso VARCHAR(44) UNIQUE,
     numero VARCHAR(10) NOT NULL,
     serie VARCHAR(3) NOT NULL,
     data_emissao DATE NOT NULL,
@@ -379,6 +543,11 @@ CREATE TABLE nfe (
     cnpj_transportador VARCHAR(18),
     condicao_pagamento_id INTEGER NOT NULL,
     cliente_id INTEGER REFERENCES cliente(id),
+    forma_pagamento_id INTEGER REFERENCES forma_pagamento(id),
+    transportadora_id INTEGER REFERENCES transportadora(id),
+    veiculo_id INTEGER REFERENCES veiculo(id),
+    modalidade_id INTEGER REFERENCES modalidade_nfe(id),
+    cancelada BOOLEAN DEFAULT FALSE,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -462,6 +631,305 @@ CREATE TABLE volume (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_volume_nfe FOREIGN KEY (chave_acesso_nfe) REFERENCES nfe (chave_acesso)
 );
+
+-- Tabela item_nfe (versão alternativa para compatibilidade)
+CREATE TABLE item_nfe (
+    id SERIAL PRIMARY KEY,
+    nfe_id INTEGER NOT NULL REFERENCES nfe(id),
+    produto_id INTEGER NOT NULL REFERENCES produto(id),
+    quantidade DECIMAL(10,3) NOT NULL,
+    valor_unitario DECIMAL(10,2) NOT NULL,
+    valor_total DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela movimentacao_nfe
+CREATE TABLE movimentacao_nfe (
+    id SERIAL PRIMARY KEY,
+    nfe_id INTEGER NOT NULL REFERENCES nfe(id),
+    data_movimentacao TIMESTAMP NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    descricao TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================================
+-- MÓDULO DE COMPRAS E VENDAS (ERP)
+-- =============================================================
+
+-- Tabela compra (Pedidos de Compra)
+CREATE TABLE compra (
+    id SERIAL PRIMARY KEY,
+    numero_pedido VARCHAR(20) NOT NULL UNIQUE,
+    fornecedor_id INTEGER NOT NULL REFERENCES fornecedor(id),
+    data_pedido DATE NOT NULL DEFAULT CURRENT_DATE,
+    data_entrega_prevista DATE,
+    data_entrega_realizada DATE,
+    condicao_pagamento_id INTEGER NOT NULL REFERENCES condicao_pagamento(id),
+    forma_pagamento_id INTEGER REFERENCES forma_pagamento(id),
+    funcionario_id INTEGER REFERENCES funcionario(id), -- Responsável pela compra
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE' CHECK (status IN ('PENDENTE', 'APROVADO', 'ENVIADO', 'RECEBIDO', 'CANCELADO')),
+    tipo_frete VARCHAR(20) DEFAULT 'CIF' CHECK (tipo_frete IN ('CIF', 'FOB')),
+    transportadora_id INTEGER REFERENCES transportadora(id),
+    valor_frete DECIMAL(15,2) DEFAULT 0.00,
+    valor_seguro DECIMAL(15,2) DEFAULT 0.00,
+    valor_desconto DECIMAL(15,2) DEFAULT 0.00,
+    valor_acrescimo DECIMAL(15,2) DEFAULT 0.00,
+    valor_produtos DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    valor_total DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    observacoes TEXT,
+    aprovado_por INTEGER REFERENCES funcionario(id),
+    data_aprovacao TIMESTAMP,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela item_compra (Itens do Pedido de Compra)
+CREATE TABLE item_compra (
+    id SERIAL PRIMARY KEY,
+    compra_id INTEGER NOT NULL REFERENCES compra(id) ON DELETE CASCADE,
+    produto_id INTEGER NOT NULL REFERENCES produto(id),
+    quantidade DECIMAL(15,3) NOT NULL,
+    valor_unitario DECIMAL(15,4) NOT NULL,
+    valor_desconto DECIMAL(15,2) DEFAULT 0.00,
+    valor_total DECIMAL(15,2) NOT NULL,
+    quantidade_recebida DECIMAL(15,3) DEFAULT 0.00,
+    data_entrega_item DATE,
+    observacoes TEXT,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela recebimento_compra (Controle de Recebimentos)
+CREATE TABLE recebimento_compra (
+    id SERIAL PRIMARY KEY,
+    compra_id INTEGER NOT NULL REFERENCES compra(id),
+    numero_recebimento VARCHAR(20) NOT NULL UNIQUE,
+    data_recebimento DATE NOT NULL DEFAULT CURRENT_DATE,
+    funcionario_responsavel_id INTEGER NOT NULL REFERENCES funcionario(id),
+    nfe_referencia VARCHAR(44), -- Chave da NFe do fornecedor
+    valor_total_recebido DECIMAL(15,2) NOT NULL,
+    observacoes TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'RECEBIDO' CHECK (status IN ('RECEBIDO', 'CONFERIDO', 'DIVERGENCIA')),
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela item_recebimento_compra (Itens Recebidos)
+CREATE TABLE item_recebimento_compra (
+    id SERIAL PRIMARY KEY,
+    recebimento_id INTEGER NOT NULL REFERENCES recebimento_compra(id) ON DELETE CASCADE,
+    item_compra_id INTEGER NOT NULL REFERENCES item_compra(id),
+    quantidade_recebida DECIMAL(15,3) NOT NULL,
+    valor_unitario_recebido DECIMAL(15,4) NOT NULL,
+    lote VARCHAR(50),
+    data_validade DATE,
+    observacoes TEXT,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela venda (Pedidos de Venda)
+CREATE TABLE venda (
+    id SERIAL PRIMARY KEY,
+    numero_pedido VARCHAR(20) NOT NULL UNIQUE,
+    cliente_id INTEGER NOT NULL REFERENCES cliente(id),
+    vendedor_id INTEGER REFERENCES funcionario(id), -- Funcionário vendedor
+    data_pedido DATE NOT NULL DEFAULT CURRENT_DATE,
+    data_entrega_prevista DATE,
+    data_entrega_realizada DATE,
+    condicao_pagamento_id INTEGER NOT NULL REFERENCES condicao_pagamento(id),
+    forma_pagamento_id INTEGER REFERENCES forma_pagamento(id),
+    status VARCHAR(20) NOT NULL DEFAULT 'ORCAMENTO' CHECK (status IN ('ORCAMENTO', 'PEDIDO', 'PRODUCAO', 'FATURADO', 'ENTREGUE', 'CANCELADO')),
+    tipo_venda VARCHAR(20) NOT NULL DEFAULT 'VENDA' CHECK (tipo_venda IN ('VENDA', 'ORCAMENTO', 'CONSIGNACAO', 'BONIFICACAO')),
+    tipo_frete VARCHAR(20) DEFAULT 'CIF' CHECK (tipo_frete IN ('CIF', 'FOB', 'SEM_FRETE')),
+    transportadora_id INTEGER REFERENCES transportadora(id),
+    endereco_entrega TEXT,
+    valor_frete DECIMAL(15,2) DEFAULT 0.00,
+    valor_seguro DECIMAL(15,2) DEFAULT 0.00,
+    valor_desconto DECIMAL(15,2) DEFAULT 0.00,
+    percentual_desconto DECIMAL(5,2) DEFAULT 0.00,
+    valor_acrescimo DECIMAL(15,2) DEFAULT 0.00,
+    valor_produtos DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    valor_total DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    observacoes TEXT,
+    aprovado_por INTEGER REFERENCES funcionario(id),
+    data_aprovacao TIMESTAMP,
+    nfe_id INTEGER REFERENCES nfe(id), -- NFe gerada para esta venda
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela item_venda (Itens do Pedido de Venda)
+CREATE TABLE item_venda (
+    id SERIAL PRIMARY KEY,
+    venda_id INTEGER NOT NULL REFERENCES venda(id) ON DELETE CASCADE,
+    produto_id INTEGER NOT NULL REFERENCES produto(id),
+    quantidade DECIMAL(15,3) NOT NULL,
+    valor_unitario DECIMAL(15,4) NOT NULL,
+    valor_desconto DECIMAL(15,2) DEFAULT 0.00,
+    percentual_desconto DECIMAL(5,2) DEFAULT 0.00,
+    valor_total DECIMAL(15,2) NOT NULL,
+    quantidade_entregue DECIMAL(15,3) DEFAULT 0.00,
+    data_entrega_item DATE,
+    observacoes TEXT,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela entrega_venda (Controle de Entregas)
+CREATE TABLE entrega_venda (
+    id SERIAL PRIMARY KEY,
+    venda_id INTEGER NOT NULL REFERENCES venda(id),
+    numero_entrega VARCHAR(20) NOT NULL UNIQUE,
+    data_entrega DATE NOT NULL DEFAULT CURRENT_DATE,
+    funcionario_responsavel_id INTEGER NOT NULL REFERENCES funcionario(id),
+    transportadora_id INTEGER REFERENCES transportadora(id),
+    veiculo_id INTEGER REFERENCES veiculo(id),
+    endereco_entrega TEXT NOT NULL,
+    valor_total_entregue DECIMAL(15,2) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PREPARANDO' CHECK (status IN ('PREPARANDO', 'TRANSPORTE', 'ENTREGUE', 'DEVOLVIDO')),
+    data_saida TIMESTAMP,
+    data_chegada TIMESTAMP,
+    observacoes TEXT,
+    assinatura_recebimento TEXT, -- Pode armazenar o nome de quem recebeu
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela item_entrega_venda (Itens Entregues)
+CREATE TABLE item_entrega_venda (
+    id SERIAL PRIMARY KEY,
+    entrega_id INTEGER NOT NULL REFERENCES entrega_venda(id) ON DELETE CASCADE,
+    item_venda_id INTEGER NOT NULL REFERENCES item_venda(id),
+    quantidade_entregue DECIMAL(15,3) NOT NULL,
+    valor_unitario_entregue DECIMAL(15,4) NOT NULL,
+    lote VARCHAR(50),
+    observacoes TEXT,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela estoque_movimento (Controle de Movimentações de Estoque)
+CREATE TABLE estoque_movimento (
+    id SERIAL PRIMARY KEY,
+    produto_id INTEGER NOT NULL REFERENCES produto(id),
+    tipo_movimento VARCHAR(20) NOT NULL CHECK (tipo_movimento IN ('ENTRADA', 'SAIDA', 'AJUSTE', 'TRANSFERENCIA', 'INVENTARIO')),
+    origem VARCHAR(30) NOT NULL CHECK (origem IN ('COMPRA', 'VENDA', 'AJUSTE', 'PRODUCAO', 'DEVOLUCAO', 'INVENTARIO')),
+    documento_origem_id INTEGER, -- ID do documento que originou o movimento (compra_id, venda_id, etc.)
+    numero_documento VARCHAR(50),
+    data_movimento DATE NOT NULL DEFAULT CURRENT_DATE,
+    funcionario_id INTEGER NOT NULL REFERENCES funcionario(id),
+    quantidade_anterior DECIMAL(15,3) NOT NULL,
+    quantidade_movimento DECIMAL(15,3) NOT NULL,
+    quantidade_atual DECIMAL(15,3) NOT NULL,
+    valor_unitario DECIMAL(15,4),
+    valor_total DECIMAL(15,2),
+    lote VARCHAR(50),
+    data_validade DATE,
+    observacoes TEXT,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela contas_pagar (Contas a Pagar - Geradas das Compras)
+CREATE TABLE contas_pagar (
+    id SERIAL PRIMARY KEY,
+    compra_id INTEGER REFERENCES compra(id),
+    fornecedor_id INTEGER NOT NULL REFERENCES fornecedor(id),
+    numero_documento VARCHAR(50) NOT NULL,
+    tipo_documento VARCHAR(20) NOT NULL DEFAULT 'FATURA' CHECK (tipo_documento IN ('FATURA', 'DUPLICATA', 'BOLETO', 'NOTA_FISCAL')),
+    data_emissao DATE NOT NULL,
+    data_vencimento DATE NOT NULL,
+    data_pagamento DATE,
+    valor_original DECIMAL(15,2) NOT NULL,
+    valor_desconto DECIMAL(15,2) DEFAULT 0.00,
+    valor_juros DECIMAL(15,2) DEFAULT 0.00,
+    valor_multa DECIMAL(15,2) DEFAULT 0.00,
+    valor_pago DECIMAL(15,2) DEFAULT 0.00,
+    valor_saldo DECIMAL(15,2) NOT NULL,
+    forma_pagamento_id INTEGER REFERENCES forma_pagamento(id),
+    status VARCHAR(20) NOT NULL DEFAULT 'ABERTO' CHECK (status IN ('ABERTO', 'PAGO', 'PARCIAL', 'VENCIDO', 'CANCELADO')),
+    observacoes TEXT,
+    pago_por INTEGER REFERENCES funcionario(id),
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela contas_receber (Contas a Receber - Geradas das Vendas)
+CREATE TABLE contas_receber (
+    id SERIAL PRIMARY KEY,
+    venda_id INTEGER REFERENCES venda(id),
+    cliente_id INTEGER NOT NULL REFERENCES cliente(id),
+    numero_documento VARCHAR(50) NOT NULL,
+    tipo_documento VARCHAR(20) NOT NULL DEFAULT 'FATURA' CHECK (tipo_documento IN ('FATURA', 'DUPLICATA', 'BOLETO', 'NOTA_FISCAL')),
+    data_emissao DATE NOT NULL,
+    data_vencimento DATE NOT NULL,
+    data_recebimento DATE,
+    valor_original DECIMAL(15,2) NOT NULL,
+    valor_desconto DECIMAL(15,2) DEFAULT 0.00,
+    valor_juros DECIMAL(15,2) DEFAULT 0.00,
+    valor_multa DECIMAL(15,2) DEFAULT 0.00,
+    valor_recebido DECIMAL(15,2) DEFAULT 0.00,
+    valor_saldo DECIMAL(15,2) NOT NULL,
+    forma_pagamento_id INTEGER REFERENCES forma_pagamento(id),
+    status VARCHAR(20) NOT NULL DEFAULT 'ABERTO' CHECK (status IN ('ABERTO', 'RECEBIDO', 'PARCIAL', 'VENCIDO', 'CANCELADO')),
+    observacoes TEXT,
+    recebido_por INTEGER REFERENCES funcionario(id),
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela orcamento (Orçamentos separados das Vendas)
+CREATE TABLE orcamento (
+    id SERIAL PRIMARY KEY,
+    numero_orcamento VARCHAR(20) NOT NULL UNIQUE,
+    cliente_id INTEGER NOT NULL REFERENCES cliente(id),
+    vendedor_id INTEGER REFERENCES funcionario(id),
+    data_orcamento DATE NOT NULL DEFAULT CURRENT_DATE,
+    data_validade DATE NOT NULL,
+    condicao_pagamento_id INTEGER NOT NULL REFERENCES condicao_pagamento(id),
+    status VARCHAR(20) NOT NULL DEFAULT 'ABERTO' CHECK (status IN ('ABERTO', 'ENVIADO', 'APROVADO', 'REJEITADO', 'CONVERTIDO', 'VENCIDO')),
+    valor_produtos DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    valor_desconto DECIMAL(15,2) DEFAULT 0.00,
+    percentual_desconto DECIMAL(5,2) DEFAULT 0.00,
+    valor_total DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    observacoes TEXT,
+    venda_id INTEGER REFERENCES venda(id), -- Se foi convertido em venda
+    data_conversao TIMESTAMP,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela item_orcamento (Itens do Orçamento)
+CREATE TABLE item_orcamento (
+    id SERIAL PRIMARY KEY,
+    orcamento_id INTEGER NOT NULL REFERENCES orcamento(id) ON DELETE CASCADE,
+    produto_id INTEGER NOT NULL REFERENCES produto(id),
+    quantidade DECIMAL(15,3) NOT NULL,
+    valor_unitario DECIMAL(15,4) NOT NULL,
+    valor_desconto DECIMAL(15,2) DEFAULT 0.00,
+    percentual_desconto DECIMAL(5,2) DEFAULT 0.00,
+    valor_total DECIMAL(15,2) NOT NULL,
+    observacoes TEXT,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 -- Criar índices para melhorar performance
 -- Índices para chaves estrangeiras
 CREATE INDEX idx_estado_pais_id ON estado(pais_id);
@@ -473,16 +941,23 @@ CREATE INDEX idx_cliente_destinatario_cliente_id ON cliente_destinatario(cliente
 CREATE INDEX idx_cliente_destinatario_destinatario_id ON cliente_destinatario(destinatario_id);
 CREATE INDEX idx_cliente_cnpj_cpf ON cliente(cnpj_cpf);
 CREATE INDEX idx_cliente_condicao_pagamento_id ON cliente(condicao_pagamento_id);
+CREATE INDEX idx_cliente_nacionalidade_id ON cliente(nacionalidade_id);
 CREATE INDEX idx_fornecedor_cnpj_cpf ON fornecedor(cnpj_cpf);
 CREATE INDEX idx_fornecedor_razao_social ON fornecedor(razao_social);
 CREATE INDEX idx_fornecedor_cidade_id ON fornecedor(cidade_id);
 CREATE INDEX idx_fornecedor_condicao_pagamento_id ON fornecedor(condicao_pagamento_id);
+CREATE INDEX idx_fornecedor_nacionalidade_id ON fornecedor(nacionalidade_id);
+CREATE INDEX idx_fornecedor_transportadora_id ON fornecedor(transportadora_id);
 CREATE INDEX idx_funcionario_cpf ON funcionario(cpf);
 CREATE INDEX idx_funcionario_email ON funcionario(email);
 CREATE INDEX idx_funcionario_cargo_id ON funcionario(cargo_id);
 CREATE INDEX idx_funcionario_departamento_id ON funcionario(departamento_id);
 CREATE INDEX idx_funcionario_cidade_id ON funcionario(cidade_id);
+CREATE INDEX idx_funcionario_funcao_id ON funcionario(funcao_funcionario_id);
+CREATE INDEX idx_funcionario_nacionalidade_id ON funcionario(nacionalidade_id);
 CREATE INDEX idx_transportador_cidade_id ON transportador(cidade_id);
+CREATE INDEX idx_transportadora_cidade_id ON transportadora(cidade_id);
+CREATE INDEX idx_transportadora_condicao_pagamento_id ON transportadora(condicao_pagamento_id);
 -- Índices para produtos e tabelas relacionadas
 CREATE INDEX idx_produto_marca_id ON produto(marca_id);
 CREATE INDEX idx_produto_categoria_id ON produto(categoria_id);
@@ -498,9 +973,15 @@ CREATE INDEX idx_nfe_cliente_id ON nfe(cliente_id);
 CREATE INDEX idx_nfe_data_emissao ON nfe(data_emissao);
 CREATE INDEX idx_nfe_numero ON nfe(numero);
 CREATE INDEX idx_nfe_situacao ON nfe(situacao);
+CREATE INDEX idx_nfe_forma_pagamento_id ON nfe(forma_pagamento_id);
+CREATE INDEX idx_nfe_transportadora_id ON nfe(transportadora_id);
+CREATE INDEX idx_nfe_veiculo_id ON nfe(veiculo_id);
+CREATE INDEX idx_nfe_modalidade_id ON nfe(modalidade_id);
 -- Índices para ITEM_nfe
 CREATE INDEX idx_item_nfe_chave_acesso ON itemnfe(chave_acesso_nfe);
 CREATE INDEX idx_item_nfe_codigo_produto ON itemnfe(codigo_produto);
+CREATE INDEX idx_item_nfe_nfe_id ON item_nfe(nfe_id);
+CREATE INDEX idx_item_nfe_produto_id ON item_nfe(produto_id);
 -- Índices para fatura
 CREATE INDEX idx_fatura_chave_acesso ON fatura(chave_acesso_nfe);
 -- Índices para parcela
@@ -510,9 +991,63 @@ CREATE INDEX idx_parcela_data_vencimento ON parcela(data_vencimento);
 CREATE INDEX idx_parcela_status ON parcela(status);
 -- Índices para volume
 CREATE INDEX idx_volume_chave_acesso ON volume(chave_acesso_nfe);
--- Índices para CONDIÇÃO DE PAGAMENTO E parcelaS - ADICIONADOS
+-- Índices para CONDIÇÃO DE PAGAMENTO E parcelas - ADICIONADOS
 CREATE INDEX idx_parcela_condicao_pagamento_condicao_id ON parcela_condicao_pagamento(condicao_pagamento_id);
 CREATE INDEX idx_parcela_condicao_pagamento_forma_id ON parcela_condicao_pagamento(forma_pagamento_id);
+-- Índices para tabelas auxiliares
+CREATE INDEX idx_fornecedor_email_fornecedor_id ON fornecedor_email(fornecedor_id);
+CREATE INDEX idx_fornecedor_telefone_fornecedor_id ON fornecedor_telefone(fornecedor_id);
+CREATE INDEX idx_transportadora_emails_cod_trans ON transportadora_emails(cod_trans);
+CREATE INDEX idx_transportadora_telefones_cod_trans ON transportadora_telefones(cod_trans);
+CREATE INDEX idx_produto_fornecedor_produto_id ON produto_fornecedor(produto_id);
+CREATE INDEX idx_produto_fornecedor_fornecedor_id ON produto_fornecedor(fornecedor_id);
+CREATE INDEX idx_movimentacao_nfe_nfe_id ON movimentacao_nfe(nfe_id);
+-- Índices para módulo de compras e vendas
+CREATE INDEX idx_compra_fornecedor_id ON compra(fornecedor_id);
+CREATE INDEX idx_compra_data_pedido ON compra(data_pedido);
+CREATE INDEX idx_compra_status ON compra(status);
+CREATE INDEX idx_compra_funcionario_id ON compra(funcionario_id);
+CREATE INDEX idx_compra_condicao_pagamento_id ON compra(condicao_pagamento_id);
+CREATE INDEX idx_compra_transportadora_id ON compra(transportadora_id);
+CREATE INDEX idx_item_compra_compra_id ON item_compra(compra_id);
+CREATE INDEX idx_item_compra_produto_id ON item_compra(produto_id);
+CREATE INDEX idx_recebimento_compra_compra_id ON recebimento_compra(compra_id);
+CREATE INDEX idx_recebimento_compra_data ON recebimento_compra(data_recebimento);
+CREATE INDEX idx_item_recebimento_recebimento_id ON item_recebimento_compra(recebimento_id);
+CREATE INDEX idx_item_recebimento_item_compra_id ON item_recebimento_compra(item_compra_id);
+CREATE INDEX idx_venda_cliente_id ON venda(cliente_id);
+CREATE INDEX idx_venda_vendedor_id ON venda(vendedor_id);
+CREATE INDEX idx_venda_data_pedido ON venda(data_pedido);
+CREATE INDEX idx_venda_status ON venda(status);
+CREATE INDEX idx_venda_condicao_pagamento_id ON venda(condicao_pagamento_id);
+CREATE INDEX idx_venda_transportadora_id ON venda(transportadora_id);
+CREATE INDEX idx_venda_nfe_id ON venda(nfe_id);
+CREATE INDEX idx_item_venda_venda_id ON item_venda(venda_id);
+CREATE INDEX idx_item_venda_produto_id ON item_venda(produto_id);
+CREATE INDEX idx_entrega_venda_venda_id ON entrega_venda(venda_id);
+CREATE INDEX idx_entrega_venda_data ON entrega_venda(data_entrega);
+CREATE INDEX idx_entrega_venda_status ON entrega_venda(status);
+CREATE INDEX idx_item_entrega_entrega_id ON item_entrega_venda(entrega_id);
+CREATE INDEX idx_item_entrega_item_venda_id ON item_entrega_venda(item_venda_id);
+CREATE INDEX idx_estoque_movimento_produto_id ON estoque_movimento(produto_id);
+CREATE INDEX idx_estoque_movimento_data ON estoque_movimento(data_movimento);
+CREATE INDEX idx_estoque_movimento_tipo ON estoque_movimento(tipo_movimento);
+CREATE INDEX idx_estoque_movimento_origem ON estoque_movimento(origem);
+CREATE INDEX idx_contas_pagar_fornecedor_id ON contas_pagar(fornecedor_id);
+CREATE INDEX idx_contas_pagar_compra_id ON contas_pagar(compra_id);
+CREATE INDEX idx_contas_pagar_vencimento ON contas_pagar(data_vencimento);
+CREATE INDEX idx_contas_pagar_status ON contas_pagar(status);
+CREATE INDEX idx_contas_receber_cliente_id ON contas_receber(cliente_id);
+CREATE INDEX idx_contas_receber_venda_id ON contas_receber(venda_id);
+CREATE INDEX idx_contas_receber_vencimento ON contas_receber(data_vencimento);
+CREATE INDEX idx_contas_receber_status ON contas_receber(status);
+CREATE INDEX idx_orcamento_cliente_id ON orcamento(cliente_id);
+CREATE INDEX idx_orcamento_vendedor_id ON orcamento(vendedor_id);
+CREATE INDEX idx_orcamento_data ON orcamento(data_orcamento);
+CREATE INDEX idx_orcamento_status ON orcamento(status);
+CREATE INDEX idx_orcamento_venda_id ON orcamento(venda_id);
+CREATE INDEX idx_item_orcamento_orcamento_id ON item_orcamento(orcamento_id);
+CREATE INDEX idx_item_orcamento_produto_id ON item_orcamento(produto_id);
 -- Triggers para atualizar o campo updated_at automaticamente
 -- Função para atualizar o timestamp
 CREATE OR REPLACE FUNCTION update_timestamp() RETURNS TRIGGER AS $$ BEGIN NEW.updated_at = CURRENT_TIMESTAMP;
@@ -540,6 +1075,8 @@ CREATE TRIGGER update_fornecedor_timestamp BEFORE
 UPDATE ON fornecedor FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_departamento_timestamp BEFORE
 UPDATE ON departamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_funcao_funcionario_timestamp BEFORE
+UPDATE ON funcao_funcionario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_cargo_timestamp BEFORE
 UPDATE ON cargo FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_marca_timestamp BEFORE
@@ -548,18 +1085,62 @@ CREATE TRIGGER update_categoria_timestamp BEFORE
 UPDATE ON categoria FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_unidade_medida_timestamp BEFORE
 UPDATE ON unidade_medida FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_modalidade_nfe_timestamp BEFORE
+UPDATE ON modalidade_nfe FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_veiculo_timestamp BEFORE
+UPDATE ON veiculo FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_funcionario_timestamp BEFORE
 UPDATE ON funcionario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_destinatario_timestamp BEFORE
 UPDATE ON destinatario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_transportador_timestamp BEFORE
 UPDATE ON transportador FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_transportadora_timestamp BEFORE
+UPDATE ON transportadora FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_fornecedor_email_timestamp BEFORE
+UPDATE ON fornecedor_email FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_fornecedor_telefone_timestamp BEFORE
+UPDATE ON fornecedor_telefone FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_produto_fornecedor_timestamp BEFORE
+UPDATE ON produto_fornecedor FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_transp_item_timestamp BEFORE
+UPDATE ON transp_item FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_produto_timestamp BEFORE
 UPDATE ON produto FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_nfe_timestamp BEFORE
 UPDATE ON nfe FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_item_nfe_timestamp BEFORE
 UPDATE ON itemnfe FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_item_nfe_alt_timestamp BEFORE
+UPDATE ON item_nfe FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_movimentacao_nfe_timestamp BEFORE
+UPDATE ON movimentacao_nfe FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_compra_timestamp BEFORE
+UPDATE ON compra FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_item_compra_timestamp BEFORE
+UPDATE ON item_compra FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_recebimento_compra_timestamp BEFORE
+UPDATE ON recebimento_compra FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_item_recebimento_compra_timestamp BEFORE
+UPDATE ON item_recebimento_compra FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_venda_timestamp BEFORE
+UPDATE ON venda FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_item_venda_timestamp BEFORE
+UPDATE ON item_venda FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_entrega_venda_timestamp BEFORE
+UPDATE ON entrega_venda FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_item_entrega_venda_timestamp BEFORE
+UPDATE ON item_entrega_venda FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_estoque_movimento_timestamp BEFORE
+UPDATE ON estoque_movimento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_contas_pagar_timestamp BEFORE
+UPDATE ON contas_pagar FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_contas_receber_timestamp BEFORE
+UPDATE ON contas_receber FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_orcamento_timestamp BEFORE
+UPDATE ON orcamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_item_orcamento_timestamp BEFORE
+UPDATE ON item_orcamento FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_fatura_timestamp BEFORE
 UPDATE ON fatura FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_parcela_timestamp BEFORE
@@ -570,40 +1151,47 @@ CREATE TRIGGER update_cliente_destinatario_timestamp BEFORE
 UPDATE ON cliente_destinatario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 -- Inserir dados iniciais
 -- Inserir país padrão (Brasil)
-INSERT INTO pais (nome, codigo, sigla)
-VALUES ('BRASIL', '55', 'BR');
+INSERT INTO pais (nome, codigo, sigla, nacionalidade)
+VALUES ('BRASIL', '55', 'BR', 'BRASILEIRA');
+
 -- Inserir formas de pagamento comuns
-INSERT INTO forma_pagamento (descricao, codigo, tipo)
-VALUES ('DINHEIRO', '01', 'À VISTA'),
-    ('CARTÃO DE CRÉDITO', '03', 'CRÉDITO'),
-    ('CARTÃO DE DÉBITO', '04', 'DÉBITO'),
-    ('PIX', '17', 'À VISTA'),
-    ('BOLETO BANCÁRIO', '15', 'À PRAZO');
+INSERT INTO forma_pagamento (nome, descricao, codigo, tipo)
+VALUES ('DINHEIRO', 'DINHEIRO', '01', 'À VISTA'),
+    ('CARTÃO DE CRÉDITO', 'CARTÃO DE CRÉDITO', '03', 'CRÉDITO'),
+    ('CARTÃO DE DÉBITO', 'CARTÃO DE DÉBITO', '04', 'DÉBITO'),
+    ('PIX', 'PIX', '17', 'À VISTA'),
+    ('BOLETO BANCÁRIO', 'BOLETO BANCÁRIO', '15', 'À PRAZO');
+
+-- Inserir modalidades de NFe
+INSERT INTO modalidade_nfe (codigo, descricao)
+VALUES ('55', 'NOTA FISCAL ELETRÔNICA'),
+    ('65', 'NOTA FISCAL DE CONSUMIDOR ELETRÔNICA');
+
 -- Inserir condições de pagamento comuns
-INSERT INTO condicao_pagamento (nome, descricao, taxa_juros, taxa_multa, percentual_desconto, ativo)
-VALUES ('À VISTA', 'PAGAMENTO À VISTA', 0, 0, 5, true),
-    ('30 DIAS', 'PAGAMENTO EM 30 DIAS', 1.5, 2, 0, true),
-    ('30/60', 'PAGAMENTO EM DUAS PARCELAS DE 30 E 60 DIAS', 2, 2, 0, true),
-    ('30/60/90', 'PAGAMENTO EM TRÊS PARCELAS DE 30, 60 e 90 DIAS', 2.5, 2, 0, true),
-    ('ENTRADA + 30 DIAS', 'PAGAMENTO COM ENTRADA E MAIS 30 DIAS', 1, 2, 0, true);
+INSERT INTO condicao_pagamento (nome, condicao_pagamento, descricao, taxa_juros, taxa_multa, percentual_desconto, ativo)
+VALUES ('À VISTA', 'À VISTA', 'PAGAMENTO À VISTA', 0, 0, 5, true),
+    ('30 DIAS', '30 DIAS', 'PAGAMENTO EM 30 DIAS', 1.5, 2, 0, true),
+    ('30/60', '30/60', 'PAGAMENTO EM DUAS PARCELAS DE 30 E 60 DIAS', 2, 2, 0, true),
+    ('30/60/90', '30/60/90', 'PAGAMENTO EM TRÊS PARCELAS DE 30, 60 e 90 DIAS', 2.5, 2, 0, true),
+    ('ENTRADA + 30 DIAS', 'ENTRADA + 30 DIAS', 'PAGAMENTO COM ENTRADA E MAIS 30 DIAS', 1, 2, 0, true);
 
 -- Inserir unidades de medida comuns
-INSERT INTO unidade_medida (nome, sigla, ativo)
-VALUES ('UNIDADE', 'UN', true),
-    ('QUILOGRAMA', 'KG', true),
-    ('GRAMA', 'G', true),
-    ('LITRO', 'L', true),
-    ('MILILITRO', 'ML', true),
-    ('METRO', 'M', true),
-    ('CENTÍMETRO', 'CM', true),
-    ('METRO QUADRADO', 'M2', true),
-    ('METRO CÚBICO', 'M3', true),
-    ('PEÇA', 'PC', true),
-    ('CAIXA', 'CX', true),
-    ('PACOTE', 'PCT', true),
-    ('PAR', 'PAR', true),
-    ('DÚZIA', 'DZ', true),
-    ('CENTO', 'CT', true);
+INSERT INTO unidade_medida (unidade_medida, nome, sigla, ativo)
+VALUES ('UNIDADE', 'UNIDADE', 'UN', true),
+    ('QUILOGRAMA', 'QUILOGRAMA', 'KG', true),
+    ('GRAMA', 'GRAMA', 'G', true),
+    ('LITRO', 'LITRO', 'L', true),
+    ('MILILITRO', 'MILILITRO', 'ML', true),
+    ('METRO', 'METRO', 'M', true),
+    ('CENTÍMETRO', 'CENTÍMETRO', 'CM', true),
+    ('METRO QUADRADO', 'METRO QUADRADO', 'M2', true),
+    ('METRO CÚBICO', 'METRO CÚBICO', 'M3', true),
+    ('PEÇA', 'PEÇA', 'PC', true),
+    ('CAIXA', 'CAIXA', 'CX', true),
+    ('PACOTE', 'PACOTE', 'PCT', true),
+    ('PAR', 'PAR', 'PAR', true),
+    ('DÚZIA', 'DÚZIA', 'DZ', true),
+    ('CENTO', 'CENTO', 'CT', true);
 
 -- Inserir marcas exemplo
 INSERT INTO marca (nome, descricao, ativo)
@@ -620,6 +1208,18 @@ VALUES ('GERAL', 'CATEGORIA GERAL PARA PRODUTOS DIVERSOS', true),
     ('ESCRITÓRIO', 'MATERIAIS DE ESCRITÓRIO', true),
     ('LIMPEZA', 'PRODUTOS DE LIMPEZA', true),
     ('ALIMENTAÇÃO', 'PRODUTOS ALIMENTÍCIOS', true);
+
+-- Inserir funções de funcionários para o módulo de compras e vendas
+INSERT INTO funcao_funcionario (funcao_funcionario, descricao, salario_base, carga_horaria, ativo)
+VALUES 
+    ('VENDEDOR', 'VENDEDOR INTERNO E EXTERNO', 2500.00, 44.00, true),
+    ('GERENTE DE VENDAS', 'GERENTE DO DEPARTAMENTO DE VENDAS', 5000.00, 44.00, true),
+    ('COMPRADOR', 'RESPONSÁVEL PELAS COMPRAS DA EMPRESA', 3500.00, 44.00, true),
+    ('GERENTE DE COMPRAS', 'GERENTE DO DEPARTAMENTO DE COMPRAS', 5500.00, 44.00, true),
+    ('ALMOXARIFE', 'RESPONSÁVEL PELO CONTROLE DE ESTOQUE', 2200.00, 44.00, true),
+    ('CONFERENTE', 'CONFERENTE DE MERCADORIAS', 2000.00, 44.00, true),
+    ('MOTORISTA', 'MOTORISTA PARA ENTREGAS', 2300.00, 44.00, true),
+    ('OPERADOR DE CAIXA', 'OPERADOR DE CAIXA E FINANCEIRO', 2100.00, 44.00, true);
 
 -- Comentários
 COMMENT ON SCHEMA dbo IS 'Schema principal para o sistema de NF-e';
