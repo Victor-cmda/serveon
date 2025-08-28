@@ -15,6 +15,11 @@ import { ProductsModule } from './modules/products/products.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { BrandsModule } from './modules/brands/brands.module';
 import { UnitMeasuresModule } from './modules/unit-measures/unit-measures.module';
+import { EmployeeFunctionsModule } from './modules/employee-functions/employee-functions.module';
+import { TransportersModule } from './modules/transporters/transporters.module';
+import { VehiclesModule } from './modules/vehicles/vehicles.module';
+import { PurchasesModule } from './modules/purchases/purchases.module';
+import { SalesModule } from './modules/sales/sales.module';
 
 @Module({
   imports: [
@@ -37,6 +42,11 @@ import { UnitMeasuresModule } from './modules/unit-measures/unit-measures.module
     CategoriesModule,
     BrandsModule,
     UnitMeasuresModule,
+    EmployeeFunctionsModule,
+    TransportersModule,
+    VehiclesModule,
+    PurchasesModule,
+    SalesModule,
   ],
 })
 export class AppModule {}

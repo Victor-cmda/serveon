@@ -180,6 +180,24 @@ export class CreateSupplierDto {
   @MaxLength(100, { message: 'Email deve ter no máximo 100 caracteres' })
   email?: string;
   @ApiProperty({
+    description: 'ID da nacionalidade',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'ID da nacionalidade deve ser um número válido' })
+  nacionalidadeId?: number;
+
+  @ApiProperty({
+    description: 'Limite de crédito do fornecedor',
+    example: 10000.00,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Limite de crédito deve ser um número com no máximo 2 casas decimais' })
+  limiteCredito?: number;
+
+  @ApiProperty({
     description: 'ID da condição de pagamento',
     example: 1,
     required: false,

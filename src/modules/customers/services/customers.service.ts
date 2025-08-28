@@ -38,9 +38,10 @@ export class CustomersService {
             (cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
             nome_fantasia, inscricao_estadual, 
             endereco, numero, complemento, bairro, 
-            cidade_id, cep, telefone, email, is_destinatario, condicao_pagamento_id, ativo)
+            cidade_id, cep, telefone, email, is_destinatario, condicao_pagamento_id, 
+            nacionalidade_id, limite_credito, ativo)
           VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
           RETURNING *`,
           [
             createCustomerDto.cnpjCpf,
@@ -62,6 +63,8 @@ export class CustomersService {
               ? createCustomerDto.isDestinatario
               : true,
             createCustomerDto.condicaoPagamentoId || null,
+            createCustomerDto.nacionalidadeId || null,
+            createCustomerDto.limiteCredito || null,
             createCustomerDto.ativo !== undefined
               ? createCustomerDto.ativo
               : true,
@@ -177,7 +180,8 @@ export class CustomersService {
             );
 
             if (destinatarios.rowCount > 0) {
-              clientEntity.destinatariosIds = destinatarios.rows.map(
+              // Como destinatariosIds não existe na entity, vamos adicionar como propriedade dinâmica
+              (clientEntity as any).destinatariosIds = destinatarios.rows.map(
                 (d) => d.destinatario_id,
               );
             }
@@ -226,7 +230,7 @@ export class CustomersService {
         );
 
         if (destinatarios.rowCount > 0) {
-          clientEntity.destinatariosIds = destinatarios.rows.map(
+          (clientEntity as any).destinatariosIds = destinatarios.rows.map(
             (d) => d.destinatario_id,
           );
         }
@@ -277,7 +281,7 @@ export class CustomersService {
         );
 
         if (destinatarios.rowCount > 0) {
-          clientEntity.destinatariosIds = destinatarios.rows.map(
+          (clientEntity as any).destinatariosIds = destinatarios.rows.map(
             (d) => d.destinatario_id,
           );
         }
@@ -405,6 +409,16 @@ export class CustomersService {
         if (updateCustomerDto.condicaoPagamentoId !== undefined) {
           updates.push(`condicao_pagamento_id = $${paramCounter++}`);
           values.push(updateCustomerDto.condicaoPagamentoId);
+        }
+
+        if (updateCustomerDto.nacionalidadeId !== undefined) {
+          updates.push(`nacionalidade_id = $${paramCounter++}`);
+          values.push(updateCustomerDto.nacionalidadeId);
+        }
+
+        if (updateCustomerDto.limiteCredito !== undefined) {
+          updates.push(`limite_credito = $${paramCounter++}`);
+          values.push(updateCustomerDto.limiteCredito);
         }
 
         if (updates.length > 0) {
@@ -676,17 +690,20 @@ export class CustomersService {
       paisId: dbRecord.pais_id || null,
       estadoId: dbRecord.estado_id || null,
       isDestinatario: dbRecord.is_destinatario || false,
+      nacionalidadeId: dbRecord.nacionalidade_id || null,
+      limiteCredito: dbRecord.limite_credito || null,
     };
 
-    if (dbRecord.cidade_nome) customer.cidadeNome = dbRecord.cidade_nome;
-    if (dbRecord.estado_nome) customer.estadoNome = dbRecord.estado_nome;
-    if (dbRecord.uf) customer.uf = dbRecord.uf;
+    // Campos opcionais que podem não existir na entity base
+    if (dbRecord.cidade_nome && (customer as any).cidadeNome !== undefined) (customer as any).cidadeNome = dbRecord.cidade_nome;
+    if (dbRecord.estado_nome && (customer as any).estadoNome !== undefined) (customer as any).estadoNome = dbRecord.estado_nome;
+    if (dbRecord.uf && (customer as any).uf !== undefined) (customer as any).uf = dbRecord.uf;
     if (dbRecord.tipo_documento)
       customer.tipoDocumento = dbRecord.tipo_documento;
     if (dbRecord.condicao_pagamento_id)
       customer.condicaoPagamentoId = dbRecord.condicao_pagamento_id;
-    if (dbRecord.condicao_pagamento_nome)
-      customer.condicaoPagamentoNome = dbRecord.condicao_pagamento_nome;
+    if (dbRecord.condicao_pagamento_nome && (customer as any).condicaoPagamentoNome !== undefined)
+      (customer as any).condicaoPagamentoNome = dbRecord.condicao_pagamento_nome;
 
     return customer;
   }

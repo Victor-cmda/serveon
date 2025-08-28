@@ -38,9 +38,10 @@ export class EmployeesService {
       }
       const result = await this.databaseService.query(
         `INSERT INTO dbo.funcionario
-          (nome, cpf, email, telefone, rg, cidade_id, cargo_id, departamento_id, data_admissao, ativo)
+          (nome, cpf, email, telefone, rg, cidade_id, cargo_id, departamento_id, 
+           data_admissao, funcao_funcionario_id, ativo)
          VALUES
-          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
          RETURNING *`,
         [
           createEmployeeDto.nome,
@@ -52,6 +53,7 @@ export class EmployeesService {
           createEmployeeDto.cargoId || null,
           createEmployeeDto.departamentoId || null,
           createEmployeeDto.dataAdmissao,
+          createEmployeeDto.funcaoFuncionarioId || null,
           createEmployeeDto.ativo,
         ],
       );
@@ -72,11 +74,13 @@ export class EmployeesService {
           f.*,
           c.nome as cargo_nome,
           d.nome as departamento_nome,
-          cid.nome as cidade_nome
+          cid.nome as cidade_nome,
+          ff.funcao_funcionario as funcao_funcionario_nome
         FROM dbo.funcionario f
         LEFT JOIN dbo.cargo c ON f.cargo_id = c.id
         LEFT JOIN dbo.departamento d ON f.departamento_id = d.id
         LEFT JOIN dbo.cidade cid ON f.cidade_id = cid.id
+        LEFT JOIN dbo.funcao_funcionario ff ON f.funcao_funcionario_id = ff.id
         ORDER BY f.nome
       `);
 
@@ -94,11 +98,13 @@ export class EmployeesService {
           f.*,
           c.nome as cargo_nome,
           d.nome as departamento_nome,
-          cid.nome as cidade_nome
+          cid.nome as cidade_nome,
+          ff.funcao_funcionario as funcao_funcionario_nome
         FROM dbo.funcionario f
         LEFT JOIN dbo.cargo c ON f.cargo_id = c.id
         LEFT JOIN dbo.departamento d ON f.departamento_id = d.id
         LEFT JOIN dbo.cidade cid ON f.cidade_id = cid.id
+        LEFT JOIN dbo.funcao_funcionario ff ON f.funcao_funcionario_id = ff.id
         WHERE f.id = $1
       `,
         [id],
@@ -204,6 +210,11 @@ export class EmployeesService {
         values.push(updateEmployeeDto.departamentoId);
       }
 
+      if (updateEmployeeDto.funcaoFuncionarioId !== undefined) {
+        updates.push(`funcao_funcionario_id = $${paramCounter++}`);
+        values.push(updateEmployeeDto.funcaoFuncionarioId);
+      }
+
       if (updateEmployeeDto.dataAdmissao !== undefined) {
         updates.push(`data_admissao = $${paramCounter++}`);
         values.push(updateEmployeeDto.dataAdmissao);
@@ -284,7 +295,7 @@ export class EmployeesService {
   }
 
   private mapToEmployeeEntity(dbRecord: any): Employee {
-    return {
+    const employee: Employee = {
       id: dbRecord.id,
       nome: dbRecord.nome,
       cpf: dbRecord.cpf,
@@ -292,16 +303,22 @@ export class EmployeesService {
       telefone: dbRecord.telefone,
       rg: dbRecord.rg,
       cidadeId: dbRecord.cidade_id,
-      cidadeNome: dbRecord.cidade_nome,
       cargoId: dbRecord.cargo_id,
-      cargoNome: dbRecord.cargo_nome,
       departamentoId: dbRecord.departamento_id,
-      departamentoNome: dbRecord.departamento_nome,
+      funcaoFuncionarioId: dbRecord.funcao_funcionario_id,
       dataAdmissao: dbRecord.data_admissao,
       dataDemissao: dbRecord.data_demissao,
       ativo: dbRecord.ativo,
       createdAt: dbRecord.created_at,
       updatedAt: dbRecord.updated_at,
     };
+
+    // Campos opcionais que podem não existir na entity base
+    if (dbRecord.cidade_nome && (employee as any).cidadeNome !== undefined) (employee as any).cidadeNome = dbRecord.cidade_nome;
+    if (dbRecord.cargo_nome && (employee as any).cargoNome !== undefined) (employee as any).cargoNome = dbRecord.cargo_nome;
+    if (dbRecord.departamento_nome && (employee as any).departamentoNome !== undefined) (employee as any).departamentoNome = dbRecord.departamento_nome;
+    if (dbRecord.funcao_funcionario_nome && (employee as any).funcaoFuncionarioNome !== undefined) (employee as any).funcaoFuncionarioNome = dbRecord.funcao_funcionario_nome;
+
+    return employee;
   }
 }

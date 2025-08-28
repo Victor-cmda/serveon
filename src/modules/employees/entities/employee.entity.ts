@@ -45,6 +45,12 @@ export class Employee extends BaseEntity {
   orgaoEmissor?: string;
 
   @ApiProperty({
+    description: 'ID da cidade onde o RG foi emitido',
+    example: 1,
+  })
+  rgCidadeId?: number;
+
+  @ApiProperty({
     description: 'Data de nascimento',
     example: '1990-05-15',
   })
@@ -57,10 +63,10 @@ export class Employee extends BaseEntity {
   estadoCivil?: string;
 
   @ApiProperty({
-    description: 'Nacionalidade',
-    example: 'Brasileira',
+    description: 'ID da nacionalidade',
+    example: 1,
   })
-  nacionalidade?: string;
+  nacionalidadeId?: number;
 
   // Campos de Endereço
   @ApiProperty({
@@ -140,6 +146,12 @@ export class Employee extends BaseEntity {
     example: 'Comercial',
   })
   departamentoNome?: string;
+
+  @ApiProperty({
+    description: 'ID da função do funcionário',
+    example: 1,
+  })
+  funcaoFuncionarioId?: number;
 
   @ApiProperty({
     description: 'Data de admissão',

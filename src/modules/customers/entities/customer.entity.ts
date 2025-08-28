@@ -36,17 +36,20 @@ export class Customer extends BaseEntity {
   razaoSocial: string;
 
   @ApiProperty({
-    description: 'Nome Fantasia',
+    description: 'Nome Fantasia (opcional)',
     example: 'XYZ Tecnologia',
+    required: false,
   })
   nomeFantasia?: string;
 
   @ApiProperty({
     description:
-      'Inscrição Estadual ou informações complementares do documento',
+      'Inscrição Estadual ou dados adicionais do documento estrangeiro',
     example: '123456789',
+    required: false,
   })
   inscricaoEstadual?: string;
+
   @ApiProperty({
     description: 'ID do país',
     example: 1,
@@ -54,10 +57,10 @@ export class Customer extends BaseEntity {
   paisId?: number;
 
   @ApiProperty({
-    description: 'Nome do país',
-    example: 'Brasil',
+    description: 'ID da nacionalidade',
+    example: 1,
   })
-  paisNome?: string;
+  nacionalidadeId?: number;
 
   @ApiProperty({
     description: 'ID do estado/província',
@@ -66,82 +69,73 @@ export class Customer extends BaseEntity {
   estadoId?: number;
 
   @ApiProperty({
-    description: 'Endereço',
-    example: 'Av. Brasil',
-  })
-  endereco?: string;
-
-  @ApiProperty({
-    description: 'Número do endereço',
-    example: '123',
-  })
-  numero?: string;
-
-  @ApiProperty({
-    description: 'Complemento do endereço',
-    example: 'Sala 101',
-  })
-  complemento?: string;
-
-  @ApiProperty({
-    description: 'Bairro',
-    example: 'Centro',
-  })
-  bairro?: string;
-  @ApiProperty({
-    description: 'ID da cidade',
+    description: 'ID da cidade no sistema',
     example: 1,
+    required: false,
   })
   cidadeId?: number;
 
   @ApiProperty({
-    description: 'CEP ou código postal',
+    description: 'Endereço',
+    example: 'Av. Brasil',
+    required: false,
+  })
+  endereco?: string;
+
+  @ApiProperty({
+    description: 'Número do endereço (opcional)',
+    example: '123',
+    required: false,
+  })
+  numero?: string;
+
+  @ApiProperty({
+    description: 'Complemento do endereço (opcional)',
+    example: 'Sala 101',
+    required: false,
+  })
+  complemento?: string;
+
+  @ApiProperty({
+    description: 'Bairro (opcional)',
+    example: 'Centro',
+    required: false,
+  })
+  bairro?: string;
+
+  @ApiProperty({
+    description: 'CEP ou Código Postal',
     example: '12345678',
+    required: false,
   })
   cep?: string;
 
   @ApiProperty({
-    description: 'Telefone',
+    description: 'Telefone (opcional)',
     example: '11987654321',
+    required: false,
   })
   telefone?: string;
 
   @ApiProperty({
-    description: 'Email',
+    description: 'Email (opcional)',
     example: 'contato@empresa.com',
+    required: false,
   })
   email?: string;
 
   @ApiProperty({
-    description: 'Nome da cidade',
-    example: 'São Paulo',
-  })
-  cidadeNome?: string;
-
-  @ApiProperty({
-    description: 'Nome do estado',
-    example: 'São Paulo',
-  })
-  estadoNome?: string;
-
-  @ApiProperty({
-    description: 'UF do estado',
-    example: 'SP',
-  })
-  uf?: string;
-  @ApiProperty({
-    description: 'Lista de IDs de destinatários associados ao cliente',
-    example: [1, 2, 3],
-    type: [Number],
-    required: false,
-  })
-  destinatariosIds?: number[];
-
-  @ApiProperty({
-    description: 'Se o cliente é também um destinatário',
+    description: 'Se o cliente também é um destinatário',
     example: true,
+    default: true,
   })
-  isDestinatario: boolean;
+  isDestinatario?: boolean;
+
+  @ApiProperty({
+    description: 'Limite de crédito do cliente',
+    example: 50000.00,
+  })
+  limiteCredito: number;
 
   @ApiProperty({
     description: 'ID da condição de pagamento',
@@ -149,11 +143,4 @@ export class Customer extends BaseEntity {
     required: false,
   })
   condicaoPagamentoId?: number;
-
-  @ApiProperty({
-    description: 'Nome da condição de pagamento',
-    example: 'À Vista',
-    required: false,
-  })
-  condicaoPagamentoNome?: string;
 }

@@ -2715,6 +2715,646 @@
           "Unit Measures"
         ]
       }
+    },
+    "/api/employee-functions": {
+      "post": {
+        "operationId": "EmployeeFunctionsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmployeeFunctionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Função criada com sucesso."
+          },
+          "400": {
+            "description": "Dados inválidos."
+          }
+        },
+        "summary": "Criar nova função de funcionário",
+        "tags": [
+          "employee-functions"
+        ]
+      },
+      "get": {
+        "operationId": "EmployeeFunctionsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de funções retornada com sucesso."
+          }
+        },
+        "summary": "Listar todas as funções de funcionários",
+        "tags": [
+          "employee-functions"
+        ]
+      }
+    },
+    "/api/employee-functions/{id}": {
+      "get": {
+        "operationId": "EmployeeFunctionsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Função encontrada."
+          },
+          "404": {
+            "description": "Função não encontrada."
+          }
+        },
+        "summary": "Buscar função por ID",
+        "tags": [
+          "employee-functions"
+        ]
+      },
+      "patch": {
+        "operationId": "EmployeeFunctionsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEmployeeFunctionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Função atualizada com sucesso."
+          },
+          "404": {
+            "description": "Função não encontrada."
+          }
+        },
+        "summary": "Atualizar função",
+        "tags": [
+          "employee-functions"
+        ]
+      },
+      "delete": {
+        "operationId": "EmployeeFunctionsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Função deletada com sucesso."
+          },
+          "404": {
+            "description": "Função não encontrada."
+          }
+        },
+        "summary": "Deletar função",
+        "tags": [
+          "employee-functions"
+        ]
+      }
+    },
+    "/api/transporters": {
+      "post": {
+        "operationId": "TransportersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTransporterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Transportadora criada com sucesso."
+          },
+          "400": {
+            "description": "Dados inválidos."
+          }
+        },
+        "summary": "Criar nova transportadora",
+        "tags": [
+          "transporters"
+        ]
+      },
+      "get": {
+        "operationId": "TransportersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de transportadoras retornada com sucesso."
+          }
+        },
+        "summary": "Listar todas as transportadoras",
+        "tags": [
+          "transporters"
+        ]
+      }
+    },
+    "/api/transporters/{id}": {
+      "get": {
+        "operationId": "TransportersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transportadora encontrada."
+          },
+          "404": {
+            "description": "Transportadora não encontrada."
+          }
+        },
+        "summary": "Buscar transportadora por ID",
+        "tags": [
+          "transporters"
+        ]
+      },
+      "patch": {
+        "operationId": "TransportersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTransporterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transportadora atualizada com sucesso."
+          },
+          "404": {
+            "description": "Transportadora não encontrada."
+          }
+        },
+        "summary": "Atualizar transportadora",
+        "tags": [
+          "transporters"
+        ]
+      },
+      "delete": {
+        "operationId": "TransportersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transportadora deletada com sucesso."
+          },
+          "404": {
+            "description": "Transportadora não encontrada."
+          }
+        },
+        "summary": "Deletar transportadora",
+        "tags": [
+          "transporters"
+        ]
+      }
+    },
+    "/api/vehicles": {
+      "post": {
+        "operationId": "VehiclesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVehicleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Veículo criado com sucesso."
+          },
+          "400": {
+            "description": "Dados inválidos."
+          }
+        },
+        "summary": "Criar novo veículo",
+        "tags": [
+          "vehicles"
+        ]
+      },
+      "get": {
+        "operationId": "VehiclesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de veículos retornada com sucesso."
+          }
+        },
+        "summary": "Listar todos os veículos",
+        "tags": [
+          "vehicles"
+        ]
+      }
+    },
+    "/api/vehicles/{id}": {
+      "get": {
+        "operationId": "VehiclesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Veículo encontrado."
+          },
+          "404": {
+            "description": "Veículo não encontrado."
+          }
+        },
+        "summary": "Buscar veículo por ID",
+        "tags": [
+          "vehicles"
+        ]
+      },
+      "patch": {
+        "operationId": "VehiclesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVehicleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Veículo atualizado com sucesso."
+          },
+          "404": {
+            "description": "Veículo não encontrado."
+          }
+        },
+        "summary": "Atualizar veículo",
+        "tags": [
+          "vehicles"
+        ]
+      },
+      "delete": {
+        "operationId": "VehiclesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Veículo deletado com sucesso."
+          },
+          "404": {
+            "description": "Veículo não encontrado."
+          }
+        },
+        "summary": "Deletar veículo",
+        "tags": [
+          "vehicles"
+        ]
+      }
+    },
+    "/api/purchases": {
+      "post": {
+        "operationId": "PurchasesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePurchaseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Compra criada com sucesso."
+          },
+          "400": {
+            "description": "Dados inválidos."
+          }
+        },
+        "summary": "Criar nova compra",
+        "tags": [
+          "purchases"
+        ]
+      },
+      "get": {
+        "operationId": "PurchasesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de compras retornada com sucesso."
+          }
+        },
+        "summary": "Listar todas as compras",
+        "tags": [
+          "purchases"
+        ]
+      }
+    },
+    "/api/purchases/{id}": {
+      "get": {
+        "operationId": "PurchasesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compra encontrada."
+          },
+          "404": {
+            "description": "Compra não encontrada."
+          }
+        },
+        "summary": "Buscar compra por ID",
+        "tags": [
+          "purchases"
+        ]
+      },
+      "patch": {
+        "operationId": "PurchasesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePurchaseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Compra atualizada com sucesso."
+          },
+          "404": {
+            "description": "Compra não encontrada."
+          }
+        },
+        "summary": "Atualizar compra",
+        "tags": [
+          "purchases"
+        ]
+      },
+      "delete": {
+        "operationId": "PurchasesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compra deletada com sucesso."
+          },
+          "404": {
+            "description": "Compra não encontrada."
+          }
+        },
+        "summary": "Deletar compra",
+        "tags": [
+          "purchases"
+        ]
+      }
+    },
+    "/api/sales": {
+      "post": {
+        "operationId": "SalesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSaleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Venda criada com sucesso."
+          },
+          "400": {
+            "description": "Dados inválidos."
+          }
+        },
+        "summary": "Criar nova venda",
+        "tags": [
+          "sales"
+        ]
+      },
+      "get": {
+        "operationId": "SalesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de vendas retornada com sucesso."
+          }
+        },
+        "summary": "Listar todas as vendas",
+        "tags": [
+          "sales"
+        ]
+      }
+    },
+    "/api/sales/{id}": {
+      "get": {
+        "operationId": "SalesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Venda encontrada."
+          },
+          "404": {
+            "description": "Venda não encontrada."
+          }
+        },
+        "summary": "Buscar venda por ID",
+        "tags": [
+          "sales"
+        ]
+      },
+      "patch": {
+        "operationId": "SalesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSaleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Venda atualizada com sucesso."
+          },
+          "404": {
+            "description": "Venda não encontrada."
+          }
+        },
+        "summary": "Atualizar venda",
+        "tags": [
+          "sales"
+        ]
+      },
+      "delete": {
+        "operationId": "SalesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Venda deletada com sucesso."
+          },
+          "404": {
+            "description": "Venda não encontrada."
+          }
+        },
+        "summary": "Deletar venda",
+        "tags": [
+          "sales"
+        ]
+      }
     }
   },
   "info": {
@@ -2772,6 +3412,11 @@
             "description": "Órgão emissor do RG",
             "example": "SSP/SP"
           },
+          "rgCidadeId": {
+            "type": "number",
+            "description": "ID da cidade onde o RG foi emitido",
+            "example": 1
+          },
           "dataNascimento": {
             "format": "date-time",
             "type": "string",
@@ -2783,10 +3428,10 @@
             "description": "Estado civil",
             "example": "Solteiro"
           },
-          "nacionalidade": {
-            "type": "string",
-            "description": "Nacionalidade",
-            "example": "Brasileira"
+          "nacionalidadeId": {
+            "type": "number",
+            "description": "ID da nacionalidade",
+            "example": 1
           },
           "cep": {
             "type": "string",
@@ -2826,6 +3471,11 @@
           "departamentoId": {
             "type": "number",
             "description": "ID do departamento do funcionário",
+            "example": 1
+          },
+          "funcaoFuncionarioId": {
+            "type": "number",
+            "description": "ID da função do funcionário",
             "example": 1
           },
           "dataAdmissao": {
@@ -2918,6 +3568,11 @@
             "description": "Órgão emissor do RG",
             "example": "SSP/SP"
           },
+          "rgCidadeId": {
+            "type": "number",
+            "description": "ID da cidade onde o RG foi emitido",
+            "example": 1
+          },
           "dataNascimento": {
             "format": "date-time",
             "type": "string",
@@ -2929,10 +3584,10 @@
             "description": "Estado civil",
             "example": "Solteiro"
           },
-          "nacionalidade": {
-            "type": "string",
-            "description": "Nacionalidade",
-            "example": "Brasileira"
+          "nacionalidadeId": {
+            "type": "number",
+            "description": "ID da nacionalidade",
+            "example": 1
           },
           "cep": {
             "type": "string",
@@ -2999,6 +3654,11 @@
             "description": "Nome do departamento do funcionário",
             "example": "Comercial"
           },
+          "funcaoFuncionarioId": {
+            "type": "number",
+            "description": "ID da função do funcionário",
+            "example": 1
+          },
           "dataAdmissao": {
             "format": "date-time",
             "type": "string",
@@ -3034,9 +3694,10 @@
           "celular",
           "rg",
           "orgaoEmissor",
+          "rgCidadeId",
           "dataNascimento",
           "estadoCivil",
-          "nacionalidade",
+          "nacionalidadeId",
           "cep",
           "endereco",
           "numero",
@@ -3050,6 +3711,7 @@
           "cargoNome",
           "departamentoId",
           "departamentoNome",
+          "funcaoFuncionarioId",
           "dataAdmissao",
           "dataDemissao",
           "salario",
@@ -3436,6 +4098,16 @@
             "example": true,
             "default": true
           },
+          "nacionalidadeId": {
+            "type": "number",
+            "description": "ID da nacionalidade",
+            "example": 1
+          },
+          "limiteCredito": {
+            "type": "number",
+            "description": "Limite de crédito do cliente",
+            "example": 50000
+          },
           "condicaoPagamentoId": {
             "type": "number",
             "description": "ID da condição de pagamento",
@@ -3516,12 +4188,12 @@
           },
           "nomeFantasia": {
             "type": "string",
-            "description": "Nome Fantasia",
+            "description": "Nome Fantasia (opcional)",
             "example": "XYZ Tecnologia"
           },
           "inscricaoEstadual": {
             "type": "string",
-            "description": "Inscrição Estadual ou informações complementares do documento",
+            "description": "Inscrição Estadual ou dados adicionais do documento estrangeiro",
             "example": "123456789"
           },
           "paisId": {
@@ -3529,14 +4201,19 @@
             "description": "ID do país",
             "example": 1
           },
-          "paisNome": {
-            "type": "string",
-            "description": "Nome do país",
-            "example": "Brasil"
+          "nacionalidadeId": {
+            "type": "number",
+            "description": "ID da nacionalidade",
+            "example": 1
           },
           "estadoId": {
             "type": "number",
             "description": "ID do estado/província",
+            "example": 1
+          },
+          "cidadeId": {
+            "type": "number",
+            "description": "ID da cidade no sistema",
             "example": 1
           },
           "endereco": {
@@ -3546,80 +4223,49 @@
           },
           "numero": {
             "type": "string",
-            "description": "Número do endereço",
+            "description": "Número do endereço (opcional)",
             "example": "123"
           },
           "complemento": {
             "type": "string",
-            "description": "Complemento do endereço",
+            "description": "Complemento do endereço (opcional)",
             "example": "Sala 101"
           },
           "bairro": {
             "type": "string",
-            "description": "Bairro",
+            "description": "Bairro (opcional)",
             "example": "Centro"
-          },
-          "cidadeId": {
-            "type": "number",
-            "description": "ID da cidade",
-            "example": 1
           },
           "cep": {
             "type": "string",
-            "description": "CEP ou código postal",
+            "description": "CEP ou Código Postal",
             "example": "12345678"
           },
           "telefone": {
             "type": "string",
-            "description": "Telefone",
+            "description": "Telefone (opcional)",
             "example": "11987654321"
           },
           "email": {
             "type": "string",
-            "description": "Email",
+            "description": "Email (opcional)",
             "example": "contato@empresa.com"
-          },
-          "cidadeNome": {
-            "type": "string",
-            "description": "Nome da cidade",
-            "example": "São Paulo"
-          },
-          "estadoNome": {
-            "type": "string",
-            "description": "Nome do estado",
-            "example": "São Paulo"
-          },
-          "uf": {
-            "type": "string",
-            "description": "UF do estado",
-            "example": "SP"
-          },
-          "destinatariosIds": {
-            "description": "Lista de IDs de destinatários associados ao cliente",
-            "example": [
-              1,
-              2,
-              3
-            ],
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
           },
           "isDestinatario": {
             "type": "boolean",
-            "description": "Se o cliente é também um destinatário",
-            "example": true
+            "description": "Se o cliente também é um destinatário",
+            "example": true,
+            "default": true
+          },
+          "limiteCredito": {
+            "type": "number",
+            "description": "Limite de crédito do cliente",
+            "example": 50000
           },
           "condicaoPagamentoId": {
             "type": "number",
             "description": "ID da condição de pagamento",
             "example": 1
-          },
-          "condicaoPagamentoNome": {
-            "type": "string",
-            "description": "Nome da condição de pagamento",
-            "example": "À Vista"
           }
         },
         "required": [
@@ -3631,23 +4277,11 @@
           "tipo",
           "isEstrangeiro",
           "razaoSocial",
-          "nomeFantasia",
-          "inscricaoEstadual",
           "paisId",
-          "paisNome",
+          "nacionalidadeId",
           "estadoId",
-          "endereco",
-          "numero",
-          "complemento",
-          "bairro",
-          "cidadeId",
-          "cep",
-          "telefone",
-          "email",
-          "cidadeNome",
-          "estadoNome",
-          "uf",
-          "isDestinatario"
+          "isDestinatario",
+          "limiteCredito"
         ]
       },
       "UpdateCustomerDto": {
@@ -4051,6 +4685,16 @@
             "description": "Email",
             "example": "contato@empresa.com"
           },
+          "nacionalidadeId": {
+            "type": "number",
+            "description": "ID da nacionalidade",
+            "example": 1
+          },
+          "limiteCredito": {
+            "type": "number",
+            "description": "Limite de crédito do fornecedor",
+            "example": 10000
+          },
           "condicaoPagamentoId": {
             "type": "number",
             "description": "ID da condição de pagamento",
@@ -4152,10 +4796,10 @@
             "description": "ID do país",
             "example": 1
           },
-          "paisNome": {
-            "type": "string",
-            "description": "Nome do país",
-            "example": "Brasil"
+          "nacionalidadeId": {
+            "type": "number",
+            "description": "ID da nacionalidade",
+            "example": 1
           },
           "estadoId": {
             "type": "number",
@@ -4187,16 +4831,6 @@
             "description": "ID da cidade",
             "example": 1
           },
-          "cidadeNome": {
-            "type": "string",
-            "description": "Nome da cidade",
-            "example": "São Paulo"
-          },
-          "uf": {
-            "type": "string",
-            "description": "UF da cidade",
-            "example": "SP"
-          },
           "cep": {
             "type": "string",
             "description": "CEP",
@@ -4212,15 +4846,15 @@
             "description": "Email",
             "example": "contato@empresa.com"
           },
+          "limiteCredito": {
+            "type": "number",
+            "description": "Limite de crédito",
+            "example": 10000
+          },
           "condicaoPagamentoId": {
             "type": "number",
             "description": "ID da condição de pagamento",
             "example": 1
-          },
-          "condicaoPagamentoNome": {
-            "type": "string",
-            "description": "Nome da condição de pagamento",
-            "example": "À Vista"
           },
           "website": {
             "type": "string",
@@ -4255,20 +4889,18 @@
           "nomeFantasia",
           "inscricaoEstadual",
           "paisId",
-          "paisNome",
+          "nacionalidadeId",
           "estadoId",
           "endereco",
           "numero",
           "complemento",
           "bairro",
           "cidadeId",
-          "cidadeNome",
-          "uf",
           "cep",
           "telefone",
           "email",
+          "limiteCredito",
           "condicaoPagamentoId",
-          "condicaoPagamentoNome",
           "website",
           "observacoes",
           "responsavel",
@@ -5017,6 +5649,576 @@
             "description": "Status da unidade de medida (ativo/inativo)",
             "example": true,
             "default": true
+          }
+        }
+      },
+      "CreateEmployeeFunctionDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome da função do funcionário",
+            "example": "Vendedor"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição da função",
+            "example": "Responsável por vendas e atendimento ao cliente"
+          }
+        },
+        "required": [
+          "nome"
+        ]
+      },
+      "UpdateEmployeeFunctionDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome da função do funcionário",
+            "example": "Vendedor"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Descrição da função",
+            "example": "Responsável por vendas e atendimento ao cliente"
+          }
+        }
+      },
+      "CreateTransporterDto": {
+        "type": "object",
+        "properties": {
+          "cnpj": {
+            "type": "string",
+            "description": "CNPJ da transportadora",
+            "example": "12345678000195"
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome da transportadora",
+            "example": "Transportes Rápidos Ltda"
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "description": "Nome fantasia da transportadora",
+            "example": "Rápidos Express"
+          },
+          "paisId": {
+            "type": "number",
+            "description": "ID do país",
+            "example": 1
+          },
+          "estadoId": {
+            "type": "number",
+            "description": "ID do estado",
+            "example": 1
+          },
+          "cidadeId": {
+            "type": "number",
+            "description": "ID da cidade",
+            "example": 1
+          },
+          "endereco": {
+            "type": "string",
+            "description": "Endereço da transportadora",
+            "example": "Av. das Transportadoras, 123"
+          },
+          "numero": {
+            "type": "string",
+            "description": "Número do endereço",
+            "example": "123"
+          },
+          "complemento": {
+            "type": "string",
+            "description": "Complemento do endereço",
+            "example": "Galpão 5"
+          },
+          "bairro": {
+            "type": "string",
+            "description": "Bairro",
+            "example": "Distrito Industrial"
+          },
+          "cep": {
+            "type": "string",
+            "description": "CEP",
+            "example": "12345-678"
+          },
+          "website": {
+            "type": "string",
+            "description": "Website da transportadora",
+            "example": "https://www.rapidosexpress.com.br"
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações sobre a transportadora",
+            "example": "Especializada em cargas frágeis"
+          }
+        },
+        "required": [
+          "cnpj",
+          "nome"
+        ]
+      },
+      "UpdateTransporterDto": {
+        "type": "object",
+        "properties": {
+          "cnpj": {
+            "type": "string",
+            "description": "CNPJ da transportadora",
+            "example": "12345678000195"
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome da transportadora",
+            "example": "Transportes Rápidos Ltda"
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "description": "Nome fantasia da transportadora",
+            "example": "Rápidos Express"
+          },
+          "paisId": {
+            "type": "number",
+            "description": "ID do país",
+            "example": 1
+          },
+          "estadoId": {
+            "type": "number",
+            "description": "ID do estado",
+            "example": 1
+          },
+          "cidadeId": {
+            "type": "number",
+            "description": "ID da cidade",
+            "example": 1
+          },
+          "endereco": {
+            "type": "string",
+            "description": "Endereço da transportadora",
+            "example": "Av. das Transportadoras, 123"
+          },
+          "numero": {
+            "type": "string",
+            "description": "Número do endereço",
+            "example": "123"
+          },
+          "complemento": {
+            "type": "string",
+            "description": "Complemento do endereço",
+            "example": "Galpão 5"
+          },
+          "bairro": {
+            "type": "string",
+            "description": "Bairro",
+            "example": "Distrito Industrial"
+          },
+          "cep": {
+            "type": "string",
+            "description": "CEP",
+            "example": "12345-678"
+          },
+          "website": {
+            "type": "string",
+            "description": "Website da transportadora",
+            "example": "https://www.rapidosexpress.com.br"
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações sobre a transportadora",
+            "example": "Especializada em cargas frágeis"
+          }
+        }
+      },
+      "CreateVehicleDto": {
+        "type": "object",
+        "properties": {
+          "placa": {
+            "type": "string",
+            "description": "Placa do veículo",
+            "example": "ABC-1234"
+          },
+          "marca": {
+            "type": "string",
+            "description": "Marca do veículo",
+            "example": "Volvo"
+          },
+          "modelo": {
+            "type": "string",
+            "description": "Modelo do veículo",
+            "example": "FH 540"
+          },
+          "ano": {
+            "type": "number",
+            "description": "Ano de fabricação",
+            "example": 2020
+          },
+          "cor": {
+            "type": "string",
+            "description": "Cor do veículo",
+            "example": "Branco"
+          },
+          "tipo": {
+            "type": "string",
+            "description": "Tipo do veículo",
+            "example": "CAMINHAO",
+            "enum": [
+              "CAMINHAO",
+              "VAN",
+              "CARRETA",
+              "UTILITARIO",
+              "OUTROS"
+            ]
+          },
+          "capacidadeCarga": {
+            "type": "number",
+            "description": "Capacidade de carga em kg",
+            "example": 15000
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações sobre o veículo",
+            "example": "Veículo com baú refrigerado"
+          }
+        },
+        "required": [
+          "placa",
+          "marca",
+          "modelo",
+          "ano",
+          "tipo"
+        ]
+      },
+      "UpdateVehicleDto": {
+        "type": "object",
+        "properties": {
+          "placa": {
+            "type": "string",
+            "description": "Placa do veículo",
+            "example": "ABC-1234"
+          },
+          "marca": {
+            "type": "string",
+            "description": "Marca do veículo",
+            "example": "Volvo"
+          },
+          "modelo": {
+            "type": "string",
+            "description": "Modelo do veículo",
+            "example": "FH 540"
+          },
+          "ano": {
+            "type": "number",
+            "description": "Ano de fabricação",
+            "example": 2020
+          },
+          "cor": {
+            "type": "string",
+            "description": "Cor do veículo",
+            "example": "Branco"
+          },
+          "tipo": {
+            "type": "string",
+            "description": "Tipo do veículo",
+            "example": "CAMINHAO",
+            "enum": [
+              "CAMINHAO",
+              "VAN",
+              "CARRETA",
+              "UTILITARIO",
+              "OUTROS"
+            ]
+          },
+          "capacidadeCarga": {
+            "type": "number",
+            "description": "Capacidade de carga em kg",
+            "example": 15000
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações sobre o veículo",
+            "example": "Veículo com baú refrigerado"
+          }
+        }
+      },
+      "CreatePurchaseDto": {
+        "type": "object",
+        "properties": {
+          "fornecedorId": {
+            "type": "number",
+            "description": "ID do fornecedor",
+            "example": 1
+          },
+          "condicaoPagamentoId": {
+            "type": "number",
+            "description": "ID da condição de pagamento",
+            "example": 1
+          },
+          "funcionarioId": {
+            "type": "number",
+            "description": "ID do funcionário responsável pela compra",
+            "example": 1
+          },
+          "dataCompra": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data da compra",
+            "example": "2024-01-15"
+          },
+          "dataVencimento": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de vencimento",
+            "example": "2024-02-15"
+          },
+          "valorTotal": {
+            "type": "number",
+            "description": "Valor total da compra",
+            "example": 1500.5
+          },
+          "valorDesconto": {
+            "type": "number",
+            "description": "Valor de desconto aplicado",
+            "example": 50,
+            "default": 0
+          },
+          "status": {
+            "type": "string",
+            "description": "Status da compra",
+            "example": "PENDENTE",
+            "enum": [
+              "PENDENTE",
+              "CONFIRMADA",
+              "CANCELADA",
+              "ENTREGUE"
+            ],
+            "default": "PENDENTE"
+          },
+          "transportadoraId": {
+            "type": "number",
+            "description": "ID da transportadora",
+            "example": 1
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações sobre a compra",
+            "example": "Compra de materiais de escritório"
+          }
+        },
+        "required": [
+          "fornecedorId",
+          "condicaoPagamentoId",
+          "funcionarioId",
+          "dataCompra",
+          "dataVencimento",
+          "valorTotal",
+          "valorDesconto",
+          "status"
+        ]
+      },
+      "UpdatePurchaseDto": {
+        "type": "object",
+        "properties": {
+          "fornecedorId": {
+            "type": "number",
+            "description": "ID do fornecedor",
+            "example": 1
+          },
+          "condicaoPagamentoId": {
+            "type": "number",
+            "description": "ID da condição de pagamento",
+            "example": 1
+          },
+          "funcionarioId": {
+            "type": "number",
+            "description": "ID do funcionário responsável pela compra",
+            "example": 1
+          },
+          "dataCompra": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data da compra",
+            "example": "2024-01-15"
+          },
+          "dataVencimento": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de vencimento",
+            "example": "2024-02-15"
+          },
+          "valorTotal": {
+            "type": "number",
+            "description": "Valor total da compra",
+            "example": 1500.5
+          },
+          "valorDesconto": {
+            "type": "number",
+            "description": "Valor de desconto aplicado",
+            "example": 50,
+            "default": 0
+          },
+          "status": {
+            "type": "string",
+            "description": "Status da compra",
+            "example": "PENDENTE",
+            "enum": [
+              "PENDENTE",
+              "CONFIRMADA",
+              "CANCELADA",
+              "ENTREGUE"
+            ],
+            "default": "PENDENTE"
+          },
+          "transportadoraId": {
+            "type": "number",
+            "description": "ID da transportadora",
+            "example": 1
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações sobre a compra",
+            "example": "Compra de materiais de escritório"
+          }
+        }
+      },
+      "CreateSaleDto": {
+        "type": "object",
+        "properties": {
+          "clienteId": {
+            "type": "number",
+            "description": "ID do cliente",
+            "example": 1
+          },
+          "condicaoPagamentoId": {
+            "type": "number",
+            "description": "ID da condição de pagamento",
+            "example": 1
+          },
+          "funcionarioId": {
+            "type": "number",
+            "description": "ID do funcionário responsável pela venda",
+            "example": 1
+          },
+          "dataVenda": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data da venda",
+            "example": "2024-01-15"
+          },
+          "dataVencimento": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de vencimento",
+            "example": "2024-02-15"
+          },
+          "valorTotal": {
+            "type": "number",
+            "description": "Valor total da venda",
+            "example": 2500
+          },
+          "valorDesconto": {
+            "type": "number",
+            "description": "Valor de desconto aplicado",
+            "example": 100,
+            "default": 0
+          },
+          "status": {
+            "type": "string",
+            "description": "Status da venda",
+            "example": "ORCAMENTO",
+            "enum": [
+              "ORCAMENTO",
+              "CONFIRMADA",
+              "CANCELADA",
+              "ENTREGUE",
+              "FATURADA"
+            ],
+            "default": "ORCAMENTO"
+          },
+          "transportadoraId": {
+            "type": "number",
+            "description": "ID da transportadora",
+            "example": 1
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações sobre a venda",
+            "example": "Venda de produtos eletrônicos"
+          }
+        },
+        "required": [
+          "clienteId",
+          "condicaoPagamentoId",
+          "funcionarioId",
+          "dataVenda",
+          "dataVencimento",
+          "valorTotal",
+          "valorDesconto",
+          "status"
+        ]
+      },
+      "UpdateSaleDto": {
+        "type": "object",
+        "properties": {
+          "clienteId": {
+            "type": "number",
+            "description": "ID do cliente",
+            "example": 1
+          },
+          "condicaoPagamentoId": {
+            "type": "number",
+            "description": "ID da condição de pagamento",
+            "example": 1
+          },
+          "funcionarioId": {
+            "type": "number",
+            "description": "ID do funcionário responsável pela venda",
+            "example": 1
+          },
+          "dataVenda": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data da venda",
+            "example": "2024-01-15"
+          },
+          "dataVencimento": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de vencimento",
+            "example": "2024-02-15"
+          },
+          "valorTotal": {
+            "type": "number",
+            "description": "Valor total da venda",
+            "example": 2500
+          },
+          "valorDesconto": {
+            "type": "number",
+            "description": "Valor de desconto aplicado",
+            "example": 100,
+            "default": 0
+          },
+          "status": {
+            "type": "string",
+            "description": "Status da venda",
+            "example": "ORCAMENTO",
+            "enum": [
+              "ORCAMENTO",
+              "CONFIRMADA",
+              "CANCELADA",
+              "ENTREGUE",
+              "FATURADA"
+            ],
+            "default": "ORCAMENTO"
+          },
+          "transportadoraId": {
+            "type": "number",
+            "description": "ID da transportadora",
+            "example": 1
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações sobre a venda",
+            "example": "Venda de produtos eletrônicos"
           }
         }
       }

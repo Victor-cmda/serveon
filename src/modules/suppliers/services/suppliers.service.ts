@@ -38,13 +38,13 @@ export class SuppliersService {
         const result = await client.query(
           `INSERT INTO dbo.fornecedor
             (cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
-            nome_fantasia, inscricao_estadual, 
+            nome_fantasia, inscricao_estadual, pais_id, nacionalidade_id,
             endereco, numero, complemento, bairro, 
-            cidade_id, cep, telefone, email, website, responsavel, 
+            cidade_id, cep, telefone, email, limite_credito, website, responsavel, 
             celular_responsavel, observacoes, condicao_pagamento_id, ativo)
           VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 
-            $14, $15, $16, $17, $18, $19, $20, $21)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 
+            $16, $17, $18, $19, $20, $21, $22, $23, $24)
           RETURNING *`,
           [
             createSupplierDto.cnpjCpf,
@@ -54,6 +54,8 @@ export class SuppliersService {
             createSupplierDto.razaoSocial,
             createSupplierDto.nomeFantasia || null,
             createSupplierDto.inscricaoEstadual || null,
+            createSupplierDto.paisId || null,
+            createSupplierDto.nacionalidadeId || null,
             createSupplierDto.endereco || null,
             createSupplierDto.numero || null,
             createSupplierDto.complemento || null,
@@ -62,6 +64,7 @@ export class SuppliersService {
             createSupplierDto.cep || null,
             createSupplierDto.telefone || null,
             createSupplierDto.email || null,
+            createSupplierDto.limiteCredito || 0.00,
             createSupplierDto.website || null,
             createSupplierDto.responsavel || null,
             createSupplierDto.celularResponsavel || null,
@@ -104,11 +107,13 @@ export class SuppliersService {
                  c.nome as cidade_nome, 
                  e.uf,
                  p.nome as pais_nome,
+                 n.nome as nacionalidade_nome,
                  cp.nome as condicao_pagamento_nome
           FROM dbo.fornecedor f
           LEFT JOIN dbo.cidade c ON f.cidade_id = c.id
           LEFT JOIN dbo.estado e ON c.estado_id = e.id
           LEFT JOIN dbo.pais p ON e.pais_id = p.id
+          LEFT JOIN dbo.pais n ON f.nacionalidade_id = n.id
           LEFT JOIN dbo.condicao_pagamento cp ON f.condicao_pagamento_id = cp.id
           ORDER BY f.razao_social ASC
         `);
@@ -132,11 +137,13 @@ export class SuppliersService {
                  c.nome as cidade_nome, 
                  e.uf,
                  p.nome as pais_nome,
+                 n.nome as nacionalidade_nome,
                  cp.nome as condicao_pagamento_nome
           FROM dbo.fornecedor f
           LEFT JOIN dbo.cidade c ON f.cidade_id = c.id
           LEFT JOIN dbo.estado e ON c.estado_id = e.id
           LEFT JOIN dbo.pais p ON e.pais_id = p.id
+          LEFT JOIN dbo.pais n ON f.nacionalidade_id = n.id
           LEFT JOIN dbo.condicao_pagamento cp ON f.condicao_pagamento_id = cp.id
           WHERE f.id = $1
         `,
@@ -256,6 +263,9 @@ export class SuppliersService {
           razaoSocial: 'razao_social',
           nomeFantasia: 'nome_fantasia',
           inscricaoEstadual: 'inscricao_estadual',
+          paisId: 'pais_id',
+          nacionalidadeId: 'nacionalidade_id',
+          estadoId: 'estado_id',
           endereco: 'endereco',
           numero: 'numero',
           complemento: 'complemento',
@@ -264,6 +274,7 @@ export class SuppliersService {
           cep: 'cep',
           telefone: 'telefone',
           email: 'email',
+          limiteCredito: 'limite_credito',
           website: 'website',
           responsavel: 'responsavel',
           celularResponsavel: 'celular_responsavel',
@@ -427,23 +438,21 @@ export class SuppliersService {
       nomeFantasia: row.nome_fantasia,
       inscricaoEstadual: row.inscricao_estadual,
       paisId: row.pais_id,
-      paisNome: row.pais_nome,
+      nacionalidadeId: row.nacionalidade_id,
       estadoId: row.estado_id,
       endereco: row.endereco,
       numero: row.numero,
       complemento: row.complemento,
       bairro: row.bairro,
       cidadeId: row.cidade_id,
-      cidadeNome: row.cidade_nome,
-      uf: row.uf,
       cep: row.cep,
       telefone: row.telefone,
       email: row.email,
+      limiteCredito: row.limite_credito,
       ativo: row.ativo,
       createdAt: row.created_at?.toISOString(),
       updatedAt: row.updated_at?.toISOString(),
       condicaoPagamentoId: row.condicao_pagamento_id,
-      condicaoPagamentoNome: row.condicao_pagamento_nome,
       website: row.website,
       observacoes: row.observacoes,
       responsavel: row.responsavel,

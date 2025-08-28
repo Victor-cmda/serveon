@@ -83,6 +83,15 @@ export class CreateEmployeeDto {
   orgaoEmissor?: string;
 
   @ApiProperty({
+    description: 'ID da cidade onde o RG foi emitido',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'ID da cidade do RG deve ser um número' })
+  rgCidadeId?: number;
+
+  @ApiProperty({
     description: 'Data de nascimento',
     example: '1990-05-15',
     required: false,
@@ -103,14 +112,13 @@ export class CreateEmployeeDto {
   estadoCivil?: string;
 
   @ApiProperty({
-    description: 'Nacionalidade',
-    example: 'Brasileira',
+    description: 'ID da nacionalidade',
+    example: 1,
     required: false,
   })
   @IsOptional()
-  @IsString({ message: 'Nacionalidade deve ser uma string' })
-  @MaxLength(30, { message: 'Nacionalidade deve ter no máximo 30 caracteres' })
-  nacionalidade?: string;
+  @IsNumber({}, { message: 'ID da nacionalidade deve ser um número' })
+  nacionalidadeId?: number;
 
   // Campos de Endereço
   @ApiProperty({
@@ -189,6 +197,15 @@ export class CreateEmployeeDto {
   @IsOptional()
   @IsNumber({}, { message: 'ID do departamento deve ser um número' })
   departamentoId?: number;
+
+  @ApiProperty({
+    description: 'ID da função do funcionário',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'ID da função deve ser um número' })
+  funcaoFuncionarioId?: number;
 
   @ApiProperty({
     description: 'Data de admissão no formato YYYY-MM-DD',

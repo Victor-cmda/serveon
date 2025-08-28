@@ -47,6 +47,7 @@ export class Supplier extends BaseEntity {
     example: '123456789',
   })
   inscricaoEstadual?: string;
+
   @ApiProperty({
     description: 'ID do país',
     example: 1,
@@ -54,10 +55,10 @@ export class Supplier extends BaseEntity {
   paisId?: number;
 
   @ApiProperty({
-    description: 'Nome do país',
-    example: 'Brasil',
+    description: 'ID da nacionalidade',
+    example: 1,
   })
-  paisNome?: string;
+  nacionalidadeId?: number;
 
   @ApiProperty({
     description: 'ID do estado/província',
@@ -88,23 +89,12 @@ export class Supplier extends BaseEntity {
     example: 'Centro',
   })
   bairro?: string;
+
   @ApiProperty({
     description: 'ID da cidade',
     example: 1,
   })
   cidadeId?: number;
-
-  @ApiProperty({
-    description: 'Nome da cidade',
-    example: 'São Paulo',
-  })
-  cidadeNome?: string;
-
-  @ApiProperty({
-    description: 'UF da cidade',
-    example: 'SP',
-  })
-  uf?: string;
 
   @ApiProperty({
     description: 'CEP',
@@ -123,17 +113,18 @@ export class Supplier extends BaseEntity {
     example: 'contato@empresa.com',
   })
   email?: string;
+
+  @ApiProperty({
+    description: 'Limite de crédito',
+    example: 10000.00,
+  })
+  limiteCredito: number;
+
   @ApiProperty({
     description: 'ID da condição de pagamento',
     example: 1,
   })
   condicaoPagamentoId?: number;
-
-  @ApiProperty({
-    description: 'Nome da condição de pagamento',
-    example: 'À Vista',
-  })
-  condicaoPagamentoNome?: string;
 
   // Campos específicos para fornecedores
   @ApiProperty({
