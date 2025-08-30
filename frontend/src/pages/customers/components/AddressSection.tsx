@@ -8,7 +8,6 @@ import {
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
-import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { City } from '../../../types/location';
 import CEPField from '../../../components/CEPField';
@@ -196,29 +195,6 @@ const AddressSection = ({
                     </div>
                   </FormControl>
                 </div>
-                {selectedCity && (
-                  <div className="mt-1 flex items-center">
-                    <Badge variant="outline" className="mr-2">
-                      {selectedCity.estadoNome} / {selectedCity.uf}
-                    </Badge>
-                    {selectedCity.paisNome && (
-                      <Badge
-                        variant={watchIsEstrangeiro ? 'secondary' : 'outline'}
-                      >
-                        {selectedCity.paisNome}
-                        {watchIsEstrangeiro && ' (Estrangeiro)'}
-                      </Badge>
-                    )}
-                  </div>
-                )}
-                {field.value && !selectedCity && (
-                  <div className="mt-1">
-                    <Badge variant="outline">
-                      Cidade selecionada mas dados não carregados. ID:{' '}
-                      {field.value}
-                    </Badge>
-                  </div>
-                )}
                 <FormMessage className="text-sm" />
               </FormItem>
             )}

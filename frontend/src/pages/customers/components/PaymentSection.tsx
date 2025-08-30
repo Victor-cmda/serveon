@@ -73,11 +73,6 @@ const PaymentSection = ({
                   </div>
                 </FormControl>
               </div>
-              {selectedPaymentTerm && (
-                <div className="mt-1 text-sm text-muted-foreground">
-                  {selectedPaymentTerm.description || 'Sem descrição adicional'}
-                </div>
-              )}
               <FormMessage className="text-sm" />
             </FormItem>
           )}

@@ -91,6 +91,12 @@ export class Supplier extends BaseEntity {
   cidadeId?: number;
 
   @ApiProperty({
+    description: 'Nome da cidade',
+    example: 'São Paulo',
+  })
+  cidadeNome?: string;
+
+  @ApiProperty({
     description: 'CEP',
     example: '12345-678',
   })

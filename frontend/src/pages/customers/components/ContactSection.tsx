@@ -8,7 +8,7 @@ import {
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
-import { getValidationMessage, getFieldValidationClass } from '../utils/validationUtils';
+import { getFieldValidationClass } from '../utils/validationUtils';
 
 interface Formatters {
   telefone: (value: string | undefined) => string;
@@ -51,17 +51,6 @@ const ContactSection = ({
                 <Phone className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
               </div>
             </FormControl>
-            {telefoneValue && (
-              <div className="mt-1 text-xs">
-                <span className={
-                  getValidationMessage(telefoneValue, 'telefone').includes('✓') 
-                    ? 'text-green-600' 
-                    : 'text-amber-600'
-                }>
-                  {getValidationMessage(telefoneValue, 'telefone')}
-                </span>
-              </div>
-            )}
             <FormMessage className="text-sm" />
           </FormItem>
         )}
@@ -87,17 +76,6 @@ const ContactSection = ({
                 <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
               </div>
             </FormControl>
-            {emailValue && (
-              <div className="mt-1 text-xs">
-                <span className={
-                  getValidationMessage(emailValue, 'email').includes('✓') 
-                    ? 'text-green-600' 
-                    : 'text-amber-600'
-                }>
-                  {getValidationMessage(emailValue, 'email')}
-                </span>
-              </div>
-            )}
             <FormMessage className="text-sm" />
           </FormItem>
         )}

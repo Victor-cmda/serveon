@@ -8,7 +8,7 @@ import {
 } from "../../../components/ui/form";
 import { Input } from "../../../components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { getValidationMessage, getFieldValidationClass } from "../utils/validationUtils";
+import { getFieldValidationClass } from "../utils/validationUtils";
 
 interface Formatters {
   cnpj: (value: string | undefined) => string;
@@ -64,17 +64,6 @@ const DocumentsSection = ({
                     <CreditCard className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                   </div>
                 </FormControl>
-                {cnpjCpfValue && (
-                  <div className="mt-1 text-xs">
-                    <span className={
-                      getValidationMessage(cnpjCpfValue, 'cnpjCpf', watchTipo, watchIsEstrangeiro).includes('✓') 
-                        ? 'text-green-600' 
-                        : 'text-amber-600'
-                    }>
-                      {getValidationMessage(cnpjCpfValue, 'cnpjCpf', watchTipo, watchIsEstrangeiro)}
-                    </span>
-                  </div>
-                )}
                 <FormMessage className="text-sm" />
               </FormItem>
             )}
@@ -115,17 +104,6 @@ const DocumentsSection = ({
                         : 'Número do RG'}
                   />
                 </FormControl>
-                {inscricaoEstadualValue && (
-                  <div className="mt-1 text-xs">
-                    <span className={
-                      getValidationMessage(inscricaoEstadualValue, 'inscricaoEstadual', watchTipo, watchIsEstrangeiro).includes('✓') 
-                        ? 'text-green-600' 
-                        : 'text-amber-600'
-                    }>
-                      {getValidationMessage(inscricaoEstadualValue, 'inscricaoEstadual', watchTipo, watchIsEstrangeiro)}
-                    </span>
-                  </div>
-                )}
                 <FormMessage className="text-sm" />
               </FormItem>
             )}

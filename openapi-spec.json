@@ -4844,6 +4844,11 @@
             "description": "ID da cidade",
             "example": 1
           },
+          "cidadeNome": {
+            "type": "string",
+            "description": "Nome da cidade",
+            "example": "São Paulo"
+          },
           "cep": {
             "type": "string",
             "description": "CEP",
@@ -4918,6 +4923,7 @@
           "complemento",
           "bairro",
           "cidadeId",
+          "cidadeNome",
           "cep",
           "telefone",
           "email",

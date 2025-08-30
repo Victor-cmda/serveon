@@ -439,6 +439,7 @@ export class SuppliersService {
       complemento: row.complemento,
       bairro: row.bairro,
       cidadeId: row.cidade_id,
+      cidadeNome: row.cidade_nome,
       cep: row.cep,
       telefone: row.telefone,
       email: row.email,
