@@ -3,22 +3,14 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 
 export class PaymentMethod extends BaseEntity {
   @ApiProperty({
-    description: 'Description of the payment method',
+    description: 'Name of the payment method',
     example: 'Credit Card',
   })
-  description: string;
-
-  @ApiProperty({
-    description: 'Code of the payment method',
-    example: 'CC',
-    required: false,
-  })
-  code?: string;
+  name: string;
 
   @ApiProperty({
     description: 'Type of payment method',
     example: 'card',
-    required: false,
   })
-  type?: string;
+  type: string;
 }

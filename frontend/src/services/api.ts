@@ -313,32 +313,15 @@ export const supplierApi = {
   },
 };
 
-// Função para transformar dados de payment method entre frontend (active) e backend (ativo)
-const transformPaymentMethodToBackend = (data: CreatePaymentMethodDto | UpdatePaymentMethodDto) => {
-  return {
-    ...data,
-    // Manter ativo como está, pois tanto frontend quanto backend usam ativo
-  };
-};
-
-const transformPaymentMethodFromBackend = (data: any): PaymentMethod => {
-  return {
-    ...data,
-    // Manter ativo como está, pois a interface espera ativo
-  };
-};
-
 export const paymentMethodApi = {
   getAll: async (): Promise<PaymentMethod[]> => {
     const response = await fetch(`${API_URL}/payment-methods`);
-    const data = await handleResponse(response);
-    return data.map(transformPaymentMethodFromBackend);
+    return handleResponse(response);
   },
 
   getById: async (id: number): Promise<PaymentMethod> => {
     const response = await fetch(`${API_URL}/payment-methods/${id}`);
-    const data = await handleResponse(response);
-    return transformPaymentMethodFromBackend(data);
+    return handleResponse(response);
   },
 
   create: async (paymentMethod: CreatePaymentMethodDto): Promise<PaymentMethod> => {
@@ -347,10 +330,9 @@ export const paymentMethodApi = {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(transformPaymentMethodToBackend(paymentMethod)),
+      body: JSON.stringify(paymentMethod),
     });
-    const data = await handleResponse(response);
-    return transformPaymentMethodFromBackend(data);
+    return handleResponse(response);
   },
 
   update: async (id: number, paymentMethod: UpdatePaymentMethodDto): Promise<PaymentMethod> => {
@@ -359,10 +341,9 @@ export const paymentMethodApi = {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(transformPaymentMethodToBackend(paymentMethod)),
+      body: JSON.stringify(paymentMethod),
     });
-    const data = await handleResponse(response);
-    return transformPaymentMethodFromBackend(data);
+    return handleResponse(response);
   },
 
   delete: async (id: number): Promise<void> => {

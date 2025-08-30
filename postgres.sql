@@ -49,9 +49,7 @@ CREATE TABLE cidade (
 CREATE TABLE forma_pagamento (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    descricao VARCHAR(100) NOT NULL,
-    codigo VARCHAR(20),
-    tipo VARCHAR(30),
+    tipo VARCHAR(30) NOT NULL,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -1155,12 +1153,12 @@ INSERT INTO pais (nome, codigo, sigla, nacionalidade)
 VALUES ('BRASIL', '55', 'BR', 'BRASILEIRA');
 
 -- Inserir formas de pagamento comuns
-INSERT INTO forma_pagamento (nome, descricao, codigo, tipo)
-VALUES ('DINHEIRO', 'DINHEIRO', '01', 'À VISTA'),
-    ('CARTÃO DE CRÉDITO', 'CARTÃO DE CRÉDITO', '03', 'CRÉDITO'),
-    ('CARTÃO DE DÉBITO', 'CARTÃO DE DÉBITO', '04', 'DÉBITO'),
-    ('PIX', 'PIX', '17', 'À VISTA'),
-    ('BOLETO BANCÁRIO', 'BOLETO BANCÁRIO', '15', 'À PRAZO');
+INSERT INTO forma_pagamento (nome, tipo)
+VALUES ('DINHEIRO', 'À VISTA'),
+    ('CARTÃO DE CRÉDITO', 'CRÉDITO'),
+    ('CARTÃO DE DÉBITO', 'DÉBITO'),
+    ('PIX', 'À VISTA'),
+    ('BOLETO BANCÁRIO', 'À PRAZO');
 
 -- Inserir modalidades de NFe
 INSERT INTO modalidade_nfe (codigo, descricao)

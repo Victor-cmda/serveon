@@ -11,14 +11,14 @@ export class PaymentMethodsService {
   async create(
     createPaymentMethodDto: CreatePaymentMethodDto,
   ): Promise<PaymentMethod> {
-    const { description, code, type, ativo = true } = createPaymentMethodDto; // Usar ativo em vez de active
+    const { name, type, ativo = true } = createPaymentMethodDto;
 
     const result = await this.databaseService.query(
-      `INSERT INTO dbo.forma_pagamento (descricao, codigo, tipo, ativo)
-        VALUES ($1, $2, $3, $4)
-        RETURNING id, descricao as description, codigo as code, tipo as type, 
+      `INSERT INTO dbo.forma_pagamento (nome, tipo, ativo)
+        VALUES ($1, $2, $3)
+        RETURNING id, nome as name, tipo as type, 
                 ativo, created_at as "createdAt", updated_at as "updatedAt"`,
-      [description, code, type, ativo], // Usar ativo
+      [name, type, ativo],
     );
 
     return result.rows[0];
@@ -26,17 +26,17 @@ export class PaymentMethodsService {
 
   async findAll(): Promise<PaymentMethod[]> {
     const result = await this.databaseService.query(
-      `SELECT id, descricao as description, codigo as code, tipo as type,
+      `SELECT id, nome as name, tipo as type,
               ativo, created_at as "createdAt", updated_at as "updatedAt"
       FROM dbo.forma_pagamento
-      ORDER BY description`,
+      ORDER BY nome`,
     );
 
     return result.rows;
   }
   async findOne(id: number): Promise<PaymentMethod> {
     const result = await this.databaseService.query(
-      `SELECT id, descricao as description, codigo as code, tipo as type,
+      `SELECT id, nome as name, tipo as type,
               ativo, created_at as "createdAt", updated_at as "updatedAt"
       FROM dbo.forma_pagamento
       WHERE id = $1`,
@@ -61,15 +61,9 @@ export class PaymentMethodsService {
     const values: any[] = [];
     let paramCount = 1;
 
-    if (updatePaymentMethodDto.description !== undefined) {
-      updates.push(`descricao = $${paramCount}`);
-      values.push(updatePaymentMethodDto.description);
-      paramCount++;
-    }
-
-    if (updatePaymentMethodDto.code !== undefined) {
-      updates.push(`codigo = $${paramCount}`);
-      values.push(updatePaymentMethodDto.code);
+    if (updatePaymentMethodDto.name !== undefined) {
+      updates.push(`nome = $${paramCount}`);
+      values.push(updatePaymentMethodDto.name);
       paramCount++;
     }
 
@@ -79,9 +73,9 @@ export class PaymentMethodsService {
       paramCount++;
     }
 
-    if (updatePaymentMethodDto.ativo !== undefined) { // Usar ativo
+    if (updatePaymentMethodDto.ativo !== undefined) {
       updates.push(`ativo = $${paramCount}`);
-      values.push(updatePaymentMethodDto.ativo); // Usar ativo
+      values.push(updatePaymentMethodDto.ativo);
       paramCount++;
     }
 
@@ -97,7 +91,7 @@ export class PaymentMethodsService {
       `UPDATE dbo.forma_pagamento
         SET ${updates.join(', ')}
         WHERE id = $${paramCount}
-        RETURNING id, descricao as description, codigo as code, tipo as type,
+        RETURNING id, nome as name, tipo as type,
                 ativo, created_at as "createdAt", updated_at as "updatedAt"`,
       values,
     );

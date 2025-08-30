@@ -4478,15 +4478,10 @@
       "CreatePaymentMethodDto": {
         "type": "object",
         "properties": {
-          "description": {
+          "name": {
             "type": "string",
-            "description": "Description of the payment method",
+            "description": "Name of the payment method",
             "example": "Credit Card"
-          },
-          "code": {
-            "type": "string",
-            "description": "Code of the payment method",
-            "example": "CC"
           },
           "type": {
             "type": "string",
@@ -4501,7 +4496,8 @@
           }
         },
         "required": [
-          "description"
+          "name",
+          "type"
         ]
       },
       "PaymentMethod": {
@@ -4528,15 +4524,10 @@
             "description": "Data da última atualização do registro",
             "example": "2025-06-19T10:00:00Z"
           },
-          "description": {
+          "name": {
             "type": "string",
-            "description": "Description of the payment method",
+            "description": "Name of the payment method",
             "example": "Credit Card"
-          },
-          "code": {
-            "type": "string",
-            "description": "Code of the payment method",
-            "example": "CC"
           },
           "type": {
             "type": "string",
@@ -4549,21 +4540,17 @@
           "ativo",
           "createdAt",
           "updatedAt",
-          "description"
+          "name",
+          "type"
         ]
       },
       "UpdatePaymentMethodDto": {
         "type": "object",
         "properties": {
-          "description": {
+          "name": {
             "type": "string",
-            "description": "Description of the payment method",
+            "description": "Name of the payment method",
             "example": "Credit Card"
-          },
-          "code": {
-            "type": "string",
-            "description": "Code of the payment method",
-            "example": "CC"
           },
           "type": {
             "type": "string",

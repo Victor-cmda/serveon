@@ -17,14 +17,22 @@ import {
 import { Input } from '@/components/ui/input';
 import { paymentMethodApi } from '@/services/api';
 import { toast } from 'sonner';
-import { CreatePaymentMethodDto, UpdatePaymentMethodDto } from '@/types/payment-method';
+import {
+  CreatePaymentMethodDto,
+  UpdatePaymentMethodDto,
+} from '@/types/payment-method';
 import AuditSection from '@/components/AuditSection';
 
 // Schema para validação do formulário
 const formSchema = z.object({
-  description: z.string().min(1, { message: 'A descrição é obrigatória' }).max(100),
-  code: z.string().max(20).optional(),
-  type: z.string().max(30).optional(),
+  name: z
+    .string()
+    .min(1, { message: 'O nome é obrigatório' })
+    .max(100),
+  type: z
+    .string()
+    .min(1, { message: 'O tipo é obrigatório' })
+    .max(30),
   ativo: z.boolean().default(true),
 });
 
@@ -40,34 +48,36 @@ const PaymentMethodForm = () => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      description: '',
-      code: '',
+      name: '',
       type: '',
       ativo: true,
     },
   });
 
-  const fetchPaymentMethod = useCallback(async (paymentMethodId: string) => {
-    setIsLoadingData(true);
-    try {
-      const data = await paymentMethodApi.getById(Number(paymentMethodId));
-      setPaymentMethodData(data);
-      form.reset({
-        description: data.description,
-        code: data.code || '',
-        type: data.type || '',
-        ativo: data.ativo,
-      });
-    } catch (error) {
-      console.error('Erro ao buscar método de pagamento:', error);
-      toast.error('Erro', {
-        description: 'Não foi possível carregar os dados do método de pagamento.',
-      });
-      navigate('/payment-methods');
-    } finally {
-      setIsLoadingData(false);
-    }
-  }, [form, navigate]);
+  const fetchPaymentMethod = useCallback(
+    async (paymentMethodId: string) => {
+      setIsLoadingData(true);
+      try {
+        const data = await paymentMethodApi.getById(Number(paymentMethodId));
+        setPaymentMethodData(data);
+        form.reset({
+          name: data.name,
+          type: data.type || '',
+          ativo: data.ativo,
+        });
+      } catch (error) {
+        console.error('Erro ao buscar método de pagamento:', error);
+        toast.error('Erro', {
+          description:
+            'Não foi possível carregar os dados do método de pagamento.',
+        });
+        navigate('/payment-methods');
+      } finally {
+        setIsLoadingData(false);
+      }
+    },
+    [form, navigate],
+  );
 
   useEffect(() => {
     if (id) {
@@ -78,30 +88,26 @@ const PaymentMethodForm = () => {
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);
     try {
-      const paymentMethodData: CreatePaymentMethodDto | UpdatePaymentMethodDto = {
-        description: values.description,
-        ativo: values.ativo
-      };
-      
-      // Somente incluir código e tipo se não estiverem vazios
-      if (values.code && values.code.trim() !== '') {
-        paymentMethodData.code = values.code;
-      }
-      
-      if (values.type && values.type.trim() !== '') {
-        paymentMethodData.type = values.type;
-      }      if (id) {
+      const paymentMethodData: CreatePaymentMethodDto | UpdatePaymentMethodDto =
+        {
+          name: values.name,
+          type: values.type,
+          ativo: values.ativo,
+        };
+      if (id) {
         await paymentMethodApi.update(Number(id), paymentMethodData);
         toast.success('Sucesso', {
           description: 'Método de pagamento atualizado com sucesso!',
         });
       } else {
-        await paymentMethodApi.create(paymentMethodData as CreatePaymentMethodDto);
+        await paymentMethodApi.create(
+          paymentMethodData as CreatePaymentMethodDto,
+        );
         toast.success('Sucesso', {
           description: 'Método de pagamento criado com sucesso!',
         });
       }
-      
+
       // Check if we need to return to a parent form in a cascading scenario
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
@@ -111,7 +117,10 @@ const PaymentMethodForm = () => {
       }
     } catch (error: unknown) {
       console.error('Erro ao salvar método de pagamento:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar o método de pagamento.';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Ocorreu um erro ao salvar o método de pagamento.';
       toast.error('Erro', {
         description: errorMessage,
       });
@@ -149,12 +158,12 @@ const PaymentMethodForm = () => {
             </p>
           </div>
         </div>
-        
+
         {/* AuditSection no header */}
-        <AuditSection 
-          form={form} 
+        <AuditSection
+          form={form}
           data={paymentMethodData}
-          variant="header" 
+          variant="header"
           isEditing={!!id}
           statusFieldName="ativo" // Campo de status é 'ativo' para PaymentMethod
         />
@@ -174,53 +183,43 @@ const PaymentMethodForm = () => {
               </div>
               <div className="p-6 pt-0">
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-8 gap-4">
                     <FormItem>
-                      <FormLabel>ID</FormLabel>
+                      <FormLabel>Código</FormLabel>
                       <FormControl>
-                        <Input value={id || 'Novo'} disabled className="bg-muted" />
+                        <Input
+                          value={id || 'Novo'}
+                          disabled
+                          className="bg-muted"
+                        />
                       </FormControl>
-                     
                     </FormItem>
-                    
-                    <div className="md:col-span-3">
+
+                    <div className="md:col-span-4">
                       <FormField
                         control={form.control}
-                        name="description"
+                        name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Descrição *</FormLabel>
+                            <FormLabel>Forma de Pagamento *</FormLabel>
                             <FormControl>
-                              <Input placeholder="Nome do método de pagamento" {...field} />
+                              <Input
+                                placeholder="Nome da forma de pagamento"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <FormField
-                      control={form.control}
-                      name="code"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Código</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Código identificador" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
+                    <div className="md:col-span-3">
+                      <FormField
                       control={form.control}
                       name="type"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Tipo</FormLabel>
+                          <FormLabel>Tipo *</FormLabel>
                           <FormControl>
                             <Input placeholder="Tipo do método" {...field} />
                           </FormControl>
@@ -228,8 +227,8 @@ const PaymentMethodForm = () => {
                         </FormItem>
                       )}
                     />
+                    </div>
                   </div>
-
                 </div>
               </div>
             </div>

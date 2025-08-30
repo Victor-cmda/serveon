@@ -933,7 +933,7 @@ const PaymentTermForm = () => {
                                   value={
                                     paymentMethods.find(
                                       (m) => m.id === field.value,
-                                    )?.description || ''
+                                    )?.name || ''
                                   }
                                   readOnly
                                   placeholder="Selecione um método de pagamento"
@@ -1095,11 +1095,10 @@ const PaymentTermForm = () => {
           }}
           onEdit={handleEditPaymentMethod}
           displayColumns={[
-            { key: 'description', header: 'Descrição' },
-            { key: 'code', header: 'Código' },
+            { key: 'name', header: 'Nome' },
             { key: 'type', header: 'Tipo' },
           ]}
-          searchKeys={['description', 'code', 'type']}
+          searchKeys={['name', 'type']}
           entityType="metodos-pagamento"
         />
       )}

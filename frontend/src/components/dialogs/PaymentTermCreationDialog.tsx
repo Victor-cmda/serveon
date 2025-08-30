@@ -128,7 +128,6 @@ const PaymentTermCreationDialog = ({
             paymentMethodId: inst.paymentMethodId,
             daysToPayment: inst.daysToPayment,
             percentageValue: inst.percentageValue,
-            interestRate: inst.interestRate,
             isActive: inst.ativo,
           })),
         });
@@ -143,7 +142,6 @@ const PaymentTermCreationDialog = ({
               paymentMethodId: undefined,
               daysToPayment: 0,
               percentageValue: 100,
-              interestRate: 0,
               isActive: true,
             },
           ],
@@ -213,7 +211,6 @@ const PaymentTermCreationDialog = ({
       paymentMethodId: lastInstallment.paymentMethodId,
       daysToPayment: lastInstallment.daysToPayment + 30,
       percentageValue: 0,
-      interestRate: 0,
       ativo: true,
     };
 
@@ -298,7 +295,7 @@ const PaymentTermCreationDialog = ({
   };
   const getPaymentMethodName = (methodId: number) => {
     const method = paymentMethods.find((m) => m.id === methodId);
-    return method ? method.description : '';
+    return method ? method.name : '';
   };
 
   return (
@@ -613,11 +610,10 @@ const PaymentTermCreationDialog = ({
         onCreateNew={openNewPaymentMethodDialog}
         onEdit={handleEditPaymentMethod}
         displayColumns={[
-          { key: 'description', header: 'Descrição' },
-          { key: 'code', header: 'Código' },
+          { key: 'name', header: 'Nome' },
           { key: 'type', header: 'Tipo' },
         ]}
-        searchKeys={['description', 'code', 'type']}
+        searchKeys={['name', 'type']}
         entityType="metodos-pagamento"
         description="Selecione um método de pagamento para associar à parcela ou cadastre um novo método."
       />

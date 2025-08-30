@@ -6,7 +6,14 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -28,11 +35,13 @@ import { paymentMethodApi } from '@/services/api';
 import { PaymentMethod, CreatePaymentMethodDto } from '@/types/payment-method';
 
 const formSchema = z.object({
-  description: z
+  name: z
     .string()
-    .min(2, 'Descrição é obrigatória e deve ter pelo menos 2 caracteres'),
-  code: z.string().optional(),
-  type: z.string().optional(),
+    .min(2, 'Nome é obrigatório e deve ter pelo menos 2 caracteres')
+    .max(100, 'Nome deve ter no máximo 100 caracteres'),
+  type: z
+    .string()
+    .min(1, 'Tipo é obrigatório'),
   active: z.boolean().default(true),
 });
 
@@ -54,8 +63,7 @@ const PaymentMethodCreationDialog = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      description: '',
-      code: '',
+      name: '',
       type: '',
       active: true,
     },
@@ -64,15 +72,13 @@ const PaymentMethodCreationDialog = ({
   useEffect(() => {
     if (!open) {
       form.reset({
-        description: '',
-        code: '',
+        name: '',
         type: '',
         active: true,
       });
     } else if (paymentMethod) {
       form.reset({
-        description: paymentMethod.description,
-        code: paymentMethod.code,
+        name: paymentMethod.name,
         type: paymentMethod.type,
         active: paymentMethod.ativo,
       });
@@ -84,9 +90,8 @@ const PaymentMethodCreationDialog = ({
 
     try {
       const formData: CreatePaymentMethodDto = {
-        description: data.description,
-        code: data.code || undefined,
-        type: data.type || undefined,
+        name: data.name,
+        type: data.type,
         ativo: data.active,
       };
 
@@ -95,11 +100,11 @@ const PaymentMethodCreationDialog = ({
       if (paymentMethod) {
         // Edição de método de pagamento existente
         savedPaymentMethod = await paymentMethodApi.update(paymentMethod.id, formData);
-        toast.success(`Método de pagamento ${data.description} atualizado com sucesso!`);
+        toast.success(`Método de pagamento ${data.name} atualizado com sucesso!`);
       } else {
         // Criação de novo método de pagamento
         savedPaymentMethod = await paymentMethodApi.create(formData);
-        toast.success(`Método de pagamento ${data.description} criado com sucesso!`);
+        toast.success(`Método de pagamento ${data.name} criado com sucesso!`);
       }      // Return the saved payment method to the parent component and close dialog
       onSuccess(savedPaymentMethod);
       onOpenChange(false);
@@ -114,131 +119,106 @@ const PaymentMethodCreationDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw] xl:max-w-[60vw] max-h-[90vh] p-6">
+      <DialogContent className="sm:max-w-md w-full p-6">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
-            {paymentMethod ? 'Editar método de pagamento' : 'Adicionar novo método de pagamento'}
+          <DialogTitle className="text-xl font-semibold">
+            {paymentMethod ? 'Editar Método de Pagamento' : 'Novo Método de Pagamento'}
           </DialogTitle>
-          <DialogDescription className="text-base">
+          <DialogDescription className="text-sm text-muted-foreground">
             {paymentMethod
-              ? 'Altere os campos abaixo para atualizar o método de pagamento.'
-              : 'Preencha os campos abaixo para cadastrar um novo método de pagamento.'}
+              ? 'Altere as informações do método de pagamento.'
+              : 'Preencha as informações para criar um novo método de pagamento.'}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 py-4"
+            className="space-y-4"
           >
             <FormField
               control={form.control}
-              name="description"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-base font-medium">
-                    Descrição
-                  </FormLabel>
+                  <FormLabel>Nome do Método</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ex: Cartão de Crédito"
+                      placeholder="Ex: Cartão de Crédito, PIX, Dinheiro"
                       {...field}
                       disabled={isLoading}
-                      className="h-11 text-base"
                     />
                   </FormControl>
-                  <FormMessage className="text-sm" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-medium">
-                      Código
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ex: CC"
-                        {...field}
-                        value={field.value || ''}
-                        disabled={isLoading}
-                        className="h-11 text-base"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-sm" />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-medium">
-                      Tipo
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ex: Cartão"
-                        {...field}
-                        value={field.value || ''}
-                        disabled={isLoading}
-                        className="h-11 text-base"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-sm" />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value || ''}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o tipo de pagamento" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                        <SelectItem value="debito">Cartão de Débito</SelectItem>
+                        <SelectItem value="credito">Cartão de Crédito</SelectItem>
+                        <SelectItem value="pix">PIX</SelectItem>
+                        <SelectItem value="boleto">Boleto</SelectItem>
+                        <SelectItem value="cheque">Cheque</SelectItem>
+                        <SelectItem value="transferencia">Transferência</SelectItem>
+                        <SelectItem value="outros">Outros</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
               name="active"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <FormLabel>Status</FormLabel>
+                    <FormDescription className="text-xs">
+                      Método de pagamento ativo e disponível para uso
+                    </FormDescription>
+                  </div>
                   <FormControl>
-                    <Checkbox
+                    <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
                       disabled={isLoading}
                     />
                   </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel className="text-base font-medium">
-                      Ativo
-                    </FormLabel>
-                    <FormDescription>
-                      Indica se o método de pagamento está disponível para uso
-                    </FormDescription>
-                  </div>
                 </FormItem>
               )}
             />
 
-            <DialogFooter className="pt-6">
+            <DialogFooter className="pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isLoading}
-                className="h-11 px-6 text-base"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="h-11 px-6 text-base"
               >
-                {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                Salvar
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {paymentMethod ? 'Atualizar' : 'Criar'}
               </Button>
             </DialogFooter>
           </form>

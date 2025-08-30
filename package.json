@@ -22,7 +22,8 @@
     "frontend:dev": "cd frontend && yarn dev",
     "frontend:build": "cd frontend && yarn build",
     "dev": "concurrently \"yarn start:dev\" \"yarn frontend:dev\"",
-    "build:full": "yarn frontend:build && yarn build"
+    "build:full": "yarn frontend:build && yarn build",
+    "debug": "nodemon --config nodemon-debug.json"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.12",
