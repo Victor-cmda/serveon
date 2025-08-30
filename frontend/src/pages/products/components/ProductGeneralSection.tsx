@@ -8,7 +8,6 @@ import {
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
-import { Badge } from '../../../components/ui/badge';
 import { UseFormReturn } from 'react-hook-form';
 import { Category } from '../../../types/category';
 import { Brand } from '../../../types/brand';
@@ -151,20 +150,6 @@ const ProductGeneralSection = ({
                   </div>
                 </FormControl>
               </div>
-              {selectedCategory && (
-                <div className="mt-1">
-                  <Badge variant="outline">
-                    {selectedCategory.nome}
-                  </Badge>
-                </div>
-              )}
-              {field.value && !selectedCategory && (
-                <div className="mt-1">
-                  <Badge variant="outline">
-                    Categoria selecionada mas dados não carregados. ID: {field.value}
-                  </Badge>
-                </div>
-              )}
               <FormMessage />
             </FormItem>
           )}
@@ -211,20 +196,6 @@ const ProductGeneralSection = ({
                   </div>
                 </FormControl>
               </div>
-              {selectedBrand && (
-                <div className="mt-1">
-                  <Badge variant="outline">
-                    {selectedBrand.nome}
-                  </Badge>
-                </div>
-              )}
-              {field.value && !selectedBrand && (
-                <div className="mt-1">
-                  <Badge variant="outline">
-                    Marca selecionada mas dados não carregados. ID: {field.value}
-                  </Badge>
-                </div>
-              )}
               <FormMessage />
             </FormItem>
           )}
@@ -272,20 +243,6 @@ const ProductGeneralSection = ({
                 </div>
               </FormControl>
             </div>
-            {selectedUnitMeasure && (
-              <div className="mt-1">
-                <Badge variant="outline">
-                  {selectedUnitMeasure.nome} ({selectedUnitMeasure.sigla})
-                </Badge>
-              </div>
-            )}
-            {field.value && !selectedUnitMeasure && (
-              <div className="mt-1">
-                <Badge variant="outline">
-                  Unidade selecionada mas dados não carregados. ID: {field.value}
-                </Badge>
-              </div>
-            )}
             <FormMessage />
           </FormItem>
         )}

@@ -11,12 +11,10 @@ import { UseFormReturn } from 'react-hook-form';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { City } from '../../../types/location';
-import { getFieldValidationClass, getValidationMessage } from '../utils/validationUtils';
-import { cn } from '../../../lib/utils';
+import CEPField from '../../../components/CEPField';
 
 interface Formatters {
   numero: (value: string | undefined) => string;
-  cep: (value: string | undefined) => string;
   text: (value: string | undefined, maxLength?: number) => string;
 }
 
@@ -27,6 +25,7 @@ interface AddressSectionProps {
   selectedCity: City | null;
   watchIsEstrangeiro: boolean;
   setCitySearchOpen: (open: boolean) => void;
+  setSelectedCity?: (city: City | null) => void; // Nova prop opcional
 }
 
 const AddressSection = ({
@@ -36,7 +35,16 @@ const AddressSection = ({
   selectedCity,
   watchIsEstrangeiro,
   setCitySearchOpen,
+  setSelectedCity,
 }: AddressSectionProps) => {
+  // Função para selecionar cidade automaticamente quando encontrada no cadastro
+  const handleCityFound = (city: City) => {
+    if (setSelectedCity && (!selectedCity || selectedCity.id !== city.id)) {
+      setSelectedCity(city);
+      form.setValue('cidadeId', city.id);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4">
@@ -202,44 +210,13 @@ const AddressSection = ({
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="cep"
-            render={({ field }) => {
-              const validationClass = getFieldValidationClass(field.value, 'cep');
-              const validationMessage = getValidationMessage(field.value, 'cep');
-              
-              return (
-                <FormItem className="col-span-4">
-                  <FormLabel className="text-base font-medium">CEP</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      value={formatters.cep(field.value)}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      disabled={isLoading}
-                      placeholder="00000-000"
-                      className={cn(
-                        "h-10 text-base transition-colors duration-200",
-                        validationClass
-                      )}
-                    />
-                  </FormControl>
-                  {validationMessage && (
-                    <p className={cn(
-                      "text-sm font-medium transition-colors duration-200",
-                      validationMessage.includes('✓') 
-                        ? "text-green-600" 
-                        : "text-orange-600"
-                    )}>
-                      {validationMessage}
-                    </p>
-                  )}
-                  <FormMessage className="text-sm" />
-                </FormItem>
-              );
-            }}
-          />
+          <div className="col-span-4">
+            <CEPField 
+              form={form}
+              disabled={isLoading}
+              onCityFound={handleCityFound}
+            />
+          </div>
         </div>
       </div>
     </div>

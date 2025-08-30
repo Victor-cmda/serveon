@@ -75,15 +75,6 @@ const formatters = {
       });
     }
   },
-  cep: (value: string | undefined): string => {
-    if (!value) return '';
-    const digits = value.replace(/\D/g, '');
-    const cep = digits.slice(0, 8);
-    return cep.replace(/(\d{5})(\d{0,3})/, (_, p1, p2) => {
-      if (p2) return `${p1}-${p2}`;
-      return p1;
-    });
-  },
   numero: (value: string | undefined): string => {
     if (!value) return '';
     // Permite números, letras e alguns caracteres especiais comuns em números de endereço
@@ -733,6 +724,7 @@ const CustomerForm = () => {
                 selectedCity={selectedCity}
                 watchIsEstrangeiro={watchIsEstrangeiro}
                 setCitySearchOpen={setCitySearchOpen}
+                setSelectedCity={setSelectedCity}
               />
 
               <DocumentsSection

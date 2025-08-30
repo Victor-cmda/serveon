@@ -512,6 +512,7 @@ const EmployeeForm: React.FC = () => {
                 isLoading={loading}
                 selectedCity={selectedCity}
                 setCitySearchOpen={setCitySearchOpen}
+                setSelectedCity={setSelectedCity}
               />
 
               {/* Seção Documentos */}

@@ -24,7 +24,6 @@ import ContactSection from './components/ContactSection';
 import DocumentsSection from './components/DocumentsSection';
 import PaymentSection from './components/PaymentSection';
 import SupplierSpecificSection from './components/SupplierSpecificSection';
-import FormValidationStatus from './components/FormValidationStatus';
 
 // Funções de validação personalizadas
 const validateCPF = (cpf: string): boolean => {
@@ -121,15 +120,6 @@ const formatters = {
         return p1;
       });
     }
-  },
-  cep: (value: string | undefined): string => {
-    if (!value) return '';
-    const digits = value.replace(/\D/g, '');
-    const cep = digits.slice(0, 8);
-    return cep.replace(/(\d{5})(\d{0,3})/, (_, p1, p2) => {
-      if (p2) return `${p1}-${p2}`;
-      return p1;
-    });
   },
   numero: (value: string | undefined): string => {
     if (!value) return '';
@@ -572,6 +562,7 @@ export default function SupplierForm() {
                 selectedCity={selectedCity}
                 watchIsEstrangeiro={watchIsEstrangeiro}
                 setCitySearchOpen={setCitySearchOpen}
+                setSelectedCity={setSelectedCity}
               />
 
               <DocumentsSection

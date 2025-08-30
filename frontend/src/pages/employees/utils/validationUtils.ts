@@ -1,3 +1,5 @@
+import { cepApi } from '../../../services/cepApi';
+
 // Formatadores
 export const formatCPF = (value: string | undefined): string => {
   if (!value) return '';
@@ -130,6 +132,23 @@ export const validateCEP = (cep: string): boolean => {
   if (!cep) return true; // CEP é opcional
   const digits = cep.replace(/\D/g, '');
   return digits.length === 8;
+};
+
+export const validateCEPWithAPI = async (cep: string): Promise<{ isValid: boolean; error?: string }> => {
+  if (!cep) return { isValid: true }; // CEP é opcional
+  
+  try {
+    const result = await cepApi.validateAndFetch(cep);
+    return {
+      isValid: result.isValid,
+      error: result.error
+    };
+  } catch (error) {
+    return {
+      isValid: false,
+      error: 'Erro ao validar CEP'
+    };
+  }
 };
 
 export const validateTelefone = (telefone: string): boolean => {

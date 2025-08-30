@@ -11,11 +11,10 @@ import { UseFormReturn } from 'react-hook-form';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { City } from '../../../types/location';
-import { getValidationMessage, getFieldValidationClass } from '../utils/validationUtils';
+import CEPField from '../../../components/CEPField';
 
 interface Formatters {
   numero: (value: string | undefined) => string;
-  cep: (value: string | undefined) => string;
   text: (value: string | undefined, maxLength?: number) => string;
 }
 
@@ -26,6 +25,7 @@ interface AddressSectionProps {
   selectedCity: City | null;
   watchIsEstrangeiro: boolean;
   setCitySearchOpen: (open: boolean) => void;
+  setSelectedCity?: (city: City | null) => void; // Nova prop opcional
 }
 
 const AddressSection = ({
@@ -35,8 +35,31 @@ const AddressSection = ({
   selectedCity,
   watchIsEstrangeiro,
   setCitySearchOpen,
+  setSelectedCity,
 }: AddressSectionProps) => {
-  const cepValue = form.watch('cep');
+  // Função para preencher campos quando endereço é encontrado via CEP
+  const handleAddressFound = (address: {
+    endereco: string;
+    bairro: string;
+    cidade: string;
+    uf: string;
+  }) => {
+    // Preenche os campos se estiverem vazios
+    if (!form.getValues('endereco') && address.endereco) {
+      form.setValue('endereco', address.endereco);
+    }
+    if (!form.getValues('bairro') && address.bairro) {
+      form.setValue('bairro', address.bairro);
+    }
+  };
+
+  // Função para selecionar cidade automaticamente quando encontrada no cadastro
+  const handleCityFound = (city: City) => {
+    if (setSelectedCity && (!selectedCity || selectedCity.id !== city.id)) {
+      setSelectedCity(city);
+      form.setValue('cidadeId', city.id);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -200,37 +223,14 @@ const AddressSection = ({
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="cep"
-            render={({ field }) => (
-              <FormItem className="md:col-span-4">
-                <FormLabel className="text-base font-medium">CEP</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    value={formatters.cep(field.value)}
-                    onChange={(e) => field.onChange(formatters.cep(e.target.value))}
-                    disabled={isLoading}
-                    className={`h-10 text-base ${getFieldValidationClass(cepValue, 'cep')}`}
-                    placeholder="00000-000"
-                  />
-                </FormControl>
-                {cepValue && (
-                  <div className="mt-1 text-xs">
-                    <span className={
-                      getValidationMessage(cepValue, 'cep').includes('✓') 
-                        ? 'text-green-600' 
-                        : 'text-amber-600'
-                    }>
-                      {getValidationMessage(cepValue, 'cep')}
-                    </span>
-                  </div>
-                )}
-                <FormMessage className="text-sm" />
-              </FormItem>
-            )}
-          />
+          <div className="md:col-span-4">
+            <CEPField 
+              form={form}
+              disabled={isLoading}
+              onAddressFound={handleAddressFound}
+              onCityFound={handleCityFound}
+            />
+          </div>
         </div>{' '}
       </div>
     </div>
