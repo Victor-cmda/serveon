@@ -149,12 +149,6 @@ export class EmployeesService {
     updateEmployeeDto: UpdateEmployeeDto,
   ): Promise<Employee> {
     try {
-      console.log(`=== ATUALIZANDO FUNCIONÁRIO ${id} ===`);
-      console.log(
-        'Dados recebidos:',
-        JSON.stringify(updateEmployeeDto, null, 2),
-      );
-
       const existingEmployee = await this.databaseService.query(
         'SELECT id FROM dbo.funcionario WHERE id = $1',
         [id],
@@ -327,14 +321,7 @@ export class EmployeesService {
         RETURNING *
       `;
 
-      console.log('Query SQL:', updateQuery);
-      console.log('Valores:', values);
-
       const result = await this.databaseService.query(updateQuery, values);
-      console.log('Resultado da atualização:', result.rows[0]);
-      console.log('=== FIM DA ATUALIZAÇÃO ===');
-
-      return this.mapToEmployeeEntity(result.rows[0]);
       return this.mapToEmployeeEntity(result.rows[0]);
     } catch (error) {
       if (
@@ -418,7 +405,7 @@ export class EmployeesService {
       ativo: dbRecord.ativo,
       createdAt: dbRecord.created_at,
       updatedAt: dbRecord.updated_at,
-
+      
       // Campos de relacionamento
       cidadeNome: dbRecord.cidade_nome,
       cargoNome: dbRecord.cargo_nome,
