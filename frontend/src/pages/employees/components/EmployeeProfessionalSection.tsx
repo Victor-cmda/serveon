@@ -39,7 +39,9 @@ const EmployeeProfessionalSection = ({
           name="departamentoId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-base font-medium">Departamento</FormLabel>
+              <FormLabel className="text-base font-medium">
+                Departamento
+              </FormLabel>
               <div className="flex gap-2">
                 <FormControl>
                   <div className="flex w-full items-center gap-2">
@@ -75,11 +77,6 @@ const EmployeeProfessionalSection = ({
                   </div>
                 </FormControl>
               </div>
-              {selectedDepartment && (
-                <div className="mt-1">
-                  <Badge variant="outline">{selectedDepartment.nome}</Badge>
-                </div>
-              )}
               <FormMessage />
             </FormItem>
           )}
@@ -126,15 +123,6 @@ const EmployeeProfessionalSection = ({
                   </div>
                 </FormControl>
               </div>
-              {selectedPosition && (
-                <div className="mt-1">
-                  <Badge variant="outline">
-                    {selectedPosition.nome}
-                    {selectedPosition.departamentoNome &&
-                      ` (${selectedPosition.departamentoNome})`}
-                  </Badge>
-                </div>
-              )}
               <FormMessage />
             </FormItem>
           )}
@@ -147,11 +135,13 @@ const EmployeeProfessionalSection = ({
           name="dataAdmissao"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-base font-medium">Data de Admissão *</FormLabel>
+              <FormLabel className="text-base font-medium">
+                Data de Admissão *
+              </FormLabel>
               <FormControl>
-                <Input 
-                  type="date" 
-                  {...field} 
+                <Input
+                  type="date"
+                  {...field}
                   disabled={isLoading}
                   className="h-10 text-base"
                 />
@@ -166,11 +156,13 @@ const EmployeeProfessionalSection = ({
           name="dataDemissao"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-base font-medium">Data de Demissão</FormLabel>
+              <FormLabel className="text-base font-medium">
+                Data de Demissão
+              </FormLabel>
               <FormControl>
-                <Input 
-                  type="date" 
-                  {...field} 
+                <Input
+                  type="date"
+                  {...field}
                   disabled={isLoading}
                   className="h-10 text-base"
                 />
@@ -216,7 +208,9 @@ const EmployeeProfessionalSection = ({
               <textarea
                 {...field}
                 value={formatText(field.value, 500)}
-                onChange={(e) => field.onChange(formatText(e.target.value, 500))}
+                onChange={(e) =>
+                  field.onChange(formatText(e.target.value, 500))
+                }
                 className="w-full min-h-[80px] px-3 py-2 text-sm border border-input rounded-md bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 placeholder="OBSERVAÇÕES SOBRE O FUNCIONÁRIO"
                 disabled={isLoading}

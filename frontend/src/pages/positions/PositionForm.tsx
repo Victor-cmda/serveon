@@ -318,25 +318,6 @@ const PositionForm: React.FC = () => {
                             <Search className="h-4 w-4" />
                           </Button>
                         </div>
-                        {selectedDepartment && (
-                          <div className="mt-1 flex items-center">
-                            <Badge variant="outline" className="mr-2">
-                              {selectedDepartment.nome}
-                            </Badge>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedDepartment(null);
-                                form.setValue('departamentoId', undefined);
-                              }}
-                              className="h-6 px-2 text-xs"
-                            >
-                              Remover
-                            </Button>
-                          </div>
-                        )}
                         <FormMessage />
                       </FormItem>
                     )}

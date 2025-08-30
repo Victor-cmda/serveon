@@ -11,7 +11,13 @@ import { Button } from '../../../components/ui/button';
 import { Badge } from '../../../components/ui/badge';
 import { UseFormReturn } from 'react-hook-form';
 import { City } from '../../../types/location';
-import { formatCEP, formatText, formatNumber, getFieldValidationClass, getValidationMessage } from '../utils/validationUtils';
+import {
+  formatCEP,
+  formatText,
+  formatNumber,
+  getFieldValidationClass,
+  getValidationMessage,
+} from '../utils/validationUtils';
 
 interface EmployeeAddressSectionProps {
   form: UseFormReturn<any>;
@@ -42,7 +48,9 @@ const EmployeeAddressSection = ({
                   <Input
                     {...field}
                     value={formatText(field.value, 100)}
-                    onChange={(e) => field.onChange(formatText(e.target.value, 100))}
+                    onChange={(e) =>
+                      field.onChange(formatText(e.target.value, 100))
+                    }
                     placeholder="Digite o endereço"
                     disabled={isLoading}
                     className="h-10 text-base pl-9"
@@ -86,7 +94,9 @@ const EmployeeAddressSection = ({
                 <Input
                   {...field}
                   value={formatText(field.value, 50)}
-                  onChange={(e) => field.onChange(formatText(e.target.value, 50))}
+                  onChange={(e) =>
+                    field.onChange(formatText(e.target.value, 50))
+                  }
                   placeholder="Digite o bairro"
                   disabled={isLoading}
                   className="h-10 text-base"
@@ -102,12 +112,16 @@ const EmployeeAddressSection = ({
           name="complemento"
           render={({ field }) => (
             <FormItem className="md:col-span-2">
-              <FormLabel className="text-base font-medium">Complemento</FormLabel>
+              <FormLabel className="text-base font-medium">
+                Complemento
+              </FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   value={formatText(field.value, 50)}
-                  onChange={(e) => field.onChange(formatText(e.target.value, 50))}
+                  onChange={(e) =>
+                    field.onChange(formatText(e.target.value, 50))
+                  }
                   placeholder="Apto, sala, etc."
                   disabled={isLoading}
                   className="h-10 text-base"
@@ -161,22 +175,11 @@ const EmployeeAddressSection = ({
                   </div>
                 </FormControl>
               </div>
-              {selectedCity && (
-                <div className="mt-1 flex items-center">
-                  <Badge variant="outline" className="mr-2">
-                    {selectedCity.estadoNome} / {selectedCity.uf}
-                  </Badge>
-                  {selectedCity.paisNome && (
-                    <Badge variant="outline">
-                      {selectedCity.paisNome}
-                    </Badge>
-                  )}
-                </div>
-              )}
               {field.value && !selectedCity && (
                 <div className="mt-1">
                   <Badge variant="outline" className="bg-yellow-50">
-                    Cidade selecionada mas dados não carregados. ID: {field.value}
+                    Cidade selecionada mas dados não carregados. ID:{' '}
+                    {field.value}
                   </Badge>
                 </div>
               )}
@@ -203,11 +206,13 @@ const EmployeeAddressSection = ({
               </FormControl>
               {cepValue && (
                 <div className="mt-1 text-xs">
-                  <span className={
-                    getValidationMessage(cepValue, 'cep').includes('✓') 
-                      ? 'text-green-600' 
-                      : 'text-amber-600'
-                  }>
+                  <span
+                    className={
+                      getValidationMessage(cepValue, 'cep').includes('✓')
+                        ? 'text-green-600'
+                        : 'text-amber-600'
+                    }
+                  >
                     {getValidationMessage(cepValue, 'cep')}
                   </span>
                 </div>
