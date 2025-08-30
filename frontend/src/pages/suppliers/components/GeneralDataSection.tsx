@@ -73,11 +73,85 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id, formatters }: Gene
         
         <FormField
           control={form.control}
+          name="fornecedor"
+          render={({ field }) => (
+            <FormItem className="md:col-span-5">
+              <FormLabel className="text-base font-medium">
+                Nome do Fornecedor *
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Input
+                    {...field}
+                    value={formatters.text(field.value, 255)}
+                    onChange={(e) => field.onChange(formatters.text(e.target.value, 255))}
+                    disabled={isLoading}
+                    className="h-10 text-base pl-9"
+                    placeholder="Digite o nome do fornecedor"
+                  />
+                  <Building2 className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                </div>
+              </FormControl>
+              <FormMessage className="text-sm" />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="apelido"
+          render={({ field }) => (
+            <FormItem className="md:col-span-3">
+              <FormLabel className="text-base font-medium">
+                Apelido *
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  value={formatters.text(field.value, 255)}
+                  onChange={(e) => field.onChange(formatters.text(e.target.value, 255))}
+                  disabled={isLoading}
+                  className="h-10 text-base"
+                  placeholder="Digite o apelido"
+                />
+              </FormControl>
+              <FormMessage className="text-sm" />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="razaoSocial"
           render={({ field }) => (
-            <FormItem className="md:col-span-6">
+            <FormItem className="md:col-span-2">
               <FormLabel className="text-base font-medium">
-                {watchTipo === 'J' ? 'Razão Social' : 'Nome Completo'}
+                Código Interno
+              </FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  value={formatters.text(field.value, 100)}
+                  onChange={(e) => field.onChange(formatters.text(e.target.value, 100))}
+                  disabled={isLoading}
+                  className="h-10 text-base"
+                  placeholder="Código"
+                />
+              </FormControl>
+              <FormMessage className="text-sm" />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="razaoSocial"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-base font-medium">
+                {watchTipo === 'J' ? 'Razão Social *' : 'Nome Completo *'}
               </FormLabel>
               <FormControl>
                 <div className="relative">
@@ -104,9 +178,9 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id, formatters }: Gene
           control={form.control}
           name="nomeFantasia"
           render={({ field }) => (
-            <FormItem className="md:col-span-4">
+            <FormItem>
               <FormLabel className="text-base font-medium">
-                {watchTipo === 'J' ? 'Nome Fantasia' : 'Apelido'}
+                {watchTipo === 'J' ? 'Nome Fantasia' : 'Apelido Adicional'}
               </FormLabel>
               <FormControl>
                 <Input
@@ -115,7 +189,7 @@ const GeneralDataSection = ({ form, isLoading, watchTipo, id, formatters }: Gene
                   onChange={(e) => field.onChange(formatters.text(e.target.value, 100))}
                   disabled={isLoading}
                   className="h-10 text-base"
-                  placeholder={watchTipo === 'J' ? 'Digite o nome fantasia (opcional)' : 'Digite o apelido (opcional)'}
+                  placeholder={watchTipo === 'J' ? 'Digite o nome fantasia (opcional)' : 'Digite o apelido adicional (opcional)'}
                 />
               </FormControl>
               <FormMessage className="text-sm" />

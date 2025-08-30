@@ -1,5 +1,7 @@
 export interface Supplier {
   id: number;
+  fornecedor: string;
+  apelido: string;
   cnpjCpf: string;
   tipo: 'F' | 'J';
   razaoSocial: string;
@@ -10,6 +12,7 @@ export interface Supplier {
   complemento?: string;
   bairro?: string;
   paisId?: number;
+  nacionalidadeId?: number;
   estadoId?: number;
   cidadeId?: number;
   cidadeNome?: string;
@@ -18,6 +21,7 @@ export interface Supplier {
   cep?: string;
   telefone?: string;
   email?: string;
+  limiteCredito?: number;
   ativo: boolean;
   createdAt: string;
   updatedAt: string;
@@ -33,6 +37,8 @@ export interface Supplier {
 }
 
 export interface CreateSupplierDto {
+  fornecedor: string;
+  apelido: string;
   cnpjCpf: string;
   tipo: 'F' | 'J';
   razaoSocial: string;
@@ -43,11 +49,13 @@ export interface CreateSupplierDto {
   complemento?: string;
   bairro?: string;
   paisId?: number;
+  nacionalidadeId?: number;
   estadoId?: number;
   cidadeId?: number;
   cep?: string;
   telefone?: string;
   email?: string;
+  limiteCredito?: number;
   ativo?: boolean;
   isEstrangeiro?: boolean;
   tipoDocumento?: string;
@@ -69,11 +77,13 @@ export interface UpdateSupplierDto {
   complemento?: string;
   bairro?: string;
   paisId?: number;
+  nacionalidadeId?: number;
   estadoId?: number;
   cidadeId?: number;
   cep?: string;
   telefone?: string;
   email?: string;
+  limiteCredito?: number;
   ativo?: boolean;
   isEstrangeiro?: boolean;
   tipoDocumento?: string;

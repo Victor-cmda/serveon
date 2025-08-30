@@ -7,7 +7,7 @@ import { useCEPValidation } from '../hooks/useCEPValidation';
 import { UseFormReturn } from 'react-hook-form';
 import { cn } from '../lib/utils';
 import { City } from '../types/location';
-import { toast } from '../lib/toast';
+import { toast } from 'sonner';
 
 interface CEPFieldProps {
   form: UseFormReturn<any>;

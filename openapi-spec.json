@@ -4593,6 +4593,16 @@
       "CreateSupplierDto": {
         "type": "object",
         "properties": {
+          "fornecedor": {
+            "type": "string",
+            "description": "Nome do fornecedor",
+            "example": "Fornecedor ABC"
+          },
+          "apelido": {
+            "type": "string",
+            "description": "Apelido/Nome curto do fornecedor",
+            "example": "ABC"
+          },
           "cnpjCpf": {
             "type": "string",
             "description": "CNPJ, CPF ou número de documento internacional do fornecedor",
@@ -4639,11 +4649,6 @@
             "description": "Inscrição Estadual ou informações complementares do documento",
             "example": "123456789"
           },
-          "paisId": {
-            "type": "number",
-            "description": "ID do país",
-            "example": 1
-          },
           "estadoId": {
             "type": "number",
             "description": "ID do estado/província",
@@ -4689,16 +4694,6 @@
             "description": "Email",
             "example": "contato@empresa.com"
           },
-          "nacionalidadeId": {
-            "type": "number",
-            "description": "ID da nacionalidade",
-            "example": 1
-          },
-          "limiteCredito": {
-            "type": "number",
-            "description": "Limite de crédito do fornecedor",
-            "example": 10000
-          },
           "condicaoPagamentoId": {
             "type": "number",
             "description": "ID da condição de pagamento",
@@ -4723,13 +4718,32 @@
             "type": "string",
             "description": "Celular do responsável",
             "example": "(11) 98765-4321"
+          },
+          "limiteCredito": {
+            "type": "number",
+            "description": "Limite de crédito do fornecedor",
+            "example": 10000,
+            "default": 0
+          },
+          "nacionalidadeId": {
+            "type": "number",
+            "description": "ID da nacionalidade (país)",
+            "example": 1
+          },
+          "transportadoraId": {
+            "type": "number",
+            "description": "ID da transportadora",
+            "example": 1
           }
         },
         "required": [
+          "fornecedor",
+          "apelido",
           "cnpjCpf",
           "tipo",
           "isEstrangeiro",
-          "razaoSocial"
+          "razaoSocial",
+          "limiteCredito"
         ]
       },
       "Supplier": {
@@ -4755,6 +4769,16 @@
             "type": "object",
             "description": "Data da última atualização do registro",
             "example": "2025-06-19T10:00:00Z"
+          },
+          "fornecedor": {
+            "type": "string",
+            "description": "Nome do fornecedor",
+            "example": "Fornecedor ABC"
+          },
+          "apelido": {
+            "type": "string",
+            "description": "Apelido/Nome curto do fornecedor",
+            "example": "ABC"
           },
           "cnpjCpf": {
             "type": "string",
@@ -4795,21 +4819,6 @@
             "description": "Inscrição Estadual ou informações complementares do documento",
             "example": "123456789"
           },
-          "paisId": {
-            "type": "number",
-            "description": "ID do país",
-            "example": 1
-          },
-          "nacionalidadeId": {
-            "type": "number",
-            "description": "ID da nacionalidade",
-            "example": 1
-          },
-          "estadoId": {
-            "type": "number",
-            "description": "ID do estado/província",
-            "example": 1
-          },
           "endereco": {
             "type": "string",
             "description": "Endereço",
@@ -4850,11 +4859,6 @@
             "description": "Email",
             "example": "contato@empresa.com"
           },
-          "limiteCredito": {
-            "type": "number",
-            "description": "Limite de crédito",
-            "example": 10000
-          },
           "condicaoPagamentoId": {
             "type": "number",
             "description": "ID da condição de pagamento",
@@ -4879,6 +4883,21 @@
             "type": "string",
             "description": "Celular do responsável",
             "example": "(11) 98765-4321"
+          },
+          "limiteCredito": {
+            "type": "number",
+            "description": "Limite de crédito do fornecedor",
+            "example": 10000
+          },
+          "nacionalidadeId": {
+            "type": "number",
+            "description": "ID da nacionalidade (país)",
+            "example": 1
+          },
+          "transportadoraId": {
+            "type": "number",
+            "description": "ID da transportadora",
+            "example": 1
           }
         },
         "required": [
@@ -4886,15 +4905,14 @@
           "ativo",
           "createdAt",
           "updatedAt",
+          "fornecedor",
+          "apelido",
           "cnpjCpf",
           "tipo",
           "isEstrangeiro",
           "razaoSocial",
           "nomeFantasia",
           "inscricaoEstadual",
-          "paisId",
-          "nacionalidadeId",
-          "estadoId",
           "endereco",
           "numero",
           "complemento",
@@ -4903,12 +4921,14 @@
           "cep",
           "telefone",
           "email",
-          "limiteCredito",
           "condicaoPagamentoId",
           "website",
           "observacoes",
           "responsavel",
-          "celularResponsavel"
+          "celularResponsavel",
+          "limiteCredito",
+          "nacionalidadeId",
+          "transportadoraId"
         ]
       },
       "UpdateSupplierDto": {

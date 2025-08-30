@@ -5,8 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { supplierApi, cityApi, paymentTermApi } from '@/services/api';
-import { City } from '@/types/location';
+import { supplierApi, cityApi, paymentTermApi, countryApi } from '@/services/api';
+import { City, Country } from '@/types/location';
 import { PaymentTerm } from '@/types/payment-term';
 import { toast } from 'sonner';
 import { SearchDialog } from '@/components/SearchDialog';
@@ -16,6 +16,7 @@ import AuditSection from '@/components/AuditSection';
 import StateCreationDialog from '@/components/dialogs/StateCreationDialog';
 import CityCreationDialog from '@/components/dialogs/CityCreationDialog';
 import PaymentTermCreationDialog from '@/components/dialogs/PaymentTermCreationDialog';
+import CountryCreationDialog from '@/components/dialogs/CountryCreationDialog';
 
 // Importa os componentes modulares
 import GeneralDataSection from './components/GeneralDataSection';
@@ -24,6 +25,7 @@ import ContactSection from './components/ContactSection';
 import DocumentsSection from './components/DocumentsSection';
 import PaymentSection from './components/PaymentSection';
 import SupplierSpecificSection from './components/SupplierSpecificSection';
+import FinancialDataSection from './components/FinancialDataSection';
 
 // Funções de validação personalizadas
 const validateCPF = (cpf: string): boolean => {
@@ -161,9 +163,24 @@ const formatters = {
     if (!value) return '';
     return value.replace(/\D/g, '');
   },
+  currency: (value: number | undefined): string => {
+    if (!value) return '';
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  },
 };
 
 const formSchema = z.object({
+  fornecedor: z.string()
+    .min(2, 'Nome do fornecedor deve ter pelo menos 2 caracteres')
+    .max(255, 'Nome do fornecedor deve ter no máximo 255 caracteres')
+    .refine((value) => value.trim().length > 0, 'Nome do fornecedor é obrigatório'),
+  apelido: z.string()
+    .min(1, 'Apelido é obrigatório')
+    .max(255, 'Apelido deve ter no máximo 255 caracteres')
+    .refine((value) => value.trim().length > 0, 'Apelido é obrigatório'),
   tipo: z.enum(['F', 'J']),
   isEstrangeiro: z.boolean().default(false),
   cnpjCpf: z.string()
@@ -215,6 +232,12 @@ const formSchema = z.object({
       if (!value) return true;
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
     }, 'Email inválido'),
+  limiteCredito: z.number()
+    .optional()
+    .refine((value) => {
+      return value === undefined || value >= 0;
+    }, 'Limite de crédito deve ser maior ou igual a zero'),
+  nacionalidadeId: z.number().optional(),
   ativo: z.boolean().default(true),
   website: z.string()
     .nullish()
@@ -294,21 +317,28 @@ export default function SupplierForm() {
   const [paymentTerms, setPaymentTerms] = useState<PaymentTerm[]>([]);
   const [selectedPaymentTerm, setSelectedPaymentTerm] =
     useState<PaymentTerm | null>(null);
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
 
   const [citySearchOpen, setCitySearchOpen] = useState(false);
   const [paymentTermSearchOpen, setPaymentTermSearchOpen] = useState(false);
+  const [countrySearchOpen, setCountrySearchOpen] = useState(false);
   const [cityCreationOpen, setCityCreationOpen] = useState(false);
   const [stateCreationOpen, setStateCreationOpen] = useState(false);
   const [paymentTermCreationOpen, setPaymentTermCreationOpen] = useState(false);
+  const [countryCreationOpen, setCountryCreationOpen] = useState(false);
 
   // Estados para edição de cidades e condições de pagamento
   const [cityToEdit, setCityToEdit] = useState<City | null>(null);
   const [paymentTermToEdit, setPaymentTermToEdit] =
     useState<PaymentTerm | null>(null);
+  const [countryToEdit, setCountryToEdit] = useState<Country | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      fornecedor: '',
+      apelido: '',
       cnpjCpf: '',
       tipo: 'J' as const,
       isEstrangeiro: false,
@@ -323,6 +353,8 @@ export default function SupplierForm() {
       cep: '',
       telefone: '',
       email: '',
+      limiteCredito: undefined,
+      nacionalidadeId: undefined,
       ativo: true,
       website: '',
       observacoes: '',
@@ -342,6 +374,8 @@ export default function SupplierForm() {
         setCities(citiesData);
         const paymentTermsData = await paymentTermApi.getAll();
         setPaymentTerms(paymentTermsData);
+        const countriesData = await countryApi.getAll();
+        setCountries(countriesData);
         if (id) {
           const supplier = await supplierApi.getById(Number(id));
           if (supplier) {
@@ -351,6 +385,8 @@ export default function SupplierForm() {
               tipo: supplier.tipo || 'J',
               isEstrangeiro: supplier.isEstrangeiro || false,
               cidadeId: supplier.cidadeId,
+              nacionalidadeId: supplier.nacionalidadeId,
+              limiteCredito: supplier.limiteCredito,
               ativo: supplier.ativo !== undefined ? supplier.ativo : true,
               condicaoPagamentoId: supplier.condicaoPagamentoId,
             });
@@ -358,6 +394,12 @@ export default function SupplierForm() {
               const city = citiesData.find((c) => c.id === supplier.cidadeId);
               if (city) {
                 setSelectedCity(city);
+              }
+            }
+            if (supplier.nacionalidadeId) {
+              const country = countriesData.find((c) => c.id === supplier.nacionalidadeId);
+              if (country) {
+                setSelectedCountry(country);
               }
             }
             if (supplier.condicaoPagamentoId) {
@@ -390,6 +432,8 @@ export default function SupplierForm() {
         celularResponsavel: formatters.clearFormat(values.celularResponsavel),
         cep: formatters.clearFormat(values.cep),
         cidadeId: values.cidadeId || undefined,
+        nacionalidadeId: values.nacionalidadeId || undefined,
+        limiteCredito: values.limiteCredito || undefined,
         condicaoPagamentoId: values.condicaoPagamentoId || undefined,
       };
       Object.keys(formattedData).forEach((key) => {
@@ -429,6 +473,12 @@ export default function SupplierForm() {
     setSelectedPaymentTerm(term);
     form.setValue('condicaoPagamentoId', term.id);
     setPaymentTermSearchOpen(false);
+  }
+
+  async function onCountrySelected(country: Country) {
+    setSelectedCountry(country);
+    form.setValue('nacionalidadeId', country.id);
+    setCountrySearchOpen(false);
   }
 
   async function onStateCreated() {
@@ -504,6 +554,39 @@ export default function SupplierForm() {
       `Condição de pagamento ${updatedPaymentTerm.name} atualizada com sucesso!`,
     );
   };
+
+  // Funções para edição de países
+  const handleEditCountry = (country: Country) => {
+    setCountryToEdit(country);
+    setCountrySearchOpen(false);
+    setCountryCreationOpen(true);
+  };
+
+  const handleCountryCreated = (newCountry: Country) => {
+    setCountries((prev) => [...prev, newCountry]);
+    setCountryCreationOpen(false);
+    setCountrySearchOpen(true);
+    toast.success(
+      `País ${newCountry.nome} criado com sucesso! Selecione-o na lista.`,
+    );
+  };
+
+  const handleCountryUpdated = (updatedCountry: Country) => {
+    setCountries((prev) =>
+      prev.map((country) =>
+        country.id === updatedCountry.id ? updatedCountry : country,
+      ),
+    );
+
+    if (selectedCountry && selectedCountry.id === updatedCountry.id) {
+      setSelectedCountry(updatedCountry);
+    }
+
+    setCountryToEdit(null);
+    toast.success(
+      `País ${updatedCountry.nome} atualizado com sucesso!`,
+    );
+  };
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -560,7 +643,6 @@ export default function SupplierForm() {
                 isLoading={isLoading}
                 formatters={formatters}
                 selectedCity={selectedCity}
-                watchIsEstrangeiro={watchIsEstrangeiro}
                 setCitySearchOpen={setCitySearchOpen}
                 setSelectedCity={setSelectedCity}
               />
@@ -583,6 +665,13 @@ export default function SupplierForm() {
                 form={form}
                 isLoading={isLoading}
                 formatters={formatters}
+              />
+
+              <FinancialDataSection
+                form={form}
+                isLoading={isLoading}
+                selectedCountry={selectedCountry}
+                setCountrySearchOpen={setCountrySearchOpen}
               />
 
               <PaymentSection
@@ -655,6 +744,30 @@ export default function SupplierForm() {
         entityType="condições de pagamento"
         description="Selecione uma condição de pagamento para o cadastro do fornecedor ou cadastre uma nova."
       />
+
+      <SearchDialog
+        title="Selecione uma nacionalidade"
+        open={countrySearchOpen}
+        onOpenChange={setCountrySearchOpen}
+        entities={countries}
+        isLoading={isLoading}
+        onSelect={onCountrySelected}
+        onCreateNew={() => {
+          setCountryToEdit(null);
+          setCountrySearchOpen(false);
+          setCountryCreationOpen(true);
+        }}
+        onEdit={handleEditCountry}
+        searchKeys={['nome', 'sigla', 'codigo']}
+        displayColumns={[
+          { key: 'nome', header: 'Nome' },
+          { key: 'sigla', header: 'Sigla' },
+          { key: 'codigo', header: 'Código' },
+        ]}
+        entityType="países"
+        description="Selecione uma nacionalidade para o fornecedor ou cadastre um novo país."
+      />
+
       {/* Diálogos de criação */}
       <StateCreationDialog
         open={stateCreationOpen}
@@ -679,6 +792,17 @@ export default function SupplierForm() {
             : handlePaymentTermCreated
         }
         paymentTerm={paymentTermToEdit}
+      />
+
+      <CountryCreationDialog
+        open={countryCreationOpen}
+        onOpenChange={setCountryCreationOpen}
+        onSuccess={
+          countryToEdit
+            ? handleCountryUpdated
+            : handleCountryCreated
+        }
+        country={countryToEdit}
       />
     </div>
   );

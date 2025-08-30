@@ -16,6 +16,24 @@ import { Type } from 'class-transformer';
 
 export class CreateSupplierDto {
   @ApiProperty({
+    description: 'Nome do fornecedor',
+    example: 'Fornecedor ABC',
+  })
+  @IsNotEmpty({ message: 'Nome do fornecedor é obrigatório' })
+  @IsString({ message: 'Nome do fornecedor deve ser uma string' })
+  @MaxLength(255, { message: 'Nome do fornecedor deve ter no máximo 255 caracteres' })
+  fornecedor: string;
+
+  @ApiProperty({
+    description: 'Apelido/Nome curto do fornecedor',
+    example: 'ABC',
+  })
+  @IsNotEmpty({ message: 'Apelido do fornecedor é obrigatório' })
+  @IsString({ message: 'Apelido deve ser uma string' })
+  @MaxLength(255, { message: 'Apelido deve ter no máximo 255 caracteres' })
+  apelido: string;
+
+  @ApiProperty({
     description: 'CNPJ, CPF ou número de documento internacional do fornecedor',
     example: '12345678901234',
   })
@@ -85,14 +103,7 @@ export class CreateSupplierDto {
     message: 'Inscrição Estadual deve ter no máximo 20 caracteres',
   })
   inscricaoEstadual?: string;
-  @ApiProperty({
-    description: 'ID do país',
-    example: 1,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber({}, { message: 'ID do país deve ser um número válido' })
-  paisId?: number;
+
   @ApiProperty({
     description: 'ID do estado/província',
     example: 1,
@@ -180,24 +191,6 @@ export class CreateSupplierDto {
   @MaxLength(100, { message: 'Email deve ter no máximo 100 caracteres' })
   email?: string;
   @ApiProperty({
-    description: 'ID da nacionalidade',
-    example: 1,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber({}, { message: 'ID da nacionalidade deve ser um número válido' })
-  nacionalidadeId?: number;
-
-  @ApiProperty({
-    description: 'Limite de crédito do fornecedor',
-    example: 10000.00,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Limite de crédito deve ser um número com no máximo 2 casas decimais' })
-  limiteCredito?: number;
-
-  @ApiProperty({
     description: 'ID da condição de pagamento',
     example: 1,
     required: false,
@@ -251,4 +244,32 @@ export class CreateSupplierDto {
     message: 'Celular do responsável deve ter no máximo 20 caracteres',
   })
   celularResponsavel?: string;
+
+  @ApiProperty({
+    description: 'Limite de crédito do fornecedor',
+    example: 10000.00,
+    default: 0.00,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'Limite de crédito deve ser um número válido' })
+  @Type(() => Number)
+  limiteCredito?: number;
+
+  @ApiProperty({
+    description: 'ID da nacionalidade (país)',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'ID da nacionalidade deve ser um número válido' })
+  nacionalidadeId?: number;
+
+  @ApiProperty({
+    description: 'ID da transportadora',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'ID da transportadora deve ser um número válido' })
+  transportadoraId?: number;
 }

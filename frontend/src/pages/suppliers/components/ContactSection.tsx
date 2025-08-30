@@ -8,7 +8,7 @@ import {
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
-import { getFieldValidationClass, getValidationMessage } from '../utils/validationUtils';
+import { getFieldValidationClass } from '../utils/validationUtils';
 import { cn } from '../../../lib/utils';
 
 interface Formatters {
@@ -35,7 +35,6 @@ const ContactSection = ({
           name="telefone"
           render={({ field }) => {
             const validationClass = getFieldValidationClass(field.value, 'telefone');
-            const validationMessage = getValidationMessage(field.value, 'telefone');
             
             return (
               <FormItem>
@@ -56,16 +55,6 @@ const ContactSection = ({
                     <Phone className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                   </div>
                 </FormControl>
-                {validationMessage && (
-                  <p className={cn(
-                    "text-sm font-medium transition-colors duration-200",
-                    validationMessage.includes('✓') 
-                      ? "text-green-600" 
-                      : "text-orange-600"
-                  )}>
-                    {validationMessage}
-                  </p>
-                )}
                 <FormMessage className="text-sm" />
               </FormItem>
             );
@@ -77,7 +66,6 @@ const ContactSection = ({
           name="email"
           render={({ field }) => {
             const validationClass = getFieldValidationClass(field.value, 'email');
-            const validationMessage = getValidationMessage(field.value, 'email');
             
             return (
               <FormItem>
@@ -98,16 +86,6 @@ const ContactSection = ({
                     <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                   </div>
                 </FormControl>
-                {validationMessage && (
-                  <p className={cn(
-                    "text-sm font-medium transition-colors duration-200",
-                    validationMessage.includes('✓') 
-                      ? "text-green-600" 
-                      : "text-orange-600"
-                  )}>
-                    {validationMessage}
-                  </p>
-                )}
                 <FormMessage className="text-sm" />
               </FormItem>
             );

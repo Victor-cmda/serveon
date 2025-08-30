@@ -9,7 +9,7 @@ import {
 import { Input } from '../../../components/ui/input';
 import { Textarea } from '../../../components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
-import { getFieldValidationClass, getValidationMessage } from '../utils/validationUtils';
+import { getFieldValidationClass } from '../utils/validationUtils';
 import { cn } from '../../../lib/utils';
 
 interface Formatters {
@@ -38,7 +38,6 @@ const SupplierSpecificSection = ({
             name="website"
             render={({ field }) => {
               const validationClass = getFieldValidationClass(field.value, 'website');
-              const validationMessage = getValidationMessage(field.value, 'website');
               
               return (
                 <FormItem>
@@ -58,16 +57,6 @@ const SupplierSpecificSection = ({
                       <Globe className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                     </div>
                   </FormControl>
-                  {validationMessage && (
-                    <p className={cn(
-                      "text-sm font-medium transition-colors duration-200",
-                      validationMessage.includes('✓') 
-                        ? "text-green-600" 
-                        : "text-orange-600"
-                    )}>
-                      {validationMessage}
-                    </p>
-                  )}
                   <FormMessage className="text-sm" />
                 </FormItem>
               );
@@ -109,7 +98,6 @@ const SupplierSpecificSection = ({
             name="celularResponsavel"
             render={({ field }) => {
               const validationClass = getFieldValidationClass(field.value, 'celularResponsavel');
-              const validationMessage = getValidationMessage(field.value, 'celularResponsavel');
               
               return (
                 <FormItem>
@@ -132,16 +120,6 @@ const SupplierSpecificSection = ({
                       <Phone className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                     </div>
                   </FormControl>
-                  {validationMessage && (
-                    <p className={cn(
-                      "text-sm font-medium transition-colors duration-200",
-                      validationMessage.includes('✓') 
-                        ? "text-green-600" 
-                        : "text-orange-600"
-                    )}>
-                      {validationMessage}
-                    </p>
-                  )}
                   <FormMessage className="text-sm" />
                 </FormItem>
               );

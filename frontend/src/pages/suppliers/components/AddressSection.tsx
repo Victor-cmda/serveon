@@ -8,7 +8,6 @@ import {
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
-import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { City } from '../../../types/location';
 import CEPField from '../../../components/CEPField';
@@ -23,7 +22,6 @@ interface AddressSectionProps {
   isLoading: boolean;
   formatters: Formatters;
   selectedCity: City | null;
-  watchIsEstrangeiro: boolean;
   setCitySearchOpen: (open: boolean) => void;
   setSelectedCity?: (city: City | null) => void; // Nova prop opcional
 }
@@ -33,10 +31,25 @@ const AddressSection = ({
   isLoading,
   formatters,
   selectedCity,
-  watchIsEstrangeiro,
   setCitySearchOpen,
   setSelectedCity,
 }: AddressSectionProps) => {
+  // Função para preencher campos quando endereço é encontrado via CEP
+  const handleAddressFound = (address: {
+    endereco: string;
+    bairro: string;
+    cidade: string;
+    uf: string;
+  }) => {
+    // Preenche os campos se estiverem vazios
+    if (!form.getValues('endereco') && address.endereco) {
+      form.setValue('endereco', address.endereco);
+    }
+    if (!form.getValues('bairro') && address.bairro) {
+      form.setValue('bairro', address.bairro);
+    }
+  };
+
   // Função para selecionar cidade automaticamente quando encontrada no cadastro
   const handleCityFound = (city: City) => {
     if (setSelectedCity && (!selectedCity || selectedCity.id !== city.id)) {
@@ -183,29 +196,6 @@ const AddressSection = ({
                     </Button>
                   </div>
                 </FormControl>
-                {selectedCity && (
-                  <div className="mt-1 flex items-center">
-                    <Badge variant="outline" className="mr-2">
-                      {selectedCity.estadoNome} / {selectedCity.uf}
-                    </Badge>
-                    {selectedCity.paisNome && (
-                      <Badge
-                        variant={watchIsEstrangeiro ? 'secondary' : 'outline'}
-                      >
-                        {selectedCity.paisNome}
-                        {watchIsEstrangeiro && ' (Estrangeiro)'}
-                      </Badge>
-                    )}
-                  </div>
-                )}
-                {field.value && !selectedCity && (
-                  <div className="mt-1">
-                    <Badge variant="outline">
-                      Cidade selecionada mas dados não carregados. ID:{' '}
-                      {field.value}
-                    </Badge>
-                  </div>
-                )}
                 <FormMessage className="text-sm" />
               </FormItem>
             )}
@@ -214,6 +204,7 @@ const AddressSection = ({
             <CEPField 
               form={form}
               disabled={isLoading}
+              onAddressFound={handleAddressFound}
               onCityFound={handleCityFound}
             />
           </div>

@@ -135,6 +135,9 @@ const SuppliersList: React.FC = () => {
                   Cidade
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Limite Crédito
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Responsável
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
@@ -144,7 +147,7 @@ const SuppliersList: React.FC = () => {
             </thead>
             <tbody>              {filteredSuppliers.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="h-24 text-center">
+                  <td colSpan={9} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Users className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -173,6 +176,17 @@ const SuppliersList: React.FC = () => {
                     </td>
                     <td className="p-4">
                       <div className="text-sm">{supplier.cidadeNome || '-'}</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm font-mono">
+                        {supplier.limiteCredito 
+                          ? new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
+                            }).format(supplier.limiteCredito)
+                          : '-'
+                        }
+                      </div>
                     </td>
                     <td className="p-4">
                       <div className="text-sm">{supplier.responsavel || '-'}</div>

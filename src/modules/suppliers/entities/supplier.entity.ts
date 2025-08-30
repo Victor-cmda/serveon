@@ -3,6 +3,18 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 
 export class Supplier extends BaseEntity {
   @ApiProperty({
+    description: 'Nome do fornecedor',
+    example: 'Fornecedor ABC',
+  })
+  fornecedor: string;
+
+  @ApiProperty({
+    description: 'Apelido/Nome curto do fornecedor',
+    example: 'ABC',
+  })
+  apelido: string;
+
+  @ApiProperty({
     description: 'CNPJ, CPF ou documento internacional do fornecedor',
     example: '12345678901234',
   })
@@ -47,24 +59,6 @@ export class Supplier extends BaseEntity {
     example: '123456789',
   })
   inscricaoEstadual?: string;
-
-  @ApiProperty({
-    description: 'ID do país',
-    example: 1,
-  })
-  paisId?: number;
-
-  @ApiProperty({
-    description: 'ID da nacionalidade',
-    example: 1,
-  })
-  nacionalidadeId?: number;
-
-  @ApiProperty({
-    description: 'ID do estado/província',
-    example: 1,
-  })
-  estadoId?: number;
 
   @ApiProperty({
     description: 'Endereço',
@@ -115,12 +109,6 @@ export class Supplier extends BaseEntity {
   email?: string;
 
   @ApiProperty({
-    description: 'Limite de crédito',
-    example: 10000.00,
-  })
-  limiteCredito: number;
-
-  @ApiProperty({
     description: 'ID da condição de pagamento',
     example: 1,
   })
@@ -150,4 +138,22 @@ export class Supplier extends BaseEntity {
     example: '(11) 98765-4321',
   })
   celularResponsavel?: string;
+
+  @ApiProperty({
+    description: 'Limite de crédito do fornecedor',
+    example: 10000.00,
+  })
+  limiteCredito?: number;
+
+  @ApiProperty({
+    description: 'ID da nacionalidade (país)',
+    example: 1,
+  })
+  nacionalidadeId?: number;
+
+  @ApiProperty({
+    description: 'ID da transportadora',
+    example: 1,
+  })
+  transportadoraId?: number;
 }
