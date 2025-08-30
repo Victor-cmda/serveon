@@ -8,9 +8,9 @@ import {
   Delete 
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { EmployeeFunctionsService } from './employee-functions.service';
-import { CreateEmployeeFunctionDto } from './dto/create-employee-function.dto';
-import { UpdateEmployeeFunctionDto } from './dto/update-employee-function.dto';
+import { EmployeeFunctionsService } from '../services/employee-functions.service';
+import { CreateEmployeeFunctionDto } from '../dto/create-employee-function.dto';
+import { UpdateEmployeeFunctionDto } from '../dto/update-employee-function.dto';
 
 @ApiTags('employee-functions')
 @Controller('employee-functions')

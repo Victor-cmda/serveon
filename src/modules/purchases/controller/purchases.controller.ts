@@ -8,9 +8,9 @@ import {
   Delete 
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { PurchasesService } from './purchases.service';
-import { CreatePurchaseDto } from './dto/create-purchase.dto';
-import { UpdatePurchaseDto } from './dto/update-purchase.dto';
+import { PurchasesService } from '../services/purchases.service';
+import { CreatePurchaseDto } from '../dto/create-purchase.dto';
+import { UpdatePurchaseDto } from '../dto/update-purchase.dto';
 
 @ApiTags('purchases')
 @Controller('purchases')

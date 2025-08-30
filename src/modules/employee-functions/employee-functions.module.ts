@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { EmployeeFunctionsService } from './employee-functions.service';
-import { EmployeeFunctionsController } from './employee-functions.controller';
+import { EmployeeFunctionsService } from './services/employee-functions.service';
+import { EmployeeFunctionsController } from './controller/employee-functions.controller';
 import { DatabaseModule } from '../../common/database/database.module';
 
 @Module({

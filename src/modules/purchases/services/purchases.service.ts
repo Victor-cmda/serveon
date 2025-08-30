@@ -4,10 +4,10 @@ import {
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
-import { CreatePurchaseDto } from './dto/create-purchase.dto';
-import { UpdatePurchaseDto } from './dto/update-purchase.dto';
-import { DatabaseService } from '../../common/database/database.service';
-import { Purchase } from './entities/purchase.entity';
+import { CreatePurchaseDto } from '../dto/create-purchase.dto';
+import { UpdatePurchaseDto } from '../dto/update-purchase.dto';
+import { DatabaseService } from '../../../common/database/database.service';
+import { Purchase } from '../entities/purchase.entity';
 
 @Injectable()
 export class PurchasesService {

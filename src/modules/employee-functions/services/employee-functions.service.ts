@@ -4,10 +4,10 @@ import {
   InternalServerErrorException,
   ConflictException,
 } from '@nestjs/common';
-import { CreateEmployeeFunctionDto } from './dto/create-employee-function.dto';
-import { UpdateEmployeeFunctionDto } from './dto/update-employee-function.dto';
-import { DatabaseService } from '../../common/database/database.service';
-import { EmployeeFunction } from './entities/employee-function.entity';
+import { CreateEmployeeFunctionDto } from '../dto/create-employee-function.dto';
+import { UpdateEmployeeFunctionDto } from '../dto/update-employee-function.dto';
+import { DatabaseService } from '../../../common/database/database.service';
+import { EmployeeFunction } from '../entities/employee-function.entity';
 
 @Injectable()
 export class EmployeeFunctionsService {

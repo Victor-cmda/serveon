@@ -8,9 +8,9 @@ import {
   Delete 
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { TransportersService } from './transporters.service';
-import { CreateTransporterDto } from './dto/create-transporter.dto';
-import { UpdateTransporterDto } from './dto/update-transporter.dto';
+import { TransportersService } from '../services/transporters.service';
+import { CreateTransporterDto } from '../dto/create-transporter.dto';
+import { UpdateTransporterDto } from '../dto/update-transporter.dto';
 
 @ApiTags('transporters')
 @Controller('transporters')

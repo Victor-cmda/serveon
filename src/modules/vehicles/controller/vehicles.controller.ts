@@ -8,9 +8,9 @@ import {
   Delete 
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { VehiclesService } from './vehicles.service';
-import { CreateVehicleDto } from './dto/create-vehicle.dto';
-import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { VehiclesService } from '../vehicles.service';
+import { CreateVehicleDto } from '../dto/create-vehicle.dto';
+import { UpdateVehicleDto } from '../dto/update-vehicle.dto';
 
 @ApiTags('vehicles')
 @Controller('vehicles')

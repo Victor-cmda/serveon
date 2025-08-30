@@ -4,10 +4,10 @@ import {
   InternalServerErrorException,
   ConflictException,
 } from '@nestjs/common';
-import { CreateVehicleDto } from './dto/create-vehicle.dto';
-import { UpdateVehicleDto } from './dto/update-vehicle.dto';
-import { DatabaseService } from '../../common/database/database.service';
-import { Vehicle } from './entities/vehicle.entity';
+import { CreateVehicleDto } from '../dto/create-vehicle.dto';
+import { UpdateVehicleDto } from '../dto/update-vehicle.dto';
+import { DatabaseService } from '../../../common/database/database.service';
+import { Vehicle } from '../entities/vehicle.entity';
 
 @Injectable()
 export class VehiclesService {
