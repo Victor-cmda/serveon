@@ -63,6 +63,12 @@ export class Employee extends BaseEntity {
   estadoCivil?: string;
 
   @ApiProperty({
+    description: 'Nacionalidade',
+    example: 'BRASILEIRA',
+  })
+  nacionalidade?: string;
+
+  @ApiProperty({
     description: 'ID da nacionalidade',
     example: 1,
   })
@@ -152,6 +158,12 @@ export class Employee extends BaseEntity {
     example: 1,
   })
   funcaoFuncionarioId?: number;
+
+  @ApiProperty({
+    description: 'Nome da função do funcionário',
+    example: 'VENDEDOR',
+  })
+  funcaoFuncionarioNome?: string;
 
   @ApiProperty({
     description: 'Data de admissão',

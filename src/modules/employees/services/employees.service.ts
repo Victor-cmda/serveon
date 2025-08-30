@@ -38,23 +38,41 @@ export class EmployeesService {
       }
       const result = await this.databaseService.query(
         `INSERT INTO dbo.funcionario
-          (nome, cpf, email, telefone, rg, cidade_id, cargo_id, departamento_id, 
-           data_admissao, funcao_funcionario_id, ativo)
+          (funcionario, nome, cpf, email, telefone, celular, rg, orgao_emissor, 
+           data_nascimento, estado_civil, nacionalidade, cep, endereco, numero, 
+           complemento, bairro, cidade_id, cargo_id, departamento_id, funcao_funcionario_id, 
+           data_admissao, salario, observacoes, observacao, nacionalidade_id, ativo)
          VALUES
-          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
          RETURNING *`,
         [
+          createEmployeeDto.nome.toUpperCase(), // funcionario - usando nome em maiúsculo
           createEmployeeDto.nome,
           createEmployeeDto.cpf,
           createEmployeeDto.email,
           createEmployeeDto.telefone || null,
+          createEmployeeDto.celular || null,
           createEmployeeDto.rg || null,
+          createEmployeeDto.orgaoEmissor || null,
+          createEmployeeDto.dataNascimento || null,
+          createEmployeeDto.estadoCivil || null,
+          createEmployeeDto.nacionalidade || 'BRASILEIRA', // nacionalidade padrão
+          createEmployeeDto.cep || null,
+          createEmployeeDto.endereco || null,
+          createEmployeeDto.numero || null,
+          createEmployeeDto.complemento || null,
+          createEmployeeDto.bairro || null,
           createEmployeeDto.cidadeId || null,
           createEmployeeDto.cargoId || null,
           createEmployeeDto.departamentoId || null,
+          createEmployeeDto.funcaoFuncionarioId || 1, // Default para funcao_funcionario_id obrigatório
           createEmployeeDto.dataAdmissao,
-          createEmployeeDto.funcaoFuncionarioId || null,
-          createEmployeeDto.ativo,
+          createEmployeeDto.salario || null,
+          createEmployeeDto.observacoes || null,
+          createEmployeeDto.observacoes ||
+            'FUNCIONÁRIO CADASTRADO PELO SISTEMA', // observacao é obrigatório
+          createEmployeeDto.nacionalidadeId || 1, // Default para nacionalidade_id obrigatório
+          createEmployeeDto.ativo ?? true,
         ],
       );
 
@@ -131,6 +149,12 @@ export class EmployeesService {
     updateEmployeeDto: UpdateEmployeeDto,
   ): Promise<Employee> {
     try {
+      console.log(`=== ATUALIZANDO FUNCIONÁRIO ${id} ===`);
+      console.log(
+        'Dados recebidos:',
+        JSON.stringify(updateEmployeeDto, null, 2),
+      );
+
       const existingEmployee = await this.databaseService.query(
         'SELECT id FROM dbo.funcionario WHERE id = $1',
         [id],
@@ -190,9 +214,59 @@ export class EmployeesService {
         values.push(updateEmployeeDto.telefone);
       }
 
+      if (updateEmployeeDto.celular !== undefined) {
+        updates.push(`celular = $${paramCounter++}`);
+        values.push(updateEmployeeDto.celular);
+      }
+
       if (updateEmployeeDto.rg !== undefined) {
         updates.push(`rg = $${paramCounter++}`);
         values.push(updateEmployeeDto.rg);
+      }
+
+      if (updateEmployeeDto.orgaoEmissor !== undefined) {
+        updates.push(`orgao_emissor = $${paramCounter++}`);
+        values.push(updateEmployeeDto.orgaoEmissor);
+      }
+
+      if (updateEmployeeDto.dataNascimento !== undefined) {
+        updates.push(`data_nascimento = $${paramCounter++}`);
+        values.push(updateEmployeeDto.dataNascimento);
+      }
+
+      if (updateEmployeeDto.estadoCivil !== undefined) {
+        updates.push(`estado_civil = $${paramCounter++}`);
+        values.push(updateEmployeeDto.estadoCivil);
+      }
+
+      if (updateEmployeeDto.nacionalidade !== undefined) {
+        updates.push(`nacionalidade = $${paramCounter++}`);
+        values.push(updateEmployeeDto.nacionalidade);
+      }
+
+      if (updateEmployeeDto.cep !== undefined) {
+        updates.push(`cep = $${paramCounter++}`);
+        values.push(updateEmployeeDto.cep);
+      }
+
+      if (updateEmployeeDto.endereco !== undefined) {
+        updates.push(`endereco = $${paramCounter++}`);
+        values.push(updateEmployeeDto.endereco);
+      }
+
+      if (updateEmployeeDto.numero !== undefined) {
+        updates.push(`numero = $${paramCounter++}`);
+        values.push(updateEmployeeDto.numero);
+      }
+
+      if (updateEmployeeDto.complemento !== undefined) {
+        updates.push(`complemento = $${paramCounter++}`);
+        values.push(updateEmployeeDto.complemento);
+      }
+
+      if (updateEmployeeDto.bairro !== undefined) {
+        updates.push(`bairro = $${paramCounter++}`);
+        values.push(updateEmployeeDto.bairro);
       }
 
       if (updateEmployeeDto.cidadeId !== undefined) {
@@ -225,6 +299,16 @@ export class EmployeesService {
         values.push(updateEmployeeDto.dataDemissao);
       }
 
+      if (updateEmployeeDto.salario !== undefined) {
+        updates.push(`salario = $${paramCounter++}`);
+        values.push(updateEmployeeDto.salario);
+      }
+
+      if (updateEmployeeDto.observacoes !== undefined) {
+        updates.push(`observacoes = $${paramCounter++}`);
+        values.push(updateEmployeeDto.observacoes);
+      }
+
       if (updateEmployeeDto.ativo !== undefined) {
         updates.push(`ativo = $${paramCounter++}`);
         values.push(updateEmployeeDto.ativo);
@@ -243,7 +327,14 @@ export class EmployeesService {
         RETURNING *
       `;
 
+      console.log('Query SQL:', updateQuery);
+      console.log('Valores:', values);
+
       const result = await this.databaseService.query(updateQuery, values);
+      console.log('Resultado da atualização:', result.rows[0]);
+      console.log('=== FIM DA ATUALIZAÇÃO ===');
+
+      return this.mapToEmployeeEntity(result.rows[0]);
       return this.mapToEmployeeEntity(result.rows[0]);
     } catch (error) {
       if (
@@ -301,23 +392,39 @@ export class EmployeesService {
       cpf: dbRecord.cpf,
       email: dbRecord.email,
       telefone: dbRecord.telefone,
+      celular: dbRecord.celular,
       rg: dbRecord.rg,
+      orgaoEmissor: dbRecord.orgao_emissor,
+      dataNascimento: dbRecord.data_nascimento,
+      estadoCivil: dbRecord.estado_civil,
+      nacionalidade: dbRecord.nacionalidade,
+      cep: dbRecord.cep,
+      endereco: dbRecord.endereco,
+      numero: dbRecord.numero,
+      complemento: dbRecord.complemento,
+      bairro: dbRecord.bairro,
       cidadeId: dbRecord.cidade_id,
       cargoId: dbRecord.cargo_id,
       departamentoId: dbRecord.departamento_id,
       funcaoFuncionarioId: dbRecord.funcao_funcionario_id,
       dataAdmissao: dbRecord.data_admissao,
       dataDemissao: dbRecord.data_demissao,
+      salario: dbRecord.salario
+        ? parseFloat(dbRecord.salario) % 1 === 0
+          ? parseInt(dbRecord.salario)
+          : parseFloat(dbRecord.salario)
+        : undefined,
+      observacoes: dbRecord.observacoes,
       ativo: dbRecord.ativo,
       createdAt: dbRecord.created_at,
       updatedAt: dbRecord.updated_at,
-    };
 
-    // Campos opcionais que podem não existir na entity base
-    if (dbRecord.cidade_nome && (employee as any).cidadeNome !== undefined) (employee as any).cidadeNome = dbRecord.cidade_nome;
-    if (dbRecord.cargo_nome && (employee as any).cargoNome !== undefined) (employee as any).cargoNome = dbRecord.cargo_nome;
-    if (dbRecord.departamento_nome && (employee as any).departamentoNome !== undefined) (employee as any).departamentoNome = dbRecord.departamento_nome;
-    if (dbRecord.funcao_funcionario_nome && (employee as any).funcaoFuncionarioNome !== undefined) (employee as any).funcaoFuncionarioNome = dbRecord.funcao_funcionario_nome;
+      // Campos de relacionamento
+      cidadeNome: dbRecord.cidade_nome,
+      cargoNome: dbRecord.cargo_nome,
+      departamentoNome: dbRecord.departamento_nome,
+      funcaoFuncionarioNome: dbRecord.funcao_funcionario_nome,
+    };
 
     return employee;
   }

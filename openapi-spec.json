@@ -3428,6 +3428,11 @@
             "description": "Estado civil",
             "example": "Solteiro"
           },
+          "nacionalidade": {
+            "type": "string",
+            "description": "Nacionalidade",
+            "example": "BRASILEIRA"
+          },
           "nacionalidadeId": {
             "type": "number",
             "description": "ID da nacionalidade",
@@ -3584,6 +3589,11 @@
             "description": "Estado civil",
             "example": "Solteiro"
           },
+          "nacionalidade": {
+            "type": "string",
+            "description": "Nacionalidade",
+            "example": "BRASILEIRA"
+          },
           "nacionalidadeId": {
             "type": "number",
             "description": "ID da nacionalidade",
@@ -3659,6 +3669,11 @@
             "description": "ID da função do funcionário",
             "example": 1
           },
+          "funcaoFuncionarioNome": {
+            "type": "string",
+            "description": "Nome da função do funcionário",
+            "example": "VENDEDOR"
+          },
           "dataAdmissao": {
             "format": "date-time",
             "type": "string",
@@ -3697,6 +3712,7 @@
           "rgCidadeId",
           "dataNascimento",
           "estadoCivil",
+          "nacionalidade",
           "nacionalidadeId",
           "cep",
           "endereco",
@@ -3712,6 +3728,7 @@
           "departamentoId",
           "departamentoNome",
           "funcaoFuncionarioId",
+          "funcaoFuncionarioNome",
           "dataAdmissao",
           "dataDemissao",
           "salario",

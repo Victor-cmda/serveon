@@ -65,7 +65,7 @@ import {
   UpdateUnitMeasureDto,
 } from '../types/unit-measure';
 
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 const handleResponse = async (response: Response) => {
   if (!response.ok) {

@@ -135,10 +135,14 @@ const EmployeeForm: React.FC = () => {
     loadDepartments();
     loadPositions();
     loadCities();
-    if (id) {
+  }, []);
+
+  useEffect(() => {
+    // Só carrega o funcionário depois que departments, positions e cities estão carregados
+    if (id && departments.length > 0 && positions.length > 0 && cities.length > 0) {
       loadEmployee();
     }
-  }, [id]);
+  }, [id, departments, positions, cities]);
 
   useEffect(() => {
     // Filtrar cargos quando departamento é selecionado
@@ -291,6 +295,7 @@ const EmployeeForm: React.FC = () => {
         celular: data.celular ? clearFormat(data.celular) : undefined,
         cep: data.cep ? clearFormat(data.cep) : undefined,
         rg: data.rg ? clearFormat(data.rg) : undefined,
+        salario: data.salario || undefined,
         // Outros campos opcionais
         orgaoEmissor: data.orgaoEmissor || undefined,
         dataNascimento: data.dataNascimento || undefined,
@@ -304,7 +309,6 @@ const EmployeeForm: React.FC = () => {
         cargoId: data.cargoId || undefined,
         departamentoId: data.departamentoId || undefined,
         dataDemissao: data.dataDemissao || undefined,
-        salario: data.salario || undefined,
         observacoes: data.observacoes || undefined,
       };
 

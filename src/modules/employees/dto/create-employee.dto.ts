@@ -112,6 +112,16 @@ export class CreateEmployeeDto {
   estadoCivil?: string;
 
   @ApiProperty({
+    description: 'Nacionalidade',
+    example: 'BRASILEIRA',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Nacionalidade deve ser uma string' })
+  @MaxLength(30, { message: 'Nacionalidade deve ter no máximo 30 caracteres' })
+  nacionalidade?: string;
+
+  @ApiProperty({
     description: 'ID da nacionalidade',
     example: 1,
     required: false,

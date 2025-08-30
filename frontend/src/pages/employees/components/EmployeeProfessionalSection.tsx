@@ -8,7 +8,11 @@ import {
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
-import { DatePicker, dateToString, stringToDate } from '../../../components/ui/date-picker';
+import {
+  CustomDatePicker,
+  dateToString,
+  stringToDate,
+} from '../../../components/ui/date-picker';
 import { UseFormReturn } from 'react-hook-form';
 import { Department } from '../../../types/department';
 import { Position } from '../../../types/position';
@@ -139,12 +143,24 @@ const EmployeeProfessionalSection = ({
                 Data de Admissão *
               </FormLabel>
               <FormControl>
-                <DatePicker
-                  date={field.value ? stringToDate(field.value) : undefined}
-                  onSelect={(date) => field.onChange(date ? dateToString(date) : '')}
+                <CustomDatePicker
+                  date={
+                    field.value && field.value.trim()
+                      ? stringToDate(field.value)
+                      : undefined
+                  }
+                  onSelect={(date) => {
+                    if (date) {
+                      field.onChange(dateToString(date));
+                    } else {
+                      field.onChange('');
+                    }
+                  }}
                   placeholder="Selecione a data de admissão"
                   disabled={isLoading}
                   className="text-base"
+                  fromYear={1980}
+                  toYear={new Date().getFullYear() + 1}
                 />
               </FormControl>
               <FormMessage className="text-sm" />
@@ -161,12 +177,24 @@ const EmployeeProfessionalSection = ({
                 Data de Demissão
               </FormLabel>
               <FormControl>
-                <DatePicker
-                  date={field.value ? stringToDate(field.value) : undefined}
-                  onSelect={(date) => field.onChange(date ? dateToString(date) : '')}
+                <CustomDatePicker
+                  date={
+                    field.value && field.value.trim()
+                      ? stringToDate(field.value)
+                      : undefined
+                  }
+                  onSelect={(date) => {
+                    if (date) {
+                      field.onChange(dateToString(date));
+                    } else {
+                      field.onChange('');
+                    }
+                  }}
                   placeholder="Selecione a data de demissão"
                   disabled={isLoading}
                   className="text-base"
+                  fromYear={1980}
+                  toYear={new Date().getFullYear() + 1}
                 />
               </FormControl>
               <FormMessage className="text-sm" />
@@ -186,12 +214,22 @@ const EmployeeProfessionalSection = ({
                   step="0.01"
                   min="0"
                   placeholder="0.00"
-                  {...field}
+                  value={field.value || ''}
                   disabled={isLoading}
                   className="h-10 text-base"
-                  onChange={(e) =>
-                    field.onChange(parseFloat(e.target.value) || undefined)
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '' || value === null) {
+                      field.onChange(undefined);
+                    } else {
+                      const numValue = parseFloat(value);
+                      if (!isNaN(numValue)) {
+                        field.onChange(numValue);
+                      }
+                    }
+                  }}
+                  onBlur={field.onBlur}
+                  name={field.name}
                 />
               </FormControl>
               <FormMessage className="text-sm" />

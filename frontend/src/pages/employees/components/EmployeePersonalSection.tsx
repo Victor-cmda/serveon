@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../components/ui/select';
-import { DatePicker, dateToString, stringToDate } from '../../../components/ui/date-picker';
+import { CustomDatePicker, dateToString, stringToDate } from '../../../components/ui/date-picker';
 import { UseFormReturn } from 'react-hook-form';
 import { formatText } from '../utils/validationUtils';
 
@@ -81,12 +81,20 @@ const EmployeePersonalSection = ({
             <FormItem className="md:col-span-4">
               <FormLabel className="text-base font-medium">Data de Nascimento</FormLabel>
               <FormControl>
-                <DatePicker
-                  date={field.value ? stringToDate(field.value) : undefined}
-                  onSelect={(date) => field.onChange(date ? dateToString(date) : '')}
+                <CustomDatePicker
+                  date={field.value && field.value.trim() ? stringToDate(field.value) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      field.onChange(dateToString(date));
+                    } else {
+                      field.onChange('');
+                    }
+                  }}
                   placeholder="Selecione a data de nascimento"
                   disabled={isLoading}
                   className="text-base"
+                  fromYear={1920}
+                  toYear={new Date().getFullYear()}
                 />
               </FormControl>
               <FormMessage className="text-sm" />
