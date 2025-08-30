@@ -7,6 +7,8 @@ import {
   LogOut,
   Settings,
   HelpCircle,
+  PanelLeftOpen,
+  PanelLeftClose,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -20,7 +22,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SearchInputWithRouter } from './SearchInput';
 import { ThemeToggle } from './ThemeToggle';
 
-const Navbar = () => {
+interface NavbarProps {
+  sidebarCollapsed?: boolean;
+  onToggleSidebar?: () => void;
+}
+
+const Navbar = ({ sidebarCollapsed = false, onToggleSidebar }: NavbarProps) => {
   return (
     <nav className="fixed top-0 z-30 w-full border-b border-border bg-background backdrop-blur-sm supports-[backdrop-filter]:bg-background/60 animate-fade-in-down animate-duration-500">
       <div className="px-4 py-3 lg:px-6">
@@ -33,6 +40,23 @@ const Navbar = () => {
               aria-label="Toggle Menu"
             >
               <Menu className="h-5 w-5" />
+            </Button>
+
+            {/* Sidebar Toggle Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleSidebar}
+              className="hidden lg:flex transition-all duration-300 hover:scale-110 hover:rotate-12 hover:bg-muted"
+              aria-label="Toggle Sidebar"
+            >
+              <div className="transition-all duration-300 ease-in-out transform">
+                {sidebarCollapsed ? (
+                  <PanelLeftOpen className="h-5 w-5 animate-in fade-in-0 slide-in-from-left-2 duration-300" />
+                ) : (
+                  <PanelLeftClose className="h-5 w-5 animate-in fade-in-0 slide-in-from-right-2 duration-300" />
+                )}
+              </div>
             </Button>
 
             <a
