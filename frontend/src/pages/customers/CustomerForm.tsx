@@ -160,6 +160,13 @@ const validateCNPJ = (cnpj: string): boolean => {
 
 const formSchema = z.object({
   id: z.number().optional(),
+  cliente: z.string()
+    .min(2, 'Nome do cliente deve ter pelo menos 2 caracteres')
+    .max(50, 'Nome do cliente deve ter no máximo 50 caracteres')
+    .refine((value) => value.trim().length > 0, 'Nome do cliente é obrigatório'),
+  apelido: z.string()
+    .max(60, 'Apelido deve ter no máximo 60 caracteres')
+    .optional(),
   tipo: z.enum(['F', 'J']),
   isEstrangeiro: z.boolean().default(false),
   cnpjCpf: z.string()
@@ -256,6 +263,8 @@ const CustomerForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       id: id ? Number(id) : undefined,
+      cliente: '',
+      apelido: '',
       cnpjCpf: '',
       tipo: 'J' as const,
       isEstrangeiro: false,
@@ -313,6 +322,8 @@ const CustomerForm = () => {
         setCustomerData(customer);
         form.reset({
           id: customer.id || 0,
+          cliente: customer.cliente || '',
+          apelido: customer.apelido || '',
           cnpjCpf: customer.cnpjCpf || '',
           tipo: customer.tipo || 'J',
           isEstrangeiro: Boolean(customer.isEstrangeiro),

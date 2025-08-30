@@ -3,6 +3,18 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 
 export class Customer extends BaseEntity {
   @ApiProperty({
+    description: 'Nome do cliente',
+    example: 'Cliente ABC',
+  })
+  cliente: string;
+
+  @ApiProperty({
+    description: 'Apelido/Nome curto do cliente',
+    example: 'ABC',
+  })
+  apelido?: string;
+
+  @ApiProperty({
     description: 'CNPJ, CPF ou documento internacional do cliente',
     example: '12345678901234',
   })
@@ -76,6 +88,13 @@ export class Customer extends BaseEntity {
   cidadeId?: number;
 
   @ApiProperty({
+    description: 'Nome da cidade',
+    example: 'São Paulo',
+    required: false,
+  })
+  cidadeNome?: string;
+
+  @ApiProperty({
     description: 'Endereço',
     example: 'Av. Brasil',
     required: false,
@@ -135,7 +154,7 @@ export class Customer extends BaseEntity {
     description: 'Limite de crédito do cliente',
     example: 50000.00,
   })
-  limiteCredito: number;
+  limiteCredito?: number;
 
   @ApiProperty({
     description: 'ID da condição de pagamento',

@@ -35,15 +35,17 @@ export class CustomersService {
         // Inserir o novo cliente (ID será gerado automaticamente)
         const result = await client.query(
           `INSERT INTO dbo.cliente
-            (cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
+            (cliente, apelido, cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
             nome_fantasia, inscricao_estadual, 
             endereco, numero, complemento, bairro, 
             cidade_id, cep, telefone, email, is_destinatario, condicao_pagamento_id, 
             nacionalidade_id, limite_credito, ativo)
           VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
           RETURNING *`,
           [
+            createCustomerDto.cliente,
+            createCustomerDto.apelido || null,
             createCustomerDto.cnpjCpf,
             createCustomerDto.tipo,
             createCustomerDto.isEstrangeiro || false,
@@ -325,6 +327,16 @@ export class CustomersService {
         const updates: string[] = [];
         const values: any[] = [];
         let paramCounter = 1;
+
+        if (updateCustomerDto.cliente !== undefined) {
+          updates.push(`cliente = $${paramCounter++}`);
+          values.push(updateCustomerDto.cliente);
+        }
+
+        if (updateCustomerDto.apelido !== undefined) {
+          updates.push(`apelido = $${paramCounter++}`);
+          values.push(updateCustomerDto.apelido);
+        }
 
         if (updateCustomerDto.tipo !== undefined) {
           updates.push(`tipo = $${paramCounter++}`);
@@ -670,6 +682,8 @@ export class CustomersService {
   private mapToCustomerEntity(dbRecord: any): Customer {
     const customer: Customer = {
       id: dbRecord.id,
+      cliente: dbRecord.cliente,
+      apelido: dbRecord.apelido,
       cnpjCpf: dbRecord.cnpj_cpf,
       tipo: dbRecord.tipo as 'F' | 'J',
       razaoSocial: dbRecord.razao_social,
@@ -680,6 +694,7 @@ export class CustomersService {
       complemento: dbRecord.complemento,
       bairro: dbRecord.bairro,
       cidadeId: dbRecord.cidade_id,
+      cidadeNome: dbRecord.cidade_nome,
       cep: dbRecord.cep,
       telefone: dbRecord.telefone,
       email: dbRecord.email,
@@ -691,11 +706,14 @@ export class CustomersService {
       estadoId: dbRecord.estado_id || null,
       isDestinatario: dbRecord.is_destinatario || false,
       nacionalidadeId: dbRecord.nacionalidade_id || null,
-      limiteCredito: dbRecord.limite_credito || null,
+      limiteCredito: dbRecord.limite_credito
+        ? parseFloat(dbRecord.limite_credito) % 1 === 0
+          ? parseInt(dbRecord.limite_credito)
+          : parseFloat(dbRecord.limite_credito)
+        : undefined,
     };
 
     // Campos opcionais que podem não existir na entity base
-    if (dbRecord.cidade_nome && (customer as any).cidadeNome !== undefined) (customer as any).cidadeNome = dbRecord.cidade_nome;
     if (dbRecord.estado_nome && (customer as any).estadoNome !== undefined) (customer as any).estadoNome = dbRecord.estado_nome;
     if (dbRecord.uf && (customer as any).uf !== undefined) (customer as any).uf = dbRecord.uf;
     if (dbRecord.tipo_documento)

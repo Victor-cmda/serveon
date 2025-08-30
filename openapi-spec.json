@@ -4007,6 +4007,16 @@
       "CreateCustomerDto": {
         "type": "object",
         "properties": {
+          "cliente": {
+            "type": "string",
+            "description": "Nome do cliente",
+            "example": "Cliente ABC"
+          },
+          "apelido": {
+            "type": "string",
+            "description": "Apelido/Nome curto do cliente",
+            "example": "ABC"
+          },
           "cnpjCpf": {
             "type": "string",
             "description": "CNPJ, CPF ou número de documento internacional do cliente",
@@ -4142,6 +4152,7 @@
           }
         },
         "required": [
+          "cliente",
           "cnpjCpf",
           "tipo",
           "isEstrangeiro",
@@ -4173,6 +4184,16 @@
             "type": "object",
             "description": "Data da última atualização do registro",
             "example": "2025-06-19T10:00:00Z"
+          },
+          "cliente": {
+            "type": "string",
+            "description": "Nome do cliente",
+            "example": "Cliente ABC"
+          },
+          "apelido": {
+            "type": "string",
+            "description": "Apelido/Nome curto do cliente",
+            "example": "ABC"
           },
           "cnpjCpf": {
             "type": "string",
@@ -4233,6 +4254,11 @@
             "description": "ID da cidade no sistema",
             "example": 1
           },
+          "cidadeNome": {
+            "type": "string",
+            "description": "Nome da cidade",
+            "example": "São Paulo"
+          },
           "endereco": {
             "type": "string",
             "description": "Endereço",
@@ -4290,6 +4316,8 @@
           "ativo",
           "createdAt",
           "updatedAt",
+          "cliente",
+          "apelido",
           "cnpjCpf",
           "tipo",
           "isEstrangeiro",
