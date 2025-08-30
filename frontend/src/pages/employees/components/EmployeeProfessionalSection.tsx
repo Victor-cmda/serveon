@@ -8,7 +8,7 @@ import {
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
-import { Badge } from '../../../components/ui/badge';
+import { DatePicker, dateToString, stringToDate } from '../../../components/ui/date-picker';
 import { UseFormReturn } from 'react-hook-form';
 import { Department } from '../../../types/department';
 import { Position } from '../../../types/position';
@@ -139,11 +139,12 @@ const EmployeeProfessionalSection = ({
                 Data de Admissão *
               </FormLabel>
               <FormControl>
-                <Input
-                  type="date"
-                  {...field}
+                <DatePicker
+                  date={field.value ? stringToDate(field.value) : undefined}
+                  onSelect={(date) => field.onChange(date ? dateToString(date) : '')}
+                  placeholder="Selecione a data de admissão"
                   disabled={isLoading}
-                  className="h-10 text-base"
+                  className="text-base"
                 />
               </FormControl>
               <FormMessage className="text-sm" />
@@ -160,11 +161,12 @@ const EmployeeProfessionalSection = ({
                 Data de Demissão
               </FormLabel>
               <FormControl>
-                <Input
-                  type="date"
-                  {...field}
+                <DatePicker
+                  date={field.value ? stringToDate(field.value) : undefined}
+                  onSelect={(date) => field.onChange(date ? dateToString(date) : '')}
+                  placeholder="Selecione a data de demissão"
                   disabled={isLoading}
-                  className="h-10 text-base"
+                  className="text-base"
                 />
               </FormControl>
               <FormMessage className="text-sm" />
