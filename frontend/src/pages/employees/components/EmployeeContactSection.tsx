@@ -7,7 +7,7 @@ import {
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
-import { formatEmail, formatPhone, getFieldValidationClass, getValidationMessage } from '../utils/validationUtils';
+import { formatEmail, formatPhone, getFieldValidationClass } from '../utils/validationUtils';
 
 interface EmployeeContactSectionProps {
   form: UseFormReturn<any>;
@@ -42,17 +42,6 @@ const EmployeeContactSection = ({
                   className={`h-10 text-base ${getFieldValidationClass(emailValue, 'email')}`}
                 />
               </FormControl>
-              {emailValue && (
-                <div className="mt-1 text-xs">
-                  <span className={
-                    getValidationMessage(emailValue, 'email').includes('✓') 
-                      ? 'text-green-600' 
-                      : 'text-amber-600'
-                  }>
-                    {getValidationMessage(emailValue, 'email')}
-                  </span>
-                </div>
-              )}
               <FormMessage className="text-sm" />
             </FormItem>
           )}
@@ -74,17 +63,6 @@ const EmployeeContactSection = ({
                   className={`h-10 text-base ${getFieldValidationClass(telefoneValue, 'telefone')}`}
                 />
               </FormControl>
-              {telefoneValue && (
-                <div className="mt-1 text-xs">
-                  <span className={
-                    getValidationMessage(telefoneValue, 'telefone').includes('✓') 
-                      ? 'text-green-600' 
-                      : 'text-amber-600'
-                  }>
-                    {getValidationMessage(telefoneValue, 'telefone')}
-                  </span>
-                </div>
-              )}
               <FormMessage className="text-sm" />
             </FormItem>
           )}
@@ -106,17 +84,6 @@ const EmployeeContactSection = ({
                   className={`h-10 text-base ${getFieldValidationClass(celularValue, 'celular')}`}
                 />
               </FormControl>
-              {celularValue && (
-                <div className="mt-1 text-xs">
-                  <span className={
-                    getValidationMessage(celularValue, 'celular').includes('✓') 
-                      ? 'text-green-600' 
-                      : 'text-amber-600'
-                  }>
-                    {getValidationMessage(celularValue, 'celular')}
-                  </span>
-                </div>
-              )}
               <FormMessage className="text-sm" />
             </FormItem>
           )}

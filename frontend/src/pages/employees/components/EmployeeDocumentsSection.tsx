@@ -7,7 +7,7 @@ import {
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
-import { formatCPF, formatRG, formatOrgaoEmissor, getFieldValidationClass, getValidationMessage } from '../utils/validationUtils';
+import { formatCPF, formatRG, formatOrgaoEmissor, getFieldValidationClass } from '../utils/validationUtils';
 
 interface EmployeeDocumentsSectionProps {
   form: UseFormReturn<any>;
@@ -42,17 +42,6 @@ const EmployeeDocumentsSection = ({
                   className={`h-10 text-base ${getFieldValidationClass(cpfValue, 'cpf')}`}
                 />
               </FormControl>
-              {cpfValue && (
-                <div className="mt-1 text-xs">
-                  <span className={
-                    getValidationMessage(cpfValue, 'cpf').includes('✓') 
-                      ? 'text-green-600' 
-                      : 'text-amber-600'
-                  }>
-                    {getValidationMessage(cpfValue, 'cpf')}
-                  </span>
-                </div>
-              )}
               <FormMessage className="text-sm" />
             </FormItem>
           )}
@@ -74,17 +63,6 @@ const EmployeeDocumentsSection = ({
                   className={`h-10 text-base ${getFieldValidationClass(rgValue, 'rg')}`}
                 />
               </FormControl>
-              {rgValue && (
-                <div className="mt-1 text-xs">
-                  <span className={
-                    getValidationMessage(rgValue, 'rg').includes('✓') 
-                      ? 'text-green-600' 
-                      : 'text-amber-600'
-                  }>
-                    {getValidationMessage(rgValue, 'rg')}
-                  </span>
-                </div>
-              )}
               <FormMessage className="text-sm" />
             </FormItem>
           )}

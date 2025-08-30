@@ -204,19 +204,6 @@ const EmployeeAddressSection = ({
                   className={`h-10 text-base ${getFieldValidationClass(cepValue, 'cep')}`}
                 />
               </FormControl>
-              {cepValue && (
-                <div className="mt-1 text-xs">
-                  <span
-                    className={
-                      getValidationMessage(cepValue, 'cep').includes('✓')
-                        ? 'text-green-600'
-                        : 'text-amber-600'
-                    }
-                  >
-                    {getValidationMessage(cepValue, 'cep')}
-                  </span>
-                </div>
-              )}
               <FormMessage className="text-sm" />
             </FormItem>
           )}
