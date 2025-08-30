@@ -33,15 +33,6 @@ const Navbar = ({ sidebarCollapsed = false, onToggleSidebar }: NavbarProps) => {
       <div className="px-4 py-3 lg:px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden transition-transform hover:scale-110 hover:rotate-12"
-              aria-label="Toggle Menu"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-
             {/* Sidebar Toggle Button */}
             <Button
               variant="ghost"
@@ -70,6 +61,17 @@ const Navbar = ({ sidebarCollapsed = false, onToggleSidebar }: NavbarProps) => {
                 Serveon
               </span>
             </a>
+
+            {/* Mobile Menu Toggle Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleSidebar}
+              className="lg:hidden transition-all duration-300 hover:scale-110 hover:rotate-12 hover:bg-muted"
+              aria-label="Toggle Mobile Menu"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
           </div>
 
           <div className="hidden max-w-md flex-1 px-4 lg:block lg:px-6">

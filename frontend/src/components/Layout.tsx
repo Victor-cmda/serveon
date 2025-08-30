@@ -19,9 +19,20 @@ const Layout = () => {
         onToggleSidebar={toggleSidebar} 
       />
       <Sidebar collapsed={sidebarCollapsed} />
+      
+      {/* Mobile Overlay */}
+      {!sidebarCollapsed && (
+        <div 
+          className="fixed inset-0 z-10 bg-black/50 lg:hidden"
+          onClick={toggleSidebar}
+          aria-label="Close sidebar"
+        />
+      )}
+      
       <div className={cn(
         "flex h-full w-full flex-col pt-16 overflow-hidden transition-all duration-300",
-        sidebarCollapsed ? "md:pl-16" : "md:pl-64"
+        "lg:pl-0", // Reset mobile padding
+        sidebarCollapsed ? "lg:pl-16" : "lg:pl-64" // Only apply padding on desktop
       )}>
         <main className="h-full overflow-y-auto p-4">
           <div className="container mx-auto">

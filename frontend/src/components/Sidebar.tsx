@@ -237,8 +237,10 @@ const Sidebar = ({ collapsed = false }: SidebarProps) => {
     <aside
       id="sidebar"
       className={cn(
-        "fixed left-0 top-0 z-20 flex h-full flex-shrink-0 flex-col pt-16 transition-all duration-700 ease-out lg:flex bg-background border-r border-border transform origin-left",
-        collapsed ? "w-16 shadow-sm scale-x-95 -translate-x-1" : "w-64 shadow-xl scale-x-100 translate-x-0"
+        "fixed left-0 top-0 z-20 flex h-full flex-shrink-0 flex-col pt-16 transition-all duration-700 ease-out bg-background border-r border-border transform origin-left",
+        // Mobile behavior: hidden by default, show when not collapsed
+        "lg:flex",
+        collapsed ? "hidden lg:block lg:w-16 shadow-sm scale-x-95 -translate-x-1" : "flex w-64 shadow-xl scale-x-100 translate-x-0"
       )}
       style={{
         background: collapsed 
@@ -253,25 +255,6 @@ const Sidebar = ({ collapsed = false }: SidebarProps) => {
           "absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent transition-all duration-700 ease-out",
           collapsed ? "opacity-100 scale-110" : "opacity-0 scale-100"
         )} />
-        
-        {/* Header */}
-        <div className={cn(
-          "border-b border-border transition-all duration-700 ease-out relative z-10",
-          collapsed ? "p-2 opacity-0 h-0 overflow-hidden transform scale-y-0" : "p-4 opacity-100 h-auto transform scale-y-100"
-        )}>
-          <h2 className={cn(
-            "text-lg font-semibold text-foreground transition-all duration-500 ease-out",
-            collapsed ? "scale-0 rotate-12 opacity-0" : "scale-100 rotate-0 opacity-100"
-          )}>
-            Kaneko System
-          </h2>
-          <p className={cn(
-            "text-xs text-muted-foreground transition-all duration-600 ease-out delay-100",
-            collapsed ? "scale-0 -rotate-6 opacity-0" : "scale-100 rotate-0 opacity-100"
-          )}>
-            Sistema de Gestão
-          </p>
-        </div>
 
         {/* Navigation */}
         <div className="flex-1 overflow-y-auto p-2">
@@ -413,20 +396,6 @@ const Sidebar = ({ collapsed = false }: SidebarProps) => {
                 </div>
               );
             })}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className={cn(
-          "border-t border-border transition-all duration-700 ease-out relative",
-          collapsed ? "p-1 opacity-0 h-0 overflow-hidden transform scale-y-0" : "p-4 opacity-100 h-auto transform scale-y-100"
-        )}>
-          <div className={cn(
-            "flex items-center space-x-2 text-xs text-muted-foreground transition-all duration-500 ease-out",
-            collapsed ? "scale-0 rotate-12" : "scale-100 rotate-0"
-          )}>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-lg" />
-            <span>Sistema Online</span>
           </div>
         </div>
 
