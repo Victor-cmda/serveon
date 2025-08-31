@@ -117,7 +117,7 @@ const GeneralDataSection = ({
           control={form.control}
           name="apelido"
           render={({ field }) => (
-            <FormItem className="md:col-span-3">
+            <FormItem className="md:col-span-5">
               <FormLabel className="text-base font-medium">
                 Apelido
               </FormLabel>
