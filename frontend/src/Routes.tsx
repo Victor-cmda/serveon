@@ -32,6 +32,8 @@ import BrandsList from './pages/brands/BrandsList';
 import BrandForm from './pages/brands/BrandForm';
 import UnitMeasuresList from './pages/unit-measures/UnitMeasuresList';
 import UnitMeasureForm from './pages/unit-measures/UnitMeasureForm';
+import TransportersList from './pages/transporters/TransportersList';
+import TransporterForm from './pages/transporters/TransporterForm';
 import { FormStateProvider } from './contexts/FormStateContext';
 
 const router = createBrowserRouter([
@@ -219,6 +221,19 @@ const router = createBrowserRouter([
       {
         path: 'unit-measures/edit/:id',
         element: <UnitMeasureForm />,
+      },
+      // Transportadoras
+      {
+        path: 'transporters',
+        element: <TransportersList />,
+      },
+      {
+        path: 'transporters/new',
+        element: <TransporterForm />,
+      },
+      {
+        path: 'transporters/edit/:id',
+        element: <TransporterForm />,
       },
       // Rota de fallback
       {

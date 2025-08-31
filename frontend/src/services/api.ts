@@ -64,6 +64,11 @@ import {
   CreateUnitMeasureDto,
   UpdateUnitMeasureDto,
 } from '../types/unit-measure';
+import {
+  Transporter,
+  CreateTransporterDto,
+  UpdateTransporterDto,
+} from '../types/transporter';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -755,6 +760,51 @@ export const unitMeasureApi = {
 
   delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_URL}/unit-measures/${id}`, {
+      method: 'DELETE',
+    });
+    return handleResponse(response);
+  },
+};
+
+// API para Transportadoras
+export const transporterApi = {
+  getAll: async (): Promise<Transporter[]> => {
+    const response = await fetch(`${API_URL}/transporters`);
+    return handleResponse(response);
+  },
+
+  getById: async (id: number): Promise<Transporter> => {
+    const response = await fetch(`${API_URL}/transporters/${id}`);
+    return handleResponse(response);
+  },
+
+  create: async (transporter: CreateTransporterDto): Promise<Transporter> => {
+    const response = await fetch(`${API_URL}/transporters`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(transporter),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (
+    id: number,
+    transporter: UpdateTransporterDto,
+  ): Promise<Transporter> => {
+    const response = await fetch(`${API_URL}/transporters/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(transporter),
+    });
+    return handleResponse(response);
+  },
+
+  delete: async (id: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/transporters/${id}`, {
       method: 'DELETE',
     });
     return handleResponse(response);

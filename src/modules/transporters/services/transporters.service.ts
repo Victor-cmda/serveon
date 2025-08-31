@@ -33,6 +33,8 @@ export class TransportersService {
         }
 
         // Inserir nova transportadora
+        const observacao = this.buildObservacao(createTransporterDto.website, createTransporterDto.observacoes);
+        
         const result = await client.query(
           `INSERT INTO dbo.transportadora
             (razao_social, nome_fantasia, cnpj, email, telefone, endereco, numero, 
@@ -56,7 +58,7 @@ export class TransportersService {
             'J', // tipo sempre jurídica para transportadoras
             null, // rg_ie
             null, // condicao_pagamento_id
-            createTransporterDto.observacoes || null,
+            observacao,
             true,
           ],
         );
@@ -200,15 +202,28 @@ export class TransportersService {
           values.push(updateTransporterDto.cep);
         }
 
-        if (updateTransporterDto.website !== undefined) {
-          // Adicionar website se não existir na tabela
+        if (updateTransporterDto.observacoes !== undefined || updateTransporterDto.website !== undefined) {
+          // Obter observação atual para preservar website ou observações existentes
+          const currentResult = await client.query(
+            'SELECT observacao FROM dbo.transportadora WHERE id = $1',
+            [id]
+          );
+          const currentObservacao = currentResult.rows[0]?.observacao;
+          
+          // Extrair dados atuais
+          const currentWebsite = this.extractWebsiteFromObservacao(currentObservacao);
+          const currentObs = this.cleanObservacoes(currentObservacao);
+          
+          // Usar novos valores ou manter os atuais
+          const newWebsite = updateTransporterDto.website !== undefined ? 
+            updateTransporterDto.website : currentWebsite;
+          const newObs = updateTransporterDto.observacoes !== undefined ? 
+            updateTransporterDto.observacoes : currentObs;
+          
+          const newObservacao = this.buildObservacao(newWebsite, newObs);
+          
           updates.push(`observacao = $${paramCounter++}`);
-          values.push(`Website: ${updateTransporterDto.website}`);
-        }
-
-        if (updateTransporterDto.observacoes !== undefined) {
-          updates.push(`observacao = $${paramCounter++}`);
-          values.push(updateTransporterDto.observacoes);
+          values.push(newObservacao);
         }
 
         if (updates.length > 0) {
@@ -294,7 +309,7 @@ export class TransportersService {
     }
   }
 
-  private mapToEntity(dbRecord: any): Transporter {
+  private mapToEntity(dbRecord: any): Transporter & { cidadeNome?: string; estadoNome?: string; uf?: string } {
     return {
       id: dbRecord.id,
       cnpj: dbRecord.cnpj,
@@ -308,11 +323,44 @@ export class TransportersService {
       complemento: dbRecord.complemento,
       bairro: dbRecord.bairro,
       cep: dbRecord.cep,
-      website: undefined, // Não disponível na estrutura atual
-      observacoes: dbRecord.observacao,
+      website: this.extractWebsiteFromObservacao(dbRecord.observacao), // Extrair do campo observacao
+      observacoes: this.cleanObservacoes(dbRecord.observacao), // Limpar website das observações
       ativo: dbRecord.ativo,
       createdAt: dbRecord.created_at,
       updatedAt: dbRecord.updated_at,
+      // Campos relacionados para exibição
+      cidadeNome: dbRecord.cidade_nome,
+      estadoNome: dbRecord.estado_nome,
+      uf: dbRecord.uf,
     };
+  }
+
+  private buildObservacao(website?: string, observacoes?: string): string | null {
+    const parts: string[] = [];
+    
+    if (website) {
+      parts.push(`Website: ${website}`);
+    }
+    
+    if (observacoes) {
+      parts.push(observacoes);
+    }
+    
+    return parts.length > 0 ? parts.join('\n') : null;
+  }
+
+  private extractWebsiteFromObservacao(observacao: string | null): string | undefined {
+    if (!observacao) return undefined;
+    
+    const websiteMatch = observacao.match(/Website:\s*(https?:\/\/[^\s\n]+)/i);
+    return websiteMatch ? websiteMatch[1] : undefined;
+  }
+
+  private cleanObservacoes(observacao: string | null): string | undefined {
+    if (!observacao) return undefined;
+    
+    // Remove linha do website das observações
+    const cleaned = observacao.replace(/Website:\s*https?:\/\/[^\s\n]+\n?/gi, '').trim();
+    return cleaned || undefined;
   }
 }

@@ -83,6 +83,12 @@ const Sidebar = ({ collapsed = false }: SidebarProps) => {
           path: '/suppliers',
         },
         {
+          id: 'transporters',
+          title: 'Transportadoras',
+          icon: <Truck className="h-4 w-4" />,
+          path: '/transporters',
+        },
+        {
           id: 'products',
           title: 'Produtos',
           icon: <Package className="h-4 w-4" />,
