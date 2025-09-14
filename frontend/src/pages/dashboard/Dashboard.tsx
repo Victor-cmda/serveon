@@ -6,7 +6,6 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { 
-  Candy, 
   TrendingUp, 
   TrendingDown, 
   DollarSign, 
@@ -14,25 +13,23 @@ import {
   Users, 
   Package, 
   Clock,
-  Star,
-  Heart,
-  Cake,
-  Coffee,
+  BarChart3,
   Globe,
   Map,
   MapPin,
   Target,
   Calendar,
-  Trophy
+  Activity,
+  Building2
 } from 'lucide-react';
 import { customerApi, supplierApi } from '@/services/api';
 
-// Simulação de dados de vendas de doces
+// Dados de vendas do sistema
 const salesData = {
   today: {
     revenue: 2850.75,
     orders: 45,
-    bestSeller: "Brigadeiros Gourmet",
+    bestSeller: "Produto Premium",
     trend: "+12%"
   },
   week: {
@@ -49,12 +46,12 @@ const salesData = {
   }
 };
 
-const sweetProducts = [
-  { name: "Brigadeiros Gourmet", sales: 156, revenue: 4680, trend: 12 },
-  { name: "Tortas Personalizadas", sales: 89, revenue: 7120, trend: 8 },
-  { name: "Cupcakes Decorados", sales: 234, revenue: 3510, trend: -3 },
-  { name: "Docinhos para Festa", sales: 98, revenue: 2940, trend: 15 },
-  { name: "Bolos de Aniversário", sales: 67, revenue: 6030, trend: 22 }
+const topProducts = [
+  { name: "Produto Premium", sales: 156, revenue: 4680, trend: 12 },
+  { name: "Serviço Personalizado", sales: 89, revenue: 7120, trend: 8 },
+  { name: "Item Padrão", sales: 234, revenue: 3510, trend: -3 },
+  { name: "Pacote Especial", sales: 98, revenue: 2940, trend: 15 },
+  { name: "Produto Deluxe", sales: 67, revenue: 6030, trend: 22 }
 ];
 
 const monthlyGoals = {
@@ -93,28 +90,28 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header com saudação personalizada */}
+      {/* Header com saudação profissional */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-pink-500 via-purple-500 to-orange-500 bg-clip-text text-transparent">
-            {greeting}, Doceira!
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            {greeting}!
           </h1>
           <p className="text-muted-foreground mt-1">
-            Vamos adoçar o dia com vendas incríveis! ✨
+            Acompanhe o desempenho do seu negócio em tempo real
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Candy className="h-8 w-8 text-pink-500 animate-bounce" />
-          <Badge variant="secondary" className="bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900 dark:to-purple-900">
-            <Heart className="h-3 w-3 mr-1 text-pink-500" />
-            Doces & Sonhos
+          <Activity className="h-8 w-8 text-primary" />
+          <Badge variant="secondary" className="bg-muted">
+            <BarChart3 className="h-3 w-3 mr-1" />
+            Sistema de Gestão
           </Badge>
         </div>
       </div>
 
       {/* Cards de estatísticas principais */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-green-500 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 hover:shadow-lg transition-all duration-300 hover:scale-105">
+        <Card className="border-l-4 border-l-green-500 hover:shadow-lg transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Vendas Hoje</CardTitle>
             <DollarSign className="h-4 w-4 text-green-600" />
@@ -130,7 +127,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-blue-500 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950 hover:shadow-lg transition-all duration-300 hover:scale-105">
+        <Card className="border-l-4 border-l-blue-500 hover:shadow-lg transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pedidos Hoje</CardTitle>
             <ShoppingCart className="h-4 w-4 text-blue-600" />
@@ -146,23 +143,23 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 hover:shadow-lg transition-all duration-300 hover:scale-105">
+        <Card className="border-l-4 border-l-primary hover:shadow-lg transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Mais Vendido</CardTitle>
-            <Star className="h-4 w-4 text-purple-600" />
+            <BarChart3 className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-bold text-purple-700 dark:text-purple-400">
+            <div className="text-lg font-bold text-primary">
               {salesData.today.bestSeller}
             </div>
             <div className="flex items-center text-xs text-muted-foreground mt-1">
-              <Trophy className="h-3 w-3 mr-1 text-purple-500" />
+              <Activity className="h-3 w-3 mr-1 text-primary" />
               Produto destaque do dia
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-orange-500 bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-950 dark:to-yellow-950 hover:shadow-lg transition-all duration-300 hover:scale-105">
+        <Card className="border-l-4 border-l-orange-500 hover:shadow-lg transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Clientes</CardTitle>
             <Users className="h-4 w-4 text-orange-600" />
@@ -172,18 +169,18 @@ const Dashboard = () => {
               {isLoading ? '...' : customerCount}
             </div>
             <div className="flex items-center text-xs text-muted-foreground mt-1">
-              <Heart className="h-3 w-3 mr-1 text-orange-500" />
-              Clientes fiéis
+              <Building2 className="h-3 w-3 mr-1 text-orange-500" />
+              Total cadastrado
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Metas mensais */}
-      <Card className="bg-gradient-to-r from-violet-50 via-purple-50 to-pink-50 dark:from-violet-950 dark:via-purple-950 dark:to-pink-950">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-purple-600" />
+            <Target className="h-5 w-5 text-primary" />
             Metas do Mês
           </CardTitle>
         </CardHeader>
@@ -233,23 +230,23 @@ const Dashboard = () => {
 
       {/* Produtos mais vendidos */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Cake className="h-5 w-5 text-amber-600" />
+              <BarChart3 className="h-5 w-5 text-primary" />
               Top Produtos do Mês
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {sweetProducts.map((product, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-white/60 dark:bg-white/5 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-200">
+              {topProducts.map((product, index) => (
+                <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-all duration-200">
                   <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                      index === 0 ? 'bg-yellow-500 text-white' :
-                      index === 1 ? 'bg-gray-400 text-white' :
-                      index === 2 ? 'bg-orange-600 text-white' :
-                      'bg-gray-200 text-gray-600'
+                      index === 0 ? 'bg-primary text-primary-foreground' :
+                      index === 1 ? 'bg-muted-foreground text-muted' :
+                      index === 2 ? 'bg-muted-foreground text-muted' :
+                      'bg-muted text-muted-foreground'
                     }`}>
                       {index + 1}
                     </div>
@@ -281,16 +278,16 @@ const Dashboard = () => {
         </Card>
 
         {/* Gestão do Sistema */}
-        <Card className="bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Coffee className="h-5 w-5 text-slate-600" />
+              <Building2 className="h-5 w-5 text-primary" />
               Gestão do Sistema
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-white/60 dark:bg-white/5 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-200">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-all duration-200">
                 <div className="flex items-center gap-3">
                   <Users className="h-4 w-4 text-blue-600" />
                   <span className="font-medium">Clientes</span>
@@ -303,7 +300,7 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-white/60 dark:bg-white/5 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-200">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-all duration-200">
                 <div className="flex items-center gap-3">
                   <Package className="h-4 w-4 text-green-600" />
                   <span className="font-medium">Fornecedores</span>
@@ -316,7 +313,7 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-white/60 dark:bg-white/5 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-200">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-all duration-200">
                 <div className="flex items-center gap-3">
                   <Globe className="h-4 w-4 text-purple-600" />
                   <span className="font-medium">Países</span>
@@ -328,7 +325,7 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-white/60 dark:bg-white/5 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-200">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-all duration-200">
                 <div className="flex items-center gap-3">
                   <Map className="h-4 w-4 text-orange-600" />
                   <span className="font-medium">Estados</span>
@@ -340,7 +337,7 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-white/60 dark:bg-white/5 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-white/10 transition-all duration-200">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-all duration-200">
                 <div className="flex items-center gap-3">
                   <MapPin className="h-4 w-4 text-red-600" />
                   <span className="font-medium">Cidades</span>
@@ -357,17 +354,17 @@ const Dashboard = () => {
       </div>
 
       {/* Resumo da semana */}
-      <Card className="bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950 dark:via-teal-950 dark:to-cyan-950">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-emerald-600" />
+            <Calendar className="h-5 w-5 text-primary" />
             Resumo da Semana
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="text-center p-4 rounded-lg bg-white/50 dark:bg-white/5 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-emerald-600">
+            <div className="text-center p-4 rounded-lg bg-muted/30">
+              <div className="text-2xl font-bold text-primary">
                 R$ {salesData.week.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </div>
               <div className="text-sm text-muted-foreground">Faturamento Total</div>
@@ -377,8 +374,8 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="text-center p-4 rounded-lg bg-white/50 dark:bg-white/5 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-teal-600">
+            <div className="text-center p-4 rounded-lg bg-muted/30">
+              <div className="text-2xl font-bold text-primary">
                 {salesData.week.orders}
               </div>
               <div className="text-sm text-muted-foreground">Pedidos Realizados</div>
@@ -387,8 +384,8 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="text-center p-4 rounded-lg bg-white/50 dark:bg-white/5 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-cyan-600">
+            <div className="text-center p-4 rounded-lg bg-muted/30">
+              <div className="text-2xl font-bold text-primary">
                 R$ {salesData.week.avgOrder.toFixed(2)}
               </div>
               <div className="text-sm text-muted-foreground">Ticket Médio</div>
