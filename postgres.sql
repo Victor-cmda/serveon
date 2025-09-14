@@ -163,7 +163,7 @@ CREATE TABLE transportador (
     cep VARCHAR(10),
     codigo_antt VARCHAR(20),
     placa_veiculo VARCHAR(10),
-    uf_veiculo CHAR(2),    
+    uf_veiculo CHAR(2),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -478,7 +478,7 @@ CREATE TABLE funcionario (
     nacionalidade VARCHAR(30),
     nacionalidade_id INTEGER NOT NULL REFERENCES pais(id),
     tipo INTEGER DEFAULT 1,
-    
+
     -- Campos de endereço
     cep VARCHAR(10),
     endereco VARCHAR(200),
@@ -486,7 +486,7 @@ CREATE TABLE funcionario (
     complemento VARCHAR(100),
     bairro VARCHAR(100),
     cidade_id INTEGER REFERENCES cidade(id),
-    
+
     -- Campos profissionais
     cargo_id INTEGER REFERENCES cargo(id),
     departamento_id INTEGER REFERENCES departamento(id),
@@ -496,7 +496,7 @@ CREATE TABLE funcionario (
     salario DECIMAL(10, 2),
     observacoes TEXT,
     observacao VARCHAR(255) NOT NULL,
-    
+
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -1147,77 +1147,7 @@ CREATE TRIGGER update_volume_timestamp BEFORE
 UPDATE ON volume FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_cliente_destinatario_timestamp BEFORE
 UPDATE ON cliente_destinatario FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
--- Inserir dados iniciais
--- Inserir país padrão (Brasil)
-INSERT INTO pais (nome, codigo, sigla, nacionalidade)
-VALUES ('BRASIL', '55', 'BR', 'BRASILEIRA');
 
--- Inserir formas de pagamento comuns
-INSERT INTO forma_pagamento (nome, tipo)
-VALUES ('DINHEIRO', 'À VISTA'),
-    ('CARTÃO DE CRÉDITO', 'CRÉDITO'),
-    ('CARTÃO DE DÉBITO', 'DÉBITO'),
-    ('PIX', 'À VISTA'),
-    ('BOLETO BANCÁRIO', 'À PRAZO');
-
--- Inserir modalidades de NFe
-INSERT INTO modalidade_nfe (codigo, descricao)
-VALUES ('55', 'NOTA FISCAL ELETRÔNICA'),
-    ('65', 'NOTA FISCAL DE CONSUMIDOR ELETRÔNICA');
-
--- Inserir condições de pagamento comuns
-INSERT INTO condicao_pagamento (nome, condicao_pagamento, descricao, taxa_juros, taxa_multa, percentual_desconto, ativo)
-VALUES ('À VISTA', 'À VISTA', 'PAGAMENTO À VISTA', 0, 0, 5, true),
-    ('30 DIAS', '30 DIAS', 'PAGAMENTO EM 30 DIAS', 1.5, 2, 0, true),
-    ('30/60', '30/60', 'PAGAMENTO EM DUAS PARCELAS DE 30 E 60 DIAS', 2, 2, 0, true),
-    ('30/60/90', '30/60/90', 'PAGAMENTO EM TRÊS PARCELAS DE 30, 60 e 90 DIAS', 2.5, 2, 0, true),
-    ('ENTRADA + 30 DIAS', 'ENTRADA + 30 DIAS', 'PAGAMENTO COM ENTRADA E MAIS 30 DIAS', 1, 2, 0, true);
-
--- Inserir unidades de medida comuns
-INSERT INTO unidade_medida (unidade_medida, nome, sigla, ativo)
-VALUES ('UNIDADE', 'UNIDADE', 'UN', true),
-    ('QUILOGRAMA', 'QUILOGRAMA', 'KG', true),
-    ('GRAMA', 'GRAMA', 'G', true),
-    ('LITRO', 'LITRO', 'L', true),
-    ('MILILITRO', 'MILILITRO', 'ML', true),
-    ('METRO', 'METRO', 'M', true),
-    ('CENTÍMETRO', 'CENTÍMETRO', 'CM', true),
-    ('METRO QUADRADO', 'METRO QUADRADO', 'M2', true),
-    ('METRO CÚBICO', 'METRO CÚBICO', 'M3', true),
-    ('PEÇA', 'PEÇA', 'PC', true),
-    ('CAIXA', 'CAIXA', 'CX', true),
-    ('PACOTE', 'PACOTE', 'PCT', true),
-    ('PAR', 'PAR', 'PAR', true),
-    ('DÚZIA', 'DÚZIA', 'DZ', true),
-    ('CENTO', 'CENTO', 'CT', true);
-
--- Inserir marcas exemplo
-INSERT INTO marca (nome, descricao, ativo)
-VALUES ('GENÉRICA', 'MARCA GENÉRICA PARA PRODUTOS SEM MARCA ESPECÍFICA', true),
-    ('PRÓPRIA', 'MARCA PRÓPRIA DA EMPRESA', true),
-    ('NACIONAL', 'PRODUTOS NACIONAIS', true),
-    ('IMPORTADO', 'PRODUTOS IMPORTADOS', true);
-
--- Inserir categorias exemplo
-INSERT INTO categoria (nome, descricao, ativo)
-VALUES ('GERAL', 'CATEGORIA GERAL PARA PRODUTOS DIVERSOS', true),
-    ('INFORMÁTICA', 'PRODUTOS DE INFORMÁTICA E TECNOLOGIA', true),
-    ('ELETRÔNICOS', 'PRODUTOS ELETRÔNICOS', true),
-    ('ESCRITÓRIO', 'MATERIAIS DE ESCRITÓRIO', true),
-    ('LIMPEZA', 'PRODUTOS DE LIMPEZA', true),
-    ('ALIMENTAÇÃO', 'PRODUTOS ALIMENTÍCIOS', true);
-
--- Inserir funções de funcionários para o módulo de compras e vendas
-INSERT INTO funcao_funcionario (funcao_funcionario, descricao, salario_base, carga_horaria, ativo)
-VALUES 
-    ('VENDEDOR', 'VENDEDOR INTERNO E EXTERNO', 2500.00, 44.00, true),
-    ('GERENTE DE VENDAS', 'GERENTE DO DEPARTAMENTO DE VENDAS', 5000.00, 44.00, true),
-    ('COMPRADOR', 'RESPONSÁVEL PELAS COMPRAS DA EMPRESA', 3500.00, 44.00, true),
-    ('GERENTE DE COMPRAS', 'GERENTE DO DEPARTAMENTO DE COMPRAS', 5500.00, 44.00, true),
-    ('ALMOXARIFE', 'RESPONSÁVEL PELO CONTROLE DE ESTOQUE', 2200.00, 44.00, true),
-    ('CONFERENTE', 'CONFERENTE DE MERCADORIAS', 2000.00, 44.00, true),
-    ('MOTORISTA', 'MOTORISTA PARA ENTREGAS', 2300.00, 44.00, true),
-    ('OPERADOR DE CAIXA', 'OPERADOR DE CAIXA E FINANCEIRO', 2100.00, 44.00, true);
 
 -- Comentários
 COMMENT ON SCHEMA dbo IS 'Schema principal para o sistema de NF-e';
