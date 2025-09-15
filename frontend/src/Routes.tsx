@@ -34,6 +34,8 @@ import UnitMeasuresList from './pages/unit-measures/UnitMeasuresList';
 import UnitMeasureForm from './pages/unit-measures/UnitMeasureForm';
 import TransportersList from './pages/transporters/TransportersList';
 import TransporterForm from './pages/transporters/TransporterForm';
+import PurchasesList from './pages/purchases/PurchasesList';
+import NewPurchaseForm from './pages/purchases/NewPurchaseForm';
 import { FormStateProvider } from './contexts/FormStateContext';
 
 const router = createBrowserRouter([
@@ -44,6 +46,19 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Dashboard />,
+      },
+      // Compras
+      {
+        path: 'purchases',
+        element: <PurchasesList />,
+      },
+      {
+        path: 'purchases/new',
+        element: <NewPurchaseForm />,
+      },
+      {
+        path: 'purchases/edit/:id',
+        element: <NewPurchaseForm />,
       },
       //Clientes
       {

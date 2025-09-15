@@ -5998,13 +5998,141 @@
           }
         }
       },
+      "CreatePurchaseItemDto": {
+        "type": "object",
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "description": "Código do produto",
+            "example": "PROD001"
+          },
+          "produtoId": {
+            "type": "number",
+            "description": "ID do produto",
+            "example": 1
+          },
+          "produto": {
+            "type": "string",
+            "description": "Nome do produto",
+            "example": "Caneta BIC Azul"
+          },
+          "unidade": {
+            "type": "string",
+            "description": "Unidade de medida",
+            "example": "UN"
+          },
+          "quantidade": {
+            "type": "number",
+            "description": "Quantidade",
+            "example": 100
+          },
+          "precoUN": {
+            "type": "number",
+            "description": "Preço unitário",
+            "example": 1.5
+          },
+          "descUN": {
+            "type": "number",
+            "description": "Desconto unitário",
+            "example": 0.1,
+            "default": 0
+          },
+          "rateio": {
+            "type": "number",
+            "description": "Rateio",
+            "example": 5,
+            "default": 0
+          }
+        },
+        "required": [
+          "codigo",
+          "produtoId",
+          "produto",
+          "unidade",
+          "quantidade",
+          "precoUN",
+          "descUN",
+          "rateio"
+        ]
+      },
+      "CreatePurchaseInstallmentDto": {
+        "type": "object",
+        "properties": {
+          "parcela": {
+            "type": "number",
+            "description": "Número da parcela",
+            "example": 1
+          },
+          "codigoFormaPagto": {
+            "type": "string",
+            "description": "Código da forma de pagamento",
+            "example": "DIN"
+          },
+          "formaPagamentoId": {
+            "type": "number",
+            "description": "ID da forma de pagamento",
+            "example": 1
+          },
+          "formaPagamento": {
+            "type": "string",
+            "description": "Nome da forma de pagamento",
+            "example": "Dinheiro"
+          },
+          "dataVencimento": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de vencimento da parcela",
+            "example": "2024-02-15"
+          },
+          "valorParcela": {
+            "type": "number",
+            "description": "Valor da parcela",
+            "example": 720
+          }
+        },
+        "required": [
+          "parcela",
+          "codigoFormaPagto",
+          "formaPagamentoId",
+          "formaPagamento",
+          "dataVencimento",
+          "valorParcela"
+        ]
+      },
       "CreatePurchaseDto": {
         "type": "object",
         "properties": {
+          "modelo": {
+            "type": "string",
+            "description": "Modelo da nota fiscal",
+            "example": "55"
+          },
+          "serie": {
+            "type": "string",
+            "description": "Série da nota fiscal",
+            "example": "1"
+          },
+          "codigoFornecedor": {
+            "type": "string",
+            "description": "Código do fornecedor",
+            "example": "FORN001"
+          },
           "fornecedorId": {
             "type": "number",
             "description": "ID do fornecedor",
             "example": 1
+          },
+          "dataEmissao": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de emissão da compra",
+            "example": "2024-01-15"
+          },
+          "dataChegada": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de chegada prevista",
+            "example": "2024-02-15"
           },
           "condicaoPagamentoId": {
             "type": "number",
@@ -6016,22 +6144,33 @@
             "description": "ID do funcionário responsável pela compra",
             "example": 1
           },
-          "dataCompra": {
-            "format": "date-time",
+          "tipoFrete": {
             "type": "string",
-            "description": "Data da compra",
-            "example": "2024-01-15"
+            "description": "Tipo de frete",
+            "example": "CIF",
+            "enum": [
+              "CIF",
+              "FOB"
+            ],
+            "default": "CIF"
           },
-          "dataVencimento": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Data de vencimento",
-            "example": "2024-02-15"
-          },
-          "valorTotal": {
+          "valorFrete": {
             "type": "number",
-            "description": "Valor total da compra",
-            "example": 1500.5
+            "description": "Valor do frete",
+            "example": 50,
+            "default": 0
+          },
+          "valorSeguro": {
+            "type": "number",
+            "description": "Valor do seguro",
+            "example": 25,
+            "default": 0
+          },
+          "outrasDespesas": {
+            "type": "number",
+            "description": "Outras despesas",
+            "example": 15,
+            "default": 0
           },
           "valorDesconto": {
             "type": "number",
@@ -6060,15 +6199,32 @@
             "type": "string",
             "description": "Observações sobre a compra",
             "example": "Compra de materiais de escritório"
+          },
+          "itens": {
+            "description": "Itens da compra",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreatePurchaseItemDto"
+            }
+          },
+          "parcelas": {
+            "description": "Parcelas da compra",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreatePurchaseInstallmentDto"
+            }
           }
         },
         "required": [
           "fornecedorId",
+          "dataEmissao",
+          "dataChegada",
           "condicaoPagamentoId",
           "funcionarioId",
-          "dataCompra",
-          "dataVencimento",
-          "valorTotal",
+          "tipoFrete",
+          "valorFrete",
+          "valorSeguro",
+          "outrasDespesas",
           "valorDesconto",
           "status"
         ]
@@ -6076,10 +6232,37 @@
       "UpdatePurchaseDto": {
         "type": "object",
         "properties": {
+          "modelo": {
+            "type": "string",
+            "description": "Modelo da nota fiscal",
+            "example": "55"
+          },
+          "serie": {
+            "type": "string",
+            "description": "Série da nota fiscal",
+            "example": "1"
+          },
+          "codigoFornecedor": {
+            "type": "string",
+            "description": "Código do fornecedor",
+            "example": "FORN001"
+          },
           "fornecedorId": {
             "type": "number",
             "description": "ID do fornecedor",
             "example": 1
+          },
+          "dataEmissao": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de emissão da compra",
+            "example": "2024-01-15"
+          },
+          "dataChegada": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de chegada prevista",
+            "example": "2024-02-15"
           },
           "condicaoPagamentoId": {
             "type": "number",
@@ -6091,22 +6274,33 @@
             "description": "ID do funcionário responsável pela compra",
             "example": 1
           },
-          "dataCompra": {
-            "format": "date-time",
+          "tipoFrete": {
             "type": "string",
-            "description": "Data da compra",
-            "example": "2024-01-15"
+            "description": "Tipo de frete",
+            "example": "CIF",
+            "enum": [
+              "CIF",
+              "FOB"
+            ],
+            "default": "CIF"
           },
-          "dataVencimento": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Data de vencimento",
-            "example": "2024-02-15"
-          },
-          "valorTotal": {
+          "valorFrete": {
             "type": "number",
-            "description": "Valor total da compra",
-            "example": 1500.5
+            "description": "Valor do frete",
+            "example": 50,
+            "default": 0
+          },
+          "valorSeguro": {
+            "type": "number",
+            "description": "Valor do seguro",
+            "example": 25,
+            "default": 0
+          },
+          "outrasDespesas": {
+            "type": "number",
+            "description": "Outras despesas",
+            "example": 15,
+            "default": 0
           },
           "valorDesconto": {
             "type": "number",
@@ -6135,6 +6329,20 @@
             "type": "string",
             "description": "Observações sobre a compra",
             "example": "Compra de materiais de escritório"
+          },
+          "itens": {
+            "description": "Itens da compra",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreatePurchaseItemDto"
+            }
+          },
+          "parcelas": {
+            "description": "Parcelas da compra",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreatePurchaseInstallmentDto"
+            }
           }
         }
       },

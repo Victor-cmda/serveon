@@ -399,9 +399,9 @@ INSERT INTO funcionario (
 -- =====================================================
 
 INSERT INTO compra (
-    numero_pedido, fornecedor_id, data_pedido, data_entrega_prevista,
+    numero_pedido, fornecedor_id, data_emissao, data_chegada,
     condicao_pagamento_id, forma_pagamento_id, funcionario_id, status, tipo_frete, transportadora_id,
-    valor_frete, valor_seguro, valor_desconto, valor_acrescimo, valor_produtos, valor_total, observacoes
+    valor_frete, valor_seguro, valor_desconto, valor_acrescimo, total_produtos, total_a_pagar, observacoes
 ) VALUES (
     'PC-0001',
     (SELECT id FROM fornecedor WHERE cnpj_cpf = '66.777.888/0001-55'),
@@ -413,9 +413,23 @@ INSERT INTO compra (
 );
 
 INSERT INTO item_compra (
-    compra_id, produto_id, quantidade, valor_unitario, valor_desconto, valor_total
+    compra_id, codigo, produto_id, produto, unidade, quantidade, preco_un, desc_un, liquido_un, total, custo_final_un, custo_final, valor_unitario, valor_desconto, valor_total
 ) VALUES (
-    (SELECT id FROM compra WHERE numero_pedido = 'PC-0001'), (SELECT id FROM produto WHERE codigo = 'P0001'), 100.000, 50.00, 0.00, 5000.00
+    (SELECT id FROM compra WHERE numero_pedido = 'PC-0001'), 
+    'P0001', 
+    (SELECT id FROM produto WHERE codigo = 'P0001'), 
+    'PRODUTO A', 
+    'UN', 
+    100.000, 
+    50.00, 
+    0.00, 
+    50.00, 
+    5000.00, 
+    50.00, 
+    5000.00, 
+    50.00, 
+    0.00, 
+    5000.00
 );
 
 INSERT INTO recebimento_compra (

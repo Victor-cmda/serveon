@@ -5,14 +5,48 @@ export class Purchase extends BaseEntity {
   @ApiProperty({
     description: 'Número sequencial da compra',
     example: 1001,
+    required: false,
   })
-  numeroSequencial: number;
+  numeroSequencial?: number | null;
+
+  @ApiProperty({
+    description: 'Modelo da nota fiscal',
+    example: '55',
+    required: false,
+  })
+  modelo?: string;
+
+  @ApiProperty({
+    description: 'Série da nota fiscal',
+    example: '1',
+    required: false,
+  })
+  serie?: string;
+
+  @ApiProperty({
+    description: 'Código do fornecedor',
+    example: 'FORN001',
+    required: false,
+  })
+  codigoFornecedor?: string;
 
   @ApiProperty({
     description: 'ID do fornecedor',
     example: 1,
   })
   fornecedorId: number;
+
+  @ApiProperty({
+    description: 'Data de emissão da compra',
+    example: '2024-01-15',
+  })
+  dataEmissao: Date;
+
+  @ApiProperty({
+    description: 'Data de chegada prevista',
+    example: '2024-02-15',
+  })
+  dataChegada: Date;
 
   @ApiProperty({
     description: 'ID da condição de pagamento',
@@ -27,22 +61,35 @@ export class Purchase extends BaseEntity {
   funcionarioId: number;
 
   @ApiProperty({
-    description: 'Data da compra',
-    example: '2024-01-15',
+    description: 'Tipo de frete',
+    example: 'CIF',
+    enum: ['CIF', 'FOB'],
   })
-  dataCompra: Date;
+  tipoFrete: string;
 
   @ApiProperty({
-    description: 'Data de vencimento',
-    example: '2024-02-15',
+    description: 'Valor do frete',
+    example: 50.00,
   })
-  dataVencimento: Date;
+  valorFrete: number;
 
   @ApiProperty({
-    description: 'Valor total da compra',
-    example: 1500.50,
+    description: 'Valor do seguro',
+    example: 25.00,
   })
-  valorTotal: number;
+  valorSeguro: number;
+
+  @ApiProperty({
+    description: 'Outras despesas',
+    example: 15.00,
+  })
+  outrasDespesas: number;
+
+  @ApiProperty({
+    description: 'Total dos produtos',
+    example: 1400.00,
+  })
+  totalProdutos: number;
 
   @ApiProperty({
     description: 'Valor de desconto aplicado',
@@ -51,10 +98,10 @@ export class Purchase extends BaseEntity {
   valorDesconto: number;
 
   @ApiProperty({
-    description: 'Valor líquido da compra',
-    example: 1450.50,
+    description: 'Total a pagar',
+    example: 1440.00,
   })
-  valorLiquido: number;
+  totalAPagar: number;
 
   @ApiProperty({
     description: 'Status da compra',

@@ -69,6 +69,11 @@ import {
   CreateTransporterDto,
   UpdateTransporterDto,
 } from '../types/transporter';
+import {
+  Purchase,
+  CreatePurchaseData,
+  UpdatePurchaseData,
+} from '../types/purchase';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -805,6 +810,51 @@ export const transporterApi = {
 
   delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_URL}/transporters/${id}`, {
+      method: 'DELETE',
+    });
+    return handleResponse(response);
+  },
+};
+
+// API para Compras
+export const purchaseApi = {
+  getAll: async (): Promise<Purchase[]> => {
+    const response = await fetch(`${API_URL}/purchases`);
+    return handleResponse(response);
+  },
+
+  getById: async (id: number): Promise<Purchase> => {
+    const response = await fetch(`${API_URL}/purchases/${id}`);
+    return handleResponse(response);
+  },
+
+  create: async (purchase: CreatePurchaseData): Promise<Purchase> => {
+    const response = await fetch(`${API_URL}/purchases`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(purchase),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (
+    id: number,
+    purchase: UpdatePurchaseData,
+  ): Promise<Purchase> => {
+    const response = await fetch(`${API_URL}/purchases/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(purchase),
+    });
+    return handleResponse(response);
+  },
+
+  delete: async (id: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/purchases/${id}`, {
       method: 'DELETE',
     });
     return handleResponse(response);

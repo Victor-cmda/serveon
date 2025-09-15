@@ -18,6 +18,7 @@ import {
   Tags,
   Layers,
   Scale,
+  ShoppingCart,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -70,6 +71,12 @@ const Sidebar = ({ collapsed = false }: SidebarProps) => {
       title: 'Gestão Principal',
       icon: <Package className="h-4 w-4" />,
       items: [
+        {
+          id: 'purchases',
+          title: 'Compras',
+          icon: <ShoppingCart className="h-4 w-4" />,
+          path: '/purchases',
+        },
         {
           id: 'customers',
           title: 'Clientes',

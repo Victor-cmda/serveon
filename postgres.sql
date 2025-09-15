@@ -657,13 +657,21 @@ CREATE TABLE movimentacao_nfe (
 -- MÓDULO DE COMPRAS E VENDAS (ERP)
 -- =============================================================
 
+-- Criar sequências para numeração automática
+CREATE SEQUENCE compra_numero_seq START 1;
+
 -- Tabela compra (Pedidos de Compra)
 CREATE TABLE compra (
     id SERIAL PRIMARY KEY,
+    numero_sequencial INTEGER UNIQUE DEFAULT nextval('compra_numero_seq'),
     numero_pedido VARCHAR(20) NOT NULL UNIQUE,
+    codigo VARCHAR(50), -- Código da nota fiscal
+    modelo VARCHAR(10), -- Modelo da nota fiscal
+    serie VARCHAR(10), -- Série da nota fiscal
+    codigo_fornecedor VARCHAR(50), -- Código interno do fornecedor
     fornecedor_id INTEGER NOT NULL REFERENCES fornecedor(id),
-    data_pedido DATE NOT NULL DEFAULT CURRENT_DATE,
-    data_entrega_prevista DATE,
+    data_emissao DATE NOT NULL DEFAULT CURRENT_DATE, -- Data de emissão (antes data_pedido)
+    data_chegada DATE, -- Data de chegada prevista (antes data_entrega_prevista)
     data_entrega_realizada DATE,
     condicao_pagamento_id INTEGER NOT NULL REFERENCES condicao_pagamento(id),
     forma_pagamento_id INTEGER REFERENCES forma_pagamento(id),
@@ -673,10 +681,13 @@ CREATE TABLE compra (
     transportadora_id INTEGER REFERENCES transportadora(id),
     valor_frete DECIMAL(15,2) DEFAULT 0.00,
     valor_seguro DECIMAL(15,2) DEFAULT 0.00,
+    outras_despesas DECIMAL(15,2) DEFAULT 0.00, -- Outras despesas
     valor_desconto DECIMAL(15,2) DEFAULT 0.00,
     valor_acrescimo DECIMAL(15,2) DEFAULT 0.00,
-    valor_produtos DECIMAL(15,2) NOT NULL DEFAULT 0.00,
-    valor_total DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    total_produtos DECIMAL(15,2) NOT NULL DEFAULT 0.00, -- Total dos produtos
+    total_a_pagar DECIMAL(15,2) NOT NULL DEFAULT 0.00, -- Total a pagar (valor final)
+    valor_produtos DECIMAL(15,2) NOT NULL DEFAULT 0.00, -- Mantido para compatibilidade
+    valor_total DECIMAL(15,2) NOT NULL DEFAULT 0.00, -- Mantido para compatibilidade
     observacoes TEXT,
     aprovado_por INTEGER REFERENCES funcionario(id),
     data_aprovacao TIMESTAMP,
@@ -689,17 +700,45 @@ CREATE TABLE compra (
 CREATE TABLE item_compra (
     id SERIAL PRIMARY KEY,
     compra_id INTEGER NOT NULL REFERENCES compra(id) ON DELETE CASCADE,
+    codigo VARCHAR(50) NOT NULL, -- Código do produto
     produto_id INTEGER NOT NULL REFERENCES produto(id),
+    produto VARCHAR(255) NOT NULL, -- Nome do produto
+    unidade VARCHAR(20) NOT NULL, -- Unidade de medida
     quantidade DECIMAL(15,3) NOT NULL,
-    valor_unitario DECIMAL(15,4) NOT NULL,
-    valor_desconto DECIMAL(15,2) DEFAULT 0.00,
-    valor_total DECIMAL(15,2) NOT NULL,
+    preco_un DECIMAL(15,4) NOT NULL, -- Preço unitário
+    desc_un DECIMAL(15,4) DEFAULT 0.00, -- Desconto unitário
+    liquido_un DECIMAL(15,4) NOT NULL, -- Valor líquido unitário
+    total DECIMAL(15,2) NOT NULL, -- Total do item
+    rateio DECIMAL(15,2) DEFAULT 0.00, -- Rateio
+    custo_final_un DECIMAL(15,4) NOT NULL, -- Custo final unitário
+    custo_final DECIMAL(15,2) NOT NULL, -- Custo final total
+    valor_unitario DECIMAL(15,4), -- Mantido para compatibilidade
+    valor_desconto DECIMAL(15,2) DEFAULT 0.00, -- Mantido para compatibilidade
+    valor_total DECIMAL(15,2), -- Mantido para compatibilidade (será igual a total)
     quantidade_recebida DECIMAL(15,3) DEFAULT 0.00,
     data_entrega_item DATE,
     observacoes TEXT,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela parcela_compra (Parcelas do Pedido de Compra)
+CREATE TABLE parcela_compra (
+    id SERIAL PRIMARY KEY,
+    compra_id INTEGER NOT NULL REFERENCES compra(id) ON DELETE CASCADE,
+    parcela INTEGER NOT NULL, -- Número da parcela
+    codigo_forma_pagto VARCHAR(20) NOT NULL, -- Código da forma de pagamento
+    forma_pagamento_id INTEGER NOT NULL REFERENCES forma_pagamento(id),
+    forma_pagamento VARCHAR(100) NOT NULL, -- Nome da forma de pagamento
+    data_vencimento DATE NOT NULL, -- Data de vencimento da parcela
+    valor_parcela DECIMAL(15,2) NOT NULL, -- Valor da parcela
+    status VARCHAR(20) DEFAULT 'PENDENTE' CHECK (status IN ('PENDENTE', 'PAGO', 'VENCIDO', 'CANCELADO')),
+    data_pagamento DATE,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_parcela_compra UNIQUE (compra_id, parcela)
 );
 
 -- Tabela recebimento_compra (Controle de Recebimentos)
@@ -1002,13 +1041,18 @@ CREATE INDEX idx_produto_fornecedor_fornecedor_id ON produto_fornecedor(forneced
 CREATE INDEX idx_movimentacao_nfe_nfe_id ON movimentacao_nfe(nfe_id);
 -- Índices para módulo de compras e vendas
 CREATE INDEX idx_compra_fornecedor_id ON compra(fornecedor_id);
-CREATE INDEX idx_compra_data_pedido ON compra(data_pedido);
+CREATE INDEX idx_compra_data_emissao ON compra(data_emissao);
 CREATE INDEX idx_compra_status ON compra(status);
 CREATE INDEX idx_compra_funcionario_id ON compra(funcionario_id);
 CREATE INDEX idx_compra_condicao_pagamento_id ON compra(condicao_pagamento_id);
 CREATE INDEX idx_compra_transportadora_id ON compra(transportadora_id);
 CREATE INDEX idx_item_compra_compra_id ON item_compra(compra_id);
 CREATE INDEX idx_item_compra_produto_id ON item_compra(produto_id);
+CREATE INDEX idx_item_compra_codigo ON item_compra(codigo);
+CREATE INDEX idx_parcela_compra_compra_id ON parcela_compra(compra_id);
+CREATE INDEX idx_parcela_compra_forma_pagamento_id ON parcela_compra(forma_pagamento_id);
+CREATE INDEX idx_parcela_compra_data_vencimento ON parcela_compra(data_vencimento);
+CREATE INDEX idx_parcela_compra_status ON parcela_compra(status);
 CREATE INDEX idx_recebimento_compra_compra_id ON recebimento_compra(compra_id);
 CREATE INDEX idx_recebimento_compra_data ON recebimento_compra(data_recebimento);
 CREATE INDEX idx_item_recebimento_recebimento_id ON item_recebimento_compra(recebimento_id);
@@ -1117,6 +1161,8 @@ CREATE TRIGGER update_compra_timestamp BEFORE
 UPDATE ON compra FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_item_compra_timestamp BEFORE
 UPDATE ON item_compra FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+CREATE TRIGGER update_parcela_compra_timestamp BEFORE
+UPDATE ON parcela_compra FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_recebimento_compra_timestamp BEFORE
 UPDATE ON recebimento_compra FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 CREATE TRIGGER update_item_recebimento_compra_timestamp BEFORE

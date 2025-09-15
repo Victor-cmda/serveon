@@ -8,6 +8,8 @@ import { CreatePurchaseDto } from '../dto/create-purchase.dto';
 import { UpdatePurchaseDto } from '../dto/update-purchase.dto';
 import { DatabaseService } from '../../../common/database/database.service';
 import { Purchase } from '../entities/purchase.entity';
+import { PurchaseItem } from '../entities/purchase-item.entity';
+import { PurchaseInstallment } from '../entities/purchase-installment.entity';
 
 @Injectable()
 export class PurchasesService {
@@ -28,31 +30,119 @@ export class PurchasesService {
         `);
         const numeroSequencial = sequenceResult.rows[0].next_number;
 
+        // Calcular totais
+        const totalProdutos =
+          createPurchaseDto.itens?.reduce((total, item) => {
+            const valorItem =
+              (item.precoUN - (item.descUN || 0)) * item.quantidade;
+            return total + valorItem;
+          }, 0) || 0;
+
+        const valorFrete = createPurchaseDto.valorFrete || 0;
+        const valorSeguro = createPurchaseDto.valorSeguro || 0;
+        const outrasDespesas = createPurchaseDto.outrasDespesas || 0;
+        const valorDesconto = createPurchaseDto.valorDesconto || 0;
+
+        const totalAPagar =
+          totalProdutos +
+          valorFrete +
+          valorSeguro +
+          outrasDespesas -
+          valorDesconto;
+
         // Inserir nova compra
         const result = await client.query(
           `INSERT INTO dbo.compra
-            (numero_pedido, fornecedor_id, condicao_pagamento_id, funcionario_id, 
-            data_pedido, data_entrega_prevista, valor_total, valor_desconto, 
-            valor_produtos, status, transportadora_id, observacoes, ativo)
+            (numero_pedido, modelo, serie, codigo_fornecedor, fornecedor_id, 
+            data_emissao, data_chegada, condicao_pagamento_id, funcionario_id, 
+            tipo_frete, valor_frete, valor_seguro, outras_despesas, 
+            total_produtos, valor_desconto, total_a_pagar, status, 
+            transportadora_id, observacoes, ativo)
           VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
           RETURNING *`,
           [
             numeroSequencial.toString(),
+            createPurchaseDto.modelo || null,
+            createPurchaseDto.serie || null,
+            createPurchaseDto.codigoFornecedor || null,
             createPurchaseDto.fornecedorId,
+            createPurchaseDto.dataEmissao,
+            createPurchaseDto.dataChegada,
             createPurchaseDto.condicaoPagamentoId,
             createPurchaseDto.funcionarioId,
-            createPurchaseDto.dataCompra,
-            createPurchaseDto.dataVencimento,
-            createPurchaseDto.valorTotal,
-            createPurchaseDto.valorDesconto || 0,
-            createPurchaseDto.valorTotal - (createPurchaseDto.valorDesconto || 0),
+            createPurchaseDto.tipoFrete || 'CIF',
+            valorFrete,
+            valorSeguro,
+            outrasDespesas,
+            totalProdutos,
+            valorDesconto,
+            totalAPagar,
             createPurchaseDto.status || 'PENDENTE',
             createPurchaseDto.transportadoraId || null,
             createPurchaseDto.observacoes || null,
             true,
           ],
         );
+
+        const compraId = result.rows[0].id;
+
+        // Inserir itens da compra
+        if (createPurchaseDto.itens && createPurchaseDto.itens.length > 0) {
+          for (const item of createPurchaseDto.itens) {
+            const liquidoUN = item.precoUN - (item.descUN || 0);
+            const total = liquidoUN * item.quantidade;
+            const rateio = item.rateio || 0;
+            const custoFinalUN = liquidoUN + rateio / item.quantidade;
+            const custoFinal = custoFinalUN * item.quantidade;
+
+            await client.query(
+              `INSERT INTO dbo.item_compra 
+                (compra_id, codigo, produto_id, produto, unidade, quantidade, 
+                preco_un, desc_un, liquido_un, total, rateio, custo_final_un, custo_final)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+              [
+                compraId,
+                item.codigo,
+                item.produtoId,
+                item.produto,
+                item.unidade,
+                item.quantidade,
+                item.precoUN,
+                item.descUN || 0,
+                liquidoUN,
+                total,
+                rateio,
+                custoFinalUN,
+                custoFinal,
+              ],
+            );
+          }
+        }
+
+        // Inserir parcelas da compra
+        if (
+          createPurchaseDto.parcelas &&
+          createPurchaseDto.parcelas.length > 0
+        ) {
+          for (const parcela of createPurchaseDto.parcelas) {
+            await client.query(
+              `INSERT INTO dbo.parcela_compra 
+                (compra_id, parcela, codigo_forma_pagto, forma_pagamento_id, 
+                forma_pagamento, data_vencimento, valor_parcela)
+              VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+              [
+                compraId,
+                parcela.parcela,
+                parcela.codigoFormaPagto,
+                parcela.formaPagamentoId,
+                parcela.formaPagamento,
+                parcela.dataVencimento,
+                parcela.valorParcela,
+              ],
+            );
+          }
+        }
 
         await client.query('COMMIT');
         return this.mapToEntity(result.rows[0]);
@@ -84,7 +174,7 @@ export class PurchasesService {
         ORDER BY c.created_at DESC
       `);
 
-      return result.rows.map(row => this.mapToEntity(row));
+      return result.rows.map((row) => this.mapToEntity(row));
     } catch (error) {
       console.error('Erro ao buscar compras:', error);
       throw new InternalServerErrorException('Erro ao buscar compras');
@@ -121,7 +211,10 @@ export class PurchasesService {
     }
   }
 
-  async update(id: number, updatePurchaseDto: UpdatePurchaseDto): Promise<Purchase> {
+  async update(
+    id: number,
+    updatePurchaseDto: UpdatePurchaseDto,
+  ): Promise<Purchase> {
     try {
       const client = await this.databaseService.getClient();
 
@@ -158,28 +251,73 @@ export class PurchasesService {
           values.push(updatePurchaseDto.funcionarioId);
         }
 
-        if (updatePurchaseDto.dataCompra !== undefined) {
-          updates.push(`data_pedido = $${paramCounter++}`);
-          values.push(updatePurchaseDto.dataCompra);
+        if (updatePurchaseDto.modelo !== undefined) {
+          updates.push(`modelo = $${paramCounter++}`);
+          values.push(updatePurchaseDto.modelo);
         }
 
-        if (updatePurchaseDto.dataVencimento !== undefined) {
-          updates.push(`data_entrega_prevista = $${paramCounter++}`);
-          values.push(updatePurchaseDto.dataVencimento);
+        if (updatePurchaseDto.serie !== undefined) {
+          updates.push(`serie = $${paramCounter++}`);
+          values.push(updatePurchaseDto.serie);
         }
 
-        if (updatePurchaseDto.valorTotal !== undefined) {
-          updates.push(`valor_total = $${paramCounter++}`);
-          values.push(updatePurchaseDto.valorTotal);
-          // Recalcular valor_produtos com base no valorTotal e valorDesconto
-          const valorDesconto = updatePurchaseDto.valorDesconto || 0;
-          updates.push(`valor_produtos = $${paramCounter++}`);
-          values.push(updatePurchaseDto.valorTotal - valorDesconto);
+        if (updatePurchaseDto.codigoFornecedor !== undefined) {
+          updates.push(`codigo_fornecedor = $${paramCounter++}`);
+          values.push(updatePurchaseDto.codigoFornecedor);
+        }
+
+        if (updatePurchaseDto.dataEmissao !== undefined) {
+          updates.push(`data_emissao = $${paramCounter++}`);
+          values.push(updatePurchaseDto.dataEmissao);
+        }
+
+        if (updatePurchaseDto.dataChegada !== undefined) {
+          updates.push(`data_chegada = $${paramCounter++}`);
+          values.push(updatePurchaseDto.dataChegada);
+        }
+
+        if (updatePurchaseDto.tipoFrete !== undefined) {
+          updates.push(`tipo_frete = $${paramCounter++}`);
+          values.push(updatePurchaseDto.tipoFrete);
+        }
+
+        if (updatePurchaseDto.valorFrete !== undefined) {
+          updates.push(`valor_frete = $${paramCounter++}`);
+          values.push(updatePurchaseDto.valorFrete);
+        }
+
+        if (updatePurchaseDto.valorSeguro !== undefined) {
+          updates.push(`valor_seguro = $${paramCounter++}`);
+          values.push(updatePurchaseDto.valorSeguro);
+        }
+
+        if (updatePurchaseDto.outrasDespesas !== undefined) {
+          updates.push(`outras_despesas = $${paramCounter++}`);
+          values.push(updatePurchaseDto.outrasDespesas);
         }
 
         if (updatePurchaseDto.valorDesconto !== undefined) {
           updates.push(`valor_desconto = $${paramCounter++}`);
           values.push(updatePurchaseDto.valorDesconto);
+        }
+
+        // Recalcular totais se necessário
+        if (updatePurchaseDto.itens) {
+          const totalProdutos = updatePurchaseDto.itens.reduce((total, item) => {
+            const valorItem = (item.precoUN - (item.descUN || 0)) * item.quantidade;
+            return total + valorItem;
+          }, 0);
+          
+          const valorFrete = updatePurchaseDto.valorFrete || 0;
+          const valorSeguro = updatePurchaseDto.valorSeguro || 0;
+          const outrasDespesas = updatePurchaseDto.outrasDespesas || 0;
+          const valorDesconto = updatePurchaseDto.valorDesconto || 0;
+          const totalAPagar = totalProdutos + valorFrete + valorSeguro + outrasDespesas - valorDesconto;
+          
+          updates.push(`total_produtos = $${paramCounter++}`);
+          values.push(totalProdutos);
+          updates.push(`total_a_pagar = $${paramCounter++}`);
+          values.push(totalAPagar);
         }
 
         if (updatePurchaseDto.status !== undefined) {
@@ -277,15 +415,22 @@ export class PurchasesService {
   private mapToEntity(dbRecord: any): Purchase {
     return {
       id: dbRecord.id,
-      numeroSequencial: parseInt(dbRecord.numero_pedido),
+      numeroSequencial: dbRecord.numero_pedido ? parseInt(dbRecord.numero_pedido) : null,
+      modelo: dbRecord.modelo,
+      serie: dbRecord.serie,
+      codigoFornecedor: dbRecord.codigo_fornecedor,
       fornecedorId: dbRecord.fornecedor_id,
+      dataEmissao: dbRecord.data_emissao,
+      dataChegada: dbRecord.data_chegada,
       condicaoPagamentoId: dbRecord.condicao_pagamento_id,
       funcionarioId: dbRecord.funcionario_id,
-      dataCompra: dbRecord.data_pedido,
-      dataVencimento: dbRecord.data_entrega_prevista,
-      valorTotal: parseFloat(dbRecord.valor_total),
+      tipoFrete: dbRecord.tipo_frete,
+      valorFrete: parseFloat(dbRecord.valor_frete || 0),
+      valorSeguro: parseFloat(dbRecord.valor_seguro || 0),
+      outrasDespesas: parseFloat(dbRecord.outras_despesas || 0),
+      totalProdutos: parseFloat(dbRecord.total_produtos || 0),
       valorDesconto: parseFloat(dbRecord.valor_desconto || 0),
-      valorLiquido: parseFloat(dbRecord.valor_produtos || dbRecord.valor_total),
+      totalAPagar: parseFloat(dbRecord.total_a_pagar || 0),
       status: dbRecord.status,
       transportadoraId: dbRecord.transportadora_id,
       observacoes: dbRecord.observacoes,
