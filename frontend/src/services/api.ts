@@ -50,6 +50,11 @@ import {
   UpdateProductDto,
 } from '../types/product';
 import {
+  Sale,
+  CreateSaleDto,
+  UpdateSaleDto,
+} from '../types/sale';
+import {
   Category,
   CreateCategoryDto,
   UpdateCategoryDto,
@@ -855,6 +860,48 @@ export const purchaseApi = {
 
   delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_URL}/purchases/${id}`, {
+      method: 'DELETE',
+    });
+    return handleResponse(response);
+  },
+};
+
+// Sales API
+export const salesApi = {
+  getAll: async (): Promise<Sale[]> => {
+    const response = await fetch(`${API_URL}/sales`);
+    return handleResponse(response);
+  },
+
+  getById: async (id: number): Promise<Sale> => {
+    const response = await fetch(`${API_URL}/sales/${id}`);
+    return handleResponse(response);
+  },
+
+  create: async (sale: CreateSaleDto): Promise<Sale> => {
+    const response = await fetch(`${API_URL}/sales`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(sale),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (id: number, sale: UpdateSaleDto): Promise<Sale> => {
+    const response = await fetch(`${API_URL}/sales/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(sale),
+    });
+    return handleResponse(response);
+  },
+
+  delete: async (id: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/sales/${id}`, {
       method: 'DELETE',
     });
     return handleResponse(response);

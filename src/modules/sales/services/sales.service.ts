@@ -20,25 +20,16 @@ export class SalesService {
       try {
         await client.query('BEGIN');
 
-        // Gerar número sequencial único
-        const sequenceResult = await client.query(`
-          SELECT COALESCE(MAX(CAST(numero_pedido AS INTEGER)), 0) + 1 as next_number
-          FROM dbo.venda 
-          WHERE numero_pedido ~ '^[0-9]+$'
-        `);
-        const numeroSequencial = sequenceResult.rows[0].next_number;
-
         // Inserir nova venda
         const result = await client.query(
           `INSERT INTO dbo.venda
-            (numero_pedido, cliente_id, condicao_pagamento_id, vendedor_id, 
+            (cliente_id, condicao_pagamento_id, vendedor_id, 
             data_pedido, data_entrega_prevista, valor_total, valor_desconto, 
             valor_produtos, status, transportadora_id, observacoes, ativo)
           VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
           RETURNING *`,
           [
-            numeroSequencial.toString(),
             createSaleDto.clienteId,
             createSaleDto.condicaoPagamentoId,
             createSaleDto.funcionarioId,
@@ -277,7 +268,6 @@ export class SalesService {
   private mapToEntity(dbRecord: any): Sale {
     return {
       id: dbRecord.id,
-      numeroSequencial: parseInt(dbRecord.numero_pedido),
       clienteId: dbRecord.cliente_id,
       condicaoPagamentoId: dbRecord.condicao_pagamento_id,
       funcionarioId: dbRecord.vendedor_id,

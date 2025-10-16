@@ -9,10 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Trash2, Plus, Search } from 'lucide-react';
 import { SearchDialog } from '@/components/SearchDialog';
-import { purchaseApi, supplierApi, paymentTermApi, productApi } from '@/services/api';
+import { purchaseApi, supplierApi, paymentTermApi, productApi, transporterApi } from '@/services/api';
 import { Supplier } from '@/types/supplier';
 import { PaymentTerm } from '@/types/payment-term';
 import { Product } from '@/types/product';
+import { Transporter } from '@/types/transporter';
 import SupplierCreationDialog from '@/components/dialogs/SupplierCreationDialog';
 
 interface PurchaseItemForm {
@@ -40,6 +41,8 @@ export default function NewPurchaseForm() {
   const navigate = useNavigate();
 
   // Estados do formulário principal
+  const [numeroPedido, setNumeroPedido] = useState<string>('');
+  const [codigo, setCodigo] = useState<string>('');
   const [fornecedorId, setFornecedorId] = useState<number>(0);
   const [dataEmissao, setDataEmissao] = useState<string>('');
   const [dataChegada, setDataChegada] = useState<string>('');
@@ -51,6 +54,8 @@ export default function NewPurchaseForm() {
   const [valorFrete, setValorFrete] = useState<number>(0);
   const [valorSeguro, setValorSeguro] = useState<number>(0);
   const [outrasDesp, setOutrasDesp] = useState<number>(0);
+  const [valorAcrescimo, setValorAcrescimo] = useState<number>(0);
+  const [transportadoraId, setTransportadoraId] = useState<number>(0);
   const [observacoes, setObservacoes] = useState<string>('');
 
   // Estados das listas
@@ -61,6 +66,7 @@ export default function NewPurchaseForm() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [paymentTerms, setPaymentTerms] = useState<PaymentTerm[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [transporters, setTransporters] = useState<Transporter[]>([]);
 
   // Estados selecionados
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
@@ -78,11 +84,6 @@ export default function NewPurchaseForm() {
 
   // Estados de loading
   const [isLoading, setIsLoading] = useState(false);
-
-  // Estados para controlar seções bloqueadas (irreversível)
-  const [headerLocked, setHeaderLocked] = useState(false);
-  const [itemsLocked, setItemsLocked] = useState(false);
-  const [currentSection, setCurrentSection] = useState<'header' | 'items' | 'totals'>('header');
 
   // Estados para novo item
   const [newItem, setNewItem] = useState<PurchaseItemForm>({
@@ -105,15 +106,17 @@ export default function NewPurchaseForm() {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [suppliersData, paymentTermsData, productsData] = await Promise.all([
+        const [suppliersData, paymentTermsData, productsData, transportersData] = await Promise.all([
           supplierApi.getAll(),
           paymentTermApi.getAll(),
           productApi.getAll(),
+          transporterApi.getAll(),
         ]);
         
         setSuppliers(suppliersData);
         setPaymentTerms(paymentTermsData);
         setProducts(productsData);
+        setTransporters(transportersData);
       } catch (error) {
         console.error('Erro ao carregar dados:', error);
         toast.error('Erro ao carregar dados necessários');
@@ -124,15 +127,6 @@ export default function NewPurchaseForm() {
 
     loadData();
   }, []);
-
-  // Effect para monitorar mudanças de seção automaticamente
-  useEffect(() => {
-    // Verificar se deve bloquear cabeçalho quando há itens
-    if (items.length > 0 && !headerLocked && isHeaderComplete()) {
-      setHeaderLocked(true);
-      toast.success('Cabeçalho bloqueado automaticamente.');
-    }
-  }, [items.length, headerLocked, fornecedorId, dataEmissao, condicaoPagamentoId]);
 
   // Handlers para seleção de entidades
   const onSelectSupplier = (supplier: Supplier) => {
@@ -299,42 +293,9 @@ export default function NewPurchaseForm() {
     toast.success('Fornecedor atualizado com sucesso!');
   };
 
-  // Função para verificar se o cabeçalho está completo
-  const isHeaderComplete = () => {
-    // Condição de pagamento é obrigatória, mas pode ser preenchida automaticamente pelo fornecedor
+  // Função para verificar se o formulário está válido para submissão
+  const isFormValid = () => {
     return fornecedorId > 0 && dataEmissao && condicaoPagamentoId > 0;
-  };
-
-  // Função para verificar se a seção de itens está completa
-  const isItemsComplete = () => {
-    return items.length > 0;
-  };
-
-  // Função para mudar de seção (com bloqueio automático)
-  const moveToSection = (section: 'header' | 'items' | 'totals') => {
-    // Bloquear seção atual se estiver completa
-    if (currentSection === 'header' && isHeaderComplete() && !headerLocked) {
-      setHeaderLocked(true);
-      toast.success('Cabeçalho bloqueado automaticamente. Não é possível mais editá-lo.');
-    }
-    
-    if (currentSection === 'items' && isItemsComplete() && !itemsLocked) {
-      setItemsLocked(true);
-      toast.success('Itens bloqueados automaticamente. Não é possível mais editá-los.');
-    }
-
-    setCurrentSection(section);
-  };
-
-  // Verificar se pode acessar uma seção
-  const canAccessSection = (section: 'header' | 'items' | 'totals') => {
-    if (section === 'items') {
-      return headerLocked; // Só pode acessar itens se cabeçalho estiver bloqueado
-    }
-    if (section === 'totals') {
-      return headerLocked && itemsLocked; // Só pode acessar totais se ambos estiverem bloqueados
-    }
-    return true; // Header sempre acessível (enquanto não bloqueado)
   };
 
   // Função para formatar moeda
@@ -382,12 +343,6 @@ export default function NewPurchaseForm() {
     if (!newItem.codigo || !newItem.produto || newItem.quantidade <= 0 || newItem.precoUN <= 0) {
       toast.error('Por favor, preencha todos os campos do item');
       return;
-    }
-
-    // Bloquear cabeçalho automaticamente quando adicionar primeiro item
-    if (!headerLocked && isHeaderComplete()) {
-      setHeaderLocked(true);
-      toast.success('Cabeçalho bloqueado automaticamente ao adicionar item.');
     }
 
     const liquidoUN = newItem.precoUN - newItem.descUN;
@@ -454,9 +409,13 @@ export default function NewPurchaseForm() {
         dataChegada,
         condicaoPagamentoId,
         funcionarioId,
+        numeroPedido,
+        codigo,
         modelo,
         serie,
         codigoFornecedor,
+        transportadoraId: transportadoraId || undefined,
+        valorAcrescimo,
         valorFrete,
         valorSeguro,
         outrasDespesas: outrasDesp,
@@ -503,27 +462,22 @@ export default function NewPurchaseForm() {
         {/* Cabeçalho da Compra */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              Dados da Compra
-              {headerLocked ? (
-                <span className="text-sm text-green-600 font-medium">✓ Seção Bloqueada</span>
-              ) : (
-                <span className="text-sm text-blue-600 font-medium">📝 Em Edição</span>
-              )}
-            </CardTitle>
+            <CardTitle>Dados da Compra</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-6 gap-4" onBlur={(e) => {
-              // Verificar se o foco está saindo da seção completa
-              setTimeout(() => {
-                if (!e.currentTarget.contains(document.activeElement) && 
-                    isHeaderComplete() && !headerLocked) {
-                  setHeaderLocked(true);
-                  toast.success('Cabeçalho bloqueado automaticamente ao sair da seção.');
-                }
-              }, 100);
-            }}>
+            <div className="grid grid-cols-8 gap-4">
               {/* Linha 1 */}
+              <div className="space-y-2">
+                <Label htmlFor="numeroPedido">Número do Pedido *</Label>
+                <Input
+                  id="numeroPedido"
+                  value={numeroPedido}
+                  onChange={(e) => setNumeroPedido(e.target.value)}
+                  placeholder="PC-0001"
+                  required
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="fornecedor">Fornecedor *</Label>
                 <div className="flex space-x-2">
@@ -531,14 +485,12 @@ export default function NewPurchaseForm() {
                     value={selectedSupplier ? selectedSupplier.fornecedor : ''}
                     placeholder="Selecione um fornecedor..."
                     readOnly
-                    disabled={headerLocked}
                     className="flex-1"
                   />
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={headerLocked}
                     onClick={() => setSupplierSearchOpen(true)}
                   >
                     <Search className="h-4 w-4" />
@@ -553,19 +505,17 @@ export default function NewPurchaseForm() {
                   type="date"
                   value={dataEmissao}
                   onChange={(e) => setDataEmissao(e.target.value)}
-                  disabled={headerLocked}
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dataChegada">Data Chegada</Label>
+                <Label htmlFor="dataChegada">Data Entrega Prevista</Label>
                 <Input
                   id="dataChegada"
                   type="date"
                   value={dataChegada}
                   onChange={(e) => setDataChegada(e.target.value)}
-                  disabled={headerLocked}
                 />
               </div>
 
@@ -576,14 +526,14 @@ export default function NewPurchaseForm() {
                     value={selectedPaymentTerm ? selectedPaymentTerm.name : ''}
                     placeholder={condicaoPagamentoId > 0 ? "Definida pelo fornecedor" : "Selecione uma condição..."}
                     readOnly
-                    disabled={headerLocked || condicaoPagamentoId > 0}
+                    disabled={condicaoPagamentoId > 0}
                     className="flex-1"
                   />
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={headerLocked || condicaoPagamentoId > 0}
+                    disabled={condicaoPagamentoId > 0}
                     onClick={() => setPaymentTermSearchOpen(true)}
                     title={condicaoPagamentoId > 0 ? "Condição definida pelo fornecedor" : "Selecionar condição"}
                   >
@@ -597,13 +547,23 @@ export default function NewPurchaseForm() {
                 )}
               </div>
 
+              {/* Linha 2 - Informações da Nota Fiscal */}
+              <div className="space-y-2">
+                <Label htmlFor="codigo">Código da Nota</Label>
+                <Input
+                  id="codigo"
+                  value={codigo}
+                  onChange={(e) => setCodigo(e.target.value)}
+                  placeholder="Código"
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="modelo">Modelo</Label>
                 <Input
                   id="modelo"
                   value={modelo}
                   onChange={(e) => setModelo(e.target.value)}
-                  disabled={headerLocked}
                 />
               </div>
 
@@ -613,7 +573,49 @@ export default function NewPurchaseForm() {
                   id="serie"
                   value={serie}
                   onChange={(e) => setSerie(e.target.value)}
-                  disabled={headerLocked}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="codigoFornecedor">Código Fornecedor</Label>
+                <Input
+                  id="codigoFornecedor"
+                  value={codigoFornecedor}
+                  onChange={(e) => setCodigoFornecedor(e.target.value)}
+                  placeholder="Código do fornecedor"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="transportadora">Transportadora</Label>
+                <div className="flex space-x-2">
+                  <Input
+                    value={transporters.find(t => t.id === transportadoraId)?.nome || ''}
+                    placeholder="Selecione uma transportadora..."
+                    readOnly
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {/* TODO: Abrir dialog de transportadora */}}
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="valorAcrescimo">Valor Acréscimo</Label>
+                <Input
+                  id="valorAcrescimo"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={valorAcrescimo}
+                  onChange={(e) => setValorAcrescimo(parseFloat(e.target.value) || 0)}
+                  placeholder="0,00"
                 />
               </div>
             </div>
@@ -623,37 +625,16 @@ export default function NewPurchaseForm() {
         {/* Adição de Produtos */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              Adicionar Produto
-              {!headerLocked ? (
-                <span className="text-sm text-amber-600 font-medium">
-                  ⚠️ Complete o cabeçalho primeiro
-                </span>
-              ) : itemsLocked ? (
-                <span className="text-sm text-green-600 font-medium">✓ Seção Bloqueada</span>
-              ) : (
-                <span className="text-sm text-blue-600 font-medium">📝 Em Edição</span>
-              )}
-            </CardTitle>
+            <CardTitle>Adicionar Produto</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-8 gap-4 items-end" onBlur={(e) => {
-              // Verificar se o foco está saindo da seção completa
-              setTimeout(() => {
-                if (!e.currentTarget.contains(document.activeElement) && 
-                    isItemsComplete() && !itemsLocked && headerLocked) {
-                  setItemsLocked(true);
-                  toast.success('Itens bloqueados automaticamente ao sair da seção.');
-                }
-              }, 100);
-            }}>
+            <div className="grid grid-cols-8 gap-4 items-end">
               <div className="space-y-2">
                 <Label>Código</Label>
                 <Input
                   value={newItem.codigo}
                   onChange={(e) => updateNewItemField('codigo', e.target.value)}
                   placeholder="Código"
-                  disabled={!headerLocked || itemsLocked}
                 />
               </div>
 
@@ -665,13 +646,11 @@ export default function NewPurchaseForm() {
                     onChange={(e) => updateNewItemField('produto', e.target.value)}
                     placeholder="Nome do produto"
                     className="flex-1"
-                    disabled={!headerLocked || itemsLocked}
                   />
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={!headerLocked || itemsLocked}
                     onClick={() => setProductSearchOpen(true)}
                   >
                     <Search className="h-4 w-4" />
@@ -685,7 +664,6 @@ export default function NewPurchaseForm() {
                   value={newItem.unidade}
                   onChange={(e) => updateNewItemField('unidade', e.target.value)}
                   placeholder="UN"
-                  disabled={!headerLocked || itemsLocked}
                 />
               </div>
 
@@ -697,7 +675,6 @@ export default function NewPurchaseForm() {
                   onChange={(e) => updateNewItemField('quantidade', parseFloat(e.target.value) || 0)}
                   min="0"
                   step="0.01"
-                  disabled={!headerLocked || itemsLocked}
                 />
               </div>
 
@@ -709,7 +686,6 @@ export default function NewPurchaseForm() {
                   onChange={(e) => updateNewItemField('precoUN', parseFloat(e.target.value) || 0)}
                   min="0"
                   step="0.01"
-                  disabled={!headerLocked || itemsLocked}
                 />
               </div>
 
@@ -721,12 +697,11 @@ export default function NewPurchaseForm() {
                   onChange={(e) => updateNewItemField('descUN', parseFloat(e.target.value) || 0)}
                   min="0"
                   step="0.01"
-                  disabled={!headerLocked || itemsLocked}
                 />
               </div>
 
               <div>
-                <Button type="button" onClick={addItem} size="sm" disabled={!headerLocked || itemsLocked}>
+                <Button type="button" onClick={addItem} size="sm">
                   <Plus className="h-4 w-4 mr-1" />
                   Adicionar
                 </Button>
@@ -738,16 +713,7 @@ export default function NewPurchaseForm() {
         {/* Tabela de Itens */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              Itens da Compra
-              {itemsLocked ? (
-                <span className="text-sm text-green-600 font-medium">✓ Seção Bloqueada</span>
-              ) : items.length > 0 ? (
-                <span className="text-sm text-blue-600 font-medium">📝 Em Edição</span>
-              ) : (
-                <span className="text-sm text-gray-500 font-medium">📋 Aguardando Itens</span>
-              )}
-            </CardTitle>
+            <CardTitle>Itens da Compra</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -786,7 +752,6 @@ export default function NewPurchaseForm() {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        disabled={itemsLocked}
                         onClick={() => removeItem(index)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -800,13 +765,7 @@ export default function NewPurchaseForm() {
         </Card>
 
         {/* Totais e Rateio */}
-        <div className="grid grid-cols-2 gap-6" onFocus={() => {
-          // Bloquear itens automaticamente ao focar na seção de totais
-          if (!itemsLocked && isItemsComplete() && headerLocked) {
-            setItemsLocked(true);
-            toast.success('Itens bloqueados automaticamente ao acessar seção de totais.');
-          }
-        }}>
+        <div className="grid grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Valores Adicionais</CardTitle>

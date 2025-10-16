@@ -3,12 +3,6 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 
 export class Sale extends BaseEntity {
   @ApiProperty({
-    description: 'Número sequencial da venda',
-    example: 2001,
-  })
-  numeroSequencial: number;
-
-  @ApiProperty({
     description: 'ID do cliente',
     example: 1,
   })
