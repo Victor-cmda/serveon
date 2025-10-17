@@ -4897,6 +4897,11 @@
             "description": "ID da condição de pagamento",
             "example": 1
           },
+          "condicaoPagamentoNome": {
+            "type": "string",
+            "description": "Nome da condição de pagamento",
+            "example": "À Vista"
+          },
           "website": {
             "type": "string",
             "description": "Website do fornecedor",
@@ -4926,11 +4931,6 @@
             "type": "number",
             "description": "ID da nacionalidade (país)",
             "example": 1
-          },
-          "transportadoraId": {
-            "type": "number",
-            "description": "ID da transportadora",
-            "example": 1
           }
         },
         "required": [
@@ -4956,13 +4956,13 @@
           "telefone",
           "email",
           "condicaoPagamentoId",
+          "condicaoPagamentoNome",
           "website",
           "observacoes",
           "responsavel",
           "celularResponsavel",
           "limiteCredito",
-          "nacionalidadeId",
-          "transportadoraId"
+          "nacionalidadeId"
         ]
       },
       "UpdateSupplierDto": {

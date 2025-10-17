@@ -447,7 +447,8 @@ export class SuppliersService {
       createdAt: row.created_at?.toISOString(),
       updatedAt: row.updated_at?.toISOString(),
       condicaoPagamentoId: row.condicao_pagamento_id,
-      website: row.website,
+      condicaoPagamentoNome: row.condicao_pagamento_nome,
+        website: row.website,
       observacoes: row.observacoes,
       responsavel: row.responsavel,
       celularResponsavel: row.celular_responsavel,
@@ -457,7 +458,6 @@ export class SuppliersService {
           : parseFloat(row.limite_credito)
         : undefined,
       nacionalidadeId: row.nacionalidade_id,
-      transportadoraId: row.transportadora_id,
     };
   }
 }

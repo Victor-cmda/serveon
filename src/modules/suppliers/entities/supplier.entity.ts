@@ -120,6 +120,12 @@ export class Supplier extends BaseEntity {
   })
   condicaoPagamentoId?: number;
 
+  @ApiProperty({
+    description: 'Nome da condição de pagamento',
+    example: 'À Vista',
+  })
+  condicaoPagamentoNome?: string;
+
   // Campos específicos para fornecedores
   @ApiProperty({
     description: 'Website do fornecedor',
@@ -156,10 +162,4 @@ export class Supplier extends BaseEntity {
     example: 1,
   })
   nacionalidadeId?: number;
-
-  @ApiProperty({
-    description: 'ID da transportadora',
-    example: 1,
-  })
-  transportadoraId?: number;
 }
