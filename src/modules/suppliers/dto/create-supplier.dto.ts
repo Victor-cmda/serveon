@@ -16,24 +16,6 @@ import { Type } from 'class-transformer';
 
 export class CreateSupplierDto {
   @ApiProperty({
-    description: 'Nome do fornecedor',
-    example: 'Fornecedor ABC',
-  })
-  @IsNotEmpty({ message: 'Nome do fornecedor é obrigatório' })
-  @IsString({ message: 'Nome do fornecedor deve ser uma string' })
-  @MaxLength(255, { message: 'Nome do fornecedor deve ter no máximo 255 caracteres' })
-  fornecedor: string;
-
-  @ApiProperty({
-    description: 'Apelido/Nome curto do fornecedor',
-    example: 'ABC',
-  })
-  @IsNotEmpty({ message: 'Apelido do fornecedor é obrigatório' })
-  @IsString({ message: 'Apelido deve ser uma string' })
-  @MaxLength(255, { message: 'Apelido deve ter no máximo 255 caracteres' })
-  apelido: string;
-
-  @ApiProperty({
     description: 'CNPJ, CPF ou número de documento internacional do fornecedor',
     example: '12345678901234',
   })

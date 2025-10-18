@@ -115,8 +115,6 @@ CREATE TABLE emitente (
 -- Tabela cliente
 CREATE TABLE cliente (
     id SERIAL PRIMARY KEY,
-    cliente VARCHAR(50) NOT NULL,
-    apelido VARCHAR(60),
     cnpj_cpf VARCHAR(20) NOT NULL UNIQUE,
     cpf_cpnj VARCHAR(14) UNIQUE,
     tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J')),
@@ -197,8 +195,6 @@ CREATE TABLE transportadora (
 -- Tabela fornecedor
 CREATE TABLE fornecedor (
     id SERIAL PRIMARY KEY,
-    fornecedor VARCHAR(255) NOT NULL,
-    apelido VARCHAR(255) NOT NULL,
     cnpj_cpf VARCHAR(20) NOT NULL UNIQUE,
     cpf_cnpj VARCHAR(14),
     tipo CHAR(1) NOT NULL CHECK (tipo IN ('F', 'J')),

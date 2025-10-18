@@ -349,7 +349,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
     
     setSupplierDialogOpen(false);
     setSupplierSearchOpen(true);
-    toast.success(`Fornecedor ${newSupplier.fornecedor} criado com sucesso!`);
+    toast.success(`Fornecedor ${newSupplier.razaoSocial} criado com sucesso!`);
   };
 
   // Função chamada quando fornecedor é atualizado
@@ -379,7 +379,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
     setSupplierToEdit(null);
     setSupplierDialogOpen(false);
     setSupplierSearchOpen(true);
-    toast.success(`Fornecedor ${updatedSupplier.fornecedor} atualizado com sucesso!`);
+    toast.success(`Fornecedor ${updatedSupplier.razaoSocial} atualizado com sucesso!`);
   };
 
   // Função para selecionar produto
@@ -717,7 +717,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                       <FormLabel>Fornecedor</FormLabel>
                       <FormControl>
                         <Input
-                          value={selectedSupplier?.fornecedor || ''}
+                          value={selectedSupplier?.razaoSocial || ''}
                           readOnly
                           disabled
                         />
@@ -1266,11 +1266,12 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
         onCreateNew={onCreateNewSupplier}
         onEdit={handleEditSupplier}
         displayColumns={[
-          { key: 'fornecedor', header: 'Nome' },
+          { key: 'razaoSocial', header: 'Razão Social' },
+          { key: 'nomeFantasia', header: 'Nome Fantasia' },
           { key: 'cnpjCpf', header: 'CNPJ/CPF' },
           { key: 'telefone', header: 'Telefone' },
         ]}
-        searchKeys={['fornecedor', 'cnpjCpf', 'apelido']}
+        searchKeys={['razaoSocial', 'nomeFantasia', 'cnpjCpf']}
         entityType="fornecedores"
         description="Selecione o fornecedor da compra, crie um novo ou edite um existente."
       />

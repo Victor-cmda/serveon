@@ -37,18 +37,16 @@ export class SuppliersService {
         // Inserir o novo fornecedor
         const result = await client.query(
           `INSERT INTO dbo.fornecedor
-            (fornecedor, apelido, cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
+            (cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
             nome_fantasia, inscricao_estadual, endereco, numero, complemento, bairro, 
             cidade_id, cep, telefone, email, website, responsavel, 
             celular_responsavel, observacoes, nacionalidade_id, limite_credito, 
             condicao_pagamento_id, transportadora_id, ativo)
           VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 
-            $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 
+            $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
           RETURNING *`,
           [
-            createSupplierDto.fornecedor || createSupplierDto.razaoSocial, // usar razão social como fallback
-            createSupplierDto.apelido || createSupplierDto.nomeFantasia || createSupplierDto.razaoSocial, // usar nome fantasia ou razão social como fallback
             createSupplierDto.cnpjCpf,
             createSupplierDto.tipo,
             createSupplierDto.isEstrangeiro || false,
@@ -251,8 +249,6 @@ export class SuppliersService {
 
         // Mapear campos do DTO para colunas SQL
         const fieldMappings = {
-          fornecedor: 'fornecedor',
-          apelido: 'apelido',
           cnpjCpf: 'cnpj_cpf',
           tipo: 'tipo',
           isEstrangeiro: 'is_estrangeiro',
@@ -425,8 +421,6 @@ export class SuppliersService {
   private mapRowToSupplier(row: any): Supplier {
     return {
       id: row.id,
-      fornecedor: row.fornecedor,
-      apelido: row.apelido,
       cnpjCpf: row.cnpj_cpf,
       tipo: row.tipo,
       isEstrangeiro: row.is_estrangeiro,

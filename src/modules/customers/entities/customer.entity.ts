@@ -3,18 +3,6 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 
 export class Customer extends BaseEntity {
   @ApiProperty({
-    description: 'Nome do cliente',
-    example: 'Cliente ABC',
-  })
-  cliente: string;
-
-  @ApiProperty({
-    description: 'Apelido/Nome curto do cliente',
-    example: 'ABC',
-  })
-  apelido?: string;
-
-  @ApiProperty({
     description: 'CNPJ, CPF ou documento internacional do cliente',
     example: '12345678901234',
   })

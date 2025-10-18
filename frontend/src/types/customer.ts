@@ -1,7 +1,5 @@
 export interface Customer {
   id: number;
-  cliente: string;
-  apelido?: string;
   cnpjCpf: string;
   tipo: 'F' | 'J';
   razaoSocial: string;
@@ -28,8 +26,6 @@ export interface Customer {
 }
 
 export interface CreateCustomerDto {
-  cliente: string;
-  apelido?: string;
   cnpjCpf: string;
   tipo: 'F' | 'J';
   razaoSocial: string;

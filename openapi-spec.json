@@ -4007,16 +4007,6 @@
       "CreateCustomerDto": {
         "type": "object",
         "properties": {
-          "cliente": {
-            "type": "string",
-            "description": "Nome do cliente",
-            "example": "Cliente ABC"
-          },
-          "apelido": {
-            "type": "string",
-            "description": "Apelido/Nome curto do cliente",
-            "example": "ABC"
-          },
           "cnpjCpf": {
             "type": "string",
             "description": "CNPJ, CPF ou número de documento internacional do cliente",
@@ -4152,7 +4142,6 @@
           }
         },
         "required": [
-          "cliente",
           "cnpjCpf",
           "tipo",
           "isEstrangeiro",
@@ -4184,16 +4173,6 @@
             "type": "object",
             "description": "Data da última atualização do registro",
             "example": "2025-06-19T10:00:00Z"
-          },
-          "cliente": {
-            "type": "string",
-            "description": "Nome do cliente",
-            "example": "Cliente ABC"
-          },
-          "apelido": {
-            "type": "string",
-            "description": "Apelido/Nome curto do cliente",
-            "example": "ABC"
           },
           "cnpjCpf": {
             "type": "string",
@@ -4316,8 +4295,6 @@
           "ativo",
           "createdAt",
           "updatedAt",
-          "cliente",
-          "apelido",
           "cnpjCpf",
           "tipo",
           "isEstrangeiro",
@@ -4621,16 +4598,6 @@
       "CreateSupplierDto": {
         "type": "object",
         "properties": {
-          "fornecedor": {
-            "type": "string",
-            "description": "Nome do fornecedor",
-            "example": "Fornecedor ABC"
-          },
-          "apelido": {
-            "type": "string",
-            "description": "Apelido/Nome curto do fornecedor",
-            "example": "ABC"
-          },
           "cnpjCpf": {
             "type": "string",
             "description": "CNPJ, CPF ou número de documento internacional do fornecedor",
@@ -4765,8 +4732,6 @@
           }
         },
         "required": [
-          "fornecedor",
-          "apelido",
           "cnpjCpf",
           "tipo",
           "isEstrangeiro",
@@ -4797,16 +4762,6 @@
             "type": "object",
             "description": "Data da última atualização do registro",
             "example": "2025-06-19T10:00:00Z"
-          },
-          "fornecedor": {
-            "type": "string",
-            "description": "Nome do fornecedor",
-            "example": "Fornecedor ABC"
-          },
-          "apelido": {
-            "type": "string",
-            "description": "Apelido/Nome curto do fornecedor",
-            "example": "ABC"
           },
           "cnpjCpf": {
             "type": "string",
@@ -4938,8 +4893,6 @@
           "ativo",
           "createdAt",
           "updatedAt",
-          "fornecedor",
-          "apelido",
           "cnpjCpf",
           "tipo",
           "isEstrangeiro",

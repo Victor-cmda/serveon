@@ -1,7 +1,5 @@
 export interface Supplier {
   id: number;
-  fornecedor: string;
-  apelido: string;
   cnpjCpf: string;
   tipo: 'F' | 'J';
   razaoSocial: string;
@@ -37,8 +35,6 @@ export interface Supplier {
 }
 
 export interface CreateSupplierDto {
-  fornecedor: string;
-  apelido: string;
   cnpjCpf: string;
   tipo: 'F' | 'J';
   razaoSocial: string;

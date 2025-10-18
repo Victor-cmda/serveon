@@ -35,17 +35,15 @@ export class CustomersService {
         // Inserir o novo cliente (ID será gerado automaticamente)
         const result = await client.query(
           `INSERT INTO dbo.cliente
-            (cliente, apelido, cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
+            (cnpj_cpf, tipo, is_estrangeiro, tipo_documento, razao_social, 
             nome_fantasia, inscricao_estadual, 
             endereco, numero, complemento, bairro, 
             cidade_id, cep, telefone, email, is_destinatario, condicao_pagamento_id, 
             nacionalidade_id, limite_credito, ativo)
           VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
           RETURNING *`,
           [
-            createCustomerDto.cliente,
-            createCustomerDto.apelido || null,
             createCustomerDto.cnpjCpf,
             createCustomerDto.tipo,
             createCustomerDto.isEstrangeiro || false,
@@ -327,16 +325,6 @@ export class CustomersService {
         const updates: string[] = [];
         const values: any[] = [];
         let paramCounter = 1;
-
-        if (updateCustomerDto.cliente !== undefined) {
-          updates.push(`cliente = $${paramCounter++}`);
-          values.push(updateCustomerDto.cliente);
-        }
-
-        if (updateCustomerDto.apelido !== undefined) {
-          updates.push(`apelido = $${paramCounter++}`);
-          values.push(updateCustomerDto.apelido);
-        }
 
         if (updateCustomerDto.tipo !== undefined) {
           updates.push(`tipo = $${paramCounter++}`);
@@ -682,8 +670,6 @@ export class CustomersService {
   private mapToCustomerEntity(dbRecord: any): Customer {
     const customer: Customer = {
       id: dbRecord.id,
-      cliente: dbRecord.cliente,
-      apelido: dbRecord.apelido,
       cnpjCpf: dbRecord.cnpj_cpf,
       tipo: dbRecord.tipo as 'F' | 'J',
       razaoSocial: dbRecord.razao_social,

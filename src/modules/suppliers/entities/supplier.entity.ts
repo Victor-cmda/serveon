@@ -3,18 +3,6 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 
 export class Supplier extends BaseEntity {
   @ApiProperty({
-    description: 'Nome do fornecedor',
-    example: 'Fornecedor ABC',
-  })
-  fornecedor: string;
-
-  @ApiProperty({
-    description: 'Apelido/Nome curto do fornecedor',
-    example: 'ABC',
-  })
-  apelido: string;
-
-  @ApiProperty({
     description: 'CNPJ, CPF ou documento internacional do fornecedor',
     example: '12345678901234',
   })

@@ -16,25 +16,6 @@ import { Type } from 'class-transformer';
 
 export class CreateCustomerDto {
   @ApiProperty({
-    description: 'Nome do cliente',
-    example: 'Cliente ABC',
-  })
-  @IsNotEmpty({ message: 'Nome do cliente é obrigatório' })
-  @IsString({ message: 'Nome do cliente deve ser uma string' })
-  @MaxLength(50, { message: 'Nome do cliente deve ter no máximo 50 caracteres' })
-  cliente: string;
-
-  @ApiProperty({
-    description: 'Apelido/Nome curto do cliente',
-    example: 'ABC',
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'Apelido deve ser uma string' })
-  @MaxLength(60, { message: 'Apelido deve ter no máximo 60 caracteres' })
-  apelido?: string;
-
-  @ApiProperty({
     description: 'CNPJ, CPF ou número de documento internacional do cliente',
     example: '12345678901234',
   })
