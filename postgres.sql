@@ -662,13 +662,12 @@ CREATE SEQUENCE compra_numero_seq START 1;
 
 -- Tabela compra (Pedidos de Compra)
 CREATE TABLE compra (
-    id SERIAL PRIMARY KEY,
+    numero_pedido VARCHAR(20) NOT NULL,
+    modelo VARCHAR(10) NOT NULL, -- Modelo da nota fiscal
+    serie VARCHAR(10) NOT NULL, -- Série da nota fiscal
+    codigo_fornecedor VARCHAR(50) NOT NULL, -- Código interno do fornecedor
     numero_sequencial INTEGER UNIQUE DEFAULT nextval('compra_numero_seq'),
-    numero_pedido VARCHAR(20) NOT NULL UNIQUE,
     codigo VARCHAR(50), -- Código da nota fiscal
-    modelo VARCHAR(10), -- Modelo da nota fiscal
-    serie VARCHAR(10), -- Série da nota fiscal
-    codigo_fornecedor VARCHAR(50), -- Código interno do fornecedor
     fornecedor_id INTEGER NOT NULL REFERENCES fornecedor(id),
     data_emissao DATE NOT NULL DEFAULT CURRENT_DATE, -- Data de emissão (antes data_pedido)
     data_chegada DATE, -- Data de chegada prevista (antes data_entrega_prevista)
@@ -693,13 +692,17 @@ CREATE TABLE compra (
     data_aprovacao TIMESTAMP,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (numero_pedido, modelo, serie, codigo_fornecedor)
 );
 
 -- Tabela item_compra (Itens do Pedido de Compra)
 CREATE TABLE item_compra (
     id SERIAL PRIMARY KEY,
-    compra_id INTEGER NOT NULL REFERENCES compra(id) ON DELETE CASCADE,
+    compra_numero_pedido VARCHAR(20) NOT NULL,
+    compra_modelo VARCHAR(10) NOT NULL,
+    compra_serie VARCHAR(10) NOT NULL,
+    compra_codigo_fornecedor VARCHAR(50) NOT NULL,
     codigo VARCHAR(50) NOT NULL, -- Código do produto
     produto_id INTEGER NOT NULL REFERENCES produto(id),
     produto VARCHAR(255) NOT NULL, -- Nome do produto
@@ -720,13 +723,18 @@ CREATE TABLE item_compra (
     observacoes TEXT,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor) 
+        REFERENCES compra(numero_pedido, modelo, serie, codigo_fornecedor) ON DELETE CASCADE
 );
 
 -- Tabela parcela_compra (Parcelas do Pedido de Compra)
 CREATE TABLE parcela_compra (
     id SERIAL PRIMARY KEY,
-    compra_id INTEGER NOT NULL REFERENCES compra(id) ON DELETE CASCADE,
+    compra_numero_pedido VARCHAR(20) NOT NULL,
+    compra_modelo VARCHAR(10) NOT NULL,
+    compra_serie VARCHAR(10) NOT NULL,
+    compra_codigo_fornecedor VARCHAR(50) NOT NULL,
     parcela INTEGER NOT NULL, -- Número da parcela
     codigo_forma_pagto VARCHAR(20) NOT NULL, -- Código da forma de pagamento
     forma_pagamento_id INTEGER NOT NULL REFERENCES forma_pagamento(id),
@@ -738,13 +746,18 @@ CREATE TABLE parcela_compra (
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uk_parcela_compra UNIQUE (compra_id, parcela)
+    FOREIGN KEY (compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor) 
+        REFERENCES compra(numero_pedido, modelo, serie, codigo_fornecedor) ON DELETE CASCADE,
+    CONSTRAINT uk_parcela_compra UNIQUE (compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor, parcela)
 );
 
 -- Tabela recebimento_compra (Controle de Recebimentos)
 CREATE TABLE recebimento_compra (
     id SERIAL PRIMARY KEY,
-    compra_id INTEGER NOT NULL REFERENCES compra(id),
+    compra_numero_pedido VARCHAR(20) NOT NULL,
+    compra_modelo VARCHAR(10) NOT NULL,
+    compra_serie VARCHAR(10) NOT NULL,
+    compra_codigo_fornecedor VARCHAR(50) NOT NULL,
     numero_recebimento VARCHAR(20) NOT NULL UNIQUE,
     data_recebimento DATE NOT NULL DEFAULT CURRENT_DATE,
     funcionario_responsavel_id INTEGER NOT NULL REFERENCES funcionario(id),
@@ -754,7 +767,9 @@ CREATE TABLE recebimento_compra (
     status VARCHAR(20) NOT NULL DEFAULT 'RECEBIDO' CHECK (status IN ('RECEBIDO', 'CONFERIDO', 'DIVERGENCIA')),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor) 
+        REFERENCES compra(numero_pedido, modelo, serie, codigo_fornecedor)
 );
 
 -- Tabela item_recebimento_compra (Itens Recebidos)
@@ -883,7 +898,10 @@ CREATE TABLE estoque_movimento (
 -- Tabela contas_pagar (Contas a Pagar - Geradas das Compras)
 CREATE TABLE contas_pagar (
     id SERIAL PRIMARY KEY,
-    compra_id INTEGER REFERENCES compra(id),
+    compra_numero_pedido VARCHAR(20),
+    compra_modelo VARCHAR(10),
+    compra_serie VARCHAR(10),
+    compra_codigo_fornecedor VARCHAR(50),
     fornecedor_id INTEGER NOT NULL REFERENCES fornecedor(id),
     numero_documento VARCHAR(50) NOT NULL,
     tipo_documento VARCHAR(20) NOT NULL DEFAULT 'FATURA' CHECK (tipo_documento IN ('FATURA', 'DUPLICATA', 'BOLETO', 'NOTA_FISCAL')),
@@ -902,7 +920,9 @@ CREATE TABLE contas_pagar (
     pago_por INTEGER REFERENCES funcionario(id),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor) 
+        REFERENCES compra(numero_pedido, modelo, serie, codigo_fornecedor)
 );
 
 -- Tabela contas_receber (Contas a Receber - Geradas das Vendas)
@@ -1046,14 +1066,18 @@ CREATE INDEX idx_compra_status ON compra(status);
 CREATE INDEX idx_compra_funcionario_id ON compra(funcionario_id);
 CREATE INDEX idx_compra_condicao_pagamento_id ON compra(condicao_pagamento_id);
 CREATE INDEX idx_compra_transportadora_id ON compra(transportadora_id);
-CREATE INDEX idx_item_compra_compra_id ON item_compra(compra_id);
+CREATE INDEX idx_compra_numero_pedido ON compra(numero_pedido);
+CREATE INDEX idx_compra_modelo ON compra(modelo);
+CREATE INDEX idx_compra_serie ON compra(serie);
+CREATE INDEX idx_compra_codigo_fornecedor ON compra(codigo_fornecedor);
+CREATE INDEX idx_item_compra_compra ON item_compra(compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor);
 CREATE INDEX idx_item_compra_produto_id ON item_compra(produto_id);
 CREATE INDEX idx_item_compra_codigo ON item_compra(codigo);
-CREATE INDEX idx_parcela_compra_compra_id ON parcela_compra(compra_id);
+CREATE INDEX idx_parcela_compra_compra ON parcela_compra(compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor);
 CREATE INDEX idx_parcela_compra_forma_pagamento_id ON parcela_compra(forma_pagamento_id);
 CREATE INDEX idx_parcela_compra_data_vencimento ON parcela_compra(data_vencimento);
 CREATE INDEX idx_parcela_compra_status ON parcela_compra(status);
-CREATE INDEX idx_recebimento_compra_compra_id ON recebimento_compra(compra_id);
+CREATE INDEX idx_recebimento_compra_compra ON recebimento_compra(compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor);
 CREATE INDEX idx_recebimento_compra_data ON recebimento_compra(data_recebimento);
 CREATE INDEX idx_item_recebimento_recebimento_id ON item_recebimento_compra(recebimento_id);
 CREATE INDEX idx_item_recebimento_item_compra_id ON item_recebimento_compra(item_compra_id);
@@ -1076,7 +1100,7 @@ CREATE INDEX idx_estoque_movimento_data ON estoque_movimento(data_movimento);
 CREATE INDEX idx_estoque_movimento_tipo ON estoque_movimento(tipo_movimento);
 CREATE INDEX idx_estoque_movimento_origem ON estoque_movimento(origem);
 CREATE INDEX idx_contas_pagar_fornecedor_id ON contas_pagar(fornecedor_id);
-CREATE INDEX idx_contas_pagar_compra_id ON contas_pagar(compra_id);
+CREATE INDEX idx_contas_pagar_compra ON contas_pagar(compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor);
 CREATE INDEX idx_contas_pagar_vencimento ON contas_pagar(data_vencimento);
 CREATE INDEX idx_contas_pagar_status ON contas_pagar(status);
 CREATE INDEX idx_contas_receber_cliente_id ON contas_receber(cliente_id);
