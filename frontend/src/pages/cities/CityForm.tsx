@@ -227,22 +227,60 @@ const CityForm = () => {
                 </p>
               </div>              <div className="p-6 pt-0">
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                     <FormItem>
                       <FormLabel>Código</FormLabel>
                       <FormControl>
                         <Input value={id || 'Novo'} disabled className="bg-muted" />
                       </FormControl>
-                      
                     </FormItem>
                     
                     <div className="md:col-span-5">
                       <FormField
                         control={form.control}
-                        name="estadoId"
+                        name="nome"
                         render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Cidade *</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Nome da cidade"
+                                {...field}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="codigoIbge"
+                    render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Estado</FormLabel>
+                        <FormLabel>Código IBGE</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ex: 3550308"
+                            {...field}
+                            maxLength={7}
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="estadoId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Estado *</FormLabel>
                         <div className="flex gap-2">
                           <div className="w-full flex-1">
                             <Input
@@ -267,45 +305,6 @@ const CityForm = () => {
                             <Search className="h-4 w-4" />
                           </Button>
                         </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                    </div>
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="nome"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome da Cidade *</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Nome da cidade"
-                            {...field}
-                            disabled={isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="codigoIbge"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Código IBGE</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Código de 7 dígitos"
-                            {...field}
-                            maxLength={7}
-                            disabled={isLoading}
-                          />
-                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

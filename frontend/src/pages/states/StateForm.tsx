@@ -211,20 +211,61 @@ const StateForm = () => {
                 </p>
               </div>              <div className="p-6 pt-0">
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                     <FormItem>
                       <FormLabel>Código</FormLabel>
                       <FormControl>
                         <Input value={id || 'Novo'} disabled className="bg-muted" />
                       </FormControl>
-                     
                     </FormItem>
                     
-                    <div className="md:col-span-5">
+                    <div className="md:col-span-3">
                       <FormField
                         control={form.control}
-                        name="paisId"
+                        name="nome"
                         render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Estado *</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Nome do estado"
+                                {...field}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="uf"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>UF *</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ex: SP"
+                            {...field}
+                            maxLength={2}
+                            onChange={(e) =>
+                              field.onChange(e.target.value.toUpperCase())
+                            }
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="paisId"
+                    render={({ field }) => (
                       <FormItem>
                         <FormLabel>País *</FormLabel>
                         <div className="flex gap-2">
@@ -251,48 +292,6 @@ const StateForm = () => {
                             <Search className="h-4 w-4" />
                           </Button>
                         </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                    </div>
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="nome"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome do Estado *</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Nome do estado"
-                            {...field}
-                            disabled={isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="uf"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>UF *</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Ex: SP"
-                            {...field}
-                            maxLength={2}
-                            onChange={(e) =>
-                              field.onChange(e.target.value.toUpperCase())
-                            }
-                            disabled={isLoading}
-                          />
-                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

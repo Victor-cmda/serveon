@@ -199,7 +199,7 @@ const CountryForm = () => {
                         name="nome"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Nome do País *</FormLabel>
+                            <FormLabel>País *</FormLabel>
                             <FormControl>
                               <Input
                                 placeholder="Nome do país"
