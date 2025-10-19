@@ -35,15 +35,16 @@ export class EmployeeFunctionsService {
         // Inserir nova função
         const result = await client.query(
           `INSERT INTO dbo.funcao_funcionario
-            (funcao_funcionario, descricao, salario_base, carga_horaria, ativo)
+            (funcao_funcionario, descricao, salario_base, carga_horaria, requer_cnh, ativo)
           VALUES
-            ($1, $2, $3, $4, $5)
+            ($1, $2, $3, $4, $5, $6)
           RETURNING *`,
           [
             createEmployeeFunctionDto.nome,
             createEmployeeFunctionDto.descricao || null,
             2000.00, // Salário base padrão
             44.00, // Carga horária padrão (44h semanais)
+            false, // Requer CNH padrão
             true,
           ],
         );
@@ -68,7 +69,18 @@ export class EmployeeFunctionsService {
   async findAll(): Promise<EmployeeFunction[]> {
     try {
       const result = await this.databaseService.query(`
-        SELECT * FROM dbo.funcao_funcionario
+        SELECT 
+          id,
+          funcao_funcionario,
+          descricao,
+          salario_base,
+          carga_horaria,
+          requer_cnh,
+          observacao,
+          ativo,
+          created_at,
+          updated_at
+        FROM dbo.funcao_funcionario
         WHERE ativo = true
         ORDER BY funcao_funcionario
       `);
@@ -83,7 +95,19 @@ export class EmployeeFunctionsService {
   async findOne(id: number): Promise<EmployeeFunction> {
     try {
       const result = await this.databaseService.query(
-        'SELECT * FROM dbo.funcao_funcionario WHERE id = $1 AND ativo = true',
+        `SELECT 
+          id,
+          funcao_funcionario,
+          descricao,
+          salario_base,
+          carga_horaria,
+          requer_cnh,
+          observacao,
+          ativo,
+          created_at,
+          updated_at
+        FROM dbo.funcao_funcionario 
+        WHERE id = $1 AND ativo = true`,
         [id],
       );
 
@@ -225,8 +249,12 @@ export class EmployeeFunctionsService {
   private mapToEntity(dbRecord: any): EmployeeFunction {
     return {
       id: dbRecord.id,
-      nome: dbRecord.funcao_funcionario,
+      funcaoFuncionario: dbRecord.funcao_funcionario,
       descricao: dbRecord.descricao,
+      salarioBase: dbRecord.salario_base ? parseFloat(dbRecord.salario_base) : 0,
+      requerCnh: dbRecord.requer_cnh || false,
+      cargaHoraria: dbRecord.carga_horaria ? parseFloat(dbRecord.carga_horaria) : 0,
+      observacao: dbRecord.observacao,
       ativo: dbRecord.ativo,
       createdAt: dbRecord.created_at,
       updatedAt: dbRecord.updated_at,

@@ -249,10 +249,7 @@ export class VehiclesService {
       marca: dbRecord.marca,
       modelo: dbRecord.modelo,
       ano: dbRecord.ano,
-      cor: undefined, // Não disponível na tabela atual
-      tipo: 'CAMINHAO', // Definindo um padrão já que não está na tabela
-      capacidadeCarga: dbRecord.capacidade ? parseFloat(dbRecord.capacidade) : undefined,
-      observacoes: undefined, // Não disponível na tabela atual
+      capacidade: dbRecord.capacidade ? parseFloat(dbRecord.capacidade) : undefined,
       ativo: dbRecord.ativo,
       createdAt: dbRecord.created_at,
       updatedAt: dbRecord.updated_at,

@@ -344,6 +344,7 @@ export class UnitMeasuresService {
   private mapDatabaseToEntity(row: any): UnitMeasure {
     return {
       id: row.id,
+      unidadeMedida: row.unidade_medida,
       nome: row.nome,
       sigla: row.sigla,
       ativo: row.ativo,

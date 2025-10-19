@@ -3543,6 +3543,11 @@
             "description": "Nome completo do funcionário",
             "example": "João da Silva"
           },
+          "apelido": {
+            "type": "string",
+            "description": "Apelido do funcionário",
+            "example": "João"
+          },
           "cpf": {
             "type": "string",
             "description": "CPF do funcionário (apenas números)",
@@ -3568,6 +3573,11 @@
             "description": "RG do funcionário",
             "example": "123456789"
           },
+          "rgInscricaoEstadual": {
+            "type": "string",
+            "description": "RG/Inscrição Estadual do funcionário",
+            "example": "12345678901234"
+          },
           "orgaoEmissor": {
             "type": "string",
             "description": "Órgão emissor do RG",
@@ -3577,6 +3587,17 @@
             "type": "number",
             "description": "ID da cidade onde o RG foi emitido",
             "example": 1
+          },
+          "cnh": {
+            "type": "string",
+            "description": "CNH do funcionário",
+            "example": "12345678901"
+          },
+          "dataValidadeCnh": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de validade da CNH",
+            "example": "2026-12-31"
           },
           "dataNascimento": {
             "format": "date-time",
@@ -3589,6 +3610,15 @@
             "description": "Estado civil",
             "example": "Solteiro"
           },
+          "sexo": {
+            "type": "number",
+            "description": "Sexo (1=Masculino, 2=Feminino)",
+            "example": 1,
+            "enum": [
+              1,
+              2
+            ]
+          },
           "nacionalidade": {
             "type": "string",
             "description": "Nacionalidade",
@@ -3597,6 +3627,11 @@
           "nacionalidadeId": {
             "type": "number",
             "description": "ID da nacionalidade",
+            "example": 1
+          },
+          "tipo": {
+            "type": "number",
+            "description": "Tipo do funcionário",
             "example": 1
           },
           "cep": {
@@ -3693,8 +3728,13 @@
           },
           "observacoes": {
             "type": "string",
-            "description": "Observações sobre o funcionário",
-            "example": "Funcionário exemplar"
+            "description": "Observações sobre o funcionário (campo TEXT)",
+            "example": "Funcionário exemplar, pontual e dedicado"
+          },
+          "observacao": {
+            "type": "string",
+            "description": "Observação (campo VARCHAR)",
+            "example": "Ativo"
           }
         },
         "required": [
@@ -3712,6 +3752,7 @@
           "rgCidadeId",
           "dataNascimento",
           "estadoCivil",
+          "sexo",
           "nacionalidade",
           "nacionalidadeId",
           "cep",
@@ -3731,8 +3772,7 @@
           "funcaoFuncionarioNome",
           "dataAdmissao",
           "dataDemissao",
-          "salario",
-          "observacoes"
+          "salario"
         ]
       },
       "UpdateEmployeeDto": {
@@ -4396,6 +4436,11 @@
             "type": "string",
             "description": "Sigla do país",
             "example": "BR"
+          },
+          "nacionalidade": {
+            "type": "string",
+            "description": "Nacionalidade",
+            "example": "BRASILEIRA"
           }
         },
         "required": [
@@ -5174,16 +5219,19 @@
             "example": "Produto em promoção até 31/12"
           },
           "situacao": {
+            "format": "date-time",
             "type": "string",
             "description": "Data de situação do produto",
             "example": "2025-06-19"
           },
           "dataCriacao": {
+            "format": "date-time",
             "type": "string",
             "description": "Data de criação do produto",
             "example": "2025-06-19"
           },
           "dataAlteracao": {
+            "format": "date-time",
             "type": "string",
             "description": "Data da última alteração",
             "example": "2025-06-19"
@@ -5622,6 +5670,11 @@
             "description": "Data da última atualização do registro",
             "example": "2025-06-19T10:00:00Z"
           },
+          "unidadeMedida": {
+            "type": "string",
+            "description": "Código da unidade de medida",
+            "example": "UNIDADE"
+          },
           "nome": {
             "type": "string",
             "description": "Nome da unidade de medida",
@@ -5638,6 +5691,7 @@
           "ativo",
           "createdAt",
           "updatedAt",
+          "unidadeMedida",
           "nome",
           "sigla"
         ]
