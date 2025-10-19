@@ -31,8 +31,9 @@ const formSchema = z.object({
   referencia: z.string().nullable().optional(),
   valorVenda: z.number().min(0, 'Valor de venda deve ser maior ou igual a zero').optional(),
   valorCompra: z.number().min(0, 'Valor de compra deve ser maior ou igual a zero').optional(),
-  quantidadeMinima: z.number().min(0, 'Quantidade mínima deve ser maior ou igual a zero').optional(),
-  quantidade: z.number().min(0, 'Quantidade atual deve ser maior ou igual a zero').optional(),
+  // Campos de estoque desabilitados - Será gerenciado por módulo específico no futuro
+  quantidadeMinima: z.number().min(0, 'Quantidade mínima deve ser maior ou igual a zero').optional().default(0),
+  quantidade: z.number().min(0, 'Quantidade atual deve ser maior ou igual a zero').optional().default(0),
   categoriaId: z.number().min(1, 'Categoria é obrigatória'),
   marcaId: z.number().nullable().optional(),
   unidadeMedidaId: z.number().min(1, 'Unidade de medida é obrigatória'),

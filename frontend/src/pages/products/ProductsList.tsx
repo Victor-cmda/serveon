@@ -169,11 +169,7 @@ const ProductsList: React.FC = () => {
                     </td>
                     <td className="p-4">
                       <div className="text-sm">
-                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                          product.quantidade <= (product.quantidadeMinima || 0)
-                            ? 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20'
-                            : 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20'
-                        }`}>
+                        <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-muted text-muted-foreground ring-1 ring-inset ring-border">
                           {product.quantidade || 0}
                         </span>
                       </div>

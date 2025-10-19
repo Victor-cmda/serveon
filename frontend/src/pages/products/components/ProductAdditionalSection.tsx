@@ -83,7 +83,8 @@ const ProductAdditionalSection = ({
                   type="number"
                   min="0"
                   placeholder="0"
-                  disabled={isLoading}
+                  disabled={true}
+                  className="bg-muted cursor-not-allowed"
                   {...field}
                   onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                 />
@@ -104,7 +105,8 @@ const ProductAdditionalSection = ({
                   type="number"
                   min="0"
                   placeholder="0"
-                  disabled={isLoading}
+                  disabled={true}
+                  className="bg-muted cursor-not-allowed"
                   {...field}
                   onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                 />
@@ -170,24 +172,6 @@ const ProductAdditionalSection = ({
               <FormControl>
                 <Input
                   placeholder="00.000.00"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="gtin"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>GTIN/EAN</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="7891234567890"
                   disabled={isLoading}
                   {...field}
                 />
