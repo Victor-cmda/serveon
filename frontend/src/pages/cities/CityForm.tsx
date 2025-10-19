@@ -297,40 +297,60 @@ const CityForm = ({
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="estadoId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Estado *</FormLabel>
-                        <div className="flex gap-2">
-                          <div className="w-full flex-1">
-                            <Input
-                              value={
-                                states.find((s) => s.id === field.value)
-                                  ?.nome || ''
-                              }
-                              readOnly
-                              placeholder="Selecione um estado"
-                              className="cursor-pointer"
-                              onClick={() => setStateSearchOpen(true)}
-                            />
-                            <input type="hidden" {...field} />
-                          </div>
-                          <Button
-                            type="button"
-                            size="icon"
-                            variant="outline"
-                            onClick={() => setStateSearchOpen(true)}
-                            disabled={isLoading}
-                          >
-                            <Search className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                    <FormItem>
+                      <FormLabel>Código Estado</FormLabel>
+                      <FormControl>
+                        <Input 
+                          value={states.find((s) => s.id === form.watch('estadoId'))?.id || ''} 
+                          disabled 
+                          className="bg-muted" 
+                          placeholder="-"
+                        />
+                      </FormControl>
+                    </FormItem>
+
+                    <div className="md:col-span-5">
+                      <FormField
+                        control={form.control}
+                        name="estadoId"
+                        render={({ field }) => {
+                          const selectedState = states.find((s) => s.id === field.value);
+                          const displayValue = selectedState 
+                            ? `${selectedState.nome}` 
+                            : '';
+                          
+                          return (
+                            <FormItem>
+                              <FormLabel>Estado *</FormLabel>
+                              <div className="flex gap-2">
+                                <div className="w-full flex-1">
+                                  <Input
+                                    value={displayValue}
+                                    readOnly
+                                    placeholder="Selecione um estado"
+                                    className="cursor-pointer"
+                                    onClick={() => setStateSearchOpen(true)}
+                                  />
+                                  <input type="hidden" {...field} />
+                                </div>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="outline"
+                                  onClick={() => setStateSearchOpen(true)}
+                                  disabled={isLoading}
+                                >
+                                  <Search className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -384,6 +404,7 @@ const CityForm = ({
         }}
         onEdit={(state) => handleEditState(state)}
         displayColumns={[
+          { key: 'id', header: 'Código' },
           { key: 'nome', header: 'Nome' },
           { key: 'uf', header: 'UF' },
           { key: 'paisNome', header: 'País' },

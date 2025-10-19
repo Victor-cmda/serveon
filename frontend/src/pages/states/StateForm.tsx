@@ -285,40 +285,60 @@ const StateForm = ({
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="paisId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>País *</FormLabel>
-                        <div className="flex gap-2">
-                          <div className="w-full flex-1">
-                            <Input
-                              value={
-                                countries.find((c) => c.id === field.value)
-                                  ?.nome || ''
-                              }
-                              readOnly
-                              placeholder="Selecione um país"
-                              className="cursor-pointer"
-                              onClick={() => setCountrySearchOpen(true)}
-                            />
-                            <input type="hidden" {...field} />
-                          </div>
-                          <Button
-                            type="button"
-                            size="icon"
-                            variant="outline"
-                            onClick={() => setCountrySearchOpen(true)}
-                            disabled={isLoading}
-                          >
-                            <Search className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                    <FormItem>
+                      <FormLabel>Código País</FormLabel>
+                      <FormControl>
+                        <Input 
+                          value={countries.find((c) => c.id === form.watch('paisId'))?.id || ''} 
+                          disabled 
+                          className="bg-muted" 
+                          placeholder="-"
+                        />
+                      </FormControl>
+                    </FormItem>
+
+                    <div className="md:col-span-5">
+                      <FormField
+                        control={form.control}
+                        name="paisId"
+                        render={({ field }) => {
+                          const selectedCountry = countries.find((c) => c.id === field.value);
+                          const displayValue = selectedCountry 
+                            ? `${selectedCountry.nome}` 
+                            : '';
+                          
+                          return (
+                            <FormItem>
+                              <FormLabel>País *</FormLabel>
+                              <div className="flex gap-2">
+                                <div className="w-full flex-1">
+                                  <Input
+                                    value={displayValue}
+                                    readOnly
+                                    placeholder="Selecione um país"
+                                    className="cursor-pointer"
+                                    onClick={() => setCountrySearchOpen(true)}
+                                  />
+                                  <input type="hidden" {...field} />
+                                </div>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="outline"
+                                  onClick={() => setCountrySearchOpen(true)}
+                                  disabled={isLoading}
+                                >
+                                  <Search className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -374,9 +394,10 @@ const StateForm = ({
         }}
         onEdit={handleEditCountry}
         displayColumns={[
+          { key: 'id', header: 'Código' },
           { key: 'nome', header: 'Nome' },
           { key: 'sigla', header: 'Sigla' },
-          { key: 'codigo', header: 'Código' },
+          { key: 'codigo', header: 'DDI' },
         ]}
         searchKeys={['nome', 'sigla', 'codigo']}
         entityType="paises"
