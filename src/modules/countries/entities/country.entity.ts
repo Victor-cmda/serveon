@@ -19,4 +19,11 @@ export class Country extends BaseEntity {
     example: 'BR',
   })
   sigla: string;
+
+  @ApiProperty({
+    description: 'Nacionalidade',
+    example: 'BRASILEIRA',
+    required: false,
+  })
+  nacionalidade?: string;
 }

@@ -3,6 +3,12 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 
 export class Purchase extends BaseEntity {
   @ApiProperty({
+    description: 'Número do pedido/nota fiscal',
+    example: 'PC-0001',
+  })
+  numeroPedido: string;
+
+  @ApiProperty({
     description: 'Número sequencial da compra',
     example: 1001,
     required: false,
@@ -12,23 +18,20 @@ export class Purchase extends BaseEntity {
   @ApiProperty({
     description: 'Modelo da nota fiscal',
     example: '55',
-    required: false,
   })
-  modelo?: string;
+  modelo: string;
 
   @ApiProperty({
     description: 'Série da nota fiscal',
-    example: '1',
-    required: false,
+    example: '001',
   })
-  serie?: string;
+  serie: string;
 
   @ApiProperty({
     description: 'Código do fornecedor',
-    example: 'FORN001',
-    required: false,
+    example: '1',
   })
-  codigoFornecedor?: string;
+  codigoFornecedor: string;
 
   @ApiProperty({
     description: 'ID do fornecedor',
@@ -55,10 +58,18 @@ export class Purchase extends BaseEntity {
   condicaoPagamentoId: number;
 
   @ApiProperty({
+    description: 'ID da forma de pagamento',
+    example: 1,
+    required: false,
+  })
+  formaPagamentoId?: number;
+
+  @ApiProperty({
     description: 'ID do funcionário responsável pela compra',
     example: 1,
+    required: false,
   })
-  funcionarioId: number;
+  funcionarioId?: number;
 
   @ApiProperty({
     description: 'Tipo de frete',
@@ -98,10 +109,28 @@ export class Purchase extends BaseEntity {
   valorDesconto: number;
 
   @ApiProperty({
+    description: 'Valor de acréscimo aplicado',
+    example: 10.00,
+  })
+  valorAcrescimo: number;
+
+  @ApiProperty({
     description: 'Total a pagar',
     example: 1440.00,
   })
   totalAPagar: number;
+
+  @ApiProperty({
+    description: 'Valor total dos produtos (compatibilidade NFe)',
+    example: 1400.00,
+  })
+  valorProdutos: number;
+
+  @ApiProperty({
+    description: 'Valor total (compatibilidade NFe)',
+    example: 1440.00,
+  })
+  valorTotal: number;
 
   @ApiProperty({
     description: 'Status da compra',
@@ -123,4 +152,25 @@ export class Purchase extends BaseEntity {
     required: false,
   })
   observacoes?: string;
+
+  @ApiProperty({
+    description: 'ID do funcionário que aprovou a compra',
+    example: 1,
+    required: false,
+  })
+  aprovadoPor?: number;
+
+  @ApiProperty({
+    description: 'Data e hora da aprovação',
+    example: '2024-01-15T10:30:00Z',
+    required: false,
+  })
+  dataAprovacao?: Date;
+
+  @ApiProperty({
+    description: 'Data de entrega realizada',
+    example: '2024-02-20',
+    required: false,
+  })
+  dataEntregaRealizada?: Date;
 }

@@ -118,19 +118,19 @@ export class Product extends BaseEntity {
     example: '2025-06-19',
     required: false,
   })
-  situacao?: string;
+  situacao?: Date;
 
   @ApiProperty({
     description: 'Data de criação do produto',
     example: '2025-06-19',
   })
-  dataCriacao: string;
+  dataCriacao: Date;
 
   @ApiProperty({
     description: 'Data da última alteração',
     example: '2025-06-19',
   })
-  dataAlteracao: string;
+  dataAlteracao: Date;
 
   @ApiProperty({
     description: 'Usuário que criou o produto',
