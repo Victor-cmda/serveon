@@ -38,15 +38,16 @@ interface StateFormProps {
   onCancel?: () => void;
 }
 
-const StateForm = ({ 
+const StateForm = ({
   mode = 'page',
   stateId,
   initialData,
   onSuccess,
-  onCancel
+  onCancel,
 }: StateFormProps) => {
   const { id: paramId } = useParams<{ id: string }>();
-  const id = mode === 'dialog' ? stateId : paramId ? Number(paramId) : undefined;
+  const id =
+    mode === 'dialog' ? stateId : paramId ? Number(paramId) : undefined;
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [countries, setCountries] = useState<Country[]>([]);
@@ -130,7 +131,10 @@ const StateForm = ({
         ativo: data.ativo,
       };
       if (id) {
-        createdOrUpdatedState = await stateApi.update(Number(id), formattedData);
+        createdOrUpdatedState = await stateApi.update(
+          Number(id),
+          formattedData,
+        );
         toast.success('Estado atualizado com sucesso!');
       } else {
         createdOrUpdatedState = await stateApi.create(formattedData);
@@ -183,7 +187,6 @@ const StateForm = ({
 
   const handleEditCountry = (country: Country) => {
     setCountryToEdit(country);
-    setCountrySearchOpen(false);
     setCountryDialogOpen(true);
   };
 
@@ -232,16 +235,21 @@ const StateForm = ({
                 <p className="text-sm text-muted-foreground">
                   Informações básicas do estado
                 </p>
-              </div>              <div className="p-6 pt-0">
+              </div>{' '}
+              <div className="p-6 pt-0">
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                     <FormItem>
                       <FormLabel>Código</FormLabel>
                       <FormControl>
-                        <Input value={id || 'Novo'} disabled className="bg-muted" />
+                        <Input
+                          value={id || 'Novo'}
+                          disabled
+                          className="bg-muted"
+                        />
                       </FormControl>
                     </FormItem>
-                    
+
                     <div className="md:col-span-5">
                       <FormField
                         control={form.control}
@@ -289,10 +297,13 @@ const StateForm = ({
                     <FormItem>
                       <FormLabel>Código País</FormLabel>
                       <FormControl>
-                        <Input 
-                          value={countries.find((c) => c.id === form.watch('paisId'))?.id || ''} 
-                          disabled 
-                          className="bg-muted" 
+                        <Input
+                          value={
+                            countries.find((c) => c.id === form.watch('paisId'))
+                              ?.id || ''
+                          }
+                          disabled
+                          className="bg-muted"
                           placeholder="-"
                         />
                       </FormControl>
@@ -303,11 +314,13 @@ const StateForm = ({
                         control={form.control}
                         name="paisId"
                         render={({ field }) => {
-                          const selectedCountry = countries.find((c) => c.id === field.value);
-                          const displayValue = selectedCountry 
-                            ? `${selectedCountry.nome}` 
+                          const selectedCountry = countries.find(
+                            (c) => c.id === field.value,
+                          );
+                          const displayValue = selectedCountry
+                            ? `${selectedCountry.nome}`
                             : '';
-                          
+
                           return (
                             <FormItem>
                               <FormLabel>País *</FormLabel>
@@ -352,9 +365,9 @@ const StateForm = ({
                 </Button>
               </Link>
             ) : (
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={onCancel}
                 disabled={isLoading}
               >
@@ -389,7 +402,6 @@ const StateForm = ({
           setCountrySearchOpen(false);
         }}
         onCreateNew={() => {
-          setCountrySearchOpen(false);
           setCountryDialogOpen(true);
         }}
         onEdit={handleEditCountry}
