@@ -649,11 +649,12 @@ VALUES ((SELECT id FROM nfe WHERE chave_acesso = '111111111111111111111111111111
 -- =====================================================
 
 -- Entrada de estoque da compra
+-- Nota: documento_origem_id pode ser NULL pois compra não tem id simples (chave composta)
 INSERT INTO estoque_movimento (
     produto_id, tipo_movimento, origem, documento_origem_id, numero_documento, data_movimento, funcionario_id,
     quantidade_anterior, quantidade_movimento, quantidade_atual, valor_unitario, valor_total, lote
 ) VALUES (
-    (SELECT id FROM produto WHERE codigo = 'P0001'), 'ENTRADA', 'COMPRA', (SELECT id FROM compra WHERE numero_pedido = 'PC-0001'), 'PC-0001', CURRENT_DATE + INTERVAL '6 days',
+    (SELECT id FROM produto WHERE codigo = 'P0001'), 'ENTRADA', 'COMPRA', NULL, '0001-55-001', CURRENT_DATE + INTERVAL '6 days',
     (SELECT id FROM funcionario WHERE email = 'comprador@exemplo.com'),
     0.000, 100.000, 100.000, 50.00, 5000.00, 'Lote-001'
 );

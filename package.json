@@ -23,7 +23,14 @@
     "frontend:build": "cd frontend && yarn build",
     "dev": "concurrently \"yarn start:dev\" \"yarn frontend:dev\"",
     "build:full": "yarn frontend:build && yarn build",
-    "debug": "nodemon --config nodemon-debug.json"
+    "debug": "nodemon --config nodemon-debug.json",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:ps": "docker-compose ps",
+    "docker:restart": "docker-compose restart",
+    "docker:clean": "docker-compose down -v",
+    "db:reset": "docker-compose down -v && docker-compose up -d postgres"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.12",
