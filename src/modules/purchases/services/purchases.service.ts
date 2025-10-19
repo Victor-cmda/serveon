@@ -412,6 +412,37 @@ export class PurchasesService {
     }
   }
 
+  async checkCompositeKeyExists(
+    numeroPedido: string,
+    modelo: string,
+    serie: string,
+    codigoFornecedor: string,
+  ): Promise<boolean> {
+    try {
+      const client = await this.databaseService.getClient();
+
+      try {
+        const result = await client.query(
+          `SELECT 1 FROM dbo.compra 
+           WHERE numero_pedido = $1 
+           AND modelo = $2 
+           AND serie = $3 
+           AND codigo_fornecedor = $4 
+           AND ativo = true
+           LIMIT 1`,
+          [numeroPedido, modelo, serie, codigoFornecedor],
+        );
+
+        return result.rowCount > 0;
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      console.error('Erro ao verificar chave composta:', error);
+      throw new InternalServerErrorException('Erro ao verificar chave composta');
+    }
+  }
+
   private mapToEntity(dbRecord: any): Purchase {
     return {
       id: dbRecord.id,
@@ -421,11 +452,14 @@ export class PurchasesService {
       serie: dbRecord.serie,
       codigoFornecedor: dbRecord.codigo_fornecedor,
       fornecedorId: dbRecord.fornecedor_id,
+      fornecedorNome: dbRecord.fornecedor_nome,
       dataEmissao: dbRecord.data_emissao,
       dataChegada: dbRecord.data_chegada,
       condicaoPagamentoId: dbRecord.condicao_pagamento_id,
+      condicaoPagamentoNome: dbRecord.condicao_pagamento_nome,
       formaPagamentoId: dbRecord.forma_pagamento_id,
       funcionarioId: dbRecord.funcionario_id,
+      funcionarioNome: dbRecord.funcionario_nome,
       tipoFrete: dbRecord.tipo_frete,
       valorFrete: parseFloat(dbRecord.valor_frete || 0),
       valorSeguro: parseFloat(dbRecord.valor_seguro || 0),
@@ -438,6 +472,7 @@ export class PurchasesService {
       valorTotal: parseFloat(dbRecord.valor_total || 0),
       status: dbRecord.status,
       transportadoraId: dbRecord.transportadora_id,
+      transportadoraNome: dbRecord.transportadora_nome,
       observacoes: dbRecord.observacoes,
       aprovadoPor: dbRecord.aprovado_por,
       dataAprovacao: dbRecord.data_aprovacao,

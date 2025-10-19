@@ -5,9 +5,10 @@ import {
   Body, 
   Patch, 
   Param, 
-  Delete 
+  Delete,
+  Query 
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { PurchasesService } from '../services/purchases.service';
 import { CreatePurchaseDto } from '../dto/create-purchase.dto';
 import { UpdatePurchaseDto } from '../dto/update-purchase.dto';
@@ -23,6 +24,28 @@ export class PurchasesController {
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
   create(@Body() createPurchaseDto: CreatePurchaseDto) {
     return this.purchasesService.create(createPurchaseDto);
+  }
+
+  @Get('check-exists')
+  @ApiOperation({ summary: 'Verificar se uma compra já existe pela chave composta' })
+  @ApiResponse({ status: 200, description: 'Retorna se a compra existe ou não.' })
+  @ApiQuery({ name: 'numeroPedido', required: true, description: 'Número do pedido/nota fiscal' })
+  @ApiQuery({ name: 'modelo', required: true, description: 'Modelo da nota fiscal' })
+  @ApiQuery({ name: 'serie', required: true, description: 'Série da nota fiscal' })
+  @ApiQuery({ name: 'codigoFornecedor', required: true, description: 'Código do fornecedor' })
+  async checkExists(
+    @Query('numeroPedido') numeroPedido: string,
+    @Query('modelo') modelo: string,
+    @Query('serie') serie: string,
+    @Query('codigoFornecedor') codigoFornecedor: string,
+  ) {
+    const exists = await this.purchasesService.checkCompositeKeyExists(
+      numeroPedido,
+      modelo,
+      serie,
+      codigoFornecedor,
+    );
+    return { exists };
   }
 
   @Get()

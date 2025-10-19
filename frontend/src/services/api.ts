@@ -833,6 +833,22 @@ export const purchaseApi = {
     return handleResponse(response);
   },
 
+  checkExists: async (
+    numeroPedido: string,
+    modelo: string,
+    serie: string,
+    codigoFornecedor: string,
+  ): Promise<{ exists: boolean }> => {
+    const params = new URLSearchParams({
+      numeroPedido,
+      modelo,
+      serie,
+      codigoFornecedor,
+    });
+    const response = await fetch(`${API_URL}/purchases/check-exists?${params}`);
+    return handleResponse(response);
+  },
+
   create: async (purchase: CreatePurchaseData): Promise<Purchase> => {
     const response = await fetch(`${API_URL}/purchases`, {
       method: 'POST',

@@ -40,6 +40,13 @@ export class Purchase extends BaseEntity {
   fornecedorId: number;
 
   @ApiProperty({
+    description: 'Nome do fornecedor',
+    example: 'Fornecedor ABC Ltda',
+    required: false,
+  })
+  fornecedorNome?: string;
+
+  @ApiProperty({
     description: 'Data de emissão da compra',
     example: '2024-01-15',
   })
@@ -58,6 +65,13 @@ export class Purchase extends BaseEntity {
   condicaoPagamentoId: number;
 
   @ApiProperty({
+    description: 'Nome da condição de pagamento',
+    example: '30 DIAS',
+    required: false,
+  })
+  condicaoPagamentoNome?: string;
+
+  @ApiProperty({
     description: 'ID da forma de pagamento',
     example: 1,
     required: false,
@@ -70,6 +84,13 @@ export class Purchase extends BaseEntity {
     required: false,
   })
   funcionarioId?: number;
+
+  @ApiProperty({
+    description: 'Nome do funcionário responsável',
+    example: 'João Silva',
+    required: false,
+  })
+  funcionarioNome?: string;
 
   @ApiProperty({
     description: 'Tipo de frete',
@@ -145,6 +166,13 @@ export class Purchase extends BaseEntity {
     required: false,
   })
   transportadoraId?: number;
+
+  @ApiProperty({
+    description: 'Nome da transportadora',
+    example: 'Transportadora XYZ',
+    required: false,
+  })
+  transportadoraNome?: string;
 
   @ApiProperty({
     description: 'Observações sobre a compra',

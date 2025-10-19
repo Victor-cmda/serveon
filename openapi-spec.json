@@ -3141,6 +3141,58 @@
         ]
       }
     },
+    "/api/purchases/check-exists": {
+      "get": {
+        "operationId": "PurchasesController_checkExists",
+        "parameters": [
+          {
+            "name": "numeroPedido",
+            "required": true,
+            "in": "query",
+            "description": "Número do pedido/nota fiscal",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "modelo",
+            "required": true,
+            "in": "query",
+            "description": "Modelo da nota fiscal",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serie",
+            "required": true,
+            "in": "query",
+            "description": "Série da nota fiscal",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "codigoFornecedor",
+            "required": true,
+            "in": "query",
+            "description": "Código do fornecedor",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retorna se a compra existe ou não."
+          }
+        },
+        "summary": "Verificar se uma compra já existe pela chave composta",
+        "tags": [
+          "purchases"
+        ]
+      }
+    },
     "/api/purchases/{id}": {
       "get": {
         "operationId": "PurchasesController_findOne",

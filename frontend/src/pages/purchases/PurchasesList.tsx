@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, ShoppingCart } from 'lucide-react';
+import { Plus, Eye, Trash2, Search, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { purchaseApi } from '../../services/api';
 import { Purchase } from '../../types/purchase';
 import { toast } from '../../lib/toast';
+import PurchaseViewDialog from './components/PurchaseViewDialog';
 
 const PurchasesList: React.FC = () => {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
 
   useEffect(() => {
     loadPurchases();
@@ -26,23 +28,6 @@ const PurchasesList: React.FC = () => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Tem certeza que deseja excluir esta compra?')) {
-      try {
-        await purchaseApi.delete(id);
-        toast.success('Sucesso', {
-          description: 'Compra excluída com sucesso',
-        });
-        loadPurchases();
-      } catch (error) {
-        console.error('Erro ao excluir compra:', error);
-        toast.error('Erro', {
-          description: 'Não foi possível excluir a compra',
-        });
-      }
     }
   };
 
@@ -130,9 +115,6 @@ const PurchasesList: React.FC = () => {
             <thead>
               <tr className="border-b bg-muted/50">
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                  Código
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Número
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
@@ -158,7 +140,7 @@ const PurchasesList: React.FC = () => {
             <tbody>
               {filteredPurchases.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="h-24 text-center">
+                  <td colSpan={7} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <ShoppingCart className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -170,9 +152,6 @@ const PurchasesList: React.FC = () => {
               ) : (
                 filteredPurchases.map((purchase) => (
                   <tr key={purchase.id} className="border-b">
-                    <td className="p-4">
-                      <div className="font-mono text-sm text-muted-foreground">{purchase.id}</div>
-                    </td>
                     <td className="p-4">
                       <div className="font-medium">{purchase.numeroSequencial || '-'}</div>
                       {purchase.modelo && purchase.serie && (
@@ -210,15 +189,17 @@ const PurchasesList: React.FC = () => {
                     </td>
                     <td className="p-4">
                       <div className="flex items-center space-x-2">
-                        <Link
-                          to={`/purchases/edit/${purchase.id}`}
-                          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Link>
                         <button
-                          onClick={() => handleDelete(purchase.id)}
-                          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
+                          onClick={() => setSelectedPurchase(purchase)}
+                          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
+                          title="Visualizar compra"
+                        >
+                          <Eye className="h-3 w-3" />
+                        </button>
+                        <button
+                          disabled
+                          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-muted text-muted-foreground h-8 w-8 cursor-not-allowed opacity-50"
+                          title="Exclusão temporariamente indisponível"
                         >
                           <Trash2 className="h-3 w-3" />
                         </button>
@@ -238,6 +219,13 @@ const PurchasesList: React.FC = () => {
             Mostrando {filteredPurchases.length} de {purchases.length} compra(s)
           </div>
         </div>
+      )}
+
+      {selectedPurchase && (
+        <PurchaseViewDialog
+          purchase={selectedPurchase}
+          onClose={() => setSelectedPurchase(null)}
+        />
       )}
     </div>
   );
