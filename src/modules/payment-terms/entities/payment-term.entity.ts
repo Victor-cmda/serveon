@@ -4,6 +4,13 @@ import { PaymentTermInstallment } from './payment-term-installment.entity';
 
 export class PaymentTerm extends BaseEntity {
   @ApiProperty({
+    description: 'Código/condição de pagamento',
+    example: '30/60',
+    required: false,
+  })
+  condicaoPagamento?: string;
+
+  @ApiProperty({
     description: 'Nome da condição de pagamento',
     example: 'À Vista',
   })
@@ -17,6 +24,30 @@ export class PaymentTerm extends BaseEntity {
   description?: string;
 
   @ApiProperty({
+    description: 'Número de parcelas',
+    example: 3,
+  })
+  numeroParcelas: number;
+
+  @ApiProperty({
+    description: 'Número de parcelas (campo alternativo)',
+    example: 3,
+  })
+  parcelas: number;
+
+  @ApiProperty({
+    description: 'Dias para primeira parcela',
+    example: 30,
+  })
+  diasPrimeiraParcela: number;
+
+  @ApiProperty({
+    description: 'Dias entre parcelas',
+    example: 30,
+  })
+  diasEntreParcelas: number;
+
+  @ApiProperty({
     description: 'Taxa de juros mensal (%)',
     example: 1.5,
   })
@@ -27,6 +58,18 @@ export class PaymentTerm extends BaseEntity {
     example: 2.0,
   })
   fineRate: number;
+
+  @ApiProperty({
+    description: 'Percentual de juros (%)',
+    example: 1.5,
+  })
+  percentualJuros: number;
+
+  @ApiProperty({
+    description: 'Percentual de multa (%)',
+    example: 2.0,
+  })
+  percentualMulta: number;
 
   @ApiProperty({
     description: 'Percentual de desconto (%)',

@@ -9,6 +9,13 @@ export class Employee extends BaseEntity {
   nome: string;
 
   @ApiProperty({
+    description: 'Apelido do funcionário',
+    example: 'João',
+    required: false,
+  })
+  apelido?: string;
+
+  @ApiProperty({
     description: 'CPF do funcionário (apenas números)',
     example: '12345678901',
   })
@@ -39,6 +46,13 @@ export class Employee extends BaseEntity {
   rg?: string;
 
   @ApiProperty({
+    description: 'RG/Inscrição Estadual do funcionário',
+    example: '12345678901234',
+    required: false,
+  })
+  rgInscricaoEstadual?: string;
+
+  @ApiProperty({
     description: 'Órgão emissor do RG',
     example: 'SSP/SP',
   })
@@ -49,6 +63,20 @@ export class Employee extends BaseEntity {
     example: 1,
   })
   rgCidadeId?: number;
+
+  @ApiProperty({
+    description: 'CNH do funcionário',
+    example: '12345678901',
+    required: false,
+  })
+  cnh?: string;
+
+  @ApiProperty({
+    description: 'Data de validade da CNH',
+    example: '2026-12-31',
+    required: false,
+  })
+  dataValidadeCnh?: Date;
 
   @ApiProperty({
     description: 'Data de nascimento',
@@ -63,6 +91,13 @@ export class Employee extends BaseEntity {
   estadoCivil?: string;
 
   @ApiProperty({
+    description: 'Sexo (1=Masculino, 2=Feminino)',
+    example: 1,
+    enum: [1, 2],
+  })
+  sexo?: number;
+
+  @ApiProperty({
     description: 'Nacionalidade',
     example: 'BRASILEIRA',
   })
@@ -73,6 +108,13 @@ export class Employee extends BaseEntity {
     example: 1,
   })
   nacionalidadeId?: number;
+
+  @ApiProperty({
+    description: 'Tipo do funcionário',
+    example: 1,
+    required: false,
+  })
+  tipo?: number;
 
   // Campos de Endereço
   @ApiProperty({
@@ -184,8 +226,16 @@ export class Employee extends BaseEntity {
   salario?: number;
 
   @ApiProperty({
-    description: 'Observações sobre o funcionário',
-    example: 'Funcionário exemplar',
+    description: 'Observações sobre o funcionário (campo TEXT)',
+    example: 'Funcionário exemplar, pontual e dedicado',
+    required: false,
   })
   observacoes?: string;
+
+  @ApiProperty({
+    description: 'Observação (campo VARCHAR)',
+    example: 'Ativo',
+    required: false,
+  })
+  observacao?: string;
 }
