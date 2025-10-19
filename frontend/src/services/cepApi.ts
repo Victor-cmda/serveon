@@ -94,10 +94,13 @@ export const cepApi = {
       // Chama a API ViaCEP
       const response = await fetch(
         `https://viacep.com.br/ws/${cleanCEP}/json/`,
+        {
+          signal: AbortSignal.timeout(10000), // Timeout de 10 segundos
+        }
       );
 
       if (!response.ok) {
-        throw new Error('Erro ao consultar CEP');
+        throw new Error('Serviço de CEP temporariamente indisponível');
       }
 
       const data: ViaCEPResponse = await response.json();
@@ -143,9 +146,23 @@ export const cepApi = {
       return result;
     } catch (error) {
       console.error('Erro ao validar CEP:', error);
+      
+      // Tratamento específico para erros de rede
+      let errorMessage = 'Erro ao validar CEP';
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+      } else if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          errorMessage = 'Tempo de consulta esgotado. Tente novamente.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       return {
         isValid: false,
-        error: error instanceof Error ? error.message : 'Erro ao validar CEP',
+        error: errorMessage,
       };
     }
   },

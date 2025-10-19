@@ -219,7 +219,7 @@ const DepartmentForm: React.FC<DepartmentFormProps> = ({
                         name="nome"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Nome *</FormLabel>
+                            <FormLabel>Departamento *</FormLabel>
                             <FormControl>
                               <Input 
                                 placeholder="Digite o nome do departamento" 

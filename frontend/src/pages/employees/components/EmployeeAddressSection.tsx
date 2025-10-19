@@ -156,11 +156,23 @@ const EmployeeAddressSection = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <FormItem className="md:col-span-1">
+          <FormLabel className="text-base font-medium">Cód. Cidade</FormLabel>
+          <FormControl>
+            <Input
+              value={selectedCity?.id || ''}
+              disabled
+              className="bg-muted h-10 text-base"
+              placeholder="-"
+            />
+          </FormControl>
+        </FormItem>
+
         <FormField
           control={form.control}
           name="cidadeId"
           render={({ field }) => (
-            <FormItem className="md:col-span-8">
+            <FormItem className="md:col-span-7">
               <FormLabel className="text-base font-medium">Cidade</FormLabel>
               <div className="flex gap-2">
                 <FormControl>

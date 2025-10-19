@@ -137,10 +137,13 @@ const PositionsList: React.FC = () => {
                   Código
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                  Nome
+                  Cargo
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Descrição
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Código Departamento
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Departamento
@@ -158,7 +161,7 @@ const PositionsList: React.FC = () => {
             </thead>
             <tbody>              {filteredPositions.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="h-24 text-center">
+                  <td colSpan={8} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Briefcase className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -179,6 +182,11 @@ const PositionsList: React.FC = () => {
                     <td className="p-4">
                       <div className="text-sm text-muted-foreground">
                         {position.descricao || '-'}
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="font-mono text-sm text-muted-foreground">
+                        {position.departamentoId || '-'}
                       </div>
                     </td>
                     <td className="p-4">

@@ -558,6 +558,7 @@ const EmployeeForm: React.FC = () => {
         onCreateNew={onCreateNewDepartment}
         onEdit={handleEditDepartment}
         displayColumns={[
+          { key: 'id', header: 'Código' },
           { key: 'nome', header: 'Nome' },
           { key: 'descricao', header: 'Descrição' },
         ]}
@@ -576,6 +577,7 @@ const EmployeeForm: React.FC = () => {
         onCreateNew={onCreateNewPosition}
         onEdit={handleEditPosition}
         displayColumns={[
+          { key: 'id', header: 'Código' },
           { key: 'nome', header: 'Nome' },
           { key: 'departamentoNome', header: 'Departamento' },
         ]}
@@ -594,6 +596,7 @@ const EmployeeForm: React.FC = () => {
         onCreateNew={onCreateNewCity}
         onEdit={handleEditCity}
         displayColumns={[
+          { key: 'id', header: 'Código' },
           { key: 'nome', header: 'Nome' },
           { key: 'uf', header: 'UF' },
         ]}
@@ -605,21 +608,36 @@ const EmployeeForm: React.FC = () => {
       {/* Diálogos de Criação */}
       <DepartmentCreationDialog
         open={departmentDialogOpen}
-        onOpenChange={setDepartmentDialogOpen}
+        onOpenChange={(open) => {
+          setDepartmentDialogOpen(open);
+          if (!open) {
+            setDepartmentToEdit(null);
+          }
+        }}
         onSuccess={departmentToEdit ? handleDepartmentUpdated : handleDepartmentCreated}
         department={departmentToEdit}
       />
 
       <PositionCreationDialog
         open={positionDialogOpen}
-        onOpenChange={setPositionDialogOpen}
+        onOpenChange={(open) => {
+          setPositionDialogOpen(open);
+          if (!open) {
+            setPositionToEdit(null);
+          }
+        }}
         onSuccess={positionToEdit ? handlePositionUpdated : handlePositionCreated}
         position={positionToEdit}
       />
 
       <CityCreationDialog
         open={cityDialogOpen}
-        onOpenChange={setCityDialogOpen}
+        onOpenChange={(open) => {
+          setCityDialogOpen(open);
+          if (!open) {
+            setCityToEdit(null);
+          }
+        }}
         onSuccess={cityToEdit ? handleCityUpdated : handleCityCreated}
         city={cityToEdit}
       />

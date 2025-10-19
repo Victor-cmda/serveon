@@ -7,6 +7,7 @@ import { Save, Search, ArrowLeft, Loader2 } from 'lucide-react';
 import { positionApi, departmentApi } from '../../services/api';
 import { toast } from '../../lib/toast';
 import { Department } from '../../types/department';
+import { Position } from '../../types/position';
 import { SearchDialog } from '../../components/SearchDialog';
 import DepartmentCreationDialog from '../../components/dialogs/DepartmentCreationDialog';
 import {
@@ -22,8 +23,14 @@ import { Button } from '../../components/ui/button';
 import AuditSection from '../../components/AuditSection';
 
 const positionSchema = z.object({
-  nome: z.string().min(1, 'Nome é obrigatório').max(100, 'Nome deve ter no máximo 100 caracteres'),
-  descricao: z.string().max(500, 'Descrição deve ter no máximo 500 caracteres').optional(),
+  nome: z
+    .string()
+    .min(1, 'Nome é obrigatório')
+    .max(100, 'Nome deve ter no máximo 100 caracteres'),
+  descricao: z
+    .string()
+    .max(500, 'Descrição deve ter no máximo 500 caracteres')
+    .optional(),
   departamentoId: z.number().optional(),
   ativo: z.boolean().default(true),
 });
@@ -37,22 +44,39 @@ const defaultValues: PositionFormData = {
   ativo: true,
 };
 
-const PositionForm: React.FC = () => {
+interface PositionFormProps {
+  mode?: 'page' | 'dialog';
+  positionId?: number;
+  initialData?: Partial<Position>;
+  onSuccess?: (position: Position) => void;
+  onCancel?: () => void;
+}
+
+const PositionForm: React.FC<PositionFormProps> = ({
+  mode = 'page',
+  positionId,
+  initialData,
+  onSuccess,
+  onCancel,
+}) => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
   const location = useLocation();
+  const { id: paramId } = useParams<{ id: string }>();
+  const id = mode === 'dialog' ? positionId : paramId ? Number(paramId) : undefined;
   const [loading, setLoading] = useState(false);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [positionData, setPositionData] = useState<any>(null);
-  
+
   // Estados para os diálogos
   const [departmentSearchOpen, setDepartmentSearchOpen] = useState(false);
   const [newDepartmentDialogOpen, setNewDepartmentDialogOpen] = useState(false);
-  const [departmentToEdit, setDepartmentToEdit] = useState<Department | null>(null);
+  const [departmentToEdit, setDepartmentToEdit] = useState<Department | null>(
+    null,
+  );
 
   const form = useForm<PositionFormData>({
     resolver: zodResolver(positionSchema),
-    defaultValues,
+    defaultValues: initialData || defaultValues,
   });
 
   const loadDepartments = useCallback(async () => {
@@ -70,8 +94,8 @@ const PositionForm: React.FC = () => {
 
     try {
       setLoading(true);
-      const data = await positionApi.getById(parseInt(id));
-      
+      const data = await positionApi.getById(id);
+
       setPositionData(data);
       form.reset({
         nome: data.nome,
@@ -84,11 +108,13 @@ const PositionForm: React.FC = () => {
     } catch (error) {
       console.error('Erro ao carregar cargo:', error);
       toast.error('Não foi possível carregar os dados do cargo');
-      navigate('/positions');
+      if (mode === 'page') {
+        navigate('/positions');
+      }
     } finally {
       setLoading(false);
     }
-  }, [id, form, navigate]); // Removido 'departments' da dependência
+  }, [id, form, navigate, mode]);
 
   useEffect(() => {
     loadDepartments();
@@ -97,16 +123,22 @@ const PositionForm: React.FC = () => {
   useEffect(() => {
     if (id && departments.length > 0) {
       loadPosition();
+    } else if (mode === 'dialog' && !id) {
+      // Limpa o formulário quando abre o dialog para criação
+      form.reset({
+        nome: initialData?.nome || '',
+        descricao: initialData?.descricao || '',
+        departamentoId: initialData?.departamentoId,
+        ativo: initialData?.ativo ?? true,
+      });
     }
-  }, [id, departments.length, loadPosition]);
-
-
+  }, [id, departments.length, loadPosition, mode, initialData, form]);
 
   // Verificar se há um departamento pré-selecionado via URL params
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const departmentId = params.get('departmentId');
-    
+
     if (departmentId) {
       const departmentIdNumber = parseInt(departmentId, 10);
       if (!isNaN(departmentIdNumber)) {
@@ -149,12 +181,16 @@ const PositionForm: React.FC = () => {
     setDepartments((prev) => [...prev, newDepartment]);
     setNewDepartmentDialogOpen(false);
     setDepartmentSearchOpen(true);
-    toast.success(`Departamento ${newDepartment.nome} criado com sucesso! Selecione-o na lista.`);
+    toast.success(
+      `Departamento ${newDepartment.nome} criado com sucesso! Selecione-o na lista.`,
+    );
   };
 
   const handleDepartmentUpdated = (updatedDepartment: Department) => {
     setDepartments((prev) =>
-      prev.map((dept) => (dept.id === updatedDepartment.id ? updatedDepartment : dept)),
+      prev.map((dept) =>
+        dept.id === updatedDepartment.id ? updatedDepartment : dept,
+      ),
     );
 
     setDepartmentToEdit(null);
@@ -163,30 +199,34 @@ const PositionForm: React.FC = () => {
   const onSubmit = async (data: PositionFormData) => {
     try {
       setLoading(true);
-      
+
+      let savedPosition: Position;
+
       const submitData = {
         ...data,
         descricao: data.descricao || undefined,
         departamentoId: data.departamentoId || undefined,
       };
 
-      let createdOrUpdatedId: number;
-
       if (id) {
-        await positionApi.update(parseInt(id), submitData);
+        savedPosition = await positionApi.update(id, submitData);
         toast.success('Cargo atualizado com sucesso!');
-        createdOrUpdatedId = parseInt(id);
       } else {
-        const createdPosition = await positionApi.create(submitData);
+        savedPosition = await positionApi.create(submitData);
         toast.success('Cargo criado com sucesso!');
-        createdOrUpdatedId = createdPosition.id;
       }
 
-      // Verificar se precisamos retornar para um formulário pai em um cenário de cascata
+      // Se está em modo dialog, chama o callback de sucesso
+      if (mode === 'dialog' && onSuccess) {
+        onSuccess(savedPosition);
+        return;
+      }
+
+      // Modo page: navega conforme returnUrl ou vai para lista
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
         // Passar o ID da entidade criada/atualizada de volta para o formulário pai
-        const returnWithParams = `${returnUrl}?createdEntity=position&createdId=${createdOrUpdatedId}`;
+        const returnWithParams = `${returnUrl}?createdEntity=position&createdId=${savedPosition.id}`;
         navigate(returnWithParams);
       } else {
         // Navegar apenas para a view de lista se não for parte de um formulário cascateado
@@ -194,7 +234,7 @@ const PositionForm: React.FC = () => {
       }
     } catch (error: unknown) {
       console.error('Erro ao salvar cargo:', error);
-      
+
       let errorMessage = 'Erro ao salvar cargo';
       if (error instanceof Error) {
         if (error.message.includes('nome')) {
@@ -203,7 +243,7 @@ const PositionForm: React.FC = () => {
           errorMessage = error.message;
         }
       }
-      
+
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -212,35 +252,37 @@ const PositionForm: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link to="/positions">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {id ? 'Editar Cargo' : 'Novo Cargo'}
-            </h1>
-            <p className="text-muted-foreground">
-              {id
-                ? 'Edite as informações do cargo abaixo'
-                : 'Preencha as informações para criar um novo cargo'}
-            </p>
+      {mode === 'page' && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link to="/positions">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {id ? 'Editar Cargo' : 'Novo Cargo'}
+              </h1>
+              <p className="text-muted-foreground">
+                {id
+                  ? 'Edite as informações do cargo abaixo'
+                  : 'Preencha as informações para criar um novo cargo'}
+              </p>
+            </div>
           </div>
+
+          {/* AuditSection no header */}
+          <AuditSection
+            form={form}
+            data={positionData}
+            variant="header"
+            isEditing={!!id}
+            statusFieldName="ativo" // Campo de status é 'ativo' para Position
+          />
         </div>
-        
-        {/* AuditSection no header */}
-        <AuditSection 
-          form={form} 
-          data={positionData}
-          variant="header" 
-          isEditing={!!id}
-          statusFieldName="ativo" // Campo de status é 'ativo' para Position
-        />
-      </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -264,10 +306,14 @@ const PositionForm: React.FC = () => {
                     <FormItem>
                       <FormLabel>Código</FormLabel>
                       <FormControl>
-                        <Input value={id || 'Novo'} disabled className="bg-muted" />
+                        <Input
+                          value={id || 'Novo'}
+                          disabled
+                          className="bg-muted"
+                        />
                       </FormControl>
                     </FormItem>
-                    
+
                     <div className="md:col-span-7">
                       <FormField
                         control={form.control}
@@ -317,8 +363,9 @@ const PositionForm: React.FC = () => {
                               <div className="w-full flex-1">
                                 <Input
                                   value={
-                                    departments.find((d) => d.id === field.value)
-                                      ?.nome || ''
+                                    departments.find(
+                                      (d) => d.id === field.value,
+                                    )?.nome || ''
                                   }
                                   readOnly
                                   placeholder="Selecione um departamento"
@@ -367,11 +414,19 @@ const PositionForm: React.FC = () => {
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Link to="/positions">
-              <Button type="button" variant="outline">
-                Cancelar
-              </Button>
-            </Link>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                if (mode === 'dialog' && onCancel) {
+                  onCancel();
+                } else {
+                  navigate('/positions');
+                }
+              }}
+            >
+              Cancelar
+            </Button>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {id ? 'Atualizar' : 'Salvar'}
@@ -390,7 +445,9 @@ const PositionForm: React.FC = () => {
             setDepartmentToEdit(null); // Limpa ao fechar o dialog
           }
         }}
-        onSuccess={departmentToEdit ? handleDepartmentUpdated : handleDepartmentCreated}
+        onSuccess={
+          departmentToEdit ? handleDepartmentUpdated : handleDepartmentCreated
+        }
         department={departmentToEdit}
       />
 
@@ -408,7 +465,7 @@ const PositionForm: React.FC = () => {
           { key: 'nome', header: 'Nome' },
           { key: 'descricao', header: 'Descrição' },
           {
-            key: (dept) => dept.ativo ? 'Ativo' : 'Inativo',
+            key: (dept) => (dept.ativo ? 'Ativo' : 'Inativo'),
             header: 'Status',
           },
         ]}

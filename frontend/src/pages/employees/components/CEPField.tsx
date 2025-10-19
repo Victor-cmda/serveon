@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Loader2, AlertCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { Input } from '../../../components/ui/input';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../../components/ui/form';
-import { Badge } from '../../../components/ui/badge';
 import { useCEPValidation } from '../../../hooks/useCEPValidation';
 import { formatCEP } from '../utils/validationUtils';
 import { UseFormReturn } from 'react-hook-form';
@@ -121,44 +120,6 @@ const CEPField = ({ form, disabled = false, onAddressFound, className }: CEPFiel
                 </div>
               </div>
             </FormControl>
-            
-            {/* Mensagens de validação */}
-            {validationResult && (
-              <div className="space-y-1">
-                {validationResult.isValid && validationResult.data && (
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    CEP válido - {validationResult.data.cidade}/{validationResult.data.uf}
-                  </Badge>
-                )}
-                
-                {!validationResult.isValid && validationResult.error && (
-                  <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                    <AlertCircle className="h-3 w-3 mr-1" />
-                    {validationResult.error}
-                  </Badge>
-                )}
-              </div>
-            )}
-            
-            {/* Mostrar dados encontrados */}
-            {validationResult?.isValid && validationResult.data && (
-              <div className="text-sm text-muted-foreground bg-green-50 p-2 rounded border border-green-200">
-                <div className="font-medium text-green-800 mb-1">Endereço encontrado:</div>
-                <div className="space-y-1">
-                  {validationResult.data.endereco && (
-                    <div><strong>Logradouro:</strong> {validationResult.data.endereco}</div>
-                  )}
-                  {validationResult.data.bairro && (
-                    <div><strong>Bairro:</strong> {validationResult.data.bairro}</div>
-                  )}
-                  <div><strong>Cidade:</strong> {validationResult.data.cidade}/{validationResult.data.uf}</div>
-                  {validationResult.data.ddd && (
-                    <div><strong>DDD:</strong> {validationResult.data.ddd}</div>
-                  )}
-                </div>
-              </div>
-            )}
             
             <FormMessage className="text-sm" />
           </FormItem>

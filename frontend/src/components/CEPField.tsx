@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Loader2, AlertCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
-import { Badge } from './ui/badge';
 import { useCEPValidation } from '../hooks/useCEPValidation';
 import { UseFormReturn } from 'react-hook-form';
 import { cn } from '../lib/utils';
@@ -161,14 +160,6 @@ const CEPField = ({
                 </div>
               </div>
             </FormControl>
-            
-            {/* Mensagens de validação - apenas erros */}
-            {validationResult && !validationResult.isValid && validationResult.error && (
-              <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                <AlertCircle className="h-3 w-3 mr-1" />
-                {validationResult.error}
-              </Badge>
-            )}
             
             <FormMessage className="text-sm" />
           </FormItem>

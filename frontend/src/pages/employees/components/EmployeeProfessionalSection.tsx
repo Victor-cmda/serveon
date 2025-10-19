@@ -38,99 +38,131 @@ const EmployeeProfessionalSection = ({
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="departamentoId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-base font-medium">
-                Departamento
-              </FormLabel>
-              <div className="flex gap-2">
-                <FormControl>
-                  <div className="flex w-full items-center gap-2">
-                    <div className="relative flex-grow">
-                      <Input
-                        value={selectedDepartment?.nome || ''}
-                        readOnly
-                        placeholder="Selecione um departamento"
-                        className="cursor-pointer h-10 text-base pl-9"
-                        onClick={() => setDepartmentSearchOpen(true)}
-                      />
-                      <input
-                        type="hidden"
-                        name={field.name}
-                        value={field.value || ''}
-                        onChange={(e) => {
-                          field.onChange(e);
-                        }}
-                        ref={field.ref}
-                        onBlur={field.onBlur}
-                      />
-                      <Users className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setDepartmentSearchOpen(true)}
-                      className="h-10 w-10"
-                    >
-                      <Search className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </FormControl>
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <FormItem>
+            <FormLabel className="text-base font-medium">Código Depto.</FormLabel>
+            <FormControl>
+              <Input
+                value={selectedDepartment?.id || ''}
+                disabled
+                className="bg-muted h-10 text-base"
+                placeholder="-"
+              />
+            </FormControl>
+          </FormItem>
 
-        <FormField
-          control={form.control}
-          name="cargoId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-base font-medium">Cargo</FormLabel>
-              <div className="flex gap-2">
-                <FormControl>
-                  <div className="flex w-full items-center gap-2">
-                    <div className="relative flex-grow">
-                      <Input
-                        value={selectedPosition?.nome || ''}
-                        readOnly
-                        placeholder="Selecione um cargo"
-                        className="cursor-pointer h-10 text-base pl-9"
-                        onClick={() => setPositionSearchOpen(true)}
-                      />
-                      <input
-                        type="hidden"
-                        name={field.name}
-                        value={field.value || ''}
-                        onChange={(e) => {
-                          field.onChange(e);
-                        }}
-                        ref={field.ref}
-                        onBlur={field.onBlur}
-                      />
-                      <Briefcase className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setPositionSearchOpen(true)}
-                      className="h-10 w-10"
-                    >
-                      <Search className="h-4 w-4" />
-                    </Button>
+          <div className="md:col-span-5">
+            <FormField
+              control={form.control}
+              name="departamentoId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base font-medium">
+                    Departamento
+                  </FormLabel>
+                  <div className="flex gap-2">
+                    <FormControl>
+                      <div className="flex w-full items-center gap-2">
+                        <div className="relative flex-grow">
+                          <Input
+                            value={selectedDepartment?.nome || ''}
+                            readOnly
+                            placeholder="Selecione um departamento"
+                            className="cursor-pointer h-10 text-base pl-9"
+                            onClick={() => setDepartmentSearchOpen(true)}
+                          />
+                          <input
+                            type="hidden"
+                            name={field.name}
+                            value={field.value || ''}
+                            onChange={(e) => {
+                              field.onChange(e);
+                            }}
+                            ref={field.ref}
+                            onBlur={field.onBlur}
+                          />
+                          <Users className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setDepartmentSearchOpen(true)}
+                          className="h-10 w-10"
+                        >
+                          <Search className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </FormControl>
                   </div>
-                </FormControl>
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <FormItem>
+            <FormLabel className="text-base font-medium">Código Cargo</FormLabel>
+            <FormControl>
+              <Input
+                value={selectedPosition?.id || ''}
+                disabled
+                className="bg-muted h-10 text-base"
+                placeholder="-"
+              />
+            </FormControl>
+          </FormItem>
+
+          <div className="md:col-span-5">
+            <FormField
+              control={form.control}
+              name="cargoId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base font-medium">Cargo</FormLabel>
+                  <div className="flex gap-2">
+                    <FormControl>
+                      <div className="flex w-full items-center gap-2">
+                        <div className="relative flex-grow">
+                          <Input
+                            value={selectedPosition?.nome || ''}
+                            readOnly
+                            placeholder="Selecione um cargo"
+                            className="cursor-pointer h-10 text-base pl-9"
+                            onClick={() => setPositionSearchOpen(true)}
+                          />
+                          <input
+                            type="hidden"
+                            name={field.name}
+                            value={field.value || ''}
+                            onChange={(e) => {
+                              field.onChange(e);
+                            }}
+                            ref={field.ref}
+                            onBlur={field.onBlur}
+                          />
+                          <Briefcase className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setPositionSearchOpen(true)}
+                          className="h-10 w-10"
+                        >
+                          <Search className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

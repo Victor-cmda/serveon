@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { cepApi, CEPValidationResult } from '../services/cepApi';
 import { City } from '../types/location';
+import { toast } from 'sonner';
 
 interface UseCEPValidationOptions {
   onValidation?: (result: CEPValidationResult) => void;
@@ -76,11 +77,19 @@ export const useCEPValidation = (
       
       return result;
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao validar CEP';
       const errorResult: CEPValidationResult = {
         isValid: false,
-        error: 'Erro ao validar CEP'
+        error: errorMessage
       };
       setValidationResult(errorResult);
+      
+      // Mostra toast temporário de erro
+      toast.error('Erro ao consultar CEP', {
+        description: errorMessage,
+        duration: 3000, // 3 segundos
+      });
+      
       return errorResult;
     } finally {
       setIsValidating(false);
