@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { countryApi } from '@/services/api';
+import { Country } from '@/types/location';
 import { toast } from 'sonner';
 import AuditSection from '@/components/AuditSection';
 
@@ -34,8 +35,23 @@ const formSchema = z.object({
   ativo: z.boolean().default(true),
 });
 
-const CountryForm = () => {
-  const { id } = useParams<{ id: string }>();
+interface CountryFormProps {
+  mode?: 'page' | 'dialog';
+  countryId?: number;
+  initialData?: Partial<Country>;
+  onSuccess?: (country: Country) => void;
+  onCancel?: () => void;
+}
+
+const CountryForm = ({
+  mode = 'page',
+  countryId,
+  initialData,
+  onSuccess,
+  onCancel
+}: CountryFormProps) => {
+  const { id: paramId } = useParams<{ id: string }>();
+  const id = mode === 'dialog' ? countryId : paramId ? Number(paramId) : undefined;
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [countryData, setCountryData] = useState<any>(null);
@@ -43,7 +59,7 @@ const CountryForm = () => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       nome: '',
       sigla: '',
       codigo: '',
@@ -52,17 +68,19 @@ const CountryForm = () => {
   });
 
   useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      e.returnValue = '';
-    };
+    if (mode === 'page') {
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        e.preventDefault();
+        e.returnValue = '';
+      };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+      window.addEventListener('beforeunload', handleBeforeUnload);
 
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, []);
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }
+  }, [mode]);
 
   useEffect(() => {
     const fetchCountry = async () => {
@@ -83,20 +101,22 @@ const CountryForm = () => {
         toast.error('Erro', {
           description: 'Não foi possível carregar os dados do país.',
         });
-        navigate('/countries');
+        if (mode === 'page') {
+          navigate('/countries');
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchCountry();
-  }, [id, navigate, form]);
+  }, [id, navigate, form, mode]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
 
     try {
-      let createdOrUpdatedId: string;
+      let createdOrUpdatedCountry: Country;
 
       // Format the data to handle empty strings
       const formattedData = {
@@ -107,22 +127,27 @@ const CountryForm = () => {
       };
 
       if (id) {
-        await countryApi.update(Number(id), formattedData);
+        createdOrUpdatedCountry = await countryApi.update(Number(id), formattedData);
         toast.success('Sucesso', {
           description: 'País atualizado com sucesso!',
         });
-        createdOrUpdatedId = id;
       } else {
-        const createdCountry = await countryApi.create(formattedData);
+        createdOrUpdatedCountry = await countryApi.create(formattedData);
         toast.success('Sucesso', {
           description: 'País criado com sucesso!',
         });
-        createdOrUpdatedId = String(createdCountry.id);
       }
 
+      // Se está em modo dialog, chama o callback de sucesso
+      if (mode === 'dialog' && onSuccess) {
+        onSuccess(createdOrUpdatedCountry);
+        return;
+      }
+
+      // Modo page: navega conforme returnUrl ou vai para lista
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
-        const returnWithParams = `${returnUrl}?createdEntity=country&createdId=${createdOrUpdatedId}`;
+        const returnWithParams = `${returnUrl}?createdEntity=country&createdId=${createdOrUpdatedCountry.id}`;
         navigate(returnWithParams);
       } else {
         navigate('/countries');
@@ -140,35 +165,37 @@ const CountryForm = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link to="/countries">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {id ? 'Editar País' : 'Novo País'}
-            </h1>
-            <p className="text-muted-foreground">
-              {id
-                ? 'Edite as informações do país abaixo'
-                : 'Preencha as informações para criar um novo país'}
-            </p>
+      {mode === 'page' && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link to="/countries">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {id ? 'Editar País' : 'Novo País'}
+              </h1>
+              <p className="text-muted-foreground">
+                {id
+                  ? 'Edite as informações do país abaixo'
+                  : 'Preencha as informações para criar um novo país'}
+              </p>
+            </div>
           </div>
+          
+          {/* AuditSection no header */}
+          <AuditSection 
+            form={form} 
+            data={countryData}
+            variant="header" 
+            isEditing={!!id}
+            statusFieldName="ativo"
+          />
         </div>
-        
-        {/* AuditSection no header */}
-        <AuditSection 
-          form={form} 
-          data={countryData}
-          variant="header" 
-          isEditing={!!id}
-          statusFieldName="ativo" // Campo de status é 'ativo' para Country
-        />
-      </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -262,11 +289,22 @@ const CountryForm = () => {
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Link to="/countries">
-              <Button type="button" variant="outline">
+            {mode === 'page' ? (
+              <Link to="/countries">
+                <Button type="button" variant="outline">
+                  Cancelar
+                </Button>
+              </Link>
+            ) : (
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onCancel}
+                disabled={isLoading}
+              >
                 Cancelar
               </Button>
-            </Link>
+            )}
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {id ? 'Atualizar' : 'Salvar'}

@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { stateApi, countryApi } from '@/services/api';
-import { Country } from '@/types/location';
+import { Country, State } from '@/types/location';
 import { toast } from 'sonner';
 import CountryCreationDialog from '@/components/dialogs/CountryCreationDialog';
 import { SearchDialog } from '@/components/SearchDialog';
@@ -30,8 +30,23 @@ const formSchema = z.object({
   ativo: z.boolean().default(true),
 });
 
-const StateForm = () => {
-  const { id } = useParams<{ id: string }>();
+interface StateFormProps {
+  mode?: 'page' | 'dialog';
+  stateId?: number;
+  initialData?: Partial<State>;
+  onSuccess?: (state: State) => void;
+  onCancel?: () => void;
+}
+
+const StateForm = ({ 
+  mode = 'page',
+  stateId,
+  initialData,
+  onSuccess,
+  onCancel
+}: StateFormProps) => {
+  const { id: paramId } = useParams<{ id: string }>();
+  const id = mode === 'dialog' ? stateId : paramId ? Number(paramId) : undefined;
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [countries, setCountries] = useState<Country[]>([]);
@@ -43,7 +58,7 @@ const StateForm = () => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       nome: '',
       uf: '',
       paisId: 0,
@@ -81,14 +96,16 @@ const StateForm = () => {
       } catch (error) {
         console.error('Erro ao buscar estado:', error);
         toast.error('Não foi possível carregar os dados do estado.');
-        navigate('/states');
+        if (mode === 'page') {
+          navigate('/states');
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchState();
-  }, [id, navigate, form]);
+  }, [id, navigate, form, mode]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -103,7 +120,7 @@ const StateForm = () => {
     setIsLoading(true);
 
     try {
-      let createdOrUpdatedId: number | undefined;
+      let createdOrUpdatedState: State;
 
       // Format the data to handle empty strings
       const formattedData = {
@@ -113,21 +130,25 @@ const StateForm = () => {
         ativo: data.ativo,
       };
       if (id) {
-        await stateApi.update(Number(id), formattedData);
+        createdOrUpdatedState = await stateApi.update(Number(id), formattedData);
         toast.success('Estado atualizado com sucesso!');
-        createdOrUpdatedId = Number(id);
       } else {
-        const createdState = await stateApi.create(formattedData);
+        createdOrUpdatedState = await stateApi.create(formattedData);
         toast.success('Estado criado com sucesso!');
-        createdOrUpdatedId = createdState.id;
       }
+
+      // Se está em modo dialog, chama o callback de sucesso
+      if (mode === 'dialog' && onSuccess) {
+        onSuccess(createdOrUpdatedState);
+        return;
+      }
+
+      // Modo page: navega conforme returnUrl ou vai para lista
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
-        // Handle cascading form returns, pass the created/updated entity ID back to the parent form
-        const returnWithParams = `${returnUrl}?createdEntity=state&createdId=${createdOrUpdatedId}`;
+        const returnWithParams = `${returnUrl}?createdEntity=state&createdId=${createdOrUpdatedState.id}`;
         navigate(returnWithParams);
       } else {
-        // Only navigate to list view if not part of a cascading form
         navigate('/states');
       }
     } catch (error: unknown) {
@@ -168,35 +189,37 @@ const StateForm = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link to="/states">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {id ? 'Editar Estado' : 'Novo Estado'}
-            </h1>
-            <p className="text-muted-foreground">
-              {id
-                ? 'Edite as informações do estado abaixo'
-                : 'Preencha as informações para criar um novo estado'}
-            </p>
+      {mode === 'page' && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link to="/states">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {id ? 'Editar Estado' : 'Novo Estado'}
+              </h1>
+              <p className="text-muted-foreground">
+                {id
+                  ? 'Edite as informações do estado abaixo'
+                  : 'Preencha as informações para criar um novo estado'}
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* AuditSection no header */}
-        <AuditSection
-          form={form}
-          data={stateData}
-          variant="header"
-          isEditing={!!id}
-          statusFieldName="ativo"
-        />
-      </div>
+          {/* AuditSection no header */}
+          <AuditSection
+            form={form}
+            data={stateData}
+            variant="header"
+            isEditing={!!id}
+            statusFieldName="ativo"
+          />
+        </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -219,7 +242,7 @@ const StateForm = () => {
                       </FormControl>
                     </FormItem>
                     
-                    <div className="md:col-span-3">
+                    <div className="md:col-span-5">
                       <FormField
                         control={form.control}
                         name="nome"
@@ -302,11 +325,22 @@ const StateForm = () => {
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Link to="/states">
-              <Button type="button" variant="outline">
+            {mode === 'page' ? (
+              <Link to="/states">
+                <Button type="button" variant="outline">
+                  Cancelar
+                </Button>
+              </Link>
+            ) : (
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onCancel}
+                disabled={isLoading}
+              >
                 Cancelar
               </Button>
-            </Link>
+            )}
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {id ? 'Atualizar' : 'Salvar'}

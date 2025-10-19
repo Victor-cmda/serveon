@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { cityApi, stateApi } from '@/services/api';
-import { CreateCityDto, UpdateCityDto, State } from '@/types/location';
+import { CreateCityDto, UpdateCityDto, State, City } from '@/types/location';
 import { toast } from 'sonner';
 import StateCreationDialog from '@/components/dialogs/StateCreationDialog';
 import { SearchDialog } from '@/components/SearchDialog';
@@ -35,8 +35,23 @@ const formSchema = z.object({
   ativo: z.boolean().default(true),
 });
 
-const CityForm = () => {
-  const { id } = useParams<{ id: string }>();
+interface CityFormProps {
+  mode?: 'page' | 'dialog';
+  cityId?: number;
+  initialData?: Partial<City>;
+  onSuccess?: (city: City) => void;
+  onCancel?: () => void;
+}
+
+const CityForm = ({
+  mode = 'page',
+  cityId,
+  initialData,
+  onSuccess,
+  onCancel
+}: CityFormProps) => {
+  const { id: paramId } = useParams<{ id: string }>();
+  const id = mode === 'dialog' ? cityId : paramId ? Number(paramId) : undefined;
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [states, setStates] = useState<State[]>([]);
@@ -50,7 +65,7 @@ const CityForm = () => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       nome: '',
       codigoIbge: '',
       estadoId: undefined,
@@ -89,7 +104,9 @@ const CityForm = () => {
       } catch (error) {
         console.error('Erro ao buscar cidade:', error);
         toast.error('Não foi possível carregar os dados da cidade.');
-        navigate('/cities');
+        if (mode === 'page') {
+          navigate('/cities');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -98,7 +115,7 @@ const CityForm = () => {
     if (id) {
       fetchCity();
     }
-  }, [id, navigate, form]);
+  }, [id, navigate, form, mode]);
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const stateId = params.get('stateId');
@@ -126,27 +143,30 @@ const CityForm = () => {
             ? data.codigoIbge
             : undefined,
       };
-      let createdOrUpdatedId: number;
+      let createdOrUpdatedCity: City;
 
       if (id) {
-        await cityApi.update(Number(id), formattedData as UpdateCityDto);
+        createdOrUpdatedCity = await cityApi.update(Number(id), formattedData as UpdateCityDto);
         toast.success('Cidade atualizada com sucesso!');
-        createdOrUpdatedId = parseInt(id, 10);
       } else {
-        const createdCity = await cityApi.create(
+        createdOrUpdatedCity = await cityApi.create(
           formattedData as CreateCityDto,
         );
         toast.success('Cidade criada com sucesso!');
-        createdOrUpdatedId = createdCity.id;
       }
 
+      // Se está em modo dialog, chama o callback de sucesso
+      if (mode === 'dialog' && onSuccess) {
+        onSuccess(createdOrUpdatedCity);
+        return;
+      }
+
+      // Modo page: navega conforme returnUrl ou vai para lista
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
-        // Handle cascading form returns, pass the created/updated entity ID back to the parent form
-        const returnWithParams = `${returnUrl}?createdEntity=city&createdId=${createdOrUpdatedId}`;
+        const returnWithParams = `${returnUrl}?createdEntity=city&createdId=${createdOrUpdatedCity.id}`;
         navigate(returnWithParams);
       } else {
-        // Only navigate to list view if not part of a cascading form
         navigate('/cities');
       }
     } catch (error: unknown) {
@@ -185,35 +205,37 @@ const CityForm = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link to="/cities">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {id ? 'Editar Cidade' : 'Nova Cidade'}
-            </h1>
-            <p className="text-muted-foreground">
-              {id
-                ? 'Edite as informações da cidade abaixo'
-                : 'Preencha as informações para criar uma nova cidade'}
-            </p>
+      {mode === 'page' && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link to="/cities">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {id ? 'Editar Cidade' : 'Nova Cidade'}
+              </h1>
+              <p className="text-muted-foreground">
+                {id
+                  ? 'Edite as informações da cidade abaixo'
+                  : 'Preencha as informações para criar uma nova cidade'}
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* AuditSection no header */}
-        <AuditSection
-          form={form}
-          data={cityData}
-          variant="header"
-          isEditing={!!id}
-          statusFieldName="ativo" // Campo de status é 'ativo' para City
-        />
-      </div>
+          {/* AuditSection no header */}
+          <AuditSection
+            form={form}
+            data={cityData}
+            variant="header"
+            isEditing={!!id}
+            statusFieldName="ativo"
+          />
+        </div>
+      )}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid gap-6">
@@ -315,11 +337,22 @@ const CityForm = () => {
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Link to="/cities">
-              <Button type="button" variant="outline">
+            {mode === 'page' ? (
+              <Link to="/cities">
+                <Button type="button" variant="outline">
+                  Cancelar
+                </Button>
+              </Link>
+            ) : (
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onCancel}
+                disabled={isLoading}
+              >
                 Cancelar
               </Button>
-            </Link>
+            )}
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {id ? 'Atualizar' : 'Salvar'}
