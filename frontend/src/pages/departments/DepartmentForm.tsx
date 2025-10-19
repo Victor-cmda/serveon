@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,6 +18,7 @@ import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
 import AuditSection from '../../components/AuditSection';
+import { Department } from '../../types/department';
 
 const departmentSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório').max(100, 'Nome deve ter no máximo 100 caracteres'),
@@ -33,15 +34,31 @@ const defaultValues: DepartmentFormData = {
   ativo: true,
 };
 
-const DepartmentForm: React.FC = () => {
+interface DepartmentFormProps {
+  mode?: 'page' | 'dialog';
+  departmentId?: number;
+  initialData?: Partial<Department>;
+  onSuccess?: (department: Department) => void;
+  onCancel?: () => void;
+}
+
+const DepartmentForm: React.FC<DepartmentFormProps> = ({
+  mode = 'page',
+  departmentId,
+  initialData,
+  onSuccess,
+  onCancel,
+}) => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const { id: paramId } = useParams<{ id: string }>();
+  const id = mode === 'dialog' ? departmentId : paramId ? Number(paramId) : undefined;
   const [loading, setLoading] = useState(false);
   const [departmentData, setDepartmentData] = useState<any>(null);
 
   const form = useForm<DepartmentFormData>({
     resolver: zodResolver(departmentSchema),
-    defaultValues,
+    defaultValues: initialData || defaultValues,
   });
 
   const loadDepartment = useCallback(async () => {
@@ -49,7 +66,7 @@ const DepartmentForm: React.FC = () => {
 
     try {
       setLoading(true);
-      const data = await departmentApi.getById(parseInt(id));
+      const data = await departmentApi.getById(id);
       
       setDepartmentData(data);
       form.reset({
@@ -62,21 +79,32 @@ const DepartmentForm: React.FC = () => {
       toast.error('Erro', {
         description: 'Não foi possível carregar os dados do departamento',
       });
-      navigate('/departments');
+      if (mode === 'page') {
+        navigate('/departments');
+      }
     } finally {
       setLoading(false);
     }
-  }, [id, form, navigate]);
+  }, [id, form, navigate, mode]);
 
   useEffect(() => {
     if (id) {
       loadDepartment();
+    } else if (mode === 'dialog') {
+      // Limpa o formulário quando abre o dialog para criação
+      form.reset({
+        nome: initialData?.nome || '',
+        descricao: initialData?.descricao || '',
+        ativo: initialData?.ativo ?? true,
+      });
     }
-  }, [id, loadDepartment]);
+  }, [id, loadDepartment, mode, initialData, form]);
 
   const onSubmit = async (data: DepartmentFormData) => {
     try {
       setLoading(true);
+      
+      let savedDepartment: Department;
       
       const submitData = {
         ...data,
@@ -84,18 +112,30 @@ const DepartmentForm: React.FC = () => {
       };
 
       if (id) {
-        await departmentApi.update(parseInt(id), submitData);
+        savedDepartment = await departmentApi.update(id, submitData);
         toast.success('Sucesso', {
           description: 'Departamento atualizado com sucesso',
         });
       } else {
-        await departmentApi.create(submitData);
+        savedDepartment = await departmentApi.create(submitData);
         toast.success('Sucesso', {
           description: 'Departamento criado com sucesso',
         });
       }
+
+      // Se está em modo dialog, chama o callback de sucesso
+      if (mode === 'dialog' && onSuccess) {
+        onSuccess(savedDepartment);
+        return;
+      }
       
-      navigate('/departments');
+      // Modo page: navega conforme returnUrl ou vai para lista
+      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
+      if (returnUrl) {
+        navigate(returnUrl);
+      } else {
+        navigate('/departments');
+      }
     } catch (error: unknown) {
       console.error('Erro ao salvar departamento:', error);
       
@@ -114,35 +154,37 @@ const DepartmentForm: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link to="/departments">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {id ? 'Editar Departamento' : 'Novo Departamento'}
-            </h1>
-            <p className="text-muted-foreground">
-              {id
-                ? 'Edite as informações do departamento abaixo'
-                : 'Preencha as informações para criar um novo departamento'}
-            </p>
+      {mode === 'page' && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link to="/departments">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {id ? 'Editar Departamento' : 'Novo Departamento'}
+              </h1>
+              <p className="text-muted-foreground">
+                {id
+                  ? 'Edite as informações do departamento abaixo'
+                  : 'Preencha as informações para criar um novo departamento'}
+              </p>
+            </div>
           </div>
+          
+          {/* AuditSection no header */}
+          <AuditSection 
+            form={form} 
+            data={departmentData}
+            variant="header" 
+            isEditing={!!id}
+            statusFieldName="ativo" // Campo de status é 'ativo' para Department
+          />
         </div>
-        
-        {/* AuditSection no header */}
-        <AuditSection 
-          form={form} 
-          data={departmentData}
-          variant="header" 
-          isEditing={!!id}
-          statusFieldName="ativo" // Campo de status é 'ativo' para Department
-        />
-      </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -216,11 +258,19 @@ const DepartmentForm: React.FC = () => {
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Link to="/departments">
-              <Button type="button" variant="outline">
-                Cancelar
-              </Button>
-            </Link>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                if (mode === 'dialog' && onCancel) {
+                  onCancel();
+                } else {
+                  navigate('/departments');
+                }
+              }}
+            >
+              Cancelar
+            </Button>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {id ? 'Atualizar' : 'Salvar'}

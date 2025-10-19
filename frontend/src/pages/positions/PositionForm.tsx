@@ -43,7 +43,6 @@ const PositionForm: React.FC = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [departments, setDepartments] = useState<Department[]>([]);
-  const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
   const [positionData, setPositionData] = useState<any>(null);
   
   // Estados para os diálogos
@@ -81,13 +80,7 @@ const PositionForm: React.FC = () => {
         ativo: data.ativo,
       });
 
-      // Buscar o departamento selecionado
-      if (data.departamentoId) {
-        const dept = departments.find(d => d.id === data.departamentoId);
-        if (dept) {
-          setSelectedDepartment(dept);
-        }
-      }
+      // Departamento será sincronizado automaticamente via form.watch
     } catch (error) {
       console.error('Erro ao carregar cargo:', error);
       toast.error('Não foi possível carregar os dados do cargo');
@@ -95,14 +88,19 @@ const PositionForm: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [id, form, departments, navigate]);
+  }, [id, form, navigate]); // Removido 'departments' da dependência
 
   useEffect(() => {
     loadDepartments();
-    if (id) {
+  }, [loadDepartments]);
+
+  useEffect(() => {
+    if (id && departments.length > 0) {
       loadPosition();
     }
-  }, [id, loadDepartments, loadPosition]);
+  }, [id, departments.length, loadPosition]);
+
+
 
   // Verificar se há um departamento pré-selecionado via URL params
   useEffect(() => {
@@ -113,11 +111,6 @@ const PositionForm: React.FC = () => {
       const departmentIdNumber = parseInt(departmentId, 10);
       if (!isNaN(departmentIdNumber)) {
         form.setValue('departamentoId', departmentIdNumber);
-        // Buscar o departamento para mostrar no campo
-        const dept = departments.find(d => d.id === departmentIdNumber);
-        if (dept) {
-          setSelectedDepartment(dept);
-        }
       }
     }
   }, [location.search, form, departments]);
@@ -135,7 +128,6 @@ const PositionForm: React.FC = () => {
         shouldTouch: true,
       });
 
-      setSelectedDepartment(department);
       setDepartmentSearchOpen(false);
     } catch (error) {
       console.error('Erro ao selecionar departamento:', error);
@@ -144,12 +136,12 @@ const PositionForm: React.FC = () => {
   };
 
   const onCreateNewDepartment = () => {
+    setDepartmentToEdit(null); // Limpa o departamento em edição
     setNewDepartmentDialogOpen(true);
   };
 
   const handleEditDepartment = (department: Department) => {
     setDepartmentToEdit(department);
-    setDepartmentSearchOpen(false);
     setNewDepartmentDialogOpen(true);
   };
 
@@ -164,10 +156,6 @@ const PositionForm: React.FC = () => {
     setDepartments((prev) =>
       prev.map((dept) => (dept.id === updatedDepartment.id ? updatedDepartment : dept)),
     );
-
-    if (selectedDepartment && selectedDepartment.id === updatedDepartment.id) {
-      setSelectedDepartment(updatedDepartment);
-    }
 
     setDepartmentToEdit(null);
   };
@@ -272,75 +260,88 @@ const PositionForm: React.FC = () => {
               </div>
               <div className="p-6 pt-0">
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-8 gap-4">
                     <FormItem>
                       <FormLabel>Código</FormLabel>
                       <FormControl>
                         <Input value={id || 'Novo'} disabled className="bg-muted" />
                       </FormControl>
-                      
                     </FormItem>
                     
+                    <div className="md:col-span-7">
+                      <FormField
+                        control={form.control}
+                        name="nome"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Cargo *</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Nome do cargo"
+                                {...field}
+                                disabled={loading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                    <FormItem>
+                      <FormLabel>Código Departamento</FormLabel>
+                      <FormControl>
+                        <Input
+                          value={
+                            departments.find(
+                              (d) => d.id === form.watch('departamentoId'),
+                            )?.id || ''
+                          }
+                          disabled
+                          className="bg-muted"
+                          placeholder="-"
+                        />
+                      </FormControl>
+                    </FormItem>
+
                     <div className="md:col-span-5">
                       <FormField
                         control={form.control}
                         name="departamentoId"
                         render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Departamento</FormLabel>
-                        <div className="flex gap-2">
-                          <div className="w-full flex-1">
-                            <Input
-                              value={selectedDepartment ? selectedDepartment.nome : ''}
-                              readOnly
-                              placeholder="Selecione um departamento"
-                              className="cursor-pointer"
-                              onClick={() => setDepartmentSearchOpen(true)}
-                            />
-                            <input
-                              type="hidden"
-                              name={field.name}
-                              value={field.value || ''}
-                              onChange={(e) => {
-                                field.onChange(e);
-                              }}
-                              ref={field.ref}
-                              onBlur={field.onBlur}
-                            />
-                          </div>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setDepartmentSearchOpen(true)}
-                          >
-                            <Search className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormItem>
+                            <FormLabel>Departamento</FormLabel>
+                            <div className="flex gap-2">
+                              <div className="w-full flex-1">
+                                <Input
+                                  value={
+                                    departments.find((d) => d.id === field.value)
+                                      ?.nome || ''
+                                  }
+                                  readOnly
+                                  placeholder="Selecione um departamento"
+                                  className="cursor-pointer"
+                                  onClick={() => setDepartmentSearchOpen(true)}
+                                />
+                                <input type="hidden" {...field} />
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setDepartmentSearchOpen(true)}
+                              >
+                                <Search className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
                   </div>
-
-                  <FormField
-                    control={form.control}
-                    name="nome"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome do Cargo *</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Nome do cargo"
-                            {...field}
-                            disabled={loading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <FormField
                     control={form.control}
@@ -357,9 +358,9 @@ const PositionForm: React.FC = () => {
                           />
                         </FormControl>
                         <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
             </div>
@@ -383,7 +384,12 @@ const PositionForm: React.FC = () => {
       {/* Diálogos */}
       <DepartmentCreationDialog
         open={newDepartmentDialogOpen}
-        onOpenChange={setNewDepartmentDialogOpen}
+        onOpenChange={(open) => {
+          setNewDepartmentDialogOpen(open);
+          if (!open) {
+            setDepartmentToEdit(null); // Limpa ao fechar o dialog
+          }
+        }}
         onSuccess={departmentToEdit ? handleDepartmentUpdated : handleDepartmentCreated}
         department={departmentToEdit}
       />
@@ -398,6 +404,7 @@ const PositionForm: React.FC = () => {
         onCreateNew={onCreateNewDepartment}
         onEdit={handleEditDepartment}
         displayColumns={[
+          { key: 'id', header: 'Código' },
           { key: 'nome', header: 'Nome' },
           { key: 'descricao', header: 'Descrição' },
           {
