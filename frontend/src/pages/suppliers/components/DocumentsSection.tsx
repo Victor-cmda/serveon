@@ -68,8 +68,8 @@ const DocumentsSection = ({
                 <FormItem>
                   <FormLabel className="text-base font-medium">
                     {watchIsEstrangeiro 
-                      ? 'Documento de Identificação'
-                      : watchTipo === 'J' ? 'CNPJ' : 'CPF'
+                      ? 'Documento de Identificação *'
+                      : watchTipo === 'J' ? 'CNPJ *' : 'CPF *'
                     }
                   </FormLabel>
                   <FormControl>

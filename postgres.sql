@@ -138,6 +138,7 @@ CREATE TABLE cliente (
     nacionalidade_id INTEGER REFERENCES pais(id),
     limite_credito DECIMAL(10,2) DEFAULT 0.00,
     observacao VARCHAR(255),
+    observacoes TEXT,
     is_destinatario BOOLEAN NOT NULL DEFAULT TRUE,
     condicao_pagamento_id INTEGER REFERENCES condicao_pagamento(id),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,

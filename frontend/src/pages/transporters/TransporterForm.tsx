@@ -17,9 +17,10 @@ import CityCreationDialog from '@/components/dialogs/CityCreationDialog';
 
 // Importa os componentes modulares
 import GeneralDataSection from './components/GeneralDataSection';
+import DocumentsSection from './components/DocumentsSection';
 import AddressSection from './components/AddressSection';
 import ContactSection from './components/ContactSection';
-import DocumentsSection from './components/DocumentsSection';
+import ObservationsSection from './components/ObservationsSection';
 
 // Importa os utilitários de validação
 import { formatters, validateCNPJ } from './utils/validationUtils';
@@ -453,12 +454,6 @@ const TransporterForm = () => {
                 formatters={formatters}
               />
 
-              <DocumentsSection
-                form={form}
-                isLoading={isLoading}
-                formatters={formatters}
-              />
-
               <AddressSection
                 form={form}
                 isLoading={isLoading}
@@ -469,6 +464,18 @@ const TransporterForm = () => {
               />
 
               <ContactSection
+                form={form}
+                isLoading={isLoading}
+                formatters={formatters}
+              />
+
+              <DocumentsSection
+                form={form}
+                isLoading={isLoading}
+                formatters={formatters}
+              />
+
+              <ObservationsSection
                 form={form}
                 isLoading={isLoading}
                 formatters={formatters}
@@ -526,6 +533,7 @@ const TransporterForm = () => {
         onCreateNew={onCreateNewCity}
         onEdit={handleEditCity}
         displayColumns={[
+          { key: 'id', header: 'Código' },
           { key: 'nome', header: 'Nome' },
           { key: 'estadoNome', header: 'Estado' },
           { key: 'uf', header: 'UF' },

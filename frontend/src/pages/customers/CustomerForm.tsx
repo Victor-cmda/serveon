@@ -23,7 +23,7 @@ import AddressSection from './components/AddressSection';
 import ContactSection from './components/ContactSection';
 import DocumentsSection from './components/DocumentsSection';
 import PaymentSection from './components/PaymentSection';
-import FormValidationStatus from './components/FormValidationStatus';
+import ObservationsSection from './components/ObservationsSection';
 
 // Formatadores de texto aprimorados
 const formatters = {
@@ -80,7 +80,7 @@ const formatters = {
     // Permite números, letras e alguns caracteres especiais comuns em números de endereço
     return value.replace(/[^0-9a-zA-Z\s\-\/]/g, '').slice(0, 10);
   },
-  inscricaoEstadual: (value: string | undefined): string => {
+  inscricaoEstadual: (value: string | null | undefined): string => {
     if (!value) return '';
     // Remove caracteres especiais exceto letras, números, pontos e hífens
     return value.replace(/[^\w\.\-]/g, '').slice(0, 20);
@@ -101,12 +101,12 @@ const formatters = {
     if (!value) return '';
     return value.slice(0, maxLength);
   },
-  email: (value: string | undefined): string => {
+  email: (value: string | null | undefined): string => {
     if (!value) return '';
     // Remove espaços e limita o tamanho
     return value.replace(/\s/g, '').slice(0, 100);
   },
-  clearFormat: (value: string | undefined): string => {
+  clearFormat: (value: string | null | undefined): string => {
     if (!value) return '';
     return value.replace(/\D/g, '');
   },
@@ -160,13 +160,6 @@ const validateCNPJ = (cnpj: string): boolean => {
 
 const formSchema = z.object({
   id: z.number().optional(),
-  cliente: z.string()
-    .min(2, 'Nome do cliente deve ter pelo menos 2 caracteres')
-    .max(50, 'Nome do cliente deve ter no máximo 50 caracteres')
-    .refine((value) => value.trim().length > 0, 'Nome do cliente é obrigatório'),
-  apelido: z.string()
-    .max(60, 'Apelido deve ter no máximo 60 caracteres')
-    .optional(),
   tipo: z.enum(['F', 'J']),
   isEstrangeiro: z.boolean().default(false),
   cnpjCpf: z.string()
@@ -181,23 +174,30 @@ const formSchema = z.object({
     .refine((value) => value.trim().length > 0, 'Nome/Razão Social é obrigatório'),
   nomeFantasia: z.string()
     .max(100, 'Nome Fantasia/Apelido deve ter no máximo 100 caracteres')
+    .nullable()
     .optional(),
   inscricaoEstadual: z.string()
     .max(20, 'Inscrição Estadual/RG deve ter no máximo 20 caracteres')
+    .nullable()
     .optional(),
   endereco: z.string()
     .max(100, 'Endereço deve ter no máximo 100 caracteres')
+    .nullable()
     .optional(),
   numero: z.string()
     .max(10, 'Número deve ter no máximo 10 caracteres')
+    .nullable()
     .optional(),
   complemento: z.string()
     .max(50, 'Complemento deve ter no máximo 50 caracteres')
+    .nullable()
     .optional(),
   bairro: z.string()
     .max(50, 'Bairro deve ter no máximo 50 caracteres')
+    .nullable()
     .optional(),
   cep: z.string()
+    .nullable()
     .optional()
     .refine((value) => {
       if (!value) return true;
@@ -205,6 +205,7 @@ const formSchema = z.object({
       return digits.length === 0 || digits.length === 8;
     }, 'CEP deve ter 8 dígitos'),
   telefone: z.string()
+    .nullable()
     .optional()
     .refine((value) => {
       if (!value) return true;
@@ -212,6 +213,7 @@ const formSchema = z.object({
       return digits.length === 0 || digits.length >= 10;
     }, 'Telefone deve ter pelo menos 10 dígitos'),
   email: z.string()
+    .nullable()
     .optional()
     .refine((value) => {
       if (!value) return true;
@@ -220,6 +222,10 @@ const formSchema = z.object({
   cidadeId: z.number().optional(),
   ativo: z.boolean().default(true),
   condicaoPagamentoId: z.number().optional(),
+  observacoes: z.string()
+    .max(500, 'Observações devem ter no máximo 500 caracteres')
+    .nullable()
+    .optional(),
 }).refine((data) => {
   // Validação específica para CPF/CNPJ baseada no tipo
   if (data.isEstrangeiro) return true;
@@ -263,8 +269,6 @@ const CustomerForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       id: id ? Number(id) : undefined,
-      cliente: '',
-      apelido: '',
       cnpjCpf: '',
       tipo: 'J' as const,
       isEstrangeiro: false,
@@ -281,6 +285,7 @@ const CustomerForm = () => {
       cidadeId: undefined,
       ativo: true,
       condicaoPagamentoId: undefined,
+      observacoes: '',
     },
   });
 
@@ -322,8 +327,6 @@ const CustomerForm = () => {
         setCustomerData(customer);
         form.reset({
           id: customer.id || 0,
-          cliente: customer.cliente || '',
-          apelido: customer.apelido || '',
           cnpjCpf: customer.cnpjCpf || '',
           tipo: customer.tipo || 'J',
           isEstrangeiro: Boolean(customer.isEstrangeiro),
@@ -510,16 +513,18 @@ const CustomerForm = () => {
         email: data.email?.trim() || undefined,
         nomeFantasia: data.nomeFantasia?.trim() || undefined,
         inscricaoEstadual:
-          formatters.inscricaoEstadual(data.inscricaoEstadual) || undefined,
+          formatters.clearFormat(data.inscricaoEstadual) || undefined,
         endereco: data.endereco?.trim() || undefined,
         numero: data.numero?.trim() || undefined,
         complemento: data.complemento?.trim() || undefined,
         bairro: data.bairro?.trim() || undefined,
         cep: formatters.clearFormat(data.cep) || undefined,
         telefone: formatters.clearFormat(data.telefone) || undefined,
+        observacoes: data.observacoes?.trim() || undefined,
         cidadeId: data.cidadeId,
         condicaoPagamentoId: data.condicaoPagamentoId || undefined,
       };
+      
       if (id) {
         await customerApi.update(Number(id), formattedData);
         toast.success('Cliente atualizado com sucesso!');
@@ -544,6 +549,7 @@ const CustomerForm = () => {
           cidadeId: undefined,
           ativo: true,
           condicaoPagamentoId: undefined,
+          observacoes: '',
         });
         setSelectedCity(null);
         setSelectedStateId(undefined);
@@ -733,17 +739,8 @@ const CustomerForm = () => {
                 isLoading={isLoading}
                 formatters={formatters}
                 selectedCity={selectedCity}
-                watchIsEstrangeiro={watchIsEstrangeiro}
                 setCitySearchOpen={setCitySearchOpen}
                 setSelectedCity={setSelectedCity}
-              />
-
-              <DocumentsSection
-                form={form}
-                isLoading={isLoading}
-                formatters={formatters}
-                watchTipo={watchTipo}
-                watchIsEstrangeiro={watchIsEstrangeiro}
               />
 
               <ContactSection
@@ -757,6 +754,19 @@ const CustomerForm = () => {
                 isLoading={isLoading}
                 selectedPaymentTerm={selectedPaymentTerm}
                 setPaymentTermSearchOpen={setPaymentTermSearchOpen}
+              />
+
+              <DocumentsSection
+                form={form}
+                isLoading={isLoading}
+                formatters={formatters}
+                watchTipo={watchTipo}
+                watchIsEstrangeiro={watchIsEstrangeiro}
+              />
+
+              <ObservationsSection
+                form={form}
+                isLoading={isLoading}
               />
             </div>
           </div>

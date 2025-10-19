@@ -326,6 +326,11 @@ export class CustomersService {
         const values: any[] = [];
         let paramCounter = 1;
 
+        if (updateCustomerDto.cnpjCpf !== undefined) {
+          updates.push(`cnpj_cpf = $${paramCounter++}`);
+          values.push(updateCustomerDto.cnpjCpf);
+        }
+
         if (updateCustomerDto.tipo !== undefined) {
           updates.push(`tipo = $${paramCounter++}`);
           values.push(updateCustomerDto.tipo);
@@ -449,6 +454,11 @@ export class CustomersService {
               paramCounter = 1;
 
               // Adicionar os mesmos campos ao update do destinatário
+              if (updateCustomerDto.cnpjCpf !== undefined) {
+                destUpdates.push(`cnpj_cpf = $${paramCounter++}`);
+                destValues.push(updateCustomerDto.cnpjCpf);
+              }
+
               if (updateCustomerDto.tipo !== undefined) {
                 destUpdates.push(`tipo = $${paramCounter++}`);
                 destValues.push(updateCustomerDto.tipo);

@@ -26,6 +26,7 @@ import EmployeeDocumentsSection from './components/EmployeeDocumentsSection';
 import EmployeeContactSection from './components/EmployeeContactSection';
 import EmployeeAddressSection from './components/EmployeeAddressSection';
 import EmployeeProfessionalSection from './components/EmployeeProfessionalSection';
+import EmployeeObservationsSection from './components/EmployeeObservationsSection';
 
 const employeeSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório').max(100, 'Nome deve ter no máximo 100 caracteres'),
@@ -515,6 +516,12 @@ const EmployeeForm: React.FC = () => {
                 setSelectedCity={setSelectedCity}
               />
 
+              {/* Seção Contato */}
+              <EmployeeContactSection
+                form={form}
+                isLoading={loading}
+              />
+
               {/* Seção Documentos */}
               <EmployeeDocumentsSection
                 form={form}
@@ -522,12 +529,11 @@ const EmployeeForm: React.FC = () => {
                 id={id}
               />
 
-              {/* Seção Contato */}
-              <EmployeeContactSection
+              {/* Seção Observações - Último campo */}
+              <EmployeeObservationsSection
                 form={form}
                 isLoading={loading}
               />
-
               
             </div>
           </div>

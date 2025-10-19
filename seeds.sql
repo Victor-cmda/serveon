@@ -237,8 +237,8 @@ INSERT INTO emitente (
     cnpj, razao_social, nome_fantasia, inscricao_estadual,
     endereco, numero, bairro, cidade_id, cep, telefone, email, regime_tributario
 ) VALUES (
-    '12.345.678/0001-90', 'EMPRESA MODELO LTDA', 'EMPRESA MODELO', '123456789',
-    'RUA EXEMPLO', '100', 'CENTRO', (SELECT id FROM cidade WHERE nome = 'SÃO PAULO'), '01000-000', '(11) 3333-3333', 'contato@exemplo.com', 'SIMPLES NACIONAL'
+    '12345678000190', 'EMPRESA MODELO LTDA', 'EMPRESA MODELO', '123456789',
+    'RUA EXEMPLO', '100', 'CENTRO', (SELECT id FROM cidade WHERE nome = 'SÃO PAULO'), '01000000', '11333333333', 'contato@exemplo.com', 'SIMPLES NACIONAL'
 );
 
 -- =====================================================
@@ -250,8 +250,8 @@ INSERT INTO cliente (
     endereco, numero, bairro, cidade_id, cep, telefone, email, sexo,
     nacionalidade_id, limite_credito, is_destinatario, condicao_pagamento_id
 ) VALUES (
-    '45.987.654/0001-00', 'J', false, 'CLIENTE MODELO LTDA', 'CLIENTE MODELO',
-    'AV. CENTRAL', '200', 'CENTRO', (SELECT id FROM cidade WHERE nome = 'SÃO PAULO'), '01010-000', '(11) 2222-2222', 'cliente@exemplo.com', 'M',
+    '45987654000100', 'J', false, 'CLIENTE MODELO LTDA', 'CLIENTE MODELO',
+    'AV. CENTRAL', '200', 'CENTRO', (SELECT id FROM cidade WHERE nome = 'SÃO PAULO'), '01010000', '11222222222', 'cliente@exemplo.com', 'M',
     (SELECT id FROM pais WHERE sigla = 'BR'), 50000.00, true, (SELECT id FROM condicao_pagamento WHERE nome = 'À VISTA')
 );
 
@@ -259,14 +259,14 @@ INSERT INTO destinatario (
     cliente_id, cnpj_cpf, tipo, is_estrangeiro, razao_social, nome_fantasia,
     endereco, numero, bairro, cidade_id, cep, telefone, email
 ) VALUES (
-    (SELECT id FROM cliente WHERE cnpj_cpf = '45.987.654/0001-00'), '45.987.654/0001-00', 'J', false, 'CLIENTE MODELO LTDA', 'CLIENTE MODELO',
-    'AV. CENTRAL', '200', 'CENTRO', (SELECT id FROM cidade WHERE nome = 'SÃO PAULO'), '01010-000', '(11) 2222-2222', 'cliente@exemplo.com'
+    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), '45987654000100', 'J', false, 'CLIENTE MODELO LTDA', 'CLIENTE MODELO',
+    'AV. CENTRAL', '200', 'CENTRO', (SELECT id FROM cidade WHERE nome = 'SÃO PAULO'), '01010000', '11222222222', 'cliente@exemplo.com'
 );
 
 INSERT INTO cliente_destinatario (cliente_id, destinatario_id)
 VALUES (
-    (SELECT id FROM cliente WHERE cnpj_cpf = '45.987.654/0001-00'),
-    (SELECT id FROM destinatario WHERE cnpj_cpf = '45.987.654/0001-00')
+    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    (SELECT id FROM destinatario WHERE cnpj_cpf = '45987654000100')
 );
 
 -- =====================================================
@@ -277,7 +277,7 @@ INSERT INTO transportadora (
     razao_social, nome_fantasia, cnpj, email, telefone, endereco, numero, bairro, cidade_id, cep,
     tipo, rg_ie, condicao_pagamento_id, observacao, ativo
 ) VALUES (
-    'TRANSPORTES MODELO LTDA', 'TRANS-MODELO', '98.765.432/0001-55', 'contato@transmodelo.com', '(11) 4444-4444', 'RUA LOGÍSTICA', '50', 'INDUSTRIAL', (SELECT id FROM cidade WHERE nome = 'SÃO PAULO'), '01100-000',
+    'TRANSPORTES MODELO LTDA', 'TRANS-MODELO', '98765432000155', 'contato@transmodelo.com', '11444444444', 'RUA LOGÍSTICA', '50', 'INDUSTRIAL', (SELECT id FROM cidade WHERE nome = 'SÃO PAULO'), '01100000',
     'J', '123456789', (SELECT id FROM condicao_pagamento WHERE nome = '30 DIAS'), 'TRANSPORTADORA PADRÃO', true
 );
 
@@ -285,7 +285,7 @@ INSERT INTO transportador (
     cnpj_cpf, tipo, razao_social, nome_fantasia, inscricao_estadual, endereco, numero, bairro, cidade_id, cep, codigo_antt,
     placa_veiculo, uf_veiculo
 ) VALUES (
-    '23.456.789/0001-10', 'J', 'TRANSPORTADOR AUXILIAR LTDA', 'TRANS-AUX', '1122334455', 'AV. DAS CARGAS', '300', 'PORTO', (SELECT id FROM cidade WHERE nome = 'SÃO PAULO'), '01111-000', 'ANTT12345',
+    '23456789000110', 'J', 'TRANSPORTADOR AUXILIAR LTDA', 'TRANS-AUX', '1122334455', 'AV. DAS CARGAS', '300', 'PORTO', (SELECT id FROM cidade WHERE nome = 'SÃO PAULO'), '01111000', 'ANTT12345',
     'ABC1D23', 'SP'
 );
 
@@ -293,19 +293,19 @@ INSERT INTO veiculo (placa, modelo, marca, ano, capacidade)
 VALUES ('ABC1D23', 'VUC', 'VW', 2022, 3.50);
 
 INSERT INTO transportadora_emails (cod_trans, email)
-VALUES ((SELECT id FROM transportadora WHERE cnpj = '98.765.432/0001-55'), 'logistica@transmodelo.com');
+VALUES ((SELECT id FROM transportadora WHERE cnpj = '98765432000155'), 'logistica@transmodelo.com');
 
 INSERT INTO transportadora_telefones (cod_trans, telefone)
-VALUES ((SELECT id FROM transportadora WHERE cnpj = '98.765.432/0001-55'), '(11) 5555-5555');
+VALUES ((SELECT id FROM transportadora WHERE cnpj = '98765432000155'), '11555555555');
 
 INSERT INTO transportadora_veiculo (transportadora_id, veiculo_id)
 VALUES (
-    (SELECT id FROM transportadora WHERE cnpj = '98.765.432/0001-55'),
+    (SELECT id FROM transportadora WHERE cnpj = '98765432000155'),
     (SELECT id FROM veiculo WHERE placa = 'ABC1D23')
 );
 
 INSERT INTO transp_item (codigo, descricao, transportadora_id, codigo_transp)
-VALUES ('TITEM001', 'SERVIÇO DE TRANSPORTE PADRÃO', (SELECT id FROM transportadora WHERE cnpj = '98.765.432/0001-55'), 'STD');
+VALUES ('TITEM001', 'SERVIÇO DE TRANSPORTE PADRÃO', (SELECT id FROM transportadora WHERE cnpj = '98765432000155'), 'STD');
 
 -- =====================================================
 -- FORNECEDORES E CONTATOS
@@ -317,17 +317,17 @@ INSERT INTO fornecedor (
     nacionalidade_id, responsavel, celular_responsavel, limite_credito,
     condicao_pagamento_id, transportadora_id
 ) VALUES (
-    '66.777.888/0001-55', 'J', false, 'FORNECEDOR MODELO LTDA', 'FORN-MODELO',
-    'RUA DOS FORNECEDORES', '10', 'COMERCIAL', (SELECT id FROM cidade WHERE nome = 'SÃO PAULO'), '01234-000', '(11) 7777-7777', 'contato@fornmodelo.com', 'www.fornmodelo.com',
-    (SELECT id FROM pais WHERE sigla = 'BR'), 'JOÃO COMPRAS', '(11) 90000-0000', 100000.00,
-    (SELECT id FROM condicao_pagamento WHERE nome = '30 DIAS'), (SELECT id FROM transportadora WHERE cnpj = '98.765.432/0001-55')
+    '66777888000155', 'J', false, 'FORNECEDOR MODELO LTDA', 'FORN-MODELO',
+    'RUA DOS FORNECEDORES', '10', 'COMERCIAL', (SELECT id FROM cidade WHERE nome = 'SÃO PAULO'), '01234000', '11777777777', 'contato@fornmodelo.com', 'www.fornmodelo.com',
+    (SELECT id FROM pais WHERE sigla = 'BR'), 'JOÃO COMPRAS', '11900000000', 100000.00,
+    (SELECT id FROM condicao_pagamento WHERE nome = '30 DIAS'), (SELECT id FROM transportadora WHERE cnpj = '98765432000155')
 );
 
 INSERT INTO fornecedor_email (fornecedor_id, email, tipo, principal)
-VALUES ((SELECT id FROM fornecedor WHERE cnpj_cpf = '66.777.888/0001-55'), 'financeiro@fornmodelo.com', 'FINANCEIRO', true);
+VALUES ((SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'financeiro@fornmodelo.com', 'FINANCEIRO', true);
 
 INSERT INTO fornecedor_telefone (fornecedor_id, telefone, tipo, principal)
-VALUES ((SELECT id FROM fornecedor WHERE cnpj_cpf = '66.777.888/0001-55'), '(11) 8888-8888', 'COMERCIAL', true);
+VALUES ((SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), '11888888888', 'COMERCIAL', true);
 
 -- =====================================================
 -- PRODUTOS E RELACIONAMENTOS

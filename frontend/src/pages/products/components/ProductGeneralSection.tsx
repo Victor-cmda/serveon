@@ -108,12 +108,24 @@ const ProductGeneralSection = ({
         )}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <FormItem className="md:col-span-1">
+          <FormLabel>Cód. Categoria</FormLabel>
+          <FormControl>
+            <Input
+              value={selectedCategory?.id || ''}
+              disabled
+              className="bg-muted h-10 text-base"
+              placeholder="-"
+            />
+          </FormControl>
+        </FormItem>
+
         <FormField
           control={form.control}
           name="categoriaId"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="md:col-span-5">
               <FormLabel>Categoria *</FormLabel>
               <div className="flex gap-2">
                 <FormControl>
@@ -155,11 +167,23 @@ const ProductGeneralSection = ({
           )}
         />
 
+        <FormItem className="md:col-span-1">
+          <FormLabel>Cód. Marca</FormLabel>
+          <FormControl>
+            <Input
+              value={selectedBrand?.id || ''}
+              disabled
+              className="bg-muted h-10 text-base"
+              placeholder="-"
+            />
+          </FormControl>
+        </FormItem>
+
         <FormField
           control={form.control}
           name="marcaId"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="md:col-span-5">
               <FormLabel>Marca</FormLabel>
               <div className="flex gap-2">
                 <FormControl>
@@ -202,51 +226,65 @@ const ProductGeneralSection = ({
         />
       </div>
 
-      <FormField
-        control={form.control}
-        name="unidadeMedidaId"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Unidade de Medida *</FormLabel>
-            <div className="flex gap-2">
-              <FormControl>
-                <div className="flex w-full items-center gap-2">
-                  <div className="relative flex-grow">
-                    <Input
-                      value={selectedUnitMeasure ? `${selectedUnitMeasure.nome} (${selectedUnitMeasure.sigla})` : ''}
-                      readOnly
-                      placeholder="Selecione uma unidade de medida"
-                      className="cursor-pointer h-10 text-base pl-9"
+      <div className="grid grid-cols-1 md:grid-cols-8 gap-4">
+        <FormItem className="md:col-span-1">
+          <FormLabel>Cód. Un. Med.</FormLabel>
+          <FormControl>
+            <Input
+              value={selectedUnitMeasure?.id || ''}
+              disabled
+              className="bg-muted h-10 text-base"
+              placeholder="-"
+            />
+          </FormControl>
+        </FormItem>
+
+        <FormField
+          control={form.control}
+          name="unidadeMedidaId"
+          render={({ field }) => (
+            <FormItem className="md:col-span-7">
+              <FormLabel>Unidade de Medida *</FormLabel>
+              <div className="flex gap-2">
+                <FormControl>
+                  <div className="flex w-full items-center gap-2">
+                    <div className="relative flex-grow">
+                      <Input
+                        value={selectedUnitMeasure ? `${selectedUnitMeasure.nome} (${selectedUnitMeasure.sigla})` : ''}
+                        readOnly
+                        placeholder="Selecione uma unidade de medida"
+                        className="cursor-pointer h-10 text-base pl-9"
+                        onClick={() => setUnitMeasureSearchOpen(true)}
+                      />
+                      <input
+                        type="hidden"
+                        name={field.name}
+                        value={field.value || ''}
+                        onChange={(e) => {
+                          field.onChange(e);
+                        }}
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                      />
+                      <Ruler className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
                       onClick={() => setUnitMeasureSearchOpen(true)}
-                    />
-                    <input
-                      type="hidden"
-                      name={field.name}
-                      value={field.value || ''}
-                      onChange={(e) => {
-                        field.onChange(e);
-                      }}
-                      ref={field.ref}
-                      onBlur={field.onBlur}
-                    />
-                    <Ruler className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      className="h-10 w-10"
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setUnitMeasureSearchOpen(true)}
-                    className="h-10 w-10"
-                  >
-                    <Search className="h-4 w-4" />
-                  </Button>
-                </div>
-              </FormControl>
-            </div>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+                </FormControl>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
       <FormField
         control={form.control}

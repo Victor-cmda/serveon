@@ -44,11 +44,10 @@ export interface CreateCustomerDto {
 }
 
 export interface UpdateCustomerDto {
-  cliente?: string;
-  apelido?: string;
   tipo?: 'F' | 'J';
   razaoSocial?: string;
-  nomeFantasia?: string;  inscricaoEstadual?: string;
+  nomeFantasia?: string;
+  inscricaoEstadual?: string;
   endereco?: string;
   numero?: string;
   complemento?: string;

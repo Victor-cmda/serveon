@@ -26,6 +26,7 @@ import DocumentsSection from './components/DocumentsSection';
 import PaymentSection from './components/PaymentSection';
 import SupplierSpecificSection from './components/SupplierSpecificSection';
 import FinancialDataSection from './components/FinancialDataSection';
+import ObservationsSection from './components/ObservationsSection';
 
 // Funções de validação personalizadas
 const validateCPF = (cpf: string): boolean => {
@@ -128,7 +129,7 @@ const formatters = {
     // Permite números, letras e alguns caracteres especiais comuns em números de endereço
     return value.replace(/[^0-9a-zA-Z\s\-\/]/g, '').slice(0, 10);
   },
-  inscricaoEstadual: (value: string | undefined): string => {
+  inscricaoEstadual: (value: string | null | undefined): string => {
     if (!value) return '';
     // Remove caracteres especiais exceto letras, números, pontos e hífens
     return value.replace(/[^\w\.\-]/g, '').slice(0, 20);
@@ -145,21 +146,21 @@ const formatters = {
       return p1;
     });
   },
-  text: (value: string | undefined, maxLength: number = 100): string => {
+  text: (value: string | null | undefined, maxLength: number = 100): string => {
     if (!value) return '';
     return value.slice(0, maxLength);
   },
-  email: (value: string | undefined): string => {
+  email: (value: string | null | undefined): string => {
     if (!value) return '';
     // Remove espaços e limita o tamanho
     return value.replace(/\s/g, '').slice(0, 100);
   },
-  website: (value: string | undefined): string => {
+  website: (value: string | null | undefined): string => {
     if (!value) return '';
     // Remove espaços e limita o tamanho
     return value.replace(/\s/g, '').slice(0, 200);
   },
-  clearFormat: (value: string | undefined): string => {
+  clearFormat: (value: string | null | undefined): string => {
     if (!value) return '';
     return value.replace(/\D/g, '');
   },
@@ -173,14 +174,6 @@ const formatters = {
 };
 
 const formSchema = z.object({
-  fornecedor: z.string()
-    .min(2, 'Nome do fornecedor deve ter pelo menos 2 caracteres')
-    .max(255, 'Nome do fornecedor deve ter no máximo 255 caracteres')
-    .refine((value) => value.trim().length > 0, 'Nome do fornecedor é obrigatório'),
-  apelido: z.string()
-    .min(1, 'Apelido é obrigatório')
-    .max(255, 'Apelido deve ter no máximo 255 caracteres')
-    .refine((value) => value.trim().length > 0, 'Apelido é obrigatório'),
   tipo: z.enum(['F', 'J']),
   isEstrangeiro: z.boolean().default(false),
   cnpjCpf: z.string()
@@ -195,24 +188,31 @@ const formSchema = z.object({
     .refine((value) => value.trim().length > 0, 'Razão Social/Nome é obrigatório'),
   nomeFantasia: z.string()
     .max(100, 'Nome Fantasia/Apelido deve ter no máximo 100 caracteres')
+    .nullable()
     .optional(),
   inscricaoEstadual: z.string()
     .max(20, 'Inscrição Estadual/RG deve ter no máximo 20 caracteres')
+    .nullable()
     .optional(),
   endereco: z.string()
     .max(100, 'Endereço deve ter no máximo 100 caracteres')
+    .nullable()
     .optional(),
   numero: z.string()
     .max(10, 'Número deve ter no máximo 10 caracteres')
+    .nullable()
     .optional(),
   complemento: z.string()
     .max(50, 'Complemento deve ter no máximo 50 caracteres')
+    .nullable()
     .optional(),
   bairro: z.string()
     .max(50, 'Bairro deve ter no máximo 50 caracteres')
+    .nullable()
     .optional(),
   cidadeId: z.number().optional(),
   cep: z.string()
+    .nullable()
     .optional()
     .refine((value) => {
       if (!value) return true;
@@ -220,6 +220,7 @@ const formSchema = z.object({
       return digits.length === 0 || digits.length === 8;
     }, 'CEP deve ter 8 dígitos'),
   telefone: z.string()
+    .nullable()
     .optional()
     .refine((value) => {
       if (!value) return true;
@@ -227,6 +228,7 @@ const formSchema = z.object({
       return digits.length === 0 || digits.length >= 10;
     }, 'Telefone deve ter pelo menos 10 dígitos'),
   email: z.string()
+    .nullable()
     .optional()
     .refine((value) => {
       if (!value) return true;
@@ -337,8 +339,6 @@ export default function SupplierForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fornecedor: '',
-      apelido: '',
       cnpjCpf: '',
       tipo: 'J' as const,
       isEstrangeiro: false,
@@ -435,6 +435,13 @@ export default function SupplierForm() {
         nacionalidadeId: values.nacionalidadeId || undefined,
         limiteCredito: values.limiteCredito || undefined,
         condicaoPagamentoId: values.condicaoPagamentoId || undefined,
+        inscricaoEstadual: values.inscricaoEstadual || undefined,
+        nomeFantasia: values.nomeFantasia || undefined,
+        endereco: values.endereco || undefined,
+        numero: values.numero || undefined,
+        complemento: values.complemento || undefined,
+        bairro: values.bairro || undefined,
+        email: values.email || undefined,
       };
       Object.keys(formattedData).forEach((key) => {
         const typedKey = key as keyof typeof formattedData;
@@ -634,7 +641,6 @@ export default function SupplierForm() {
                 form={form}
                 isLoading={isLoading}
                 watchTipo={watchTipo}
-                id={id}
                 formatters={formatters}
               />
 
@@ -645,14 +651,6 @@ export default function SupplierForm() {
                 selectedCity={selectedCity}
                 setCitySearchOpen={setCitySearchOpen}
                 setSelectedCity={setSelectedCity}
-              />
-
-              <DocumentsSection
-                form={form}
-                isLoading={isLoading}
-                formatters={formatters}
-                watchTipo={watchTipo}
-                watchIsEstrangeiro={watchIsEstrangeiro}
               />
               
               <ContactSection
@@ -679,6 +677,20 @@ export default function SupplierForm() {
                 isLoading={isLoading}
                 selectedPaymentTerm={selectedPaymentTerm}
                 setPaymentTermSearchOpen={setPaymentTermSearchOpen}
+              />
+
+              <DocumentsSection
+                form={form}
+                isLoading={isLoading}
+                formatters={formatters}
+                watchTipo={watchTipo}
+                watchIsEstrangeiro={watchIsEstrangeiro}
+              />
+
+              <ObservationsSection
+                form={form}
+                isLoading={isLoading}
+                formatters={formatters}
               />
             </div>
           </div>

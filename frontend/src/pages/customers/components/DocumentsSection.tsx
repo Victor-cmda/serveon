@@ -45,7 +45,7 @@ const DocumentsSection = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-base font-medium">
-                  {watchTipo === 'J' ? 'CNPJ' : 'CPF'}
+                  {watchTipo === 'J' ? 'CNPJ *' : 'CPF *'}
                   {watchIsEstrangeiro && ' / Documento'}
                 </FormLabel>
                 <FormControl>

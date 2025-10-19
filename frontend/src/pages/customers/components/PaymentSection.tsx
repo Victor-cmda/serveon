@@ -26,12 +26,24 @@ const PaymentSection = ({
 }: PaymentSectionProps) => {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-8 gap-4">
+        <FormItem className="md:col-span-1">
+          <FormLabel className="text-base font-medium">Cód. Cond. Pgto</FormLabel>
+          <FormControl>
+            <Input
+              value={selectedPaymentTerm?.id || ''}
+              disabled
+              className="bg-muted h-10 text-base"
+              placeholder="-"
+            />
+          </FormControl>
+        </FormItem>
+
         <FormField
           control={form.control}
           name="condicaoPagamentoId"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="md:col-span-7">
               <FormLabel className="text-base font-medium">
                 Condição de Pagamento
               </FormLabel>

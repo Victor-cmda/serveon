@@ -1,4 +1,4 @@
-import { Globe, User2, Phone, Clipboard } from 'lucide-react';
+import { Globe, User2, Phone } from 'lucide-react';
 import {
   FormControl,
   FormField,
@@ -7,7 +7,6 @@ import {
   FormMessage,
 } from '../../../components/ui/form';
 import { Input } from '../../../components/ui/input';
-import { Textarea } from '../../../components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
 import { getFieldValidationClass } from '../utils/validationUtils';
 import { cn } from '../../../lib/utils';
@@ -126,34 +125,6 @@ const SupplierSpecificSection = ({
             }}
           />
         </div>
-      </div>
-      
-      <div className="grid grid-cols-1 gap-4">
-        <FormField
-          control={form.control}
-          name="observacoes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-base font-medium">
-                Observações
-              </FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Textarea
-                    {...field}
-                    value={formatters.text(field.value || '', 500)}
-                    disabled={isLoading}
-                    placeholder="Observações adicionais sobre o fornecedor..."
-                    className="min-h-24 text-base pl-9"
-                    onChange={(e) => field.onChange(e.target.value || '')}
-                  />
-                  <Clipboard className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                </div>
-              </FormControl>
-              <FormMessage className="text-sm" />
-            </FormItem>
-          )}
-        />
       </div>
     </div>
   );
