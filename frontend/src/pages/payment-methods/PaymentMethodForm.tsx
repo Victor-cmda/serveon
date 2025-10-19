@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import {
   CreatePaymentMethodDto,
   UpdatePaymentMethodDto,
+  PaymentMethod,
 } from '@/types/payment-method';
 import AuditSection from '@/components/AuditSection';
 
@@ -38,16 +39,32 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const PaymentMethodForm = () => {
-  const { id } = useParams();
+interface PaymentMethodFormProps {
+  mode?: 'page' | 'dialog';
+  paymentMethodId?: number;
+  initialData?: Partial<PaymentMethod>;
+  onSuccess?: (paymentMethod: PaymentMethod) => void;
+  onCancel?: () => void;
+}
+
+const PaymentMethodForm = ({
+  mode = 'page',
+  paymentMethodId,
+  initialData,
+  onSuccess,
+  onCancel
+}: PaymentMethodFormProps) => {
+  const { id: paramId } = useParams();
+  const id = mode === 'dialog' ? paymentMethodId : paramId ? Number(paramId) : undefined;
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(id ? true : false);
   const [paymentMethodData, setPaymentMethodData] = useState<any>(null);
+  const location = useLocation();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       name: '',
       type: '',
       ativo: true,
@@ -55,10 +72,10 @@ const PaymentMethodForm = () => {
   });
 
   const fetchPaymentMethod = useCallback(
-    async (paymentMethodId: string) => {
+    async (paymentMethodId: number) => {
       setIsLoadingData(true);
       try {
-        const data = await paymentMethodApi.getById(Number(paymentMethodId));
+        const data = await paymentMethodApi.getById(paymentMethodId);
         setPaymentMethodData(data);
         form.reset({
           name: data.name,
@@ -71,36 +88,48 @@ const PaymentMethodForm = () => {
           description:
             'Não foi possível carregar os dados do método de pagamento.',
         });
-        navigate('/payment-methods');
+        if (mode === 'page') {
+          navigate('/payment-methods');
+        }
       } finally {
         setIsLoadingData(false);
       }
     },
-    [form, navigate],
+    [form, navigate, mode],
   );
 
   useEffect(() => {
     if (id) {
       fetchPaymentMethod(id);
+    } else if (mode === 'dialog') {
+      // Limpa o formulário quando abre o dialog para criação
+      form.reset({
+        name: initialData?.name || '',
+        type: initialData?.type || '',
+        ativo: initialData?.ativo ?? true,
+      });
     }
-  }, [id, fetchPaymentMethod]);
+  }, [id, fetchPaymentMethod, mode, initialData, form]);
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);
     try {
+      let savedPaymentMethod: PaymentMethod;
+      
       const paymentMethodData: CreatePaymentMethodDto | UpdatePaymentMethodDto =
         {
           name: values.name,
           type: values.type,
           ativo: values.ativo,
         };
+      
       if (id) {
-        await paymentMethodApi.update(Number(id), paymentMethodData);
+        savedPaymentMethod = await paymentMethodApi.update(id, paymentMethodData);
         toast.success('Sucesso', {
           description: 'Método de pagamento atualizado com sucesso!',
         });
       } else {
-        await paymentMethodApi.create(
+        savedPaymentMethod = await paymentMethodApi.create(
           paymentMethodData as CreatePaymentMethodDto,
         );
         toast.success('Sucesso', {
@@ -108,7 +137,13 @@ const PaymentMethodForm = () => {
         });
       }
 
-      // Check if we need to return to a parent form in a cascading scenario
+      // Se está em modo dialog, chama o callback de sucesso
+      if (mode === 'dialog' && onSuccess) {
+        onSuccess(savedPaymentMethod);
+        return;
+      }
+
+      // Modo page: navega conforme returnUrl ou vai para lista
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
         navigate(returnUrl);
@@ -139,35 +174,37 @@ const PaymentMethodForm = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link to="/payment-methods">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {id ? 'Editar Método de Pagamento' : 'Novo Método de Pagamento'}
-            </h1>
-            <p className="text-muted-foreground">
-              {id
-                ? 'Edite as informações do método de pagamento abaixo'
-                : 'Preencha as informações para criar um novo método de pagamento'}
-            </p>
+      {mode === 'page' && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link to="/payment-methods">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {id ? 'Editar Método de Pagamento' : 'Novo Método de Pagamento'}
+              </h1>
+              <p className="text-muted-foreground">
+                {id
+                  ? 'Edite as informações do método de pagamento abaixo'
+                  : 'Preencha as informações para criar um novo método de pagamento'}
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* AuditSection no header */}
-        <AuditSection
-          form={form}
-          data={paymentMethodData}
-          variant="header"
-          isEditing={!!id}
-          statusFieldName="ativo" // Campo de status é 'ativo' para PaymentMethod
-        />
-      </div>
+          {/* AuditSection no header */}
+          <AuditSection
+            form={form}
+            data={paymentMethodData}
+            variant="header"
+            isEditing={!!id}
+            statusFieldName="ativo" // Campo de status é 'ativo' para PaymentMethod
+          />
+        </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -235,11 +272,19 @@ const PaymentMethodForm = () => {
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Link to="/payment-methods">
-              <Button type="button" variant="outline">
-                Cancelar
-              </Button>
-            </Link>
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={() => {
+                if (mode === 'dialog' && onCancel) {
+                  onCancel();
+                } else {
+                  navigate('/payment-methods');
+                }
+              }}
+            >
+              Cancelar
+            </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {id ? 'Atualizar' : 'Salvar'}

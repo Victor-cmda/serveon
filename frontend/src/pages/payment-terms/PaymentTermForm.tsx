@@ -179,15 +179,18 @@ const PaymentTermForm = () => {
       form.reset({
         name: data.name,
         description: data.description || '',
-        interestRate: typeof data.interestRate === 'string'
-          ? parseFloat(data.interestRate)
-          : data.interestRate || 0,
-        fineRate: typeof data.fineRate === 'string'
-          ? parseFloat(data.fineRate)
-          : data.fineRate || 0,
-        discountPercentage: typeof data.discountPercentage === 'string'
-          ? parseFloat(data.discountPercentage)
-          : data.discountPercentage || 0,
+        interestRate:
+          typeof data.interestRate === 'string'
+            ? parseFloat(data.interestRate)
+            : data.interestRate || 0,
+        fineRate:
+          typeof data.fineRate === 'string'
+            ? parseFloat(data.fineRate)
+            : data.fineRate || 0,
+        discountPercentage:
+          typeof data.discountPercentage === 'string'
+            ? parseFloat(data.discountPercentage)
+            : data.discountPercentage || 0,
         ativo: data.ativo,
         installments: sortedInstallments.map((inst) => ({
           installmentNumber: inst.installmentNumber,
@@ -229,27 +232,34 @@ const PaymentTermForm = () => {
   // Função para distribuir percentuais automaticamente de forma igual
   const distributeEqualPercentages = () => {
     const installments = form.getValues('installments');
-    const activeInstallments = installments.filter(inst => inst.ativo);
-    
+    const activeInstallments = installments.filter((inst) => inst.ativo);
+
     if (activeInstallments.length === 0) return;
-    
-    const equalPercentage = parseFloat((100 / activeInstallments.length).toFixed(2));
+
+    const equalPercentage = parseFloat(
+      (100 / activeInstallments.length).toFixed(2),
+    );
     let remainingPercentage = 100;
-    
+
     installments.forEach((installment, index) => {
       if (!installment.ativo) {
         form.setValue(`installments.${index}.percentageValue`, 0);
         return;
       }
-      
+
       // Para a última parcela ativa, usar o percentual restante para evitar problemas de arredondamento
-      const isLastActive = index === installments.map((inst, idx) => inst.ativo ? idx : -1).filter(idx => idx !== -1).slice(-1)[0];
+      const isLastActive =
+        index ===
+        installments
+          .map((inst, idx) => (inst.ativo ? idx : -1))
+          .filter((idx) => idx !== -1)
+          .slice(-1)[0];
       const percentage = isLastActive ? remainingPercentage : equalPercentage;
-      
+
       form.setValue(`installments.${index}.percentageValue`, percentage);
       remainingPercentage -= percentage;
     });
-    
+
     // Trigger validation
     form.trigger('installments');
   };
@@ -257,37 +267,37 @@ const PaymentTermForm = () => {
   // Função para distribuir percentuais com base em pesos personalizados
   const distributeWeightedPercentages = () => {
     const installments = form.getValues('installments');
-    const activeInstallments = installments.filter(inst => inst.ativo);
-    
+    const activeInstallments = installments.filter((inst) => inst.ativo);
+
     if (activeInstallments.length === 0) return;
-    
+
     // Peso decrescente: primeira parcela maior, demais menores
     const weights = activeInstallments.map((_, index) => {
       if (index === 0) return 50; // Primeira parcela: 50%
       return 50 / (activeInstallments.length - 1); // Demais parcelas dividem os 50% restantes
     });
-    
+
     const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
     let remainingPercentage = 100;
     let activeIndex = 0;
-    
+
     installments.forEach((installment, index) => {
       if (!installment.ativo) {
         form.setValue(`installments.${index}.percentageValue`, 0);
         return;
       }
-      
+
       // Para a última parcela ativa, usar o percentual restante
       const isLastActive = activeIndex === activeInstallments.length - 1;
-      const percentage = isLastActive 
-        ? remainingPercentage 
+      const percentage = isLastActive
+        ? remainingPercentage
         : parseFloat(((weights[activeIndex] / totalWeight) * 100).toFixed(2));
-      
+
       form.setValue(`installments.${index}.percentageValue`, percentage);
       remainingPercentage -= percentage;
       activeIndex++;
     });
-    
+
     // Trigger validation
     form.trigger('installments');
   };
@@ -305,11 +315,12 @@ const PaymentTermForm = () => {
   const calculateTotalPercentage = () => {
     const installments = form.watch('installments') || [];
     return installments
-      .filter(inst => inst.ativo)
+      .filter((inst) => inst.ativo)
       .reduce((total, inst) => {
-        const value = typeof inst.percentageValue === 'string' 
-          ? parseFloat(inst.percentageValue) || 0 
-          : inst.percentageValue || 0;
+        const value =
+          typeof inst.percentageValue === 'string'
+            ? parseFloat(inst.percentageValue) || 0
+            : inst.percentageValue || 0;
         return total + value;
       }, 0);
   };
@@ -320,13 +331,13 @@ const PaymentTermForm = () => {
   // Função para ajustar automaticamente pequenas diferenças de arredondamento
   const adjustPercentages = () => {
     const installments = form.getValues('installments');
-    const activeInstallments = installments.filter(inst => inst.ativo);
-    
+    const activeInstallments = installments.filter((inst) => inst.ativo);
+
     if (activeInstallments.length === 0) return;
-    
+
     const currentTotal = calculateTotalPercentage();
     const difference = 100 - currentTotal;
-    
+
     // Se a diferença for muito pequena (≤ 0.1%), ajustar a última parcela ativa
     if (Math.abs(difference) <= 0.1 && Math.abs(difference) > 0.01) {
       // Encontrar o índice da última parcela ativa
@@ -334,11 +345,14 @@ const PaymentTermForm = () => {
       installments.forEach((inst, index) => {
         if (inst.ativo) lastActiveIndex = index;
       });
-      
+
       if (lastActiveIndex !== -1) {
         const currentValue = installments[lastActiveIndex].percentageValue;
         const newValue = parseFloat((currentValue + difference).toFixed(2));
-        form.setValue(`installments.${lastActiveIndex}.percentageValue`, newValue);
+        form.setValue(
+          `installments.${lastActiveIndex}.percentageValue`,
+          newValue,
+        );
         form.trigger('installments');
       }
     }
@@ -350,18 +364,18 @@ const PaymentTermForm = () => {
     while (fields.length > 1) {
       remove(fields.length - 1);
     }
-    
+
     // Configurar a parcela única
     form.setValue('installments.0.installmentNumber', 1);
     form.setValue('installments.0.daysToPayment', 0);
     form.setValue('installments.0.percentageValue', 100);
     form.setValue('installments.0.ativo', true);
-    
+
     // Configurar taxas típicas para à vista
     form.setValue('interestRate', 0);
     form.setValue('fineRate', 0);
     form.setValue('discountPercentage', 3); // 3% de desconto para à vista
-    
+
     form.trigger();
   };
 
@@ -371,7 +385,7 @@ const PaymentTermForm = () => {
     while (fields.length > 0) {
       remove(0);
     }
-    
+
     // Adicionar duas parcelas
     append({
       installmentNumber: 1,
@@ -380,7 +394,7 @@ const PaymentTermForm = () => {
       percentageValue: 50,
       ativo: true,
     });
-    
+
     append({
       installmentNumber: 2,
       paymentMethodId: 0,
@@ -388,12 +402,12 @@ const PaymentTermForm = () => {
       percentageValue: 50,
       ativo: true,
     });
-    
+
     // Configurar taxas típicas para 30/60
     form.setValue('interestRate', 2);
     form.setValue('fineRate', 2);
     form.setValue('discountPercentage', 0);
-    
+
     form.trigger();
   };
 
@@ -403,7 +417,7 @@ const PaymentTermForm = () => {
     while (fields.length > 0) {
       remove(0);
     }
-    
+
     // Adicionar três parcelas (entrada + 2x)
     append({
       installmentNumber: 1,
@@ -412,7 +426,7 @@ const PaymentTermForm = () => {
       percentageValue: 40,
       ativo: true,
     });
-    
+
     append({
       installmentNumber: 2,
       paymentMethodId: 0,
@@ -420,7 +434,7 @@ const PaymentTermForm = () => {
       percentageValue: 30,
       ativo: true,
     });
-    
+
     append({
       installmentNumber: 3,
       paymentMethodId: 0,
@@ -428,12 +442,12 @@ const PaymentTermForm = () => {
       percentageValue: 30,
       ativo: true,
     });
-    
+
     // Configurar taxas típicas
     form.setValue('interestRate', 1.5);
     form.setValue('fineRate', 2);
     form.setValue('discountPercentage', 0);
-    
+
     form.trigger();
   };
 
@@ -457,7 +471,7 @@ const PaymentTermForm = () => {
               : inst.percentageValue,
           ativo: inst.ativo,
         })),
-      }; 
+      };
       // Verifica se existe algum método de pagamento não selecionado
       const hasInvalidPaymentMethod = paymentTermData.installments.some(
         (inst) => !inst.paymentMethodId || inst.paymentMethodId <= 0,
@@ -514,7 +528,6 @@ const PaymentTermForm = () => {
         newPaymentMethod.id,
       );
     }
-
   };
 
   const handlePaymentMethodUpdated = (updatedPaymentMethod: PaymentMethod) => {
@@ -596,11 +609,14 @@ const PaymentTermForm = () => {
                     <FormItem>
                       <FormLabel>Código</FormLabel>
                       <FormControl>
-                        <Input value={id || 'Novo'} disabled className="bg-muted" />
+                        <Input
+                          value={id || 'Novo'}
+                          disabled
+                          className="bg-muted"
+                        />
                       </FormControl>
-                      
                     </FormItem>
-                    
+
                     <div className="md:col-span-3">
                       <FormField
                         control={form.control}
@@ -620,25 +636,6 @@ const PaymentTermForm = () => {
                       />
                     </div>
                   </div>
-
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Descrição</FormLabel>
-                        <FormControl>
-                          <textarea
-                            className="w-full min-h-[100px] px-3 py-2 text-sm border border-input rounded-md bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            placeholder="Descrição da condição de pagamento"
-                            {...field}
-                            value={field.value || ''}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
@@ -740,6 +737,24 @@ const PaymentTermForm = () => {
                       )}
                     />
                   </div>
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descrição</FormLabel>
+                        <FormControl>
+                          <textarea
+                            className="w-full min-h-[100px] px-3 py-2 text-sm border border-input rounded-md bg-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            placeholder="Descrição da condição de pagamento"
+                            {...field}
+                            value={field.value || ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
             </div>
@@ -763,7 +778,7 @@ const PaymentTermForm = () => {
               <p className="text-sm text-muted-foreground">
                 Configure as parcelas da condição de pagamento
               </p>
-              
+
               <div className="space-y-3">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground mb-2 block">
@@ -809,7 +824,7 @@ const PaymentTermForm = () => {
                     </Button>
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium text-muted-foreground mb-2 block">
                     Templates Prontos
@@ -845,28 +860,31 @@ const PaymentTermForm = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Indicador do total de percentuais */}
               <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <span className="text-sm font-medium">Total dos Percentuais:</span>
+                <span className="text-sm font-medium">
+                  Total dos Percentuais:
+                </span>
                 <div className="flex items-center gap-2">
-                  <span className={`text-sm font-bold ${
-                    Math.abs(totalPercentage - 100) < 0.01 
-                      ? 'text-green-600' 
-                      : totalPercentage > 100 
-                        ? 'text-red-600' 
-                        : 'text-orange-600'
-                  }`}>
+                  <span
+                    className={`text-sm font-bold ${
+                      Math.abs(totalPercentage - 100) < 0.01
+                        ? 'text-green-600'
+                        : totalPercentage > 100
+                          ? 'text-red-600'
+                          : 'text-orange-600'
+                    }`}
+                  >
                     {totalPercentage.toFixed(2)}%
                   </span>
                   {Math.abs(totalPercentage - 100) < 0.01 ? (
                     <span className="text-green-600 text-xs">✓ Correto</span>
                   ) : (
                     <span className="text-xs text-muted-foreground">
-                      {totalPercentage > 100 
-                        ? `Excesso: +${(totalPercentage - 100).toFixed(2)}%` 
-                        : `Falta: ${(100 - totalPercentage).toFixed(2)}%`
-                      }
+                      {totalPercentage > 100
+                        ? `Excesso: +${(totalPercentage - 100).toFixed(2)}%`
+                        : `Falta: ${(100 - totalPercentage).toFixed(2)}%`}
                     </span>
                   )}
                 </div>
@@ -921,42 +939,62 @@ const PaymentTermForm = () => {
                         )}
                       />
 
-                      <FormField
-                        control={form.control}
-                        name={`installments.${index}.paymentMethodId`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Método de Pagamento</FormLabel>
-                            <div className="flex gap-2">
-                              <div className="w-full flex-1">
-                                <Input
-                                  value={
-                                    paymentMethods.find(
-                                      (m) => m.id === field.value,
-                                    )?.name || ''
-                                  }
-                                  readOnly
-                                  placeholder="Selecione um método de pagamento"
-                                  className="cursor-pointer h-11 text-base"
-                                  onClick={() => openPaymentMethodSearch(index)}
-                                />
-                                <input type="hidden" {...field} />
-                              </div>
-                              <Button
-                                type="button"
-                                size="icon"
-                                variant="outline"
-                                onClick={() => openPaymentMethodSearch(index)}
-                                disabled={isLoading}
-                                className="h-11 w-11"
-                              >
-                                <Search className="h-5 w-5" />
-                              </Button>
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                        <FormItem>
+                          <FormLabel>Código Método</FormLabel>
+                          <FormControl>
+                            <Input
+                              value={
+                                paymentMethods.find(
+                                  (m) => m.id === form.watch(`installments.${index}.paymentMethodId`),
+                                )?.id || ''
+                              }
+                              disabled
+                              className="bg-muted"
+                              placeholder="-"
+                            />
+                          </FormControl>
+                        </FormItem>
+
+                        <div className="md:col-span-5">
+                          <FormField
+                            control={form.control}
+                            name={`installments.${index}.paymentMethodId`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Método de Pagamento</FormLabel>
+                                <div className="flex gap-2">
+                                  <div className="w-full flex-1">
+                                    <Input
+                                      value={
+                                        paymentMethods.find(
+                                          (m) => m.id === field.value,
+                                        )?.name || ''
+                                      }
+                                      readOnly
+                                      placeholder="Selecione um método de pagamento"
+                                      className="cursor-pointer h-11 text-base"
+                                      onClick={() => openPaymentMethodSearch(index)}
+                                    />
+                                    <input type="hidden" {...field} />
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    size="icon"
+                                    variant="outline"
+                                    onClick={() => openPaymentMethodSearch(index)}
+                                    disabled={isLoading}
+                                    className="h-11 w-11"
+                                  >
+                                    <Search className="h-5 w-5" />
+                                  </Button>
+                                </div>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
 
                       <FormField
                         control={form.control}
@@ -1061,7 +1099,12 @@ const PaymentTermForm = () => {
       {/* Diálogos */}
       <PaymentMethodCreationDialog
         open={paymentMethodDialogOpen}
-        onOpenChange={setPaymentMethodDialogOpen}
+        onOpenChange={(open) => {
+          setPaymentMethodDialogOpen(open);
+          if (!open) {
+            setPaymentMethodToEdit(null); // Limpa ao fechar o dialog
+          }
+        }}
         onSuccess={
           paymentMethodToEdit
             ? handlePaymentMethodUpdated
@@ -1090,11 +1133,13 @@ const PaymentTermForm = () => {
             }
           }}
           onCreateNew={() => {
+            setPaymentMethodToEdit(null); // Limpa o método em edição
             setPaymentMethodSearchOpen(paymentMethodSearchOpen);
             setPaymentMethodDialogOpen(true);
           }}
           onEdit={handleEditPaymentMethod}
           displayColumns={[
+            { key: 'id', header: 'Código' },
             { key: 'name', header: 'Nome' },
             { key: 'type', header: 'Tipo' },
           ]}
