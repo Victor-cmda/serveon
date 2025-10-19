@@ -441,109 +441,131 @@ export class CustomersService {
           if (clienteAtual.is_destinatario) {
             // Verificar se o destinatário existe para este cliente
             const destinatarioResult = await client.query(
-              'SELECT id FROM dbo.destinatario WHERE cliente_id = $1',
+              'SELECT id, cnpj_cpf FROM dbo.destinatario WHERE cliente_id = $1',
               [clienteId],
             );
 
             if (destinatarioResult.rowCount > 0) {
               const destinatarioId = destinatarioResult.rows[0].id;
+              const cnpjCpfAntigo = destinatarioResult.rows[0].cnpj_cpf;
+              let constraintDisabled = false;
 
-              // Resetar para novo update
-              const destUpdates: string[] = [];
-              const destValues: any[] = [];
-              paramCounter = 1;
+              try {
+                // Se o CNPJ/CPF está sendo alterado, primeiro atualizar as NFEs
+                if (updateCustomerDto.cnpjCpf !== undefined && updateCustomerDto.cnpjCpf !== cnpjCpfAntigo) {
+                  // Desabilitar temporariamente a constraint
+                  await client.query('ALTER TABLE dbo.nfe DISABLE TRIGGER ALL');
+                  constraintDisabled = true;
+                  
+                  // Atualizar as NFEs com o novo CNPJ
+                  await client.query(
+                    'UPDATE dbo.nfe SET cnpj_destinatario = $1 WHERE cnpj_destinatario = $2',
+                    [updateCustomerDto.cnpjCpf, cnpjCpfAntigo],
+                  );
+                }
 
-              // Adicionar os mesmos campos ao update do destinatário
-              if (updateCustomerDto.cnpjCpf !== undefined) {
-                destUpdates.push(`cnpj_cpf = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.cnpjCpf);
-              }
+                // Resetar para novo update
+                const destUpdates: string[] = [];
+                const destValues: any[] = [];
+                paramCounter = 1;
 
-              if (updateCustomerDto.tipo !== undefined) {
-                destUpdates.push(`tipo = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.tipo);
-              }
+                // Adicionar os mesmos campos ao update do destinatário
+                if (updateCustomerDto.cnpjCpf !== undefined) {
+                  destUpdates.push(`cnpj_cpf = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.cnpjCpf);
+                }
 
-              if (updateCustomerDto.isEstrangeiro !== undefined) {
-                destUpdates.push(`is_estrangeiro = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.isEstrangeiro);
-              }
+                if (updateCustomerDto.tipo !== undefined) {
+                  destUpdates.push(`tipo = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.tipo);
+                }
 
-              if (updateCustomerDto.tipoDocumento !== undefined) {
-                destUpdates.push(`tipo_documento = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.tipoDocumento);
-              }
+                if (updateCustomerDto.isEstrangeiro !== undefined) {
+                  destUpdates.push(`is_estrangeiro = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.isEstrangeiro);
+                }
 
-              if (updateCustomerDto.razaoSocial !== undefined) {
-                destUpdates.push(`razao_social = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.razaoSocial);
-              }
+                if (updateCustomerDto.tipoDocumento !== undefined) {
+                  destUpdates.push(`tipo_documento = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.tipoDocumento);
+                }
 
-              if (updateCustomerDto.nomeFantasia !== undefined) {
-                destUpdates.push(`nome_fantasia = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.nomeFantasia);
-              }
+                if (updateCustomerDto.razaoSocial !== undefined) {
+                  destUpdates.push(`razao_social = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.razaoSocial);
+                }
 
-              if (updateCustomerDto.inscricaoEstadual !== undefined) {
-                destUpdates.push(`inscricao_estadual = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.inscricaoEstadual);
-              }
+                if (updateCustomerDto.nomeFantasia !== undefined) {
+                  destUpdates.push(`nome_fantasia = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.nomeFantasia);
+                }
 
-              if (updateCustomerDto.endereco !== undefined) {
-                destUpdates.push(`endereco = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.endereco);
-              }
+                if (updateCustomerDto.inscricaoEstadual !== undefined) {
+                  destUpdates.push(`inscricao_estadual = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.inscricaoEstadual);
+                }
 
-              if (updateCustomerDto.numero !== undefined) {
-                destUpdates.push(`numero = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.numero);
-              }
+                if (updateCustomerDto.endereco !== undefined) {
+                  destUpdates.push(`endereco = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.endereco);
+                }
 
-              if (updateCustomerDto.complemento !== undefined) {
-                destUpdates.push(`complemento = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.complemento);
-              }
+                if (updateCustomerDto.numero !== undefined) {
+                  destUpdates.push(`numero = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.numero);
+                }
 
-              if (updateCustomerDto.bairro !== undefined) {
-                destUpdates.push(`bairro = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.bairro);
-              }
+                if (updateCustomerDto.complemento !== undefined) {
+                  destUpdates.push(`complemento = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.complemento);
+                }
 
-              if (updateCustomerDto.cidadeId !== undefined) {
-                destUpdates.push(`cidade_id = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.cidadeId);
-              }
+                if (updateCustomerDto.bairro !== undefined) {
+                  destUpdates.push(`bairro = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.bairro);
+                }
 
-              if (updateCustomerDto.cep !== undefined) {
-                destUpdates.push(`cep = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.cep);
-              }
+                if (updateCustomerDto.cidadeId !== undefined) {
+                  destUpdates.push(`cidade_id = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.cidadeId);
+                }
 
-              if (updateCustomerDto.telefone !== undefined) {
-                destUpdates.push(`telefone = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.telefone);
-              }
+                if (updateCustomerDto.cep !== undefined) {
+                  destUpdates.push(`cep = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.cep);
+                }
 
-              if (updateCustomerDto.email !== undefined) {
-                destUpdates.push(`email = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.email);
-              }
+                if (updateCustomerDto.telefone !== undefined) {
+                  destUpdates.push(`telefone = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.telefone);
+                }
 
-              if (updateCustomerDto.ativo !== undefined) {
-                destUpdates.push(`ativo = $${paramCounter++}`);
-                destValues.push(updateCustomerDto.ativo);
-              }
+                if (updateCustomerDto.email !== undefined) {
+                  destUpdates.push(`email = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.email);
+                }
 
-              if (destUpdates.length > 0) {
-                destValues.push(destinatarioId);
+                if (updateCustomerDto.ativo !== undefined) {
+                  destUpdates.push(`ativo = $${paramCounter++}`);
+                  destValues.push(updateCustomerDto.ativo);
+                }
 
-                const destUpdateQuery = `
-                  UPDATE dbo.destinatario
-                  SET ${destUpdates.join(', ')}
-                  WHERE id = $${paramCounter}
-                `;
+                if (destUpdates.length > 0) {
+                  destValues.push(destinatarioId);
 
-                await client.query(destUpdateQuery, destValues);
+                  const destUpdateQuery = `
+                    UPDATE dbo.destinatario
+                    SET ${destUpdates.join(', ')}
+                    WHERE id = $${paramCounter}
+                  `;
+
+                  await client.query(destUpdateQuery, destValues);
+                }
+              } finally {
+                // Garantir que as constraints sejam reabilitadas
+                if (constraintDisabled) {
+                  await client.query('ALTER TABLE dbo.nfe ENABLE TRIGGER ALL');
+                }
               }
             }
           }

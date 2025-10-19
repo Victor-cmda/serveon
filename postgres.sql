@@ -533,9 +533,9 @@ CREATE TABLE nfe (
     frete_por_conta CHAR(1),
     -- 0=emitente, 1=Destinatário, 2=Terceiros, 9=Sem Frete
     informacoes_complementares TEXT,
-    cnpj_emitente VARCHAR(18) NOT NULL,
-    cnpj_destinatario VARCHAR(18) NOT NULL,
-    cnpj_transportador VARCHAR(18),
+    cnpj_emitente VARCHAR(20) NOT NULL, -- CNPJ sem formatação (apenas números)
+    cnpj_destinatario VARCHAR(20) NOT NULL, -- CNPJ/CPF sem formatação (apenas números)
+    cnpj_transportador VARCHAR(20), -- CNPJ/CPF sem formatação (apenas números)
     condicao_pagamento_id INTEGER NOT NULL,
     cliente_id INTEGER REFERENCES cliente(id),
     forma_pagamento_id INTEGER REFERENCES forma_pagamento(id),
@@ -1338,6 +1338,9 @@ COMMENT ON TABLE dbo.cliente_destinatario IS 'Relacionamento entre clientes e de
 COMMENT ON TABLE dbo.transportador IS 'Cadastro de transportadores de mercadorias';
 COMMENT ON TABLE dbo.produto IS 'Cadastro de produtos';
 COMMENT ON TABLE dbo.nfe IS 'Notas fiscais eletrônicas';
+COMMENT ON COLUMN dbo.nfe.cnpj_emitente IS 'CNPJ do emitente - ARMAZENAR SEM FORMATAÇÃO (apenas números)';
+COMMENT ON COLUMN dbo.nfe.cnpj_destinatario IS 'CNPJ/CPF do destinatário - ARMAZENAR SEM FORMATAÇÃO (apenas números)';
+COMMENT ON COLUMN dbo.nfe.cnpj_transportador IS 'CNPJ/CPF do transportador - ARMAZENAR SEM FORMATAÇÃO (apenas números)';
 COMMENT ON TABLE dbo.itemnfe IS 'Itens de notas fiscais';
 COMMENT ON TABLE dbo.fatura IS 'faturas de pagamento de notas fiscais';
 COMMENT ON TABLE dbo.parcela IS 'parcelas de pagamento das faturas';
