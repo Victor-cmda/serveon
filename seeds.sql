@@ -370,6 +370,9 @@ VALUES
 -- FUNCIONÁRIOS
 -- =====================================================
 
+-- Reset da sequência para garantir IDs previsíveis
+SELECT setval('funcionario_id_seq', 1, false);
+
 INSERT INTO funcionario (
     funcionario, nome, cpf, email, telefone, celular, sexo,
     nacionalidade_id, cep, endereco, numero, bairro, cidade_id,
@@ -404,7 +407,7 @@ INSERT INTO compra (
     condicao_pagamento_id, forma_pagamento_id, funcionario_id, status, tipo_frete, transportadora_id,
     valor_frete, valor_seguro, valor_desconto, valor_acrescimo, total_produtos, total_a_pagar, observacoes
 ) VALUES (
-    '0001', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '1', '55', '1', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     CURRENT_DATE, CURRENT_DATE + INTERVAL '5 days',
     (SELECT id FROM condicao_pagamento WHERE nome = '30 DIAS'),
     (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'),
@@ -416,7 +419,7 @@ INSERT INTO item_compra (
     compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     codigo, produto_id, produto, unidade, quantidade, preco_un, desc_un, liquido_un, total, custo_final_un, custo_final, valor_unitario, valor_desconto, valor_total
 ) VALUES (
-    '0001', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '1', '55', '1', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     'P0001', 
     (SELECT id FROM produto WHERE codigo = 'P0001'), 
     'PRODUTO A', 
@@ -437,15 +440,15 @@ INSERT INTO recebimento_compra (
     compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     numero_recebimento, data_recebimento, funcionario_responsavel_id, nfe_referencia, valor_total_recebido, observacoes, status
 ) VALUES (
-    '0001', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
-    '0001', CURRENT_DATE + INTERVAL '6 days', (SELECT id FROM funcionario WHERE email = 'comprador@exemplo.com'), NULL, 5000.00, 'RECEBIMENTO TOTAL', 'RECEBIDO'
+    '1', '55', '1', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '1', CURRENT_DATE + INTERVAL '6 days', (SELECT id FROM funcionario WHERE email = 'comprador@exemplo.com'), NULL, 5000.00, 'RECEBIMENTO TOTAL', 'RECEBIDO'
 );
 
 INSERT INTO item_recebimento_compra (
     recebimento_id, item_compra_id, quantidade_recebida, valor_unitario_recebido, lote
 ) VALUES (
-    (SELECT id FROM recebimento_compra WHERE numero_recebimento = '0001'), 
-    (SELECT id FROM item_compra WHERE compra_numero_pedido = '0001' AND compra_modelo = '55' AND compra_serie = '001' AND compra_fornecedor_id = (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155') LIMIT 1), 
+    (SELECT id FROM recebimento_compra WHERE numero_recebimento = '1'), 
+    (SELECT id FROM item_compra WHERE compra_numero_pedido = '1' AND compra_modelo = '55' AND compra_serie = '1' AND compra_fornecedor_id = (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155') LIMIT 1), 
     100.000, 50.00, 'Lote-001'
 );
 
@@ -456,7 +459,7 @@ INSERT INTO compra (
     condicao_pagamento_id, forma_pagamento_id, funcionario_id, status, tipo_frete, transportadora_id,
     valor_frete, valor_seguro, valor_desconto, valor_acrescimo, total_produtos, total_a_pagar, observacoes
 ) VALUES (
-    '0002', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '2', '55', '1', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     CURRENT_DATE + INTERVAL '10 days', CURRENT_DATE + INTERVAL '15 days',
     (SELECT id FROM condicao_pagamento WHERE nome = '30/60'),
     (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'),
@@ -468,7 +471,7 @@ INSERT INTO item_compra (
     compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     codigo, produto_id, produto, unidade, quantidade, preco_un, desc_un, liquido_un, total, custo_final_un, custo_final, valor_unitario, valor_desconto, valor_total
 ) VALUES (
-    '0002', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '2', '55', '1', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     'P0002', 
     (SELECT id FROM produto WHERE codigo = 'P0002'), 
     'PRODUTO B', 
@@ -485,14 +488,14 @@ INSERT INTO item_compra (
     1500.00
 );
 
--- Terceira compra - Mesmo número 0001, mas série diferente (demonstra unicidade da chave composta)
+-- Terceira compra - Mesmo número 1, mas série diferente (demonstra unicidade da chave composta)
 INSERT INTO compra (
     numero_pedido, modelo, serie, fornecedor_id,
     data_emissao, data_chegada,
     condicao_pagamento_id, forma_pagamento_id, funcionario_id, status, tipo_frete, transportadora_id,
     valor_frete, valor_seguro, valor_desconto, valor_acrescimo, total_produtos, total_a_pagar, observacoes
 ) VALUES (
-    '0001', '55', '002', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '1', '55', '2', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     CURRENT_DATE + INTERVAL '20 days', CURRENT_DATE + INTERVAL '25 days',
     (SELECT id FROM condicao_pagamento WHERE nome = 'À VISTA'),
     (SELECT id FROM forma_pagamento WHERE nome = 'PIX'),
@@ -504,7 +507,7 @@ INSERT INTO item_compra (
     compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     codigo, produto_id, produto, unidade, quantidade, preco_un, desc_un, liquido_un, total, custo_final_un, custo_final, valor_unitario, valor_desconto, valor_total
 ) VALUES (
-    '0001', '55', '002', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '1', '55', '2', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     'P0001', 
     (SELECT id FROM produto WHERE codigo = 'P0001'), 
     'PRODUTO A', 
@@ -526,7 +529,7 @@ INSERT INTO parcela_compra (
     compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     parcela, codigo_forma_pagto, forma_pagamento_id, forma_pagamento, data_vencimento, valor_parcela, status
 ) VALUES (
-    '0001', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '1', '55', '1', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     1, 'BOL', (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'BOLETO BANCÁRIO', 
     CURRENT_DATE + INTERVAL '30 days', 5100.00, 'PENDENTE'
 );
@@ -535,12 +538,12 @@ INSERT INTO parcela_compra (
     compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     parcela, codigo_forma_pagto, forma_pagamento_id, forma_pagamento, data_vencimento, valor_parcela, status
 ) VALUES (
-    '0002', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '2', '55', '1', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     1, 'BOL', (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'BOLETO BANCÁRIO', 
     CURRENT_DATE + INTERVAL '30 days', 700.00, 'PENDENTE'
 ),
 (
-    '0002', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '2', '55', '1', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     2, 'BOL', (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'BOLETO BANCÁRIO', 
     CURRENT_DATE + INTERVAL '60 days', 700.00, 'PENDENTE'
 );
@@ -549,7 +552,7 @@ INSERT INTO parcela_compra (
     compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     parcela, codigo_forma_pagto, forma_pagamento_id, forma_pagamento, data_vencimento, valor_parcela, status
 ) VALUES (
-    '0001', '55', '002', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '1', '55', '2', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     1, 'PIX', (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'PIX', 
     CURRENT_DATE + INTERVAL '20 days', 800.00, 'PENDENTE'
 );
@@ -563,7 +566,7 @@ INSERT INTO venda (
     condicao_pagamento_id, forma_pagamento_id, status, tipo_venda, tipo_frete,
     transportadora_id, endereco_entrega, valor_frete, valor_produtos, valor_total, observacoes
 ) VALUES (
-    '0001',
+    '1',
     (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
     (SELECT id FROM funcionario WHERE email = 'vendedor@exemplo.com'),
     CURRENT_DATE, CURRENT_DATE + INTERVAL '3 days',
@@ -574,14 +577,14 @@ INSERT INTO venda (
 INSERT INTO item_venda (
     venda_id, produto_id, quantidade, valor_unitario, valor_total
 ) VALUES (
-    (SELECT id FROM venda WHERE numero_pedido = '0001'), (SELECT id FROM produto WHERE codigo = 'P0001'), 10.000, 80.00, 800.00
+    (SELECT id FROM venda WHERE numero_pedido = '1'), (SELECT id FROM produto WHERE codigo = 'P0001'), 10.000, 80.00, 800.00
 );
 
 INSERT INTO entrega_venda (
     venda_id, numero_entrega, data_entrega, funcionario_responsavel_id, transportadora_id, veiculo_id,
     endereco_entrega, valor_total_entregue, status, data_saida
 ) VALUES (
-    (SELECT id FROM venda WHERE numero_pedido = '0001'), '0001', CURRENT_DATE + INTERVAL '3 days', (SELECT id FROM funcionario WHERE email = 'vendedor@exemplo.com'),
+    (SELECT id FROM venda WHERE numero_pedido = '1'), '1', CURRENT_DATE + INTERVAL '3 days', (SELECT id FROM funcionario WHERE email = 'vendedor@exemplo.com'),
     (SELECT id FROM transportadora WHERE cnpj = '98765432000155'), (SELECT id FROM veiculo WHERE placa = 'ABC1D23'),
     'AV. CENTRAL, 200 - CENTRO - SÃO PAULO/SP', 800.00, 'TRANSPORTE', CURRENT_TIMESTAMP
 );
@@ -589,7 +592,7 @@ INSERT INTO entrega_venda (
 INSERT INTO item_entrega_venda (
     entrega_id, item_venda_id, quantidade_entregue, valor_unitario_entregue, lote
 ) VALUES (
-    (SELECT id FROM entrega_venda WHERE numero_entrega = '0001'), (SELECT id FROM item_venda LIMIT 1), 10.000, 80.00, 'Lote-001'
+    (SELECT id FROM entrega_venda WHERE numero_entrega = '1'), (SELECT id FROM item_venda LIMIT 1), 10.000, 80.00, 'Lote-001'
 );
 
 -- =====================================================
@@ -651,7 +654,7 @@ INSERT INTO estoque_movimento (
     produto_id, tipo_movimento, origem, documento_origem_id, numero_documento, data_movimento, funcionario_id,
     quantidade_anterior, quantidade_movimento, quantidade_atual, valor_unitario, valor_total, lote
 ) VALUES (
-    (SELECT id FROM produto WHERE codigo = 'P0001'), 'ENTRADA', 'COMPRA', NULL, '0001-55-001', CURRENT_DATE + INTERVAL '6 days',
+    (SELECT id FROM produto WHERE codigo = 'P0001'), 'ENTRADA', 'COMPRA', NULL, '1-55-1', CURRENT_DATE + INTERVAL '6 days',
     (SELECT id FROM funcionario WHERE email = 'comprador@exemplo.com'),
     0.000, 100.000, 100.000, 50.00, 5000.00, 'Lote-001'
 );
@@ -661,7 +664,7 @@ INSERT INTO estoque_movimento (
     produto_id, tipo_movimento, origem, documento_origem_id, numero_documento, data_movimento, funcionario_id,
     quantidade_anterior, quantidade_movimento, quantidade_atual, valor_unitario, valor_total, lote
 ) VALUES (
-    (SELECT id FROM produto WHERE codigo = 'P0001'), 'SAIDA', 'VENDA', (SELECT id FROM venda WHERE numero_pedido = '0001'), '0001', CURRENT_DATE + INTERVAL '3 days',
+    (SELECT id FROM produto WHERE codigo = 'P0001'), 'SAIDA', 'VENDA', (SELECT id FROM venda WHERE numero_pedido = '1'), '1', CURRENT_DATE + INTERVAL '3 days',
     (SELECT id FROM funcionario WHERE email = 'vendedor@exemplo.com'),
     100.000, -10.000, 90.000, 80.00, 800.00, 'Lote-001'
 );
@@ -675,9 +678,9 @@ INSERT INTO contas_pagar (
     fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
     valor_original, valor_saldo, forma_pagamento_id, status, observacoes
 ) VALUES (
-    '0001', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '1', '55', '1', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'DUP-0001', 'DUPLICATA', CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days',
-    5100.00, 5100.00, (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 'A PAGAR DA COMPRA 0001 SÉRIE 001'
+    5100.00, 5100.00, (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 'A PAGAR DA COMPRA 1 SÉRIE 1'
 );
 
 INSERT INTO contas_pagar (
@@ -685,9 +688,9 @@ INSERT INTO contas_pagar (
     fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
     valor_original, valor_saldo, forma_pagamento_id, status, observacoes
 ) VALUES (
-    '0002', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '2', '55', '1', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'DUP-0002', 'DUPLICATA', CURRENT_DATE + INTERVAL '10 days', CURRENT_DATE + INTERVAL '40 days',
-    1400.00, 1400.00, (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 'A PAGAR DA COMPRA 0002'
+    1400.00, 1400.00, (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 'A PAGAR DA COMPRA 2'
 );
 
 INSERT INTO contas_pagar (
@@ -695,17 +698,17 @@ INSERT INTO contas_pagar (
     fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
     valor_original, valor_saldo, forma_pagamento_id, status, observacoes
 ) VALUES (
-    '0001', '55', '002', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '1', '55', '2', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'DUP-0003', 'DUPLICATA', CURRENT_DATE + INTERVAL '20 days', CURRENT_DATE + INTERVAL '40 days',
-    800.00, 800.00, (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'ABERTO', 'A PAGAR DA COMPRA 0001 SÉRIE 002'
+    800.00, 800.00, (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'ABERTO', 'A PAGAR DA COMPRA 1 SÉRIE 2'
 );
 
 INSERT INTO contas_receber (
     venda_id, cliente_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
     valor_original, valor_saldo, forma_pagamento_id, status, observacoes
 ) VALUES (
-    (SELECT id FROM venda WHERE numero_pedido = '0001'), (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 'REC-0001', 'DUPLICATA', CURRENT_DATE, CURRENT_DATE + INTERVAL '5 days',
-    850.00, 850.00, (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'ABERTO', 'A RECEBER DA VENDA 0001'
+    (SELECT id FROM venda WHERE numero_pedido = '1'), (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 'REC-0001', 'DUPLICATA', CURRENT_DATE, CURRENT_DATE + INTERVAL '5 days',
+    850.00, 850.00, (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'ABERTO', 'A RECEBER DA VENDA 1'
 );
 
 -- =====================================================
@@ -716,7 +719,7 @@ INSERT INTO orcamento (
     numero_orcamento, cliente_id, vendedor_id, data_orcamento, data_validade, condicao_pagamento_id, status,
     valor_produtos, valor_desconto, percentual_desconto, valor_total, observacoes
 ) VALUES (
-    '0001', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), (SELECT id FROM funcionario WHERE email = 'vendedor@exemplo.com'),
+    '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), (SELECT id FROM funcionario WHERE email = 'vendedor@exemplo.com'),
     CURRENT_DATE, CURRENT_DATE + INTERVAL '15 days', (SELECT id FROM condicao_pagamento WHERE nome = '30 DIAS'), 'ENVIADO',
     500.00, 0.00, 0.00, 500.00, 'ORÇAMENTO DE PRODUTO B'
 );
@@ -724,7 +727,7 @@ INSERT INTO orcamento (
 INSERT INTO item_orcamento (
     orcamento_id, produto_id, quantidade, valor_unitario, valor_total
 ) VALUES (
-    (SELECT id FROM orcamento WHERE numero_orcamento = '0001'), (SELECT id FROM produto WHERE codigo = 'P0002'), 10.000, 50.00, 500.00
+    (SELECT id FROM orcamento WHERE numero_orcamento = '1'), (SELECT id FROM produto WHERE codigo = 'P0002'), 10.000, 50.00, 500.00
 );
 
 -- =====================================================

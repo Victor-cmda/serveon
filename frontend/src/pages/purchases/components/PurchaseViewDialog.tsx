@@ -12,6 +12,7 @@ const PurchaseViewDialog: React.FC<PurchaseViewDialogProps> = ({ purchase, onClo
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
+  // Formata valores que já vêm em reais do backend (DECIMAL)
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -85,7 +86,7 @@ const PurchaseViewDialog: React.FC<PurchaseViewDialogProps> = ({ purchase, onClo
 
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Data de Chegada</label>
-                <p className="text-base font-medium">{formatDate(purchase.dataChegada)}</p>
+                <p className="text-base font-medium">{purchase.dataChegada ? formatDate(purchase.dataChegada) : '-'}</p>
               </div>
             </div>
           </div>
@@ -100,8 +101,8 @@ const PurchaseViewDialog: React.FC<PurchaseViewDialogProps> = ({ purchase, onClo
               </div>
               
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Código do Fornecedor</label>
-                <p className="text-base font-medium">{purchase.codigoFornecedor || '-'}</p>
+                <label className="text-sm font-medium text-muted-foreground">ID do Fornecedor</label>
+                <p className="text-base font-medium">{purchase.fornecedorId || '-'}</p>
               </div>
             </div>
           </div>
@@ -138,7 +139,14 @@ const PurchaseViewDialog: React.FC<PurchaseViewDialogProps> = ({ purchase, onClo
 
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Transportadora</label>
-                <p className="text-base font-medium">{purchase.transportadoraNome || '-'}</p>
+                <p className="text-base font-medium">
+                  {purchase.transportadoraNome || '-'}
+                  {purchase.transportadoraId && (
+                    <span className="text-xs text-muted-foreground ml-2">
+                      (Cód: {purchase.transportadoraId})
+                    </span>
+                  )}
+                </p>
               </div>
 
               <div>
@@ -159,7 +167,7 @@ const PurchaseViewDialog: React.FC<PurchaseViewDialogProps> = ({ purchase, onClo
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Total dos Produtos</label>
-                <p className="text-base font-medium">{formatCurrency(purchase.totalProdutos)}</p>
+                <p className="text-base font-medium">{formatCurrency(purchase.totalProdutos || 0)}</p>
               </div>
 
               <div>
@@ -169,10 +177,72 @@ const PurchaseViewDialog: React.FC<PurchaseViewDialogProps> = ({ purchase, onClo
 
               <div className="md:col-span-2 lg:col-span-1">
                 <label className="text-sm font-medium text-muted-foreground">Total a Pagar</label>
-                <p className="text-xl font-bold text-primary">{formatCurrency(purchase.totalAPagar)}</p>
+                <p className="text-xl font-bold text-primary">{formatCurrency(purchase.totalAPagar || 0)}</p>
               </div>
             </div>
           </div>
+
+          {/* Produtos/Itens da Compra */}
+          {purchase.itens && purchase.itens.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">Produtos da Compra</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-muted">
+                      <th className="border px-4 py-2 text-left text-sm font-medium">Produto</th>
+                      <th className="border px-4 py-2 text-left text-sm font-medium">Quantidade</th>
+                      <th className="border px-4 py-2 text-left text-sm font-medium">Unidade</th>
+                      <th className="border px-4 py-2 text-right text-sm font-medium">Preço Unit.</th>
+                      <th className="border px-4 py-2 text-right text-sm font-medium">Desconto Un.</th>
+                      <th className="border px-4 py-2 text-right text-sm font-medium">Total Líquido</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {purchase.itens.map((item: any, index: number) => (
+                      <tr key={index} className="hover:bg-muted/50">
+                        <td className="border px-4 py-2 text-sm">{item.produto || '-'}</td>
+                        <td className="border px-4 py-2 text-sm">{item.quantidade}</td>
+                        <td className="border px-4 py-2 text-sm">{item.unidade || '-'}</td>
+                        <td className="border px-4 py-2 text-sm text-right">{formatCurrency(item.preco_un || 0)}</td>
+                        <td className="border px-4 py-2 text-sm text-right">{formatCurrency(item.desc_un || 0)}</td>
+                        <td className="border px-4 py-2 text-sm text-right font-medium">{formatCurrency(item.total || 0)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Parcelas de Pagamento */}
+          {purchase.parcelas && purchase.parcelas.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold border-b pb-2">Parcelas de Pagamento</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-muted">
+                      <th className="border px-4 py-2 text-left text-sm font-medium">Parcela</th>
+                      <th className="border px-4 py-2 text-left text-sm font-medium">Data de Vencimento</th>
+                      <th className="border px-4 py-2 text-left text-sm font-medium">Forma de Pagamento</th>
+                      <th className="border px-4 py-2 text-right text-sm font-medium">Valor</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {purchase.parcelas.map((parcela: any, index: number) => (
+                      <tr key={index} className="hover:bg-muted/50">
+                        <td className="border px-4 py-2 text-sm">{parcela.parcela || index + 1}</td>
+                        <td className="border px-4 py-2 text-sm">{formatDate(parcela.data_vencimento)}</td>
+                        <td className="border px-4 py-2 text-sm">{parcela.forma_pagamento || '-'}</td>
+                        <td className="border px-4 py-2 text-sm text-right font-medium">{formatCurrency(parcela.valor_parcela || 0)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {/* Observações */}
           {purchase.observacoes && (

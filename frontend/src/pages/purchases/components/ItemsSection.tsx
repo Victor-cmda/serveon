@@ -76,7 +76,7 @@ export function ItemsSection({
 
     // Recalcular valores quando quantidade, preço ou desconto mudam
     if (field === 'quantidade' || field === 'precoUN' || field === 'descUN') {
-      const totals = calculateItemTotal(item.quantidade, item.precoUN, item.descUN);
+      const totals = calculateItemTotal(item.quantidade, item.precoUN, item.descUn);
       item.liquidoUN = totals.liquidoUN;
       item.total = totals.total;
     }
@@ -224,7 +224,7 @@ export function ItemsSection({
                     <TableCell>
                       <Input
                         type="number"
-                        value={item.descUN || ''}
+                        value={item.descUn || ''}
                         onChange={(e) => updateItem(index, 'descUN', e.target.value)}
                         className="text-sm"
                         step="0.01"

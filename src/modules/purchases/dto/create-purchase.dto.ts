@@ -15,14 +15,6 @@ import { Type } from 'class-transformer';
 
 export class CreatePurchaseItemDto {
   @ApiProperty({
-    description: 'Código do produto',
-    example: 'PROD001',
-  })
-  @IsNotEmpty({ message: 'Código do produto é obrigatório' })
-  @IsString({ message: 'Código do produto deve ser uma string' })
-  codigo: string;
-
-  @ApiProperty({
     description: 'ID do produto',
     example: 1,
   })
@@ -31,36 +23,20 @@ export class CreatePurchaseItemDto {
   produtoId: number;
 
   @ApiProperty({
-    description: 'Nome do produto',
-    example: 'Caneta BIC Azul',
-  })
-  @IsNotEmpty({ message: 'Nome do produto é obrigatório' })
-  @IsString({ message: 'Nome do produto deve ser uma string' })
-  produto: string;
-
-  @ApiProperty({
-    description: 'Unidade de medida',
-    example: 'UN',
-  })
-  @IsNotEmpty({ message: 'Unidade é obrigatória' })
-  @IsString({ message: 'Unidade deve ser uma string' })
-  unidade: string;
-
-  @ApiProperty({
-    description: 'Quantidade',
-    example: 100,
+    description: 'Quantidade do produto',
+    example: 10,
   })
   @IsNotEmpty({ message: 'Quantidade é obrigatória' })
   @IsNumber(
-    { maxDecimalPlaces: 3 },
+    { maxDecimalPlaces: 4 },
     { message: 'Quantidade deve ser um número' },
   )
-  @Min(0.001, { message: 'Quantidade deve ser maior que 0' })
+  @Min(0.0001, { message: 'Quantidade deve ser maior que 0' })
   quantidade: number;
 
   @ApiProperty({
-    description: 'Preço unitário',
-    example: 1.5,
+    description: 'Preço unitário do produto',
+    example: 100.5,
   })
   @IsNotEmpty({ message: 'Preço unitário é obrigatório' })
   @IsNumber(
@@ -68,11 +44,11 @@ export class CreatePurchaseItemDto {
     { message: 'Preço unitário deve ser um número' },
   )
   @Min(0, { message: 'Preço unitário deve ser maior ou igual a 0' })
-  precoUN: number;
+  precoUn: number;
 
   @ApiProperty({
-    description: 'Desconto unitário',
-    example: 0.1,
+    description: 'Desconto unitário aplicado ao produto',
+    example: 5,
     default: 0,
   })
   @IsOptional()
@@ -81,17 +57,105 @@ export class CreatePurchaseItemDto {
     { message: 'Desconto unitário deve ser um número' },
   )
   @Min(0, { message: 'Desconto unitário deve ser maior ou igual a 0' })
-  descUN?: number;
+  descUn?: number;
 
   @ApiProperty({
-    description: 'Rateio',
-    example: 5,
+    description: 'Valor líquido unitário (preço - desconto)',
+    example: 95.5,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber(
+    { maxDecimalPlaces: 4 },
+    { message: 'Valor líquido unitário deve ser um número' },
+  )
+  @Min(0, { message: 'Valor líquido unitário deve ser maior ou igual a 0' })
+  liquidoUn?: number;
+
+  @ApiProperty({
+    description: 'Valor total do item (quantidade * líquido unitário)',
+    example: 955,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    { message: 'Valor total deve ser um número' },
+  )
+  @Min(0, { message: 'Valor total deve ser maior ou igual a 0' })
+  total?: number;
+
+  @ApiProperty({
+    description: 'Valor de rateio de despesas',
+    example: 10,
     default: 0,
   })
   @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Rateio deve ser um número' })
-  @Min(0, { message: 'Rateio deve ser maior ou igual a 0' })
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    { message: 'Valor de rateio deve ser um número' },
+  )
+  @Min(0, { message: 'Valor de rateio deve ser maior ou igual a 0' })
   rateio?: number;
+
+  @ApiProperty({
+    description: 'Custo final unitário (líquido + rateio / quantidade)',
+    example: 96.5,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber(
+    { maxDecimalPlaces: 4 },
+    { message: 'Custo final unitário deve ser um número' },
+  )
+  @Min(0, { message: 'Custo final unitário deve ser maior ou igual a 0' })
+  custoFinalUn?: number;
+
+  @ApiProperty({
+    description: 'Custo final total (custo final unitário * quantidade)',
+    example: 965,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    { message: 'Custo final deve ser um número' },
+  )
+  @Min(0, { message: 'Custo final deve ser maior ou igual a 0' })
+  custoFinal?: number;
+
+  @ApiProperty({
+    description: 'Quantidade recebida do item',
+    example: 0,
+    default: 0,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber(
+    { maxDecimalPlaces: 3 },
+    { message: 'Quantidade recebida deve ser um número' },
+  )
+  @Min(0, { message: 'Quantidade recebida deve ser maior ou igual a 0' })
+  quantidadeRecebida?: number;
+
+  @ApiProperty({
+    description: 'Data de entrega do item',
+    example: '2024-02-20',
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate({ message: 'Data de entrega do item deve ser uma data válida' })
+  dataEntregaItem?: Date;
+
+  @ApiProperty({
+    description: 'Observações sobre o item',
+    example: 'Item com defeito',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Observações devem ser uma string' })
+  observacoes?: string;
 }
 
 export class CreatePurchaseInstallmentDto {
@@ -107,10 +171,12 @@ export class CreatePurchaseInstallmentDto {
   @ApiProperty({
     description: 'Código da forma de pagamento',
     example: 'DIN',
+    required: false,
   })
-  @IsNotEmpty({ message: 'Código da forma de pagamento é obrigatório' })
+  @IsOptional()
   @IsString({ message: 'Código da forma de pagamento deve ser uma string' })
-  codigoFormaPagto: string;
+  @MaxLength(20, { message: 'Código da forma de pagamento deve ter no máximo 20 caracteres' })
+  codigoFormaPagto?: string;
 
   @ApiProperty({
     description: 'ID da forma de pagamento',
@@ -119,14 +185,6 @@ export class CreatePurchaseInstallmentDto {
   @IsNotEmpty({ message: 'ID da forma de pagamento é obrigatório' })
   @IsNumber({}, { message: 'ID da forma de pagamento deve ser um número' })
   formaPagamentoId: number;
-
-  @ApiProperty({
-    description: 'Nome da forma de pagamento',
-    example: 'Dinheiro',
-  })
-  @IsNotEmpty({ message: 'Nome da forma de pagamento é obrigatório' })
-  @IsString({ message: 'Nome da forma de pagamento deve ser uma string' })
-  formaPagamento: string;
 
   @ApiProperty({
     description: 'Data de vencimento da parcela',
@@ -152,31 +210,31 @@ export class CreatePurchaseInstallmentDto {
 
 export class CreatePurchaseDto {
   @ApiProperty({
-    description: 'Modelo da nota fiscal',
-    example: '55',
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'Modelo deve ser uma string' })
-  modelo?: string;
-
-  @ApiProperty({
-    description: 'Série da nota fiscal',
+    description: 'Número do pedido/nota fiscal',
     example: '1',
     required: false,
   })
   @IsOptional()
-  @IsString({ message: 'Série deve ser uma string' })
-  serie?: string;
+  @IsString({ message: 'Número do pedido deve ser uma string' })
+  numeroPedido?: string;
 
   @ApiProperty({
-    description: 'Código do fornecedor',
-    example: 'FORN001',
-    required: false,
+    description: 'Modelo da nota fiscal',
+    example: '55',
   })
-  @IsOptional()
-  @IsString({ message: 'Código do fornecedor deve ser uma string' })
-  codigoFornecedor?: string;
+  @IsNotEmpty({ message: 'Modelo é obrigatório' })
+  @IsString({ message: 'Modelo deve ser uma string' })
+  @MaxLength(10, { message: 'Modelo deve ter no máximo 10 caracteres' })
+  modelo: string;
+
+  @ApiProperty({
+    description: 'Série da nota fiscal',
+    example: '1',
+  })
+  @IsNotEmpty({ message: 'Série é obrigatória' })
+  @IsString({ message: 'Série deve ser uma string' })
+  @MaxLength(10, { message: 'Série deve ter no máximo 10 caracteres' })
+  serie: string;
 
   @ApiProperty({
     description: 'ID do fornecedor',
@@ -185,6 +243,16 @@ export class CreatePurchaseDto {
   @IsNotEmpty({ message: 'ID do fornecedor é obrigatório' })
   @IsNumber({}, { message: 'ID do fornecedor deve ser um número' })
   fornecedorId: number;
+
+  @ApiProperty({
+    description: 'Número da nota fiscal',
+    example: '12345',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Número da nota deve ser uma string' })
+  @MaxLength(50, { message: 'Número da nota deve ter no máximo 50 caracteres' })
+  numeroNota?: string;
 
   @ApiProperty({
     description: 'Data de emissão da compra',
@@ -198,11 +266,22 @@ export class CreatePurchaseDto {
   @ApiProperty({
     description: 'Data de chegada prevista',
     example: '2024-02-15',
+    required: false,
   })
-  @IsNotEmpty({ message: 'Data de chegada é obrigatória' })
+  @IsOptional()
   @Type(() => Date)
   @IsDate({ message: 'Data de chegada deve ser uma data válida' })
-  dataChegada: Date;
+  dataChegada?: Date;
+
+  @ApiProperty({
+    description: 'Data de entrega realizada',
+    example: '2024-02-15',
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate({ message: 'Data de entrega realizada deve ser uma data válida' })
+  dataEntregaRealizada?: Date;
 
   @ApiProperty({
     description: 'ID da condição de pagamento',
@@ -213,12 +292,33 @@ export class CreatePurchaseDto {
   condicaoPagamentoId: number;
 
   @ApiProperty({
+    description: 'ID da forma de pagamento',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'ID da forma de pagamento deve ser um número' })
+  formaPagamentoId?: number;
+
+  @ApiProperty({
     description: 'ID do funcionário responsável pela compra',
     example: 1,
   })
   @IsNotEmpty({ message: 'ID do funcionário é obrigatório' })
   @IsNumber({}, { message: 'ID do funcionário deve ser um número' })
   funcionarioId: number;
+
+  @ApiProperty({
+    description: 'Status da compra',
+    example: 'PENDENTE',
+    enum: ['PENDENTE', 'APROVADO', 'ENVIADO', 'RECEBIDO', 'CANCELADO'],
+    default: 'PENDENTE',
+  })
+  @IsOptional()
+  @IsEnum(['PENDENTE', 'APROVADO', 'ENVIADO', 'RECEBIDO', 'CANCELADO'], {
+    message: 'Status deve ser PENDENTE, APROVADO, ENVIADO, RECEBIDO ou CANCELADO',
+  })
+  status?: string;
 
   @ApiProperty({
     description: 'Tipo de frete',
@@ -229,6 +329,15 @@ export class CreatePurchaseDto {
   @IsOptional()
   @IsEnum(['CIF', 'FOB'], { message: 'Tipo de frete deve ser CIF ou FOB' })
   tipoFrete?: string;
+
+  @ApiProperty({
+    description: 'ID da transportadora',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'ID da transportadora deve ser um número' })
+  transportadoraId?: number;
 
   @ApiProperty({
     description: 'Valor do frete',
@@ -264,9 +373,9 @@ export class CreatePurchaseDto {
   @IsOptional()
   @IsNumber(
     { maxDecimalPlaces: 2 },
-    { message: 'Outras despesas deve ser um número' },
+    { message: 'Outras despesas devem ser um número' },
   )
-  @Min(0, { message: 'Outras despesas deve ser maior ou igual a 0' })
+  @Min(0, { message: 'Outras despesas devem ser maior ou igual a 0' })
   outrasDespesas?: number;
 
   @ApiProperty({
@@ -283,25 +392,17 @@ export class CreatePurchaseDto {
   valorDesconto?: number;
 
   @ApiProperty({
-    description: 'Status da compra',
-    example: 'PENDENTE',
-    enum: ['PENDENTE', 'CONFIRMADA', 'CANCELADA', 'ENTREGUE'],
-    default: 'PENDENTE',
+    description: 'Valor de acréscimo aplicado',
+    example: 10,
+    default: 0,
   })
   @IsOptional()
-  @IsEnum(['PENDENTE', 'CONFIRMADA', 'CANCELADA', 'ENTREGUE'], {
-    message: 'Status deve ser PENDENTE, CONFIRMADA, CANCELADA ou ENTREGUE',
-  })
-  status?: string;
-
-  @ApiProperty({
-    description: 'ID da transportadora',
-    example: 1,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber({}, { message: 'ID da transportadora deve ser um número' })
-  transportadoraId?: number;
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    { message: 'Valor de acréscimo deve ser um número' },
+  )
+  @Min(0, { message: 'Valor de acréscimo deve ser maior ou igual a 0' })
+  valorAcrescimo?: number;
 
   @ApiProperty({
     description: 'Observações sobre a compra',
@@ -310,8 +411,26 @@ export class CreatePurchaseDto {
   })
   @IsOptional()
   @IsString({ message: 'Observações devem ser uma string' })
-  @MaxLength(500, { message: 'Observações devem ter no máximo 500 caracteres' })
   observacoes?: string;
+
+  @ApiProperty({
+    description: 'ID do funcionário que aprovou a compra',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'ID do aprovador deve ser um número' })
+  aprovadoPor?: number;
+
+  @ApiProperty({
+    description: 'Data de aprovação da compra',
+    example: '2024-01-16',
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate({ message: 'Data de aprovação deve ser uma data válida' })
+  dataAprovacao?: Date;
 
   @ApiProperty({
     description: 'Itens da compra',

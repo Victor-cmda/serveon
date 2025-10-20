@@ -79,4 +79,46 @@ export class PurchaseItem extends BaseEntity {
     example: 145,
   })
   custoFinal: number;
+
+  @ApiProperty({
+    description: 'Valor unitário (compatibilidade NFe)',
+    example: 1.5,
+    required: false,
+  })
+  valorUnitario?: number;
+
+  @ApiProperty({
+    description: 'Valor desconto (compatibilidade NFe)',
+    example: 10,
+    required: false,
+  })
+  valorDesconto?: number;
+
+  @ApiProperty({
+    description: 'Valor total (compatibilidade NFe)',
+    example: 140,
+    required: false,
+  })
+  valorTotal?: number;
+
+  @ApiProperty({
+    description: 'Quantidade recebida',
+    example: 0,
+    default: 0,
+  })
+  quantidadeRecebida: number;
+
+  @ApiProperty({
+    description: 'Data de entrega do item',
+    example: '2024-02-20',
+    required: false,
+  })
+  dataEntregaItem?: Date;
+
+  @ApiProperty({
+    description: 'Observações sobre o item',
+    example: 'Item com defeito',
+    required: false,
+  })
+  observacoes?: string;
 }

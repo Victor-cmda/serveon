@@ -124,6 +124,10 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
   const [isHeaderLocked, setIsHeaderLocked] = useState(false);
   const [isProductsLocked, setIsProductsLocked] = useState(false);
 
+  // Estado para controle de verificação de chave composta
+  const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
+
   // Listas de entidades
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -154,9 +158,71 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
   // Verifica se o header está completo (Número e Fornecedor preenchidos)
   const numeroNota = form.watch('numeroNota');
   const idFornecedor = form.watch('idFornecedor');
+  const modelo = form.watch('modelo');
+  const serie = form.watch('serie');
+  
   const isHeaderComplete = useMemo(() => {
     return numeroNota?.trim() !== '' && idFornecedor?.trim() !== '';
   }, [numeroNota, idFornecedor]);
+
+  // Função para verificar se a chave composta já existe
+  const checkDuplicatePurchase = async (
+    numeroPedido: string,
+    modeloDoc: string,
+    serieDoc: string,
+    fornecedorId: string
+  ) => {
+    // Não verifica em modo de edição para a própria compra
+    if (isEditing && id) {
+      return;
+    }
+
+    // Valida se todos os campos da chave composta estão preenchidos
+    if (!numeroPedido || !modeloDoc || !serieDoc || !fornecedorId) {
+      setDuplicateError(null);
+      return;
+    }
+
+    setIsCheckingDuplicate(true);
+    setDuplicateError(null);
+
+    try {
+      // Usa a API específica para verificar existência
+      const result = await purchaseApi.checkExists(
+        numeroPedido,
+        modeloDoc,
+        serieDoc,
+        fornecedorId
+      );
+
+      if (result.exists) {
+        const errorMsg = `Já existe uma compra com Número: ${numeroPedido}, Modelo: ${modeloDoc}, Série: ${serieDoc} e Fornecedor ID: ${fornecedorId}`;
+        setDuplicateError(errorMsg);
+        toast.error(errorMsg, {
+          duration: 5000,
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao verificar duplicidade:', error);
+      // Se houver erro na verificação, não bloqueamos o usuário
+      toast.warning('Não foi possível verificar duplicidade. Prossiga com cautela.');
+    } finally {
+      setIsCheckingDuplicate(false);
+    }
+  };
+
+  // Verifica duplicidade quando os campos da chave composta mudam
+  useEffect(() => {
+    if (numeroNota && modelo && serie && idFornecedor) {
+      const timer = setTimeout(() => {
+        checkDuplicatePurchase(numeroNota, modelo, serie, idFornecedor);
+      }, 500); // Debounce de 500ms
+
+      return () => clearTimeout(timer);
+    } else {
+      setDuplicateError(null);
+    }
+  }, [numeroNota, modelo, serie, idFornecedor, isEditing, id]);
 
   // Carrega listas de entidades
   useEffect(() => {
@@ -192,7 +258,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
           setPurchaseData(purchase);
           // TODO: Implementar conversão completa dos dados da compra
           form.reset({
-            numeroNota: purchase.codigo || '',
+            numeroNota: purchase.numeroNota || '',
             modelo: purchase.modelo || '',
             serie: purchase.serie || '',
             idFornecedor: purchase.fornecedorId?.toString() || '',
@@ -290,7 +356,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
         cod_forma_pagto: inst.paymentMethodId,
         forma_pagto_descricao: formaPagtoNome,
         data_vencimento: format(dataVencimento, 'yyyy-MM-dd'),
-        valor_parcela: valorFinal,
+        valor_parcela: valorFinal, // Manter em centavos, converter apenas no envio
       };
     });
 
@@ -426,6 +492,13 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
       return;
     }
 
+    // Validação: desconto não pode ser maior que o valor total do produto
+    const valorTotalProduto = precoCents * qtd;
+    if (descontoCents > valorTotalProduto) {
+      toast.error('O desconto não pode ser maior que o valor total do produto');
+      return;
+    }
+
     const precoUN = precoCents;
     const descontoUN = descontoCents / qtd; // Desconto unitário
     const precoLiquidoUN = precoUN - descontoUN;
@@ -493,42 +566,38 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
     setIsLoading(true);
     try {
       const payload = {
-        codigo: data.numeroNota,
-        modelo: data.modelo,
-        serie: data.serie,
+        numeroNota: data.numeroNota,
+        modelo: data.modelo || '55',
+        serie: data.serie || '1',
         fornecedorId: parseInt(data.idFornecedor),
         dataEmissao: data.dataEmissao,
         dataChegada: data.dataChegada,
         tipoFrete: data.tipoFrete,
-        valorFrete: parseCurrency(data.valorFrete),
-        valorSeguro: parseCurrency(data.valorSeguro),
-        outrasDespesas: parseCurrency(data.outrasDespesas),
+        valorFrete: parseCurrency(data.valorFrete) / 100, // Converter centavos para reais
+        valorSeguro: parseCurrency(data.valorSeguro) / 100, // Converter centavos para reais
+        outrasDespesas: parseCurrency(data.outrasDespesas) / 100, // Converter centavos para reais
         transportadoraId: data.idTransportadora ? parseInt(data.idTransportadora) : undefined,
         condicaoPagamentoId: parseInt(data.idCondPagamento),
         formaPagamentoId: data.idFormaPagamento ? parseInt(data.idFormaPagamento) : undefined,
-        funcionarioId: 1, // TODO: Obter do contexto de autenticação
+        funcionarioId: 4, // TODO: Obter do contexto de autenticação
         observacoes: data.observacao,
         itens: produtosComRateio.map((p) => ({
-          codigo: p.idProduto,
           produtoId: parseInt(p.idProduto),
-          produto: p.nomeProduto,
-          unidade: p.unidade,
           quantidade: parseFloat(p.quantidade.replace(',', '.')),
-          precoUN: p.precoUN,
-          descUN: p.descontoUN,
-          liquidoUN: p.precoLiquidoUN,
-          total: p.precoTotal,
-          rateio: p.valorRateio || 0,
-          custoFinalUN: Math.round((p.precoTotal + (p.valorRateio || 0)) / parseFloat(p.quantidade.replace(',', '.'))),
-          custoFinal: p.precoTotal + (p.valorRateio || 0),
+          precoUn: p.precoUN / 100, // Converter centavos para reais
+          descUn: p.descontoUN / 100, // Converter centavos para reais
+          liquidoUn: p.precoLiquidoUN / 100, // Converter centavos para reais
+          total: p.precoTotal / 100, // Converter centavos para reais
+          rateio: (p.valorRateio || 0) / 100, // Converter centavos para reais
+          custoFinalUn: Math.round((p.precoTotal + (p.valorRateio || 0)) / parseFloat(p.quantidade.replace(',', '.'))) / 100, // Converter centavos para reais
+          custoFinal: (p.precoTotal + (p.valorRateio || 0)) / 100, // Converter centavos para reais
         })),
         parcelas: parcelas.map((p) => ({
           parcela: p.num_parcela,
           codigoFormaPagto: p.cod_forma_pagto.toString(),
           formaPagamentoId: p.cod_forma_pagto,
-          formaPagamento: p.forma_pagto_descricao,
           dataVencimento: p.data_vencimento,
-          valorParcela: p.valor_parcela,
+          valorParcela: p.valor_parcela / 100, // Converter centavos para reais
         })),
       };
 
@@ -607,7 +676,11 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                         <FormItem>
                           <FormLabel>Modelo</FormLabel>
                           <FormControl>
-                            <Input {...field} disabled={isHeaderLocked || isLoading} />
+                            <Input 
+                              {...field} 
+                              disabled={isHeaderLocked || isLoading}
+                              className={duplicateError ? 'border-red-500' : ''}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -623,7 +696,11 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                         <FormItem>
                           <FormLabel>Série</FormLabel>
                           <FormControl>
-                            <Input {...field} disabled={isHeaderLocked || isLoading} />
+                            <Input 
+                              {...field} 
+                              disabled={isHeaderLocked || isLoading}
+                              className={duplicateError ? 'border-red-500' : ''}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -639,9 +716,18 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                         <FormItem>
                           <FormLabel>Número *</FormLabel>
                           <FormControl>
-                            <Input {...field} disabled={isHeaderLocked || isLoading} />
+                            <Input 
+                              {...field} 
+                              disabled={isHeaderLocked || isLoading}
+                              className={duplicateError ? 'border-red-500' : ''}
+                            />
                           </FormControl>
                           <FormMessage />
+                          {isCheckingDuplicate && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Verificando duplicidade...
+                            </p>
+                          )}
                         </FormItem>
                       )}
                     />
@@ -694,6 +780,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                                 value={selectedSupplier?.id || ''}
                                 readOnly
                                 disabled={isHeaderLocked || isLoading}
+                                className={duplicateError ? 'border-red-500' : ''}
                               />
                               <Button
                                 type="button"
@@ -720,11 +807,44 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                           value={selectedSupplier?.razaoSocial || ''}
                           readOnly
                           disabled
+                          className={duplicateError ? 'border-red-500' : ''}
                         />
                       </FormControl>
                     </FormItem>
                   </div>
                 </div>
+                
+                {/* Alerta de duplicidade */}
+                {duplicateError && (
+                  <div className="rounded-lg border border-red-500 bg-red-50 dark:bg-red-950/30 p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0">
+                        <svg
+                          className="h-5 w-5 text-red-600 dark:text-red-400"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-sm font-medium text-red-800 dark:text-red-300">
+                          Chave Composta Duplicada
+                        </h3>
+                        <p className="mt-1 text-sm text-red-700 dark:text-red-400">
+                          {duplicateError}
+                        </p>
+                        <p className="mt-2 text-xs text-red-600 dark:text-red-500">
+                          A combinação de <strong>Número + Modelo + Série + Fornecedor</strong> deve ser única no sistema.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* PRODUTOS */}
@@ -737,14 +857,15 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                     <Input
                       value={produtoAtual.idProduto}
                       readOnly
-                      disabled={!isHeaderComplete || isProductsLocked || isLoading}
+                      disabled={!isHeaderComplete || isProductsLocked || isLoading || !!duplicateError}
                     />
                     <Button
                       type="button"
                       variant="outline"
                       size="icon"
                       onClick={() => setProductSearchOpen(true)}
-                      disabled={!isHeaderComplete || isProductsLocked || isLoading}
+                      disabled={!isHeaderComplete || isProductsLocked || isLoading || !!duplicateError}
+                      title={duplicateError ? 'Corrija a duplicidade antes de adicionar produtos' : 'Buscar produto'}
                     >
                       <Search className="h-4 w-4" />
                     </Button>
@@ -798,7 +919,19 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                       setProdutoAtual({ ...produtoAtual, desconto: formatCurrency(parsed) });
                     }}
                     disabled={!isHeaderComplete || isProductsLocked || isLoading}
+                    className={
+                      parseCurrency(produtoAtual.desconto) > 
+                      (parseFloat(produtoAtual.quantidade.replace(',', '.')) || 0) * parseCurrency(produtoAtual.preco)
+                        ? 'border-red-500 focus-visible:ring-red-500'
+                        : ''
+                    }
                   />
+                  {parseCurrency(produtoAtual.desconto) > 
+                   (parseFloat(produtoAtual.quantidade.replace(',', '.')) || 0) * parseCurrency(produtoAtual.preco) && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Desconto não pode exceder o valor total
+                    </p>
+                  )}
                 </div>
 
                 <div className="col-span-1">
@@ -810,6 +943,12 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                     )}
                     readOnly
                     disabled
+                    className={
+                      parseCurrency(produtoAtual.desconto) > 
+                      (parseFloat(produtoAtual.quantidade.replace(',', '.')) || 0) * parseCurrency(produtoAtual.preco)
+                        ? 'border-red-500'
+                        : ''
+                    }
                   />
                 </div>
 
@@ -817,7 +956,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                   <Button
                     type="button"
                     onClick={adicionarProduto}
-                    disabled={!isHeaderComplete || isProductsLocked || isLoading}
+                    disabled={!isHeaderComplete || isProductsLocked || isLoading || !!duplicateError}
                     className="w-full"
                   >
                     <Plus className="h-4 w-4 mr-2" />
@@ -1242,8 +1381,12 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                       Cancelar
                     </Button>
                   </Link>
-                  <Button type="submit" disabled={isLoading}>
+                  <Button 
+                    type="submit" 
+                    disabled={isLoading || isCheckingDuplicate || !!duplicateError}
+                  >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isCheckingDuplicate && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {isEditing ? 'Atualizar' : 'Salvar'}
                     <Save className="ml-2 h-4 w-4" />
                   </Button>

@@ -28,10 +28,11 @@ export class Purchase extends BaseEntity {
   serie: string;
 
   @ApiProperty({
-    description: 'Código do fornecedor',
-    example: '1',
+    description: 'Número da nota fiscal',
+    example: '12345',
+    required: false,
   })
-  codigoFornecedor: string;
+  numeroNota?: string;
 
   @ApiProperty({
     description: 'ID do fornecedor',
@@ -156,7 +157,7 @@ export class Purchase extends BaseEntity {
   @ApiProperty({
     description: 'Status da compra',
     example: 'PENDENTE',
-    enum: ['PENDENTE', 'CONFIRMADA', 'CANCELADA', 'ENTREGUE'],
+    enum: ['PENDENTE', 'APROVADO', 'ENVIADO', 'RECEBIDO', 'CANCELADO'],
   })
   status: string;
 

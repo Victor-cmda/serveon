@@ -1,80 +1,86 @@
 export interface Purchase {
   id: number;
   numeroSequencial?: number | null;
-  codigo?: string;
+  numeroPedido?: string;
+  numeroNota?: string;
   modelo?: string;
   serie?: string;
-  codigoFornecedor?: string;
   fornecedorId: number;
   fornecedorNome?: string;
   dataEmissao: string;
-  dataChegada: string;
+  dataChegada?: string;
+  dataEntregaRealizada?: string;
   condicaoPagamentoId: number;
   condicaoPagamentoNome?: string;
+  formaPagamentoId?: number;
   funcionarioId: number;
   funcionarioNome?: string;
   tipoFrete: 'CIF' | 'FOB';
   valorFrete: number;
   valorSeguro: number;
   outrasDespesas: number;
-  totalProdutos: number;
+  totalProdutos?: number;
   valorDesconto: number;
-  totalAPagar: number;
-  status: 'PENDENTE' | 'CONFIRMADA' | 'CANCELADA' | 'ENTREGUE';
+  valorAcrescimo?: number;
+  totalAPagar?: number;
+  status: 'PENDENTE' | 'APROVADO' | 'ENVIADO' | 'RECEBIDO' | 'CANCELADO';
   transportadoraId?: number;
   transportadoraNome?: string;
   observacoes?: string;
+  aprovadoPor?: number;
+  dataAprovacao?: string;
   ativo: boolean;
   createdAt: string;
   updatedAt: string;
+  itens?: any[];
+  parcelas?: any[];
 }
 
 export interface PurchaseItem {
   id?: number;
-  compraId?: number;
-  codigo: string;
   produtoId: number;
-  produto: string;
-  unidade: string;
   quantidade: number;
-  precoUN: number;
-  descUN: number;
-  liquidoUN: number;
-  total: number;
-  rateio: number;
-  custoFinalUN: number;
-  custoFinal: number;
+  precoUn: number;
+  descUn?: number;
+  liquidoUn?: number;
+  total?: number;
+  rateio?: number;
+  custoFinalUn?: number;
+  custoFinal?: number;
 }
 
 export interface PurchaseInstallment {
   id?: number;
-  compraId?: number;
   parcela: number;
-  codigoFormaPagto: string;
+  codigoFormaPagto?: string;
   formaPagamentoId: number;
-  formaPagamento: string;
   dataVencimento: string;
   valorParcela: number;
 }
 
 export interface CreatePurchaseData {
-  codigo?: string;
-  modelo?: string;
-  serie?: string;
-  codigoFornecedor?: string;
+  numeroPedido?: string;
+  numeroNota?: string;
+  modelo: string;
+  serie: string;
   fornecedorId: number;
   dataEmissao: string;
-  dataChegada: string;
+  dataChegada?: string;
+  dataEntregaRealizada?: string;
   condicaoPagamentoId: number;
+  formaPagamentoId?: number;
   funcionarioId: number;
   tipoFrete?: 'CIF' | 'FOB';
   valorFrete?: number;
   valorSeguro?: number;
   outrasDespesas?: number;
   valorDesconto?: number;
-  status?: 'PENDENTE' | 'CONFIRMADA' | 'CANCELADA' | 'ENTREGUE';
+  valorAcrescimo?: number;
+  status?: 'PENDENTE' | 'APROVADO' | 'ENVIADO' | 'RECEBIDO' | 'CANCELADO';
   transportadoraId?: number;
   observacoes?: string;
+  aprovadoPor?: number;
+  dataAprovacao?: string;
   itens?: PurchaseItem[];
   parcelas?: PurchaseInstallment[];
 }

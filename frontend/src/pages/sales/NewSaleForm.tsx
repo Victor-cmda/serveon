@@ -100,6 +100,12 @@ export default function NewSaleForm() {
       return;
     }
 
+    // Validação: desconto não pode ser maior que o valor total
+    if (valorDesconto > valorTotal) {
+      toast.error('O desconto não pode ser maior que o valor total da venda');
+      return;
+    }
+
     try {
       const saleData: CreateSaleDto = {
         clienteId,
@@ -264,7 +270,17 @@ export default function NewSaleForm() {
                   min="0"
                   value={valorDesconto}
                   onChange={(e) => setValorDesconto(parseFloat(e.target.value) || 0)}
+                  className={
+                    valorDesconto > valorTotal
+                      ? 'border-red-500 focus-visible:ring-red-500'
+                      : ''
+                  }
                 />
+                {valorDesconto > valorTotal && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Desconto não pode ser maior que o valor total
+                  </p>
+                )}
               </div>
 
               <div className="col-span-4 space-y-2">

@@ -15,6 +15,13 @@ export class SalesService {
 
   async create(createSaleDto: CreateSaleDto): Promise<Sale> {
     try {
+      // Validação: desconto não pode ser maior que o valor total
+      if (createSaleDto.valorDesconto && createSaleDto.valorDesconto > createSaleDto.valorTotal) {
+        throw new BadRequestException(
+          'O desconto não pode ser maior que o valor total da venda',
+        );
+      }
+
       const client = await this.databaseService.getClient();
 
       try {
@@ -114,6 +121,15 @@ export class SalesService {
 
   async update(id: number, updateSaleDto: UpdateSaleDto): Promise<Sale> {
     try {
+      // Validação: se desconto for fornecido, verificar se não excede o valor total
+      if (updateSaleDto.valorDesconto !== undefined && updateSaleDto.valorTotal !== undefined) {
+        if (updateSaleDto.valorDesconto > updateSaleDto.valorTotal) {
+          throw new BadRequestException(
+            'O desconto não pode ser maior que o valor total da venda',
+          );
+        }
+      }
+
       const client = await this.databaseService.getClient();
 
       try {

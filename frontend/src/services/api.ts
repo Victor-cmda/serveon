@@ -837,13 +837,13 @@ export const purchaseApi = {
     numeroPedido: string,
     modelo: string,
     serie: string,
-    codigoFornecedor: string,
+    fornecedorId: string,
   ): Promise<{ exists: boolean }> => {
     const params = new URLSearchParams({
       numeroPedido,
       modelo,
       serie,
-      codigoFornecedor,
+      fornecedorId,
     });
     const response = await fetch(`${API_URL}/purchases/check-exists?${params}`);
     return handleResponse(response);

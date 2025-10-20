@@ -32,18 +32,18 @@ export class PurchasesController {
   @ApiQuery({ name: 'numeroPedido', required: true, description: 'Número do pedido/nota fiscal' })
   @ApiQuery({ name: 'modelo', required: true, description: 'Modelo da nota fiscal' })
   @ApiQuery({ name: 'serie', required: true, description: 'Série da nota fiscal' })
-  @ApiQuery({ name: 'codigoFornecedor', required: true, description: 'Código do fornecedor' })
+  @ApiQuery({ name: 'fornecedorId', required: true, description: 'ID do fornecedor' })
   async checkExists(
     @Query('numeroPedido') numeroPedido: string,
     @Query('modelo') modelo: string,
     @Query('serie') serie: string,
-    @Query('codigoFornecedor') codigoFornecedor: string,
+    @Query('fornecedorId') fornecedorId: string,
   ) {
     const exists = await this.purchasesService.checkCompositeKeyExists(
       numeroPedido,
       modelo,
       serie,
-      codigoFornecedor,
+      fornecedorId,
     );
     return { exists };
   }
