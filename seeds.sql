@@ -399,13 +399,12 @@ INSERT INTO funcionario (
 -- =====================================================
 
 INSERT INTO compra (
-    numero_pedido, modelo, serie, codigo_fornecedor,
-    fornecedor_id, data_emissao, data_chegada,
+    numero_pedido, modelo, serie, fornecedor_id,
+    data_emissao, data_chegada,
     condicao_pagamento_id, forma_pagamento_id, funcionario_id, status, tipo_frete, transportadora_id,
     valor_frete, valor_seguro, valor_desconto, valor_acrescimo, total_produtos, total_a_pagar, observacoes
 ) VALUES (
-    '0001', '55', '001', (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
-    (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '0001', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     CURRENT_DATE, CURRENT_DATE + INTERVAL '5 days',
     (SELECT id FROM condicao_pagamento WHERE nome = '30 DIAS'),
     (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'),
@@ -414,10 +413,10 @@ INSERT INTO compra (
 );
 
 INSERT INTO item_compra (
-    compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor,
+    compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     codigo, produto_id, produto, unidade, quantidade, preco_un, desc_un, liquido_un, total, custo_final_un, custo_final, valor_unitario, valor_desconto, valor_total
 ) VALUES (
-    '0001', '55', '001', (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '0001', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     'P0001', 
     (SELECT id FROM produto WHERE codigo = 'P0001'), 
     'PRODUTO A', 
@@ -435,10 +434,10 @@ INSERT INTO item_compra (
 );
 
 INSERT INTO recebimento_compra (
-    compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor,
+    compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     numero_recebimento, data_recebimento, funcionario_responsavel_id, nfe_referencia, valor_total_recebido, observacoes, status
 ) VALUES (
-    '0001', '55', '001', (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '0001', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     '0001', CURRENT_DATE + INTERVAL '6 days', (SELECT id FROM funcionario WHERE email = 'comprador@exemplo.com'), NULL, 5000.00, 'RECEBIMENTO TOTAL', 'RECEBIDO'
 );
 
@@ -446,19 +445,18 @@ INSERT INTO item_recebimento_compra (
     recebimento_id, item_compra_id, quantidade_recebida, valor_unitario_recebido, lote
 ) VALUES (
     (SELECT id FROM recebimento_compra WHERE numero_recebimento = '0001'), 
-    (SELECT id FROM item_compra WHERE compra_numero_pedido = '0001' AND compra_modelo = '55' AND compra_serie = '001' AND compra_codigo_fornecedor = (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155') LIMIT 1), 
+    (SELECT id FROM item_compra WHERE compra_numero_pedido = '0001' AND compra_modelo = '55' AND compra_serie = '001' AND compra_fornecedor_id = (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155') LIMIT 1), 
     100.000, 50.00, 'Lote-001'
 );
 
 -- Segunda compra - Demonstra a chave composta permitindo mesmo numero_pedido com modelo/série/fornecedor diferentes
 INSERT INTO compra (
-    numero_pedido, modelo, serie, codigo_fornecedor,
-    fornecedor_id, data_emissao, data_chegada,
+    numero_pedido, modelo, serie, fornecedor_id,
+    data_emissao, data_chegada,
     condicao_pagamento_id, forma_pagamento_id, funcionario_id, status, tipo_frete, transportadora_id,
     valor_frete, valor_seguro, valor_desconto, valor_acrescimo, total_produtos, total_a_pagar, observacoes
 ) VALUES (
-    '0002', '55', '001', (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
-    (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '0002', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     CURRENT_DATE + INTERVAL '10 days', CURRENT_DATE + INTERVAL '15 days',
     (SELECT id FROM condicao_pagamento WHERE nome = '30/60'),
     (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'),
@@ -467,10 +465,10 @@ INSERT INTO compra (
 );
 
 INSERT INTO item_compra (
-    compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor,
+    compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     codigo, produto_id, produto, unidade, quantidade, preco_un, desc_un, liquido_un, total, custo_final_un, custo_final, valor_unitario, valor_desconto, valor_total
 ) VALUES (
-    '0002', '55', '001', (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '0002', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     'P0002', 
     (SELECT id FROM produto WHERE codigo = 'P0002'), 
     'PRODUTO B', 
@@ -489,13 +487,12 @@ INSERT INTO item_compra (
 
 -- Terceira compra - Mesmo número 0001, mas série diferente (demonstra unicidade da chave composta)
 INSERT INTO compra (
-    numero_pedido, modelo, serie, codigo_fornecedor,
-    fornecedor_id, data_emissao, data_chegada,
+    numero_pedido, modelo, serie, fornecedor_id,
+    data_emissao, data_chegada,
     condicao_pagamento_id, forma_pagamento_id, funcionario_id, status, tipo_frete, transportadora_id,
     valor_frete, valor_seguro, valor_desconto, valor_acrescimo, total_produtos, total_a_pagar, observacoes
 ) VALUES (
-    '0001', '55', '002', (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
-    (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '0001', '55', '002', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     CURRENT_DATE + INTERVAL '20 days', CURRENT_DATE + INTERVAL '25 days',
     (SELECT id FROM condicao_pagamento WHERE nome = 'À VISTA'),
     (SELECT id FROM forma_pagamento WHERE nome = 'PIX'),
@@ -504,10 +501,10 @@ INSERT INTO compra (
 );
 
 INSERT INTO item_compra (
-    compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor,
+    compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     codigo, produto_id, produto, unidade, quantidade, preco_un, desc_un, liquido_un, total, custo_final_un, custo_final, valor_unitario, valor_desconto, valor_total
 ) VALUES (
-    '0001', '55', '002', (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '0001', '55', '002', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     'P0001', 
     (SELECT id FROM produto WHERE codigo = 'P0001'), 
     'PRODUTO A', 
@@ -526,33 +523,33 @@ INSERT INTO item_compra (
 
 -- Parcelas das compras
 INSERT INTO parcela_compra (
-    compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor,
+    compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     parcela, codigo_forma_pagto, forma_pagamento_id, forma_pagamento, data_vencimento, valor_parcela, status
 ) VALUES (
-    '0001', '55', '001', (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '0001', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     1, 'BOL', (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'BOLETO BANCÁRIO', 
     CURRENT_DATE + INTERVAL '30 days', 5100.00, 'PENDENTE'
 );
 
 INSERT INTO parcela_compra (
-    compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor,
+    compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     parcela, codigo_forma_pagto, forma_pagamento_id, forma_pagamento, data_vencimento, valor_parcela, status
 ) VALUES (
-    '0002', '55', '001', (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '0002', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     1, 'BOL', (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'BOLETO BANCÁRIO', 
     CURRENT_DATE + INTERVAL '30 days', 700.00, 'PENDENTE'
 ),
 (
-    '0002', '55', '001', (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '0002', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     2, 'BOL', (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'BOLETO BANCÁRIO', 
     CURRENT_DATE + INTERVAL '60 days', 700.00, 'PENDENTE'
 );
 
 INSERT INTO parcela_compra (
-    compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor,
+    compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     parcela, codigo_forma_pagto, forma_pagamento_id, forma_pagamento, data_vencimento, valor_parcela, status
 ) VALUES (
-    '0001', '55', '002', (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '0001', '55', '002', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     1, 'PIX', (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'PIX', 
     CURRENT_DATE + INTERVAL '20 days', 800.00, 'PENDENTE'
 );
@@ -674,31 +671,31 @@ INSERT INTO estoque_movimento (
 -- =====================================================
 
 INSERT INTO contas_pagar (
-    compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor,
+    compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
     valor_original, valor_saldo, forma_pagamento_id, status, observacoes
 ) VALUES (
-    '0001', '55', '001', (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '0001', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'DUP-0001', 'DUPLICATA', CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days',
     5100.00, 5100.00, (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 'A PAGAR DA COMPRA 0001 SÉRIE 001'
 );
 
 INSERT INTO contas_pagar (
-    compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor,
+    compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
     valor_original, valor_saldo, forma_pagamento_id, status, observacoes
 ) VALUES (
-    '0002', '55', '001', (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '0002', '55', '001', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'DUP-0002', 'DUPLICATA', CURRENT_DATE + INTERVAL '10 days', CURRENT_DATE + INTERVAL '40 days',
     1400.00, 1400.00, (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 'A PAGAR DA COMPRA 0002'
 );
 
 INSERT INTO contas_pagar (
-    compra_numero_pedido, compra_modelo, compra_serie, compra_codigo_fornecedor,
+    compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
     valor_original, valor_saldo, forma_pagamento_id, status, observacoes
 ) VALUES (
-    '0001', '55', '002', (SELECT id::VARCHAR FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
+    '0001', '55', '002', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
     (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'DUP-0003', 'DUPLICATA', CURRENT_DATE + INTERVAL '20 days', CURRENT_DATE + INTERVAL '40 days',
     800.00, 800.00, (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'ABERTO', 'A PAGAR DA COMPRA 0001 SÉRIE 002'
 );
