@@ -29,13 +29,23 @@ export class PurchasesService {
       try {
         await client.query('BEGIN');
 
-        // Gerar número sequencial único
-        const sequenceResult = await client.query(`
-          SELECT COALESCE(MAX(CAST(numero_pedido AS INTEGER)), 0) + 1 as next_number
-          FROM dbo.compra 
-          WHERE numero_pedido ~ '^[0-9]+$'
-        `);
-        const numeroSequencial = sequenceResult.rows[0].next_number;
+        // Usar o número do pedido informado pelo usuário ou gerar um sequencial
+        let numeroPedido: string;
+        
+        if (createPurchaseDto.numeroPedido && createPurchaseDto.numeroPedido.trim() !== '') {
+          // Usar o número informado pelo usuário
+          numeroPedido = createPurchaseDto.numeroPedido.trim();
+          console.log('[DEBUG] Usando número do pedido informado pelo usuário:', numeroPedido);
+        } else {
+          // Gerar número sequencial único apenas se não for informado
+          const sequenceResult = await client.query(`
+            SELECT COALESCE(MAX(CAST(numero_pedido AS INTEGER)), 0) + 1 as next_number
+            FROM dbo.compra 
+            WHERE numero_pedido ~ '^[0-9]+$'
+          `);
+          numeroPedido = sequenceResult.rows[0].next_number.toString();
+          console.log('[DEBUG] Número do pedido gerado automaticamente:', numeroPedido);
+        }
 
         // Calcular totais
         const totalProdutos =
@@ -80,7 +90,7 @@ export class PurchasesService {
             ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
           RETURNING *`,
           [
-            numeroSequencial.toString(),
+            numeroPedido,
             createPurchaseDto.modelo,
             createPurchaseDto.serie,
             createPurchaseDto.numeroNota || null,
@@ -156,7 +166,7 @@ export class PurchasesService {
             const quantidadeRecebida = item.quantidadeRecebida || 0;
 
             console.log(`[DEBUG] Inserindo item com dados:`, {
-              numeroSequencial: numeroSequencial.toString(),
+              numeroPedido: numeroPedido,
               modelo: createPurchaseDto.modelo,
               serie: createPurchaseDto.serie,
               fornecedorId: createPurchaseDto.fornecedorId,
@@ -176,7 +186,7 @@ export class PurchasesService {
                 data_entrega_item, observacoes)
               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)`,
               [
-                numeroSequencial.toString(),
+                numeroPedido,
                 createPurchaseDto.modelo,
                 createPurchaseDto.serie,
                 createPurchaseDto.fornecedorId,
@@ -236,7 +246,7 @@ export class PurchasesService {
                 data_vencimento, valor_parcela)
               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
               [
-                numeroSequencial.toString(),
+                numeroPedido,
                 createPurchaseDto.modelo,
                 createPurchaseDto.serie,
                 createPurchaseDto.fornecedorId,
@@ -611,6 +621,103 @@ export class PurchasesService {
     } catch (error) {
       console.error('Erro ao verificar chave composta:', error);
       throw new InternalServerErrorException('Erro ao verificar chave composta');
+    }
+  }
+
+  async approve(id: number, aprovadoPor?: number): Promise<Purchase> {
+    try {
+      const client = await this.databaseService.getClient();
+
+      try {
+        await client.query('BEGIN');
+
+        // Verificar se a compra existe
+        const checkResult = await client.query(
+          'SELECT numero_sequencial FROM dbo.compra WHERE numero_sequencial = $1',
+          [id],
+        );
+
+        if (checkResult.rows.length === 0) {
+          throw new NotFoundException(`Compra com ID ${id} não encontrada`);
+        }
+
+        // Atualizar status para APROVADO
+        const updateResult = await client.query(
+          `UPDATE dbo.compra 
+           SET status = $1, 
+               aprovado_por = $2, 
+               data_aprovacao = CURRENT_TIMESTAMP,
+               updated_at = CURRENT_TIMESTAMP
+           WHERE numero_sequencial = $3
+           RETURNING *`,
+          ['APROVADO', aprovadoPor || null, id],
+        );
+
+        await client.query('COMMIT');
+
+        return this.mapToEntity(updateResult.rows[0]);
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error('Erro ao aprovar compra:', error);
+      throw new InternalServerErrorException('Erro ao aprovar compra');
+    }
+  }
+
+  async deny(id: number, motivo?: string): Promise<Purchase> {
+    try {
+      const client = await this.databaseService.getClient();
+
+      try {
+        await client.query('BEGIN');
+
+        // Verificar se a compra existe
+        const checkResult = await client.query(
+          'SELECT numero_sequencial FROM dbo.compra WHERE numero_sequencial = $1',
+          [id],
+        );
+
+        if (checkResult.rows.length === 0) {
+          throw new NotFoundException(`Compra com ID ${id} não encontrada`);
+        }
+
+        // Atualizar status para CANCELADO (negar = cancelar)
+        const observacoesUpdate = motivo 
+          ? `Negado: ${motivo}` 
+          : 'Compra negada';
+
+        const updateResult = await client.query(
+          `UPDATE dbo.compra 
+           SET status = $1, 
+               observacoes = COALESCE(observacoes || ' | ', '') || $2,
+               updated_at = CURRENT_TIMESTAMP
+           WHERE numero_sequencial = $3
+           RETURNING *`,
+          ['CANCELADO', observacoesUpdate, id],
+        );
+
+        await client.query('COMMIT');
+
+        return this.mapToEntity(updateResult.rows[0]);
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error('Erro ao negar compra:', error);
+      throw new InternalServerErrorException('Erro ao negar compra');
     }
   }
 

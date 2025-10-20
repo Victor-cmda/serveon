@@ -54,7 +54,7 @@ const PurchaseViewDialog: React.FC<PurchaseViewDialogProps> = ({ purchase, onClo
             <h3 className="text-lg font-semibold border-b pb-2">Informações Gerais</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Número Sequencial</label>
+                <label className="text-sm font-medium text-muted-foreground">Número da Nota</label>
                 <p className="text-base font-medium">{purchase.numeroSequencial || '-'}</p>
               </div>
               

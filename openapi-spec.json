@@ -3280,6 +3280,60 @@
         ]
       }
     },
+    "/api/purchases/{id}/approve": {
+      "patch": {
+        "operationId": "PurchasesController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compra aprovada com sucesso."
+          },
+          "404": {
+            "description": "Compra não encontrada."
+          }
+        },
+        "summary": "Aprovar compra",
+        "tags": [
+          "purchases"
+        ]
+      }
+    },
+    "/api/purchases/{id}/deny": {
+      "patch": {
+        "operationId": "PurchasesController_deny",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compra negada com sucesso."
+          },
+          "404": {
+            "description": "Compra não encontrada."
+          }
+        },
+        "summary": "Negar compra",
+        "tags": [
+          "purchases"
+        ]
+      }
+    },
     "/api/sales": {
       "post": {
         "operationId": "SalesController_create",
@@ -6321,6 +6375,7 @@
           }
         },
         "required": [
+          "numeroPedido",
           "modelo",
           "serie",
           "fornecedorId",

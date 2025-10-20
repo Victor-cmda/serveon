@@ -71,6 +71,24 @@ export class PurchasesController {
     return this.purchasesService.update(+id, updatePurchaseDto);
   }
 
+  @Patch(':id/approve')
+  @ApiOperation({ summary: 'Aprovar compra' })
+  @ApiResponse({ status: 200, description: 'Compra aprovada com sucesso.' })
+  @ApiResponse({ status: 404, description: 'Compra não encontrada.' })
+  approve(@Param('id') id: string) {
+    // TODO: Obter ID do usuário logado do contexto de autenticação
+    const aprovadoPor = 4; // Temporário - deve vir do contexto
+    return this.purchasesService.approve(+id, aprovadoPor);
+  }
+
+  @Patch(':id/deny')
+  @ApiOperation({ summary: 'Negar compra' })
+  @ApiResponse({ status: 200, description: 'Compra negada com sucesso.' })
+  @ApiResponse({ status: 404, description: 'Compra não encontrada.' })
+  deny(@Param('id') id: string, @Body() body?: { motivo?: string }) {
+    return this.purchasesService.deny(+id, body?.motivo);
+  }
+
   @Delete(':id')
   @ApiOperation({ summary: 'Deletar compra' })
   @ApiResponse({ status: 200, description: 'Compra deletada com sucesso.' })

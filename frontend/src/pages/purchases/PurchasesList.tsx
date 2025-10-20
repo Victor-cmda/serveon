@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Eye, Trash2, Search, ShoppingCart } from 'lucide-react';
+import { Plus, Eye, Search, ShoppingCart, MoreVertical, Check, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { purchaseApi } from '../../services/api';
 import { Purchase } from '../../types/purchase';
 import { toast } from '../../lib/toast';
 import PurchaseViewDialog from './components/PurchaseViewDialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 const PurchasesList: React.FC = () => {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
@@ -33,7 +40,7 @@ const PurchasesList: React.FC = () => {
 
   const filteredPurchases = purchases.filter(
     purchase =>
-      (purchase.numeroSequencial?.toString() || '').includes(searchTerm) ||
+      (purchase.numeroPedido?.toString() || '').includes(searchTerm) ||
       purchase.id.toString().includes(searchTerm) ||
       (purchase.fornecedorNome && purchase.fornecedorNome.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (purchase.funcionarioNome && purchase.funcionarioNome.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -57,14 +64,38 @@ const PurchasesList: React.FC = () => {
     switch (status) {
       case 'PENDENTE':
         return 'bg-yellow-100 text-yellow-800';
-      case 'CONFIRMADA':
-        return 'bg-blue-100 text-blue-800';
-      case 'ENTREGUE':
+      case 'APROVADO':
         return 'bg-green-100 text-green-800';
-      case 'CANCELADA':
+      case 'ENVIADO':
+        return 'bg-blue-100 text-blue-800';
+      case 'RECEBIDO':
+        return 'bg-green-100 text-green-800';
+      case 'CANCELADO':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleApprove = async (purchaseId: number) => {
+    try {
+      await purchaseApi.approve(purchaseId);
+      toast.success('Compra aprovada com sucesso!');
+      loadPurchases();
+    } catch (error) {
+      console.error('Erro ao aprovar compra:', error);
+      toast.error('Erro ao aprovar compra');
+    }
+  };
+
+  const handleDeny = async (purchaseId: number) => {
+    try {
+      await purchaseApi.deny(purchaseId);
+      toast.success('Compra negada com sucesso!');
+      loadPurchases();
+    } catch (error) {
+      console.error('Erro ao negar compra:', error);
+      toast.error('Erro ao negar compra');
     }
   };
 
@@ -153,7 +184,7 @@ const PurchasesList: React.FC = () => {
                 filteredPurchases.map((purchase) => (
                   <tr key={purchase.id} className="border-b">
                     <td className="p-4">
-                      <div className="font-medium">{purchase.numeroSequencial || '-'}</div>
+                      <div className="font-medium">{purchase.numeroPedido || '-'}</div>
                       {purchase.modelo && purchase.serie && (
                         <div className="text-sm text-muted-foreground">
                           Mod: {purchase.modelo} / Série: {purchase.serie}
@@ -162,22 +193,17 @@ const PurchasesList: React.FC = () => {
                     </td>
                     <td className="p-4">
                       <div className="font-medium">{purchase.fornecedorNome || '-'}</div>
-                      {purchase.codigoFornecedor && (
-                        <div className="text-sm text-muted-foreground">
-                          Cód: {purchase.codigoFornecedor}
-                        </div>
-                      )}
                     </td>
                     <td className="p-4">
                       <div className="text-sm">{formatDate(purchase.dataEmissao)}</div>
                     </td>
                     <td className="p-4">
-                      <div className="text-sm">{formatDate(purchase.dataChegada)}</div>
+                      <div className="text-sm">{purchase.dataChegada ? formatDate(purchase.dataChegada) : '-'}</div>
                     </td>
                     <td className="p-4">
-                      <div className="font-medium">{formatCurrency(purchase.totalAPagar)}</div>
+                      <div className="font-medium">{purchase.totalAPagar ? formatCurrency(purchase.totalAPagar) : '-'}</div>
                       <div className="text-sm text-muted-foreground">
-                        Produtos: {formatCurrency(purchase.totalProdutos)}
+                        Produtos: {purchase.totalProdutos ? formatCurrency(purchase.totalProdutos) : '-'}
                       </div>
                     </td>
                     <td className="p-4">
@@ -196,13 +222,34 @@ const PurchasesList: React.FC = () => {
                         >
                           <Eye className="h-3 w-3" />
                         </button>
-                        <button
-                          disabled
-                          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-muted text-muted-foreground h-8 w-8 cursor-not-allowed opacity-50"
-                          title="Exclusão temporariamente indisponível"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
+                        
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8"
+                              title="Mais opções"
+                            >
+                              <MoreVertical className="h-3 w-3" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleApprove(purchase.id)}
+                              className="cursor-pointer"
+                            >
+                              <Check className="mr-2 h-4 w-4" />
+                              <span>Aprovar Nota</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleDeny(purchase.id)}
+                              className="cursor-pointer text-red-600"
+                            >
+                              <X className="mr-2 h-4 w-4" />
+                              <span>Negar Nota</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </td>
                   </tr>

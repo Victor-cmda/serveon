@@ -8,10 +8,24 @@ import { ArrowLeft, Save, Loader2, Search, Plus, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { supplierApi, productApi, paymentTermApi, purchaseApi, transporterApi, paymentMethodApi } from '@/services/api';
+import {
+  supplierApi,
+  productApi,
+  paymentTermApi,
+  purchaseApi,
+  transporterApi,
+  paymentMethodApi,
+} from '@/services/api';
 import { toast } from 'sonner';
 import { SearchDialog } from '@/components/SearchDialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import AuditSection from '@/components/AuditSection';
 import SupplierCreationDialog from '@/components/dialogs/SupplierCreationDialog';
 import { Supplier } from '@/types/supplier';
@@ -24,7 +38,10 @@ import { PaymentMethod } from '@/types/payment-method';
 const formatCurrency = (valueInCents: number): string => {
   const number = Number(valueInCents) / 100;
   if (isNaN(number)) return '0,00';
-  return number.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return number.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 };
 
 const parseCurrency = (valueString: string | number): number => {
@@ -33,6 +50,11 @@ const parseCurrency = (valueString: string | number): number => {
   }
   const digitsOnly = valueString.replace(/\D/g, '');
   return parseInt(digitsOnly, 10) || 0;
+};
+
+// Função para arredondar para um número específico de casas decimais
+const roundToDecimals = (value: number, decimals: number): number => {
+  return Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals);
 };
 
 interface ProdutoItem {
@@ -60,8 +82,8 @@ interface Parcela {
 
 const formSchema = z.object({
   numeroNota: z.string().min(1, 'Número da nota é obrigatório'),
-  modelo: z.string().optional(),
-  serie: z.string().optional(),
+  modelo: z.string().min(1, 'Modelo é obrigatório'),
+  serie: z.string().min(1, 'Série é obrigatória'),
   idFornecedor: z.string().min(1, 'Fornecedor é obrigatório'),
   dataEmissao: z.string().min(1, 'Data de emissão é obrigatória'),
   dataChegada: z.string().min(1, 'Data de chegada é obrigatória'),
@@ -89,12 +111,17 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
   const [purchaseData, setPurchaseData] = useState<any>(null);
 
   // Estados para entidades selecionadas
-  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
-  const [selectedPaymentTerm, setSelectedPaymentTerm] = useState<PaymentTerm | null>(null);
-  const [selectedTransporter, setSelectedTransporter] = useState<Transporter | null>(null);
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(
+    null,
+  );
+  const [selectedPaymentTerm, setSelectedPaymentTerm] =
+    useState<PaymentTerm | null>(null);
+  const [selectedTransporter, setSelectedTransporter] =
+    useState<Transporter | null>(null);
 
   // Estado para controlar se a condição de pagamento vem do fornecedor (bloqueada)
-  const [isPaymentTermFromSupplier, setIsPaymentTermFromSupplier] = useState(false);
+  const [isPaymentTermFromSupplier, setIsPaymentTermFromSupplier] =
+    useState(false);
 
   // Estados para produtos e parcelas
   const [produtos, setProdutos] = useState<ProdutoItem[]>([]);
@@ -155,22 +182,27 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
     },
   });
 
-  // Verifica se o header está completo (Número e Fornecedor preenchidos)
+  // Verifica se o header está completo (Número, Modelo, Série e Fornecedor preenchidos)
   const numeroNota = form.watch('numeroNota');
   const idFornecedor = form.watch('idFornecedor');
   const modelo = form.watch('modelo');
   const serie = form.watch('serie');
-  
+
   const isHeaderComplete = useMemo(() => {
-    return numeroNota?.trim() !== '' && idFornecedor?.trim() !== '';
-  }, [numeroNota, idFornecedor]);
+    return (
+      numeroNota?.trim() !== '' &&
+      idFornecedor?.trim() !== '' &&
+      modelo?.trim() !== '' &&
+      serie?.trim() !== ''
+    );
+  }, [numeroNota, idFornecedor, modelo, serie]);
 
   // Função para verificar se a chave composta já existe
   const checkDuplicatePurchase = async (
     numeroPedido: string,
     modeloDoc: string,
     serieDoc: string,
-    fornecedorId: string
+    fornecedorId: string,
   ) => {
     // Não verifica em modo de edição para a própria compra
     if (isEditing && id) {
@@ -192,7 +224,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
         numeroPedido,
         modeloDoc,
         serieDoc,
-        fornecedorId
+        fornecedorId,
       );
 
       if (result.exists) {
@@ -205,7 +237,9 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
     } catch (error) {
       console.error('Erro ao verificar duplicidade:', error);
       // Se houver erro na verificação, não bloqueamos o usuário
-      toast.warning('Não foi possível verificar duplicidade. Prossiga com cautela.');
+      toast.warning(
+        'Não foi possível verificar duplicidade. Prossiga com cautela.',
+      );
     } finally {
       setIsCheckingDuplicate(false);
     }
@@ -228,7 +262,13 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [suppliersData, productsData, paymentTermsData, transportersData, paymentMethodsData] = await Promise.all([
+        const [
+          suppliersData,
+          productsData,
+          paymentTermsData,
+          transportersData,
+          paymentMethodsData,
+        ] = await Promise.all([
           supplierApi.getAll(),
           productApi.getAll(),
           paymentTermApi.getAll(),
@@ -289,10 +329,15 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
 
     const freteCents = parseCurrency(form.watch('valorFrete') || '0,00');
     const seguroCents = parseCurrency(form.watch('valorSeguro') || '0,00');
-    const outrasDespesasCents = parseCurrency(form.watch('outrasDespesas') || '0,00');
+    const outrasDespesasCents = parseCurrency(
+      form.watch('outrasDespesas') || '0,00',
+    );
     const totalDespesasCents = freteCents + seguroCents + outrasDespesasCents;
 
-    const totalProdutosCents = produtos.reduce((acc, p) => acc + p.precoTotal, 0);
+    const totalProdutosCents = produtos.reduce(
+      (acc, p) => acc + p.precoTotal,
+      0,
+    );
 
     if (totalProdutosCents === 0) return produtos;
 
@@ -305,14 +350,22 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
         valorTotalComRateio: produto.precoTotal + rateio,
       };
     });
-  }, [produtos, form.watch('valorFrete'), form.watch('valorSeguro'), form.watch('outrasDespesas')]);
+  }, [
+    produtos,
+    form.watch('valorFrete'),
+    form.watch('valorSeguro'),
+    form.watch('outrasDespesas'),
+  ]);
 
   // Calcula totais
   const totais = useMemo(() => {
-    const totalProdutos = produtosComRateio.reduce((acc, p) => acc + p.precoTotal, 0);
+    const totalProdutos = produtosComRateio.reduce(
+      (acc, p) => acc + p.precoTotal,
+      0,
+    );
     const totalRateio = produtosComRateio.reduce(
       (acc, p) => acc + (p.valorRateio || 0),
-      0
+      0,
     );
     const totalGeral = totalProdutos + totalRateio;
 
@@ -330,9 +383,11 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
       return;
     }
 
-    const dataBase = parseISO(form.watch('dataEmissao') || new Date().toISOString().split('T')[0]);
+    const dataBase = parseISO(
+      form.watch('dataEmissao') || new Date().toISOString().split('T')[0],
+    );
     const installments = selectedPaymentTerm.installments || [];
-    
+
     if (installments.length === 0) {
       setParcelas([]);
       return;
@@ -345,10 +400,13 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
 
     const novasParcelas: Parcela[] = installments.map((inst, idx) => {
       const dataVencimento = addDays(dataBase, inst.daysToPayment);
-      const valorFinal = idx === numParcelas - 1 ? valorParcela + resto : valorParcela;
-      
+      const valorFinal =
+        idx === numParcelas - 1 ? valorParcela + resto : valorParcela;
+
       // Buscar o nome da forma de pagamento
-      const paymentMethod = paymentMethods.find(pm => pm.id === inst.paymentMethodId);
+      const paymentMethod = paymentMethods.find(
+        (pm) => pm.id === inst.paymentMethodId,
+      );
       const formaPagtoNome = paymentMethod?.name || 'Não definido';
 
       return {
@@ -361,16 +419,23 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
     });
 
     setParcelas(novasParcelas);
-  }, [selectedPaymentTerm, totais.totalGeral, form.watch('dataEmissao'), paymentMethods]);
+  }, [
+    selectedPaymentTerm,
+    totais.totalGeral,
+    form.watch('dataEmissao'),
+    paymentMethods,
+  ]);
 
   // Função para selecionar fornecedor
   const onSelectSupplier = (supplier: Supplier) => {
     setSelectedSupplier(supplier);
     form.setValue('idFornecedor', supplier.id.toString());
-    
+
     // Preencher automaticamente a condição de pagamento do fornecedor e bloquear
     if (supplier.condicaoPagamentoId) {
-      const paymentTerm = paymentTerms.find(pt => pt.id === supplier.condicaoPagamentoId);
+      const paymentTerm = paymentTerms.find(
+        (pt) => pt.id === supplier.condicaoPagamentoId,
+      );
       if (paymentTerm) {
         setSelectedPaymentTerm(paymentTerm);
         form.setValue('idCondPagamento', paymentTerm.id.toString());
@@ -379,7 +444,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
     } else {
       setIsPaymentTermFromSupplier(false); // Permitir alteração se fornecedor não tiver condição
     }
-    
+
     setSupplierSearchOpen(false);
   };
 
@@ -402,17 +467,19 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
     setSuppliers((prev) => [...prev, newSupplier]);
     setSelectedSupplier(newSupplier);
     form.setValue('idFornecedor', newSupplier.id.toString());
-    
+
     // Preencher automaticamente a condição de pagamento do fornecedor
     if (newSupplier.condicaoPagamentoId) {
-      const paymentTerm = paymentTerms.find(pt => pt.id === newSupplier.condicaoPagamentoId);
+      const paymentTerm = paymentTerms.find(
+        (pt) => pt.id === newSupplier.condicaoPagamentoId,
+      );
       if (paymentTerm) {
         setSelectedPaymentTerm(paymentTerm);
         form.setValue('idCondPagamento', paymentTerm.id.toString());
         setIsPaymentTermFromSupplier(true);
       }
     }
-    
+
     setSupplierDialogOpen(false);
     setSupplierSearchOpen(true);
     toast.success(`Fornecedor ${newSupplier.razaoSocial} criado com sucesso!`);
@@ -422,16 +489,18 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
   const handleSupplierUpdated = (updatedSupplier: Supplier) => {
     setSuppliers((prev) =>
       prev.map((supplier) =>
-        supplier.id === updatedSupplier.id ? updatedSupplier : supplier
-      )
+        supplier.id === updatedSupplier.id ? updatedSupplier : supplier,
+      ),
     );
 
     if (selectedSupplier && selectedSupplier.id === updatedSupplier.id) {
       setSelectedSupplier(updatedSupplier);
-      
+
       // Atualizar condição de pagamento se mudou
       if (updatedSupplier.condicaoPagamentoId) {
-        const paymentTerm = paymentTerms.find(pt => pt.id === updatedSupplier.condicaoPagamentoId);
+        const paymentTerm = paymentTerms.find(
+          (pt) => pt.id === updatedSupplier.condicaoPagamentoId,
+        );
         if (paymentTerm) {
           setSelectedPaymentTerm(paymentTerm);
           form.setValue('idCondPagamento', paymentTerm.id.toString());
@@ -445,7 +514,9 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
     setSupplierToEdit(null);
     setSupplierDialogOpen(false);
     setSupplierSearchOpen(true);
-    toast.success(`Fornecedor ${updatedSupplier.razaoSocial} atualizado com sucesso!`);
+    toast.success(
+      `Fornecedor ${updatedSupplier.razaoSocial} atualizado com sucesso!`,
+    );
   };
 
   // Função para selecionar produto
@@ -566,38 +637,46 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
     setIsLoading(true);
     try {
       const payload = {
-        numeroNota: data.numeroNota,
-        modelo: data.modelo || '55',
-        serie: data.serie || '1',
+        numeroPedido: data.numeroNota, // O campo numeroNota do form é o número do pedido
+        modelo: data.modelo,
+        serie: data.serie,
         fornecedorId: parseInt(data.idFornecedor),
         dataEmissao: data.dataEmissao,
         dataChegada: data.dataChegada,
         tipoFrete: data.tipoFrete,
-        valorFrete: parseCurrency(data.valorFrete) / 100, // Converter centavos para reais
-        valorSeguro: parseCurrency(data.valorSeguro) / 100, // Converter centavos para reais
-        outrasDespesas: parseCurrency(data.outrasDespesas) / 100, // Converter centavos para reais
-        transportadoraId: data.idTransportadora ? parseInt(data.idTransportadora) : undefined,
+        valorFrete: roundToDecimals(parseCurrency(data.valorFrete) / 100, 2), // Converter centavos para reais com 2 decimais
+        valorSeguro: roundToDecimals(parseCurrency(data.valorSeguro) / 100, 2), // Converter centavos para reais com 2 decimais
+        outrasDespesas: roundToDecimals(parseCurrency(data.outrasDespesas) / 100, 2), // Converter centavos para reais com 2 decimais
+        transportadoraId: data.idTransportadora
+          ? parseInt(data.idTransportadora)
+          : undefined,
         condicaoPagamentoId: parseInt(data.idCondPagamento),
-        formaPagamentoId: data.idFormaPagamento ? parseInt(data.idFormaPagamento) : undefined,
+        formaPagamentoId: data.idFormaPagamento
+          ? parseInt(data.idFormaPagamento)
+          : undefined,
         funcionarioId: 4, // TODO: Obter do contexto de autenticação
         observacoes: data.observacao,
         itens: produtosComRateio.map((p) => ({
           produtoId: parseInt(p.idProduto),
           quantidade: parseFloat(p.quantidade.replace(',', '.')),
-          precoUn: p.precoUN / 100, // Converter centavos para reais
-          descUn: p.descontoUN / 100, // Converter centavos para reais
-          liquidoUn: p.precoLiquidoUN / 100, // Converter centavos para reais
-          total: p.precoTotal / 100, // Converter centavos para reais
-          rateio: (p.valorRateio || 0) / 100, // Converter centavos para reais
-          custoFinalUn: Math.round((p.precoTotal + (p.valorRateio || 0)) / parseFloat(p.quantidade.replace(',', '.'))) / 100, // Converter centavos para reais
-          custoFinal: (p.precoTotal + (p.valorRateio || 0)) / 100, // Converter centavos para reais
+          precoUn: roundToDecimals(p.precoUN / 100, 4), // Converter centavos para reais com 4 decimais
+          descUn: roundToDecimals(p.descontoUN / 100, 4), // Converter centavos para reais com 4 decimais
+          liquidoUn: roundToDecimals(p.precoLiquidoUN / 100, 4), // Converter centavos para reais com 4 decimais
+          total: roundToDecimals(p.precoTotal / 100, 2), // Converter centavos para reais com 2 decimais
+          rateio: roundToDecimals((p.valorRateio || 0) / 100, 2), // Converter centavos para reais com 2 decimais
+          custoFinalUn: roundToDecimals(
+            (p.precoTotal + (p.valorRateio || 0)) /
+              parseFloat(p.quantidade.replace(',', '.')) / 100,
+            4
+          ), // Converter centavos para reais com 4 decimais
+          custoFinal: roundToDecimals((p.precoTotal + (p.valorRateio || 0)) / 100, 2), // Converter centavos para reais com 2 decimais
         })),
         parcelas: parcelas.map((p) => ({
           parcela: p.num_parcela,
           codigoFormaPagto: p.cod_forma_pagto.toString(),
           formaPagamentoId: p.cod_forma_pagto,
           dataVencimento: p.data_vencimento,
-          valorParcela: p.valor_parcela / 100, // Converter centavos para reais
+          valorParcela: roundToDecimals(p.valor_parcela / 100, 2), // Converter centavos para reais com 2 decimais
         })),
       };
 
@@ -659,8 +738,8 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                 Dados da Compra
               </h3>
               <p className="text-sm text-muted-foreground">
-                {isHeaderLocked 
-                  ? 'Campos bloqueados após adicionar produtos' 
+                {isHeaderLocked
+                  ? 'Campos bloqueados após adicionar produtos'
                   : 'Informações básicas da nota fiscal'}
               </p>
             </div>
@@ -671,13 +750,37 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                   <div className="col-span-2">
                     <FormField
                       control={form.control}
+                      name="numeroNota"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Número da Nota*</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              disabled={isHeaderLocked || isLoading}
+                              className={duplicateError ? 'border-red-500' : ''}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                          {isCheckingDuplicate && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Verificando duplicidade...
+                            </p>
+                          )}
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <FormField
+                      control={form.control}
                       name="modelo"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Modelo</FormLabel>
+                          <FormLabel>Modelo *</FormLabel>
                           <FormControl>
-                            <Input 
-                              {...field} 
+                            <Input
+                              {...field}
                               disabled={isHeaderLocked || isLoading}
                               className={duplicateError ? 'border-red-500' : ''}
                             />
@@ -694,40 +797,15 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                       name="serie"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Série</FormLabel>
+                          <FormLabel>Série *</FormLabel>
                           <FormControl>
-                            <Input 
-                              {...field} 
+                            <Input
+                              {...field}
                               disabled={isHeaderLocked || isLoading}
                               className={duplicateError ? 'border-red-500' : ''}
                             />
                           </FormControl>
                           <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <FormField
-                      control={form.control}
-                      name="numeroNota"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Número *</FormLabel>
-                          <FormControl>
-                            <Input 
-                              {...field} 
-                              disabled={isHeaderLocked || isLoading}
-                              className={duplicateError ? 'border-red-500' : ''}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                          {isCheckingDuplicate && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Verificando duplicidade...
-                            </p>
-                          )}
                         </FormItem>
                       )}
                     />
@@ -741,7 +819,11 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                         <FormItem>
                           <FormLabel>Data Emissão *</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} disabled={isHeaderLocked || isLoading} />
+                            <Input
+                              type="date"
+                              {...field}
+                              disabled={isHeaderLocked || isLoading}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -757,7 +839,11 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                         <FormItem>
                           <FormLabel>Data Chegada *</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} disabled={isHeaderLocked || isLoading} />
+                            <Input
+                              type="date"
+                              {...field}
+                              disabled={isHeaderLocked || isLoading}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -780,7 +866,9 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                                 value={selectedSupplier?.id || ''}
                                 readOnly
                                 disabled={isHeaderLocked || isLoading}
-                                className={duplicateError ? 'border-red-500' : ''}
+                                className={
+                                  duplicateError ? 'border-red-500' : ''
+                                }
                               />
                               <Button
                                 type="button"
@@ -813,7 +901,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                     </FormItem>
                   </div>
                 </div>
-                
+
                 {/* Alerta de duplicidade */}
                 {duplicateError && (
                   <div className="rounded-lg border border-red-500 bg-red-50 dark:bg-red-950/30 p-4">
@@ -839,7 +927,9 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                           {duplicateError}
                         </p>
                         <p className="mt-2 text-xs text-red-600 dark:text-red-500">
-                          A combinação de <strong>Número + Modelo + Série + Fornecedor</strong> deve ser única no sistema.
+                          A combinação de{' '}
+                          <strong>Número + Modelo + Série + Fornecedor</strong>{' '}
+                          deve ser única no sistema.
                         </p>
                       </div>
                     </div>
@@ -849,548 +939,714 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
 
               {/* PRODUTOS */}
               <div className="border-t pt-6 space-y-4">
+                <div className="grid grid-cols-12 gap-2 items-end">
+                  <div className="col-span-1">
+                    <Label>Cód. Produto *</Label>
+                    <div className="flex gap-1">
+                      <Input
+                        value={produtoAtual.idProduto}
+                        readOnly
+                        disabled={
+                          !isHeaderComplete ||
+                          isProductsLocked ||
+                          isLoading ||
+                          !!duplicateError
+                        }
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setProductSearchOpen(true)}
+                        disabled={
+                          !isHeaderComplete ||
+                          isProductsLocked ||
+                          isLoading ||
+                          !!duplicateError
+                        }
+                        title={
+                          duplicateError
+                            ? 'Corrija a duplicidade antes de adicionar produtos'
+                            : 'Buscar produto'
+                        }
+                      >
+                        <Search className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-12 gap-2 items-end">
-                <div className="col-span-1">
-                  <Label>Cód. Produto *</Label>
-                  <div className="flex gap-1">
+                  <div className="col-span-4">
+                    <Label>Produto</Label>
+                    <Input value={produtoAtual.nomeProduto} readOnly disabled />
+                  </div>
+
+                  <div className="col-span-1">
+                    <Label>Unidade</Label>
+                    <Input value={produtoAtual.unidade} readOnly disabled />
+                  </div>
+
+                  <div className="col-span-1">
+                    <Label>Quantidade *</Label>
                     <Input
-                      value={produtoAtual.idProduto}
-                      readOnly
-                      disabled={!isHeaderComplete || isProductsLocked || isLoading || !!duplicateError}
+                      type="number"
+                      value={produtoAtual.quantidade}
+                      onChange={(e) =>
+                        setProdutoAtual({
+                          ...produtoAtual,
+                          quantidade: e.target.value,
+                        })
+                      }
+                      disabled={
+                        !isHeaderComplete || isProductsLocked || isLoading
+                      }
                     />
+                  </div>
+
+                  <div className="col-span-1">
+                    <Label>Preço *</Label>
+                    <Input
+                      value={produtoAtual.preco}
+                      onChange={(e) => {
+                        const parsed = parseCurrency(e.target.value);
+                        setProdutoAtual({
+                          ...produtoAtual,
+                          preco: formatCurrency(parsed),
+                        });
+                      }}
+                      disabled={
+                        !isHeaderComplete || isProductsLocked || isLoading
+                      }
+                    />
+                  </div>
+
+                  <div className="col-span-1">
+                    <Label>R$ Desconto</Label>
+                    <Input
+                      value={produtoAtual.desconto}
+                      onChange={(e) => {
+                        const parsed = parseCurrency(e.target.value);
+                        setProdutoAtual({
+                          ...produtoAtual,
+                          desconto: formatCurrency(parsed),
+                        });
+                      }}
+                      disabled={
+                        !isHeaderComplete || isProductsLocked || isLoading
+                      }
+                      className={
+                        parseCurrency(produtoAtual.desconto) >
+                        (parseFloat(
+                          produtoAtual.quantidade.replace(',', '.'),
+                        ) || 0) *
+                          parseCurrency(produtoAtual.preco)
+                          ? 'border-red-500 focus-visible:ring-red-500'
+                          : ''
+                      }
+                    />
+                    {parseCurrency(produtoAtual.desconto) >
+                      (parseFloat(produtoAtual.quantidade.replace(',', '.')) ||
+                        0) *
+                        parseCurrency(produtoAtual.preco) && (
+                      <p className="text-xs text-red-500 mt-1">
+                        Desconto não pode exceder o valor total
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="col-span-1">
+                    <Label>Total</Label>
+                    <Input
+                      value={formatCurrency(
+                        Math.round(
+                          parseFloat(produtoAtual.quantidade || '0') *
+                            parseCurrency(produtoAtual.preco),
+                        ) - parseCurrency(produtoAtual.desconto),
+                      )}
+                      readOnly
+                      disabled
+                      className={
+                        parseCurrency(produtoAtual.desconto) >
+                        (parseFloat(
+                          produtoAtual.quantidade.replace(',', '.'),
+                        ) || 0) *
+                          parseCurrency(produtoAtual.preco)
+                          ? 'border-red-500'
+                          : ''
+                      }
+                    />
+                  </div>
+
+                  <div className="col-span-2">
                     <Button
                       type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setProductSearchOpen(true)}
-                      disabled={!isHeaderComplete || isProductsLocked || isLoading || !!duplicateError}
-                      title={duplicateError ? 'Corrija a duplicidade antes de adicionar produtos' : 'Buscar produto'}
+                      onClick={adicionarProduto}
+                      disabled={
+                        !isHeaderComplete ||
+                        isProductsLocked ||
+                        isLoading ||
+                        !!duplicateError
+                      }
+                      className="w-full"
                     >
-                      <Search className="h-4 w-4" />
+                      <Plus className="h-4 w-4 mr-2" />
+                      Adicionar
                     </Button>
                   </div>
                 </div>
 
-                <div className="col-span-4">
-                  <Label>Produto</Label>
-                  <Input
-                    value={produtoAtual.nomeProduto}
-                    readOnly
-                    disabled
-                  />
-                </div>
-
-                <div className="col-span-1">
-                  <Label>Unidade</Label>
-                  <Input value={produtoAtual.unidade} readOnly disabled />
-                </div>
-
-                <div className="col-span-1">
-                  <Label>Quantidade *</Label>
-                  <Input
-                    type="number"
-                    value={produtoAtual.quantidade}
-                    onChange={(e) =>
-                      setProdutoAtual({ ...produtoAtual, quantidade: e.target.value })
-                    }
-                    disabled={!isHeaderComplete || isProductsLocked || isLoading}
-                  />
-                </div>
-
-                <div className="col-span-1">
-                  <Label>Preço *</Label>
-                  <Input
-                    value={produtoAtual.preco}
-                    onChange={(e) => {
-                      const parsed = parseCurrency(e.target.value);
-                      setProdutoAtual({ ...produtoAtual, preco: formatCurrency(parsed) });
-                    }}
-                    disabled={!isHeaderComplete || isProductsLocked || isLoading}
-                  />
-                </div>
-
-                <div className="col-span-1">
-                  <Label>R$ Desconto</Label>
-                  <Input
-                    value={produtoAtual.desconto}
-                    onChange={(e) => {
-                      const parsed = parseCurrency(e.target.value);
-                      setProdutoAtual({ ...produtoAtual, desconto: formatCurrency(parsed) });
-                    }}
-                    disabled={!isHeaderComplete || isProductsLocked || isLoading}
-                    className={
-                      parseCurrency(produtoAtual.desconto) > 
-                      (parseFloat(produtoAtual.quantidade.replace(',', '.')) || 0) * parseCurrency(produtoAtual.preco)
-                        ? 'border-red-500 focus-visible:ring-red-500'
-                        : ''
-                    }
-                  />
-                  {parseCurrency(produtoAtual.desconto) > 
-                   (parseFloat(produtoAtual.quantidade.replace(',', '.')) || 0) * parseCurrency(produtoAtual.preco) && (
-                    <p className="text-xs text-red-500 mt-1">
-                      Desconto não pode exceder o valor total
-                    </p>
-                  )}
-                </div>
-
-                <div className="col-span-1">
-                  <Label>Total</Label>
-                  <Input
-                    value={formatCurrency(
-                      Math.round(parseFloat(produtoAtual.quantidade || '0') * parseCurrency(produtoAtual.preco)) -
-                      parseCurrency(produtoAtual.desconto)
-                    )}
-                    readOnly
-                    disabled
-                    className={
-                      parseCurrency(produtoAtual.desconto) > 
-                      (parseFloat(produtoAtual.quantidade.replace(',', '.')) || 0) * parseCurrency(produtoAtual.preco)
-                        ? 'border-red-500'
-                        : ''
-                    }
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <Button
-                    type="button"
-                    onClick={adicionarProduto}
-                    disabled={!isHeaderComplete || isProductsLocked || isLoading || !!duplicateError}
-                    className="w-full"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar
-                  </Button>
-                </div>
-              </div>
-
-              {produtos.length > 0 && (
-                <div className="space-y-3">
-                  <div className="relative w-full overflow-auto">
-                    <table className="w-full caption-bottom text-sm">
-                    <thead className="[&_tr]:border-b">
-                      <tr className="border-b transition-colors hover:bg-muted/50">
-                        <th className="h-12 px-4 text-left align-middle font-medium">Código</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium">Produto</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium">Unidade</th>
-                        <th className="h-12 px-4 text-right align-middle font-medium">Qtd</th>
-                        <th className="h-12 px-4 text-right align-middle font-medium">Preço UN</th>
-                        <th className="h-12 px-4 text-right align-middle font-medium">Desc UN</th>
-                        <th className="h-12 px-4 text-right align-middle font-medium">Líquido UN</th>
-                        <th className="h-12 px-4 text-right align-middle font-medium">Total</th>
-                        <th className="h-12 px-4 text-right align-middle font-medium">Rateio</th>
-                        <th className="h-12 px-4 text-right align-middle font-medium">Custo Final UN</th>
-                        <th className="h-12 px-4 text-right align-middle font-medium">Custo Final</th>
-                      </tr>
-                    </thead>
-                    <tbody className="[&_tr:last-child]:border-0">
-                      {produtosComRateio.map((produto, index) => {
-                        const quantidade = parseFloat(produto.quantidade) || 1;
-                        const custoFinalUN = (produto.valorTotalComRateio || produto.precoTotal) / quantidade;
-                        return (
-                          <tr key={index} className="border-b transition-colors hover:bg-muted/50">
-                            <td className="p-4 align-middle">{produto.idProduto}</td>
-                            <td className="p-4 align-middle">{produto.nomeProduto}</td>
-                            <td className="p-4 align-middle">{produto.unidade}</td>
-                            <td className="p-4 align-middle text-right">{produto.quantidade}</td>
-                            <td className="p-4 align-middle text-right">
-                              {formatCurrency(produto.precoUN)}
-                            </td>
-                            <td className="p-4 align-middle text-right">
-                              {formatCurrency(produto.descontoUN)}
-                            </td>
-                            <td className="p-4 align-middle text-right">
-                              {formatCurrency(produto.precoLiquidoUN)}
-                            </td>
-                            <td className="p-4 align-middle text-right">
-                              {formatCurrency(produto.precoTotal)}
-                            </td>
-                            <td className="p-4 align-middle text-right">
-                              {formatCurrency(produto.valorRateio || 0)}
-                            </td>
-                            <td className="p-4 align-middle text-right">
-                              {formatCurrency(Math.round(custoFinalUN))}
-                            </td>
-                            <td className="p-4 align-middle text-right font-semibold">
-                              {formatCurrency(produto.valorTotalComRateio || produto.precoTotal)}
-                            </td>
+                {produtos.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="relative w-full overflow-auto">
+                      <table className="w-full caption-bottom text-sm">
+                        <thead className="[&_tr]:border-b">
+                          <tr className="border-b transition-colors hover:bg-muted/50">
+                            <th className="h-12 px-4 text-left align-middle font-medium">
+                              Código
+                            </th>
+                            <th className="h-12 px-4 text-left align-middle font-medium">
+                              Produto
+                            </th>
+                            <th className="h-12 px-4 text-left align-middle font-medium">
+                              Unidade
+                            </th>
+                            <th className="h-12 px-4 text-right align-middle font-medium">
+                              Qtd
+                            </th>
+                            <th className="h-12 px-4 text-right align-middle font-medium">
+                              Preço UN
+                            </th>
+                            <th className="h-12 px-4 text-right align-middle font-medium">
+                              Desc UN
+                            </th>
+                            <th className="h-12 px-4 text-right align-middle font-medium">
+                              Líquido UN
+                            </th>
+                            <th className="h-12 px-4 text-right align-middle font-medium">
+                              Total
+                            </th>
+                            <th className="h-12 px-4 text-right align-middle font-medium">
+                              Rateio
+                            </th>
+                            <th className="h-12 px-4 text-right align-middle font-medium">
+                              Custo Final UN
+                            </th>
+                            <th className="h-12 px-4 text-right align-middle font-medium">
+                              Custo Final
+                            </th>
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-                <div>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => removerProduto(produtos.length - 1)}
-                    disabled={produtos.length === 0 || isLoading}
-                  >
-                    <Trash className="h-4 w-4 mr-2" />
-                    Excluir Produto
-                  </Button>
-                </div>
-                </div>
-              )}
+                        </thead>
+                        <tbody className="[&_tr:last-child]:border-0">
+                          {produtosComRateio.map((produto, index) => {
+                            const quantidade =
+                              parseFloat(produto.quantidade) || 1;
+                            const custoFinalUN =
+                              (produto.valorTotalComRateio ||
+                                produto.precoTotal) / quantidade;
+                            return (
+                              <tr
+                                key={index}
+                                className="border-b transition-colors hover:bg-muted/50"
+                              >
+                                <td className="p-4 align-middle">
+                                  {produto.idProduto}
+                                </td>
+                                <td className="p-4 align-middle">
+                                  {produto.nomeProduto}
+                                </td>
+                                <td className="p-4 align-middle">
+                                  {produto.unidade}
+                                </td>
+                                <td className="p-4 align-middle text-right">
+                                  {produto.quantidade}
+                                </td>
+                                <td className="p-4 align-middle text-right">
+                                  {formatCurrency(produto.precoUN)}
+                                </td>
+                                <td className="p-4 align-middle text-right">
+                                  {formatCurrency(produto.descontoUN)}
+                                </td>
+                                <td className="p-4 align-middle text-right">
+                                  {formatCurrency(produto.precoLiquidoUN)}
+                                </td>
+                                <td className="p-4 align-middle text-right">
+                                  {formatCurrency(produto.precoTotal)}
+                                </td>
+                                <td className="p-4 align-middle text-right">
+                                  {formatCurrency(produto.valorRateio || 0)}
+                                </td>
+                                <td className="p-4 align-middle text-right">
+                                  {formatCurrency(Math.round(custoFinalUN))}
+                                </td>
+                                <td className="p-4 align-middle text-right font-semibold">
+                                  {formatCurrency(
+                                    produto.valorTotalComRateio ||
+                                      produto.precoTotal,
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => removerProduto(produtos.length - 1)}
+                        disabled={produtos.length === 0 || isLoading}
+                      >
+                        <Trash className="h-4 w-4 mr-2" />
+                        Excluir Produto
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
-              {/* VALORES FINANCEIROS */}
-              <div className="border-t pt-6 space-y-4">
-                <div className="grid grid-cols-12 gap-4">
-                  <div className="col-span-2">
-                    <FormField
-                      control={form.control}
-                      name="tipoFrete"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tipo Frete</FormLabel>
-                          <FormControl>
-                            <div className="flex gap-2">
-                              <label className="flex items-center gap-1">
-                                <input
-                                  type="radio"
-                                  value="CIF"
-                                  checked={field.value === 'CIF'}
-                                  onChange={(e) => {
-                                    handleFinancialFieldChange('tipoFrete', e.target.value);
-                                    if (e.target.value === 'CIF') {
-                                      handleFinancialFieldChange('valorFrete', '0,00');
-                                      handleFinancialFieldChange('valorSeguro', '0,00');
+                {/* VALORES FINANCEIROS */}
+                <div className="border-t pt-6 space-y-4">
+                  <div className="grid grid-cols-12 gap-4">
+                    <div className="col-span-2">
+                      <FormField
+                        control={form.control}
+                        name="tipoFrete"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tipo Frete</FormLabel>
+                            <FormControl>
+                              <div className="flex gap-2">
+                                <label className="flex items-center gap-1">
+                                  <input
+                                    type="radio"
+                                    value="CIF"
+                                    checked={field.value === 'CIF'}
+                                    onChange={(e) => {
+                                      handleFinancialFieldChange(
+                                        'tipoFrete',
+                                        e.target.value,
+                                      );
+                                      if (e.target.value === 'CIF') {
+                                        handleFinancialFieldChange(
+                                          'valorFrete',
+                                          '0,00',
+                                        );
+                                        handleFinancialFieldChange(
+                                          'valorSeguro',
+                                          '0,00',
+                                        );
+                                      }
+                                    }}
+                                    disabled={!isHeaderComplete || isLoading}
+                                  />
+                                  <span className="text-sm">CIF</span>
+                                </label>
+                                <label className="flex items-center gap-1">
+                                  <input
+                                    type="radio"
+                                    value="FOB"
+                                    checked={field.value === 'FOB'}
+                                    onChange={(e) =>
+                                      handleFinancialFieldChange(
+                                        'tipoFrete',
+                                        e.target.value,
+                                      )
                                     }
-                                  }}
-                                  disabled={!isHeaderComplete || isLoading}
-                                />
-                                <span className="text-sm">CIF</span>
-                              </label>
-                              <label className="flex items-center gap-1">
-                                <input
-                                  type="radio"
-                                  value="FOB"
-                                  checked={field.value === 'FOB'}
-                                  onChange={(e) => handleFinancialFieldChange('tipoFrete', e.target.value)}
-                                  disabled={!isHeaderComplete || isLoading}
-                                />
-                                <span className="text-sm">FOB</span>
-                              </label>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                                    disabled={!isHeaderComplete || isLoading}
+                                  />
+                                  <span className="text-sm">FOB</span>
+                                </label>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-                  <div className="col-span-2">
-                    <FormField
-                      control={form.control}
-                      name="valorFrete"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Valor Frete</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              onChange={(e) => {
-                                const parsed = parseCurrency(e.target.value);
-                                handleFinancialFieldChange('valorFrete', formatCurrency(parsed));
-                              }}
-                              disabled={!isHeaderComplete || form.watch('tipoFrete') === 'CIF' || isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                    <div className="col-span-2">
+                      <FormField
+                        control={form.control}
+                        name="valorFrete"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Valor Frete</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                onChange={(e) => {
+                                  const parsed = parseCurrency(e.target.value);
+                                  handleFinancialFieldChange(
+                                    'valorFrete',
+                                    formatCurrency(parsed),
+                                  );
+                                }}
+                                disabled={
+                                  !isHeaderComplete ||
+                                  form.watch('tipoFrete') === 'CIF' ||
+                                  isLoading
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-                  <div className="col-span-2">
-                    <FormField
-                      control={form.control}
-                      name="valorSeguro"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Valor Seguro</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              onChange={(e) => {
-                                const parsed = parseCurrency(e.target.value);
-                                handleFinancialFieldChange('valorSeguro', formatCurrency(parsed));
-                              }}
-                              disabled={!isHeaderComplete || form.watch('tipoFrete') === 'CIF' || isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                    <div className="col-span-2">
+                      <FormField
+                        control={form.control}
+                        name="valorSeguro"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Valor Seguro</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                onChange={(e) => {
+                                  const parsed = parseCurrency(e.target.value);
+                                  handleFinancialFieldChange(
+                                    'valorSeguro',
+                                    formatCurrency(parsed),
+                                  );
+                                }}
+                                disabled={
+                                  !isHeaderComplete ||
+                                  form.watch('tipoFrete') === 'CIF' ||
+                                  isLoading
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-                  <div className="col-span-2">
-                    <FormField
-                      control={form.control}
-                      name="outrasDespesas"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Outras Despesas</FormLabel>
-                          <FormControl>
+                    <div className="col-span-2">
+                      <FormField
+                        control={form.control}
+                        name="outrasDespesas"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Outras Despesas</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                onChange={(e) => {
+                                  const parsed = parseCurrency(e.target.value);
+                                  handleFinancialFieldChange(
+                                    'outrasDespesas',
+                                    formatCurrency(parsed),
+                                  );
+                                }}
+                                disabled={!isHeaderComplete || isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="col-span-2">
+                      <FormItem>
+                        <FormLabel>Total Produtos</FormLabel>
+                        <FormControl>
+                          <Input
+                            value={formatCurrency(totais.totalProdutos)}
+                            readOnly
+                            disabled
+                          />
+                        </FormControl>
+                      </FormItem>
+                    </div>
+
+                    <div className="col-span-2">
+                      <FormItem>
+                        <FormLabel>Total a Pagar</FormLabel>
+                        <FormControl>
+                          <Input
+                            value={formatCurrency(totais.totalGeral)}
+                            readOnly
+                            disabled
+                            className="font-semibold"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    </div>
+                  </div>
+                </div>
+
+                {/* TRANSPORTE E PAGAMENTO */}
+                <div className="border-t pt-6 space-y-4">
+                  <div className="grid grid-cols-12 gap-4">
+                    <div className="col-span-2">
+                      <FormItem>
+                        <FormLabel>Cód. Transportadora</FormLabel>
+                        <FormControl>
+                          <div className="flex gap-1">
                             <Input
-                              {...field}
-                              onChange={(e) => {
-                                const parsed = parseCurrency(e.target.value);
-                                handleFinancialFieldChange('outrasDespesas', formatCurrency(parsed));
-                              }}
+                              value={selectedTransporter?.id || ''}
+                              readOnly
                               disabled={!isHeaderComplete || isLoading}
                             />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <FormItem>
-                      <FormLabel>Total Produtos</FormLabel>
-                      <FormControl>
-                        <Input
-                          value={formatCurrency(totais.totalProdutos)}
-                          readOnly
-                          disabled
-                        />
-                      </FormControl>
-                    </FormItem>
-                  </div>
-
-                  <div className="col-span-2">
-                    <FormItem>
-                      <FormLabel>Total a Pagar</FormLabel>
-                      <FormControl>
-                        <Input
-                          value={formatCurrency(totais.totalGeral)}
-                          readOnly
-                          disabled
-                          className="font-semibold"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  </div>
-                </div>
-              </div>
-
-              {/* TRANSPORTE E PAGAMENTO */}
-              <div className="border-t pt-6 space-y-4">
-                <div className="grid grid-cols-12 gap-4">
-                <div className="col-span-2">
-                  <FormItem>
-                    <FormLabel>Cód. Transportadora</FormLabel>
-                    <FormControl>
-                      <div className="flex gap-1">
-                        <Input
-                          value={selectedTransporter?.id || ''}
-                          readOnly
-                          disabled={!isHeaderComplete || isLoading}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setTransporterSearchOpen(true)}
-                          disabled={!isHeaderComplete || isLoading}
-                        >
-                          <Search className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                </div>
-
-                <div className="col-span-10">
-                  <FormItem>
-                    <FormLabel>Transportadora</FormLabel>
-                    <FormControl>
-                      <Input
-                        value={selectedTransporter?.nome || ''}
-                        readOnly
-                        disabled
-                      />
-                    </FormControl>
-                  </FormItem>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-12 gap-4">
-                  <div className="col-span-2">
-                    <FormItem>
-                      <FormLabel>Cód. Cond. Pagto *</FormLabel>
-                      <FormControl>
-                        <div className="flex gap-1">
-                          <Input
-                            value={selectedPaymentTerm?.id || ''}
-                            readOnly
-                            disabled={!isHeaderComplete || isLoading || isPaymentTermFromSupplier}
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setPaymentTermSearchOpen(true)}
-                            disabled={!isHeaderComplete || isLoading || isPaymentTermFromSupplier}
-                            title={isPaymentTermFromSupplier ? 'Condição de pagamento definida pelo fornecedor' : 'Selecionar condição de pagamento'}
-                          >
-                            <Search className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </FormControl>
-                      {isPaymentTermFromSupplier && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Condição definida pelo fornecedor
-                        </p>
-                      )}
-                    </FormItem>
-                  </div>
-
-                  <div className="col-span-10">
-                    <FormField
-                      control={form.control}
-                      name="idCondPagamento"
-                      render={() => (
-                        <FormItem>
-                          <FormLabel>Condição de Pagamento</FormLabel>
-                          <FormControl>
-                            <Input
-                              value={selectedPaymentTerm?.name || ''}
-                              readOnly
-                              disabled
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-
-              {/* Visualização da Estrutura da Condição de Pagamento */}
-              {selectedPaymentTerm && selectedPaymentTerm.installments && selectedPaymentTerm.installments.length > 0 && (
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-muted-foreground">
-                    Estrutura de Parcelas da Condição de Pagamento:
-                  </div>
-                  <div className="relative w-full overflow-auto rounded-md border">
-                    <table className="w-full caption-bottom text-sm">
-                      <thead className="[&_tr]:border-b bg-muted/50">
-                        <tr className="border-b transition-colors">
-                          <th className="h-10 px-4 text-left align-middle font-medium">Parcela</th>
-                          <th className="h-10 px-4 text-left align-middle font-medium">Dias até Vencimento</th>
-                          <th className="h-10 px-4 text-left align-middle font-medium">Forma de Pagamento</th>
-                          <th className="h-10 px-4 text-right align-middle font-medium">% do Total</th>
-                        </tr>
-                      </thead>
-                      <tbody className="[&_tr:last-child]:border-0">
-                        {selectedPaymentTerm.installments.map((inst) => {
-                          const paymentMethod = paymentMethods.find(pm => pm.id === inst.paymentMethodId);
-                          return (
-                            <tr
-                              key={inst.id}
-                              className="border-b transition-colors hover:bg-muted/50"
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() => setTransporterSearchOpen(true)}
+                              disabled={!isHeaderComplete || isLoading}
                             >
-                              <td className="p-3 align-middle">{inst.installmentNumber}</td>
-                              <td className="p-3 align-middle">{inst.daysToPayment} dias</td>
-                              <td className="p-3 align-middle">{paymentMethod?.name || 'Não definido'}</td>
-                              <td className="p-3 align-middle text-right">{inst.percentageValue.toFixed(2)}%</td>
+                              <Search className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    </div>
+
+                    <div className="col-span-10">
+                      <FormItem>
+                        <FormLabel>Transportadora</FormLabel>
+                        <FormControl>
+                          <Input
+                            value={selectedTransporter?.nome || ''}
+                            readOnly
+                            disabled
+                          />
+                        </FormControl>
+                      </FormItem>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-12 gap-4">
+                    <div className="col-span-2">
+                      <FormItem>
+                        <FormLabel>Cód. Cond. Pagto *</FormLabel>
+                        <FormControl>
+                          <div className="flex gap-1">
+                            <Input
+                              value={selectedPaymentTerm?.id || ''}
+                              readOnly
+                              disabled={
+                                !isHeaderComplete ||
+                                isLoading ||
+                                isPaymentTermFromSupplier
+                              }
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() => setPaymentTermSearchOpen(true)}
+                              disabled={
+                                !isHeaderComplete ||
+                                isLoading ||
+                                isPaymentTermFromSupplier
+                              }
+                              title={
+                                isPaymentTermFromSupplier
+                                  ? 'Condição de pagamento definida pelo fornecedor'
+                                  : 'Selecionar condição de pagamento'
+                              }
+                            >
+                              <Search className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </FormControl>
+                        {isPaymentTermFromSupplier && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Condição definida pelo fornecedor
+                          </p>
+                        )}
+                      </FormItem>
+                    </div>
+
+                    <div className="col-span-10">
+                      <FormField
+                        control={form.control}
+                        name="idCondPagamento"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>Condição de Pagamento</FormLabel>
+                            <FormControl>
+                              <Input
+                                value={selectedPaymentTerm?.name || ''}
+                                readOnly
+                                disabled
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Visualização da Estrutura da Condição de Pagamento */}
+                  {selectedPaymentTerm &&
+                    selectedPaymentTerm.installments &&
+                    selectedPaymentTerm.installments.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium text-muted-foreground">
+                          Estrutura de Parcelas da Condição de Pagamento:
+                        </div>
+                        <div className="relative w-full overflow-auto rounded-md border">
+                          <table className="w-full caption-bottom text-sm">
+                            <thead className="[&_tr]:border-b bg-muted/50">
+                              <tr className="border-b transition-colors">
+                                <th className="h-10 px-4 text-left align-middle font-medium">
+                                  Parcela
+                                </th>
+                                <th className="h-10 px-4 text-left align-middle font-medium">
+                                  Dias até Vencimento
+                                </th>
+                                <th className="h-10 px-4 text-left align-middle font-medium">
+                                  Forma de Pagamento
+                                </th>
+                                <th className="h-10 px-4 text-right align-middle font-medium">
+                                  % do Total
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="[&_tr:last-child]:border-0">
+                              {selectedPaymentTerm.installments.map((inst) => {
+                                const paymentMethod = paymentMethods.find(
+                                  (pm) => pm.id === inst.paymentMethodId,
+                                );
+                                return (
+                                  <tr
+                                    key={inst.id}
+                                    className="border-b transition-colors hover:bg-muted/50"
+                                  >
+                                    <td className="p-3 align-middle">
+                                      {inst.installmentNumber}
+                                    </td>
+                                    <td className="p-3 align-middle">
+                                      {inst.daysToPayment} dias
+                                    </td>
+                                    <td className="p-3 align-middle">
+                                      {paymentMethod?.name || 'Não definido'}
+                                    </td>
+                                    <td className="p-3 align-middle text-right">
+                                      {inst.percentageValue.toFixed(2)}%
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Parcelas Calculadas com Valores */}
+                  {parcelas.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="text-sm font-medium text-muted-foreground">
+                        Parcelas Calculadas (com valores):
+                      </div>
+                      <div className="relative w-full overflow-auto rounded-md border">
+                        <table className="w-full caption-bottom text-sm">
+                          <thead className="[&_tr]:border-b">
+                            <tr className="border-b transition-colors hover:bg-muted/50">
+                              <th className="h-12 px-4 text-left align-middle font-medium">
+                                Parcela
+                              </th>
+                              <th className="h-12 px-4 text-left align-middle font-medium">
+                                Cód. Forma Pagto
+                              </th>
+                              <th className="h-12 px-4 text-left align-middle font-medium">
+                                Forma de Pagamento
+                              </th>
+                              <th className="h-12 px-4 text-left align-middle font-medium">
+                                Data Vencimento
+                              </th>
+                              <th className="h-12 px-4 text-right align-middle font-medium">
+                                Valor Parcela
+                              </th>
                             </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {/* Parcelas Calculadas com Valores */}
-              {parcelas.length > 0 && (
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-muted-foreground">
-                    Parcelas Calculadas (com valores):
-                  </div>
-                  <div className="relative w-full overflow-auto rounded-md border">
-                  <table className="w-full caption-bottom text-sm">
-                    <thead className="[&_tr]:border-b">
-                      <tr className="border-b transition-colors hover:bg-muted/50">
-                        <th className="h-12 px-4 text-left align-middle font-medium">Parcela</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium">Cód. Forma Pagto</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium">Forma de Pagamento</th>
-                        <th className="h-12 px-4 text-left align-middle font-medium">Data Vencimento</th>
-                        <th className="h-12 px-4 text-right align-middle font-medium">Valor Parcela</th>
-                      </tr>
-                    </thead>
-                    <tbody className="[&_tr:last-child]:border-0">
-                      {parcelas.map((parcela) => (
-                        <tr
-                          key={parcela.num_parcela}
-                          className="border-b transition-colors hover:bg-muted/50"
-                        >
-                          <td className="p-4 align-middle">{parcela.num_parcela}</td>
-                          <td className="p-4 align-middle">{parcela.cod_forma_pagto}</td>
-                          <td className="p-4 align-middle">{parcela.forma_pagto_descricao}</td>
-                          <td className="p-4 align-middle">
-                            {format(parseISO(parcela.data_vencimento), 'dd/MM/yyyy')}
-                          </td>
-                          <td className="p-4 align-middle text-right font-semibold">
-                            {formatCurrency(parcela.valor_parcela)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  </div>
-                </div>
-              )}
-              </div>
-
-              {/* OBSERVAÇÕES */}
-              <div className="border-t pt-6">
-                <FormField
-                  control={form.control}
-                  name="observacao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Observações</FormLabel>
-                      <FormControl>
-                        <textarea
-                          {...field}
-                          rows={4}
-                          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          placeholder="Observações adicionais sobre a compra..."
-                          disabled={isLoading}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                          </thead>
+                          <tbody className="[&_tr:last-child]:border-0">
+                            {parcelas.map((parcela) => (
+                              <tr
+                                key={parcela.num_parcela}
+                                className="border-b transition-colors hover:bg-muted/50"
+                              >
+                                <td className="p-4 align-middle">
+                                  {parcela.num_parcela}
+                                </td>
+                                <td className="p-4 align-middle">
+                                  {parcela.cod_forma_pagto}
+                                </td>
+                                <td className="p-4 align-middle">
+                                  {parcela.forma_pagto_descricao}
+                                </td>
+                                <td className="p-4 align-middle">
+                                  {format(
+                                    parseISO(parcela.data_vencimento),
+                                    'dd/MM/yyyy',
+                                  )}
+                                </td>
+                                <td className="p-4 align-middle text-right font-semibold">
+                                  {formatCurrency(parcela.valor_parcela)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   )}
-                />
-              </div>
-
-              {/* AÇÕES */}
-              <div className="border-t pt-6">
-                <div className="flex justify-end space-x-4">
-                  <Link to="/purchases">
-                    <Button type="button" variant="outline">
-                      Cancelar
-                    </Button>
-                  </Link>
-                  <Button 
-                    type="submit" 
-                    disabled={isLoading || isCheckingDuplicate || !!duplicateError}
-                  >
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isCheckingDuplicate && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isEditing ? 'Atualizar' : 'Salvar'}
-                    <Save className="ml-2 h-4 w-4" />
-                  </Button>
                 </div>
+
+                {/* OBSERVAÇÕES */}
+                <div className="border-t pt-6">
+                  <FormField
+                    control={form.control}
+                    name="observacao"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Observações</FormLabel>
+                        <FormControl>
+                          <textarea
+                            {...field}
+                            rows={4}
+                            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            placeholder="Observações adicionais sobre a compra..."
+                            disabled={isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* AÇÕES */}
+                <div className="border-t pt-6">
+                  <div className="flex justify-end space-x-4">
+                    <Link to="/purchases">
+                      <Button type="button" variant="outline">
+                        Cancelar
+                      </Button>
+                    </Link>
+                    <Button
+                      type="submit"
+                      disabled={
+                        isLoading || isCheckingDuplicate || !!duplicateError
+                      }
+                    >
+                      {isLoading && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      {isCheckingDuplicate && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      {isEditing ? 'Atualizar' : 'Salvar'}
+                      <Save className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1477,7 +1733,9 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
       <SupplierCreationDialog
         open={supplierDialogOpen}
         onOpenChange={setSupplierDialogOpen}
-        onSuccess={supplierToEdit ? handleSupplierUpdated : handleSupplierCreated}
+        onSuccess={
+          supplierToEdit ? handleSupplierUpdated : handleSupplierCreated
+        }
         supplier={supplierToEdit}
       />
     </div>

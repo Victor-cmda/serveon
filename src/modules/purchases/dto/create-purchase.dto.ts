@@ -212,11 +212,11 @@ export class CreatePurchaseDto {
   @ApiProperty({
     description: 'Número do pedido/nota fiscal',
     example: '1',
-    required: false,
   })
-  @IsOptional()
+  @IsNotEmpty({ message: 'Número do pedido é obrigatório' })
   @IsString({ message: 'Número do pedido deve ser uma string' })
-  numeroPedido?: string;
+  @MaxLength(20, { message: 'Número do pedido deve ter no máximo 20 caracteres' })
+  numeroPedido: string;
 
   @ApiProperty({
     description: 'Modelo da nota fiscal',
