@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Eye, Search, ShoppingCart, MoreVertical, Check, X } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Plus, Eye, ShoppingCart, MoreVertical, Check, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { purchaseApi } from '../../services/api';
 import { Purchase } from '../../types/purchase';
 import { toast } from '../../lib/toast';
 import PurchaseViewDialog from './components/PurchaseViewDialog';
+import { PurchaseFilters, PurchaseFilterOptions } from './components/PurchaseFilters';
+import { isAfter, isBefore, isEqual, parseISO } from 'date-fns';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,8 +18,21 @@ import {
 const PurchasesList: React.FC = () => {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
+  
+  const [filters, setFilters] = useState<PurchaseFilterOptions>({
+    searchTerm: '',
+    status: 'TODOS',
+    fornecedorId: '0',
+    dataEmissaoInicio: undefined,
+    dataEmissaoFim: undefined,
+    dataChegadaInicio: undefined,
+    dataChegadaFim: undefined,
+    modelo: '',
+    serie: '',
+    valorMinimo: '',
+    valorMaximo: '',
+  });
 
   useEffect(() => {
     loadPurchases();
@@ -38,16 +53,105 @@ const PurchasesList: React.FC = () => {
     }
   };
 
-  const filteredPurchases = purchases.filter(
-    purchase =>
-      (purchase.numeroPedido?.toString() || '').includes(searchTerm) ||
-      purchase.id.toString().includes(searchTerm) ||
-      (purchase.fornecedorNome && purchase.fornecedorNome.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (purchase.funcionarioNome && purchase.funcionarioNome.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      purchase.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (purchase.modelo && purchase.modelo.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (purchase.serie && purchase.serie.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const clearFilters = () => {
+    setFilters({
+      searchTerm: '',
+      status: 'TODOS',
+      fornecedorId: '0',
+      dataEmissaoInicio: undefined,
+      dataEmissaoFim: undefined,
+      dataChegadaInicio: undefined,
+      dataChegadaFim: undefined,
+      modelo: '',
+      serie: '',
+      valorMinimo: '',
+      valorMaximo: '',
+    });
+  };
+
+  const filteredPurchases = useMemo(() => {
+    return purchases.filter((purchase) => {
+      // Filtro de busca por texto
+      const searchLower = filters.searchTerm.toLowerCase();
+      const matchesSearch =
+        !filters.searchTerm ||
+        (purchase.numeroPedido?.toString() || '').includes(filters.searchTerm) ||
+        purchase.id.toString().includes(filters.searchTerm) ||
+        (purchase.fornecedorNome && purchase.fornecedorNome.toLowerCase().includes(searchLower)) ||
+        (purchase.funcionarioNome && purchase.funcionarioNome.toLowerCase().includes(searchLower)) ||
+        purchase.status.toLowerCase().includes(searchLower) ||
+        (purchase.modelo && purchase.modelo.toLowerCase().includes(searchLower)) ||
+        (purchase.serie && purchase.serie.toLowerCase().includes(searchLower));
+
+      // Filtro de status
+      const matchesStatus = filters.status === 'TODOS' || purchase.status === filters.status;
+
+      // Filtro de fornecedor
+      const matchesFornecedor =
+        !filters.fornecedorId || 
+        filters.fornecedorId === '0' || 
+        purchase.fornecedorId?.toString() === filters.fornecedorId;
+
+      // Filtro de modelo
+      const matchesModelo =
+        !filters.modelo ||
+        (purchase.modelo && purchase.modelo.toLowerCase().includes(filters.modelo.toLowerCase()));
+
+      // Filtro de série
+      const matchesSerie =
+        !filters.serie ||
+        (purchase.serie && purchase.serie.toLowerCase().includes(filters.serie.toLowerCase()));
+
+      // Filtro de data de emissão
+      const dataEmissao = parseISO(purchase.dataEmissao);
+      const matchesDataEmissaoInicio =
+        !filters.dataEmissaoInicio ||
+        isEqual(dataEmissao, filters.dataEmissaoInicio) ||
+        isAfter(dataEmissao, filters.dataEmissaoInicio);
+      const matchesDataEmissaoFim =
+        !filters.dataEmissaoFim ||
+        isEqual(dataEmissao, filters.dataEmissaoFim) ||
+        isBefore(dataEmissao, filters.dataEmissaoFim);
+
+      // Filtro de data de chegada
+      let matchesDataChegadaInicio = true;
+      let matchesDataChegadaFim = true;
+      if (purchase.dataChegada) {
+        const dataChegada = parseISO(purchase.dataChegada);
+        matchesDataChegadaInicio =
+          !filters.dataChegadaInicio ||
+          isEqual(dataChegada, filters.dataChegadaInicio) ||
+          isAfter(dataChegada, filters.dataChegadaInicio);
+        matchesDataChegadaFim =
+          !filters.dataChegadaFim ||
+          isEqual(dataChegada, filters.dataChegadaFim) ||
+          isBefore(dataChegada, filters.dataChegadaFim);
+      } else if (filters.dataChegadaInicio || filters.dataChegadaFim) {
+        // Se tem filtro de data de chegada mas a compra não tem data de chegada, não exibe
+        matchesDataChegadaInicio = false;
+        matchesDataChegadaFim = false;
+      }
+
+      // Filtro de valor
+      const valor = purchase.totalAPagar || 0;
+      const matchesValorMinimo = !filters.valorMinimo || valor >= parseFloat(filters.valorMinimo);
+      const matchesValorMaximo = !filters.valorMaximo || valor <= parseFloat(filters.valorMaximo);
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesFornecedor &&
+        matchesModelo &&
+        matchesSerie &&
+        matchesDataEmissaoInicio &&
+        matchesDataEmissaoFim &&
+        matchesDataChegadaInicio &&
+        matchesDataChegadaFim &&
+        matchesValorMinimo &&
+        matchesValorMaximo
+      );
+    });
+  }, [purchases, filters]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
@@ -128,17 +232,11 @@ const PurchasesList: React.FC = () => {
         </Link>
       </div>
 
-      <div className="flex items-center space-x-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <input
-            placeholder="Pesquisar compras..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-8 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-          />
-        </div>
-      </div>
+      <PurchaseFilters
+        filters={filters}
+        onFiltersChange={setFilters}
+        onClearFilters={clearFilters}
+      />
 
       <div className="rounded-md border">
         <div className="overflow-x-auto">
@@ -175,7 +273,7 @@ const PurchasesList: React.FC = () => {
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <ShoppingCart className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
-                        {searchTerm ? 'Nenhuma compra encontrada.' : 'Nenhuma compra cadastrada.'}
+                        {filters.searchTerm || filters.status !== 'TODOS' ? 'Nenhuma compra encontrada com os filtros aplicados.' : 'Nenhuma compra cadastrada.'}
                       </p>
                     </div>
                   </td>
