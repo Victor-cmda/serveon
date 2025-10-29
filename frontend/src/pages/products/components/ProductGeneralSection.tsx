@@ -77,7 +77,7 @@ const ProductGeneralSection = ({
         name="produto"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Nome do Produto *</FormLabel>
+            <FormLabel>Produto *</FormLabel>
             <FormControl>
               <Input
                 placeholder="Nome/descrição do produto"
