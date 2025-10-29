@@ -3375,6 +3375,58 @@
         ]
       }
     },
+    "/api/sales/check-exists": {
+      "get": {
+        "operationId": "SalesController_checkExists",
+        "parameters": [
+          {
+            "name": "numeroPedido",
+            "required": true,
+            "in": "query",
+            "description": "Número do pedido/nota fiscal",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "modelo",
+            "required": true,
+            "in": "query",
+            "description": "Modelo da nota fiscal",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "serie",
+            "required": true,
+            "in": "query",
+            "description": "Série da nota fiscal",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "clienteId",
+            "required": true,
+            "in": "query",
+            "description": "ID do cliente",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retorna se a venda existe ou não."
+          }
+        },
+        "summary": "Verificar se uma venda já existe pela chave composta",
+        "tags": [
+          "sales"
+        ]
+      }
+    },
     "/api/sales/{id}": {
       "get": {
         "operationId": "SalesController_findOne",
@@ -3457,6 +3509,60 @@
           }
         },
         "summary": "Deletar venda",
+        "tags": [
+          "sales"
+        ]
+      }
+    },
+    "/api/sales/{id}/approve": {
+      "patch": {
+        "operationId": "SalesController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Venda aprovada com sucesso."
+          },
+          "404": {
+            "description": "Venda não encontrada."
+          }
+        },
+        "summary": "Aprovar venda",
+        "tags": [
+          "sales"
+        ]
+      }
+    },
+    "/api/sales/{id}/deny": {
+      "patch": {
+        "operationId": "SalesController_deny",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Venda negada com sucesso."
+          },
+          "404": {
+            "description": "Venda não encontrada."
+          }
+        },
+        "summary": "Negar venda",
         "tags": [
           "sales"
         ]
@@ -6542,17 +6648,173 @@
           }
         }
       },
+      "CreateSaleItemDto": {
+        "type": "object",
+        "properties": {
+          "produtoId": {
+            "type": "number",
+            "description": "ID do produto",
+            "example": 1
+          },
+          "quantidade": {
+            "type": "number",
+            "description": "Quantidade do produto",
+            "example": 10
+          },
+          "precoUn": {
+            "type": "number",
+            "description": "Preço unitário do produto",
+            "example": 100.5
+          },
+          "descUn": {
+            "type": "number",
+            "description": "Desconto unitário aplicado ao produto",
+            "example": 5,
+            "default": 0
+          },
+          "liquidoUn": {
+            "type": "number",
+            "description": "Valor líquido unitário (preço - desconto)",
+            "example": 95.5
+          },
+          "total": {
+            "type": "number",
+            "description": "Valor total do item (quantidade * líquido unitário)",
+            "example": 955
+          },
+          "rateio": {
+            "type": "number",
+            "description": "Valor de rateio de despesas",
+            "example": 10,
+            "default": 0
+          },
+          "custoFinalUn": {
+            "type": "number",
+            "description": "Custo final unitário (líquido + rateio / quantidade)",
+            "example": 96.5
+          },
+          "custoFinal": {
+            "type": "number",
+            "description": "Custo final total (custo final unitário * quantidade)",
+            "example": 965
+          },
+          "quantidadeEntregue": {
+            "type": "number",
+            "description": "Quantidade entregue do item",
+            "example": 0,
+            "default": 0
+          },
+          "dataEntregaItem": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de entrega do item",
+            "example": "2024-02-20"
+          },
+          "observacoes": {
+            "type": "string",
+            "description": "Observações sobre o item",
+            "example": "Produto com garantia estendida"
+          }
+        },
+        "required": [
+          "produtoId",
+          "quantidade",
+          "precoUn",
+          "descUn",
+          "rateio"
+        ]
+      },
+      "CreateSaleInstallmentDto": {
+        "type": "object",
+        "properties": {
+          "parcela": {
+            "type": "number",
+            "description": "Número da parcela",
+            "example": 1
+          },
+          "codigoFormaPagto": {
+            "type": "string",
+            "description": "Código da forma de pagamento",
+            "example": "DIN"
+          },
+          "formaPagamentoId": {
+            "type": "number",
+            "description": "ID da forma de pagamento",
+            "example": 1
+          },
+          "dataVencimento": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de vencimento da parcela",
+            "example": "2024-02-15"
+          },
+          "valorParcela": {
+            "type": "number",
+            "description": "Valor da parcela",
+            "example": 720
+          }
+        },
+        "required": [
+          "parcela",
+          "formaPagamentoId",
+          "dataVencimento",
+          "valorParcela"
+        ]
+      },
       "CreateSaleDto": {
         "type": "object",
         "properties": {
+          "numeroPedido": {
+            "type": "string",
+            "description": "Número do pedido/nota fiscal",
+            "example": "1"
+          },
+          "modelo": {
+            "type": "string",
+            "description": "Modelo da nota fiscal",
+            "example": "55"
+          },
+          "serie": {
+            "type": "string",
+            "description": "Série da nota fiscal",
+            "example": "1"
+          },
           "clienteId": {
             "type": "number",
             "description": "ID do cliente",
             "example": 1
           },
+          "numeroNota": {
+            "type": "string",
+            "description": "Número da nota fiscal",
+            "example": "12345"
+          },
+          "dataEmissao": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de emissão da venda",
+            "example": "2024-01-15"
+          },
+          "dataEntrega": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de entrega prevista",
+            "example": "2024-02-15"
+          },
+          "dataEntregaRealizada": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de entrega realizada",
+            "example": "2024-02-15"
+          },
           "condicaoPagamentoId": {
             "type": "number",
             "description": "ID da condição de pagamento",
+            "example": 1
+          },
+          "formaPagamentoId": {
+            "type": "number",
+            "description": "ID da forma de pagamento",
             "example": 1
           },
           "funcionarioId": {
@@ -6560,75 +6822,166 @@
             "description": "ID do funcionário responsável pela venda",
             "example": 1
           },
-          "dataVenda": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Data da venda",
-            "example": "2024-01-15"
-          },
-          "dataVencimento": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Data de vencimento",
-            "example": "2024-02-15"
-          },
-          "valorTotal": {
-            "type": "number",
-            "description": "Valor total da venda",
-            "example": 2500
-          },
-          "valorDesconto": {
-            "type": "number",
-            "description": "Valor de desconto aplicado",
-            "example": 100,
-            "default": 0
-          },
           "status": {
             "type": "string",
             "description": "Status da venda",
-            "example": "ORCAMENTO",
+            "example": "PENDENTE",
             "enum": [
-              "ORCAMENTO",
-              "CONFIRMADA",
-              "CANCELADA",
+              "PENDENTE",
+              "APROVADO",
+              "ENVIADO",
               "ENTREGUE",
-              "FATURADA"
+              "CANCELADO"
             ],
-            "default": "ORCAMENTO"
+            "default": "PENDENTE"
+          },
+          "tipoFrete": {
+            "type": "string",
+            "description": "Tipo de frete",
+            "example": "CIF",
+            "enum": [
+              "CIF",
+              "FOB"
+            ],
+            "default": "CIF"
           },
           "transportadoraId": {
             "type": "number",
             "description": "ID da transportadora",
             "example": 1
           },
+          "valorFrete": {
+            "type": "number",
+            "description": "Valor do frete",
+            "example": 50,
+            "default": 0
+          },
+          "valorSeguro": {
+            "type": "number",
+            "description": "Valor do seguro",
+            "example": 25,
+            "default": 0
+          },
+          "outrasDespesas": {
+            "type": "number",
+            "description": "Outras despesas",
+            "example": 15,
+            "default": 0
+          },
+          "valorDesconto": {
+            "type": "number",
+            "description": "Valor de desconto aplicado",
+            "example": 50,
+            "default": 0
+          },
+          "valorAcrescimo": {
+            "type": "number",
+            "description": "Valor de acréscimo aplicado",
+            "example": 10,
+            "default": 0
+          },
           "observacoes": {
             "type": "string",
             "description": "Observações sobre a venda",
             "example": "Venda de produtos eletrônicos"
+          },
+          "aprovadoPor": {
+            "type": "number",
+            "description": "ID do funcionário que aprovou a venda",
+            "example": 1
+          },
+          "dataAprovacao": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de aprovação da venda",
+            "example": "2024-01-16"
+          },
+          "itens": {
+            "description": "Itens da venda",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateSaleItemDto"
+            }
+          },
+          "parcelas": {
+            "description": "Parcelas da venda",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateSaleInstallmentDto"
+            }
           }
         },
         "required": [
+          "numeroPedido",
+          "modelo",
+          "serie",
           "clienteId",
+          "dataEmissao",
           "condicaoPagamentoId",
           "funcionarioId",
-          "dataVenda",
-          "dataVencimento",
-          "valorTotal",
+          "status",
+          "tipoFrete",
+          "valorFrete",
+          "valorSeguro",
+          "outrasDespesas",
           "valorDesconto",
-          "status"
+          "valorAcrescimo"
         ]
       },
       "UpdateSaleDto": {
         "type": "object",
         "properties": {
+          "numeroPedido": {
+            "type": "string",
+            "description": "Número do pedido/nota fiscal",
+            "example": "1"
+          },
+          "modelo": {
+            "type": "string",
+            "description": "Modelo da nota fiscal",
+            "example": "55"
+          },
+          "serie": {
+            "type": "string",
+            "description": "Série da nota fiscal",
+            "example": "1"
+          },
           "clienteId": {
             "type": "number",
             "description": "ID do cliente",
             "example": 1
           },
+          "numeroNota": {
+            "type": "string",
+            "description": "Número da nota fiscal",
+            "example": "12345"
+          },
+          "dataEmissao": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de emissão da venda",
+            "example": "2024-01-15"
+          },
+          "dataEntrega": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de entrega prevista",
+            "example": "2024-02-15"
+          },
+          "dataEntregaRealizada": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de entrega realizada",
+            "example": "2024-02-15"
+          },
           "condicaoPagamentoId": {
             "type": "number",
             "description": "ID da condição de pagamento",
+            "example": 1
+          },
+          "formaPagamentoId": {
+            "type": "number",
+            "description": "ID da forma de pagamento",
             "example": 1
           },
           "funcionarioId": {
@@ -6636,51 +6989,93 @@
             "description": "ID do funcionário responsável pela venda",
             "example": 1
           },
-          "dataVenda": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Data da venda",
-            "example": "2024-01-15"
-          },
-          "dataVencimento": {
-            "format": "date-time",
-            "type": "string",
-            "description": "Data de vencimento",
-            "example": "2024-02-15"
-          },
-          "valorTotal": {
-            "type": "number",
-            "description": "Valor total da venda",
-            "example": 2500
-          },
-          "valorDesconto": {
-            "type": "number",
-            "description": "Valor de desconto aplicado",
-            "example": 100,
-            "default": 0
-          },
           "status": {
             "type": "string",
             "description": "Status da venda",
-            "example": "ORCAMENTO",
+            "example": "PENDENTE",
             "enum": [
-              "ORCAMENTO",
-              "CONFIRMADA",
-              "CANCELADA",
+              "PENDENTE",
+              "APROVADO",
+              "ENVIADO",
               "ENTREGUE",
-              "FATURADA"
+              "CANCELADO"
             ],
-            "default": "ORCAMENTO"
+            "default": "PENDENTE"
+          },
+          "tipoFrete": {
+            "type": "string",
+            "description": "Tipo de frete",
+            "example": "CIF",
+            "enum": [
+              "CIF",
+              "FOB"
+            ],
+            "default": "CIF"
           },
           "transportadoraId": {
             "type": "number",
             "description": "ID da transportadora",
             "example": 1
           },
+          "valorFrete": {
+            "type": "number",
+            "description": "Valor do frete",
+            "example": 50,
+            "default": 0
+          },
+          "valorSeguro": {
+            "type": "number",
+            "description": "Valor do seguro",
+            "example": 25,
+            "default": 0
+          },
+          "outrasDespesas": {
+            "type": "number",
+            "description": "Outras despesas",
+            "example": 15,
+            "default": 0
+          },
+          "valorDesconto": {
+            "type": "number",
+            "description": "Valor de desconto aplicado",
+            "example": 50,
+            "default": 0
+          },
+          "valorAcrescimo": {
+            "type": "number",
+            "description": "Valor de acréscimo aplicado",
+            "example": 10,
+            "default": 0
+          },
           "observacoes": {
             "type": "string",
             "description": "Observações sobre a venda",
             "example": "Venda de produtos eletrônicos"
+          },
+          "aprovadoPor": {
+            "type": "number",
+            "description": "ID do funcionário que aprovou a venda",
+            "example": 1
+          },
+          "dataAprovacao": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de aprovação da venda",
+            "example": "2024-01-16"
+          },
+          "itens": {
+            "description": "Itens da venda",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateSaleItemDto"
+            }
+          },
+          "parcelas": {
+            "description": "Parcelas da venda",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateSaleInstallmentDto"
+            }
           }
         }
       }

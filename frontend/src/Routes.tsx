@@ -36,6 +36,8 @@ import TransportersList from './pages/transporters/TransportersList';
 import TransporterForm from './pages/transporters/TransporterForm';
 import PurchasesList from './pages/purchases/PurchasesList';
 import PurchaseForm from './pages/purchases/PurchaseForm';
+import SalesList from './pages/sales/SalesList';
+import SaleForm from './pages/sales/SaleForm';
 import { FormStateProvider } from './contexts/FormStateContext';
 
 const router = createBrowserRouter([
@@ -59,6 +61,19 @@ const router = createBrowserRouter([
       {
         path: 'purchases/edit/:id',
         element: <PurchaseForm mode="edit" />,
+      },
+      // Vendas
+      {
+        path: 'sales',
+        element: <SalesList />,
+      },
+      {
+        path: 'sales/new',
+        element: <SaleForm />,
+      },
+      {
+        path: 'sales/edit/:id',
+        element: <SaleForm />,
       },
       //Clientes
       {

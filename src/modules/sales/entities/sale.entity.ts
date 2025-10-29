@@ -3,10 +3,36 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 
 export class Sale extends BaseEntity {
   @ApiProperty({
-    description: 'Número do pedido/venda',
-    example: 'PV-0001',
+    description: 'Número do pedido/nota fiscal',
+    example: 'VD-0001',
   })
   numeroPedido: string;
+
+  @ApiProperty({
+    description: 'Número sequencial da venda',
+    example: 1001,
+    required: false,
+  })
+  numeroSequencial?: number | null;
+
+  @ApiProperty({
+    description: 'Modelo da nota fiscal',
+    example: '55',
+  })
+  modelo: string;
+
+  @ApiProperty({
+    description: 'Série da nota fiscal',
+    example: '001',
+  })
+  serie: string;
+
+  @ApiProperty({
+    description: 'Número da nota fiscal',
+    example: '12345',
+    required: false,
+  })
+  numeroNota?: string;
 
   @ApiProperty({
     description: 'ID do cliente',
@@ -15,37 +41,36 @@ export class Sale extends BaseEntity {
   clienteId: number;
 
   @ApiProperty({
-    description: 'ID do vendedor (funcionário)',
-    example: 1,
+    description: 'Nome do cliente',
+    example: 'Cliente ABC Ltda',
     required: false,
   })
-  vendedorId?: number;
+  clienteNome?: string;
 
   @ApiProperty({
-    description: 'Data do pedido',
+    description: 'Data de emissão da venda',
     example: '2024-01-15',
   })
-  dataPedido: Date;
+  dataEmissao: Date;
 
   @ApiProperty({
     description: 'Data de entrega prevista',
     example: '2024-02-15',
-    required: false,
   })
-  dataEntregaPrevista?: Date;
-
-  @ApiProperty({
-    description: 'Data de entrega realizada',
-    example: '2024-02-20',
-    required: false,
-  })
-  dataEntregaRealizada?: Date;
+  dataEntrega: Date;
 
   @ApiProperty({
     description: 'ID da condição de pagamento',
     example: 1,
   })
   condicaoPagamentoId: number;
+
+  @ApiProperty({
+    description: 'Nome da condição de pagamento',
+    example: '30 DIAS',
+    required: false,
+  })
+  condicaoPagamentoNome?: string;
 
   @ApiProperty({
     description: 'ID da forma de pagamento',
@@ -55,39 +80,25 @@ export class Sale extends BaseEntity {
   formaPagamentoId?: number;
 
   @ApiProperty({
-    description: 'Status da venda',
-    example: 'PEDIDO',
-    enum: ['ORCAMENTO', 'PEDIDO', 'PRODUCAO', 'FATURADO', 'ENTREGUE', 'CANCELADO'],
+    description: 'ID do funcionário responsável pela venda',
+    example: 1,
+    required: false,
   })
-  status: string;
+  funcionarioId?: number;
 
   @ApiProperty({
-    description: 'Tipo de venda',
-    example: 'VENDA',
-    enum: ['VENDA', 'ORCAMENTO', 'CONSIGNACAO', 'BONIFICACAO'],
+    description: 'Nome do funcionário responsável',
+    example: 'João Silva',
+    required: false,
   })
-  tipoVenda: string;
+  funcionarioNome?: string;
 
   @ApiProperty({
     description: 'Tipo de frete',
     example: 'CIF',
-    enum: ['CIF', 'FOB', 'SEM_FRETE'],
+    enum: ['CIF', 'FOB'],
   })
   tipoFrete: string;
-
-  @ApiProperty({
-    description: 'ID da transportadora',
-    example: 1,
-    required: false,
-  })
-  transportadoraId?: number;
-
-  @ApiProperty({
-    description: 'Endereço de entrega',
-    example: 'Rua Exemplo, 123',
-    required: false,
-  })
-  enderecoEntrega?: string;
 
   @ApiProperty({
     description: 'Valor do frete',
@@ -102,34 +113,67 @@ export class Sale extends BaseEntity {
   valorSeguro: number;
 
   @ApiProperty({
+    description: 'Outras despesas',
+    example: 15.00,
+  })
+  outrasDespesas: number;
+
+  @ApiProperty({
+    description: 'Total dos produtos',
+    example: 1400.00,
+  })
+  totalProdutos: number;
+
+  @ApiProperty({
     description: 'Valor de desconto aplicado',
-    example: 100.00,
+    example: 50.00,
   })
   valorDesconto: number;
 
   @ApiProperty({
-    description: 'Percentual de desconto',
-    example: 5.00,
-  })
-  percentualDesconto: number;
-
-  @ApiProperty({
-    description: 'Valor de acréscimo',
+    description: 'Valor de acréscimo aplicado',
     example: 10.00,
   })
   valorAcrescimo: number;
 
   @ApiProperty({
-    description: 'Valor dos produtos',
-    example: 2000.00,
+    description: 'Total a pagar',
+    example: 1440.00,
+  })
+  totalAPagar: number;
+
+  @ApiProperty({
+    description: 'Valor total dos produtos (compatibilidade NFe)',
+    example: 1400.00,
   })
   valorProdutos: number;
 
   @ApiProperty({
-    description: 'Valor total da venda',
-    example: 2500.00,
+    description: 'Valor total (compatibilidade NFe)',
+    example: 1440.00,
   })
   valorTotal: number;
+
+  @ApiProperty({
+    description: 'Status da venda',
+    example: 'PENDENTE',
+    enum: ['PENDENTE', 'APROVADO', 'ENVIADO', 'ENTREGUE', 'CANCELADO'],
+  })
+  status: string;
+
+  @ApiProperty({
+    description: 'ID da transportadora',
+    example: 1,
+    required: false,
+  })
+  transportadoraId?: number;
+
+  @ApiProperty({
+    description: 'Nome da transportadora',
+    example: 'Transportadora XYZ',
+    required: false,
+  })
+  transportadoraNome?: string;
 
   @ApiProperty({
     description: 'Observações sobre a venda',
@@ -139,7 +183,7 @@ export class Sale extends BaseEntity {
   observacoes?: string;
 
   @ApiProperty({
-    description: 'ID do funcionário que aprovou',
+    description: 'ID do funcionário que aprovou a venda',
     example: 1,
     required: false,
   })
@@ -153,9 +197,9 @@ export class Sale extends BaseEntity {
   dataAprovacao?: Date;
 
   @ApiProperty({
-    description: 'ID da NFe gerada para esta venda',
-    example: 1,
+    description: 'Data de entrega realizada',
+    example: '2024-02-20',
     required: false,
   })
-  nfeId?: number;
+  dataEntregaRealizada?: Date;
 }

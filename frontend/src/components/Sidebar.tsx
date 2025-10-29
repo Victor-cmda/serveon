@@ -78,6 +78,12 @@ const Sidebar = ({ collapsed = false }: SidebarProps) => {
           path: '/purchases',
         },
         {
+          id: 'sales',
+          title: 'Vendas',
+          icon: <ShoppingCart className="h-4 w-4" />,
+          path: '/sales',
+        },
+        {
           id: 'customers',
           title: 'Clientes',
           icon: <Users className="h-4 w-4" />,

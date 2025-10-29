@@ -783,60 +783,107 @@ CREATE TABLE item_recebimento_compra (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela venda (Pedidos de Venda)
+-- Sequence para numero_sequencial das vendas
+CREATE SEQUENCE venda_numero_seq START 1;
+
+-- Tabela venda (Pedidos de Venda) - Com chave composta
 CREATE TABLE venda (
-    id SERIAL PRIMARY KEY,
-    numero_pedido VARCHAR(20) NOT NULL UNIQUE,
+    numero_pedido VARCHAR(20) NOT NULL,
+    modelo VARCHAR(10) NOT NULL, -- Modelo da nota fiscal
+    serie VARCHAR(10) NOT NULL, -- Série da nota fiscal
     cliente_id INTEGER NOT NULL REFERENCES cliente(id),
-    vendedor_id INTEGER REFERENCES funcionario(id), -- Funcionário vendedor
-    data_pedido DATE NOT NULL DEFAULT CURRENT_DATE,
-    data_entrega_prevista DATE,
+    numero_sequencial INTEGER UNIQUE DEFAULT nextval('venda_numero_seq'),
+    codigo VARCHAR(50), -- Código da nota fiscal
+    data_emissao DATE NOT NULL DEFAULT CURRENT_DATE, -- Data de emissão
+    data_entrega DATE, -- Data de entrega prevista
     data_entrega_realizada DATE,
     condicao_pagamento_id INTEGER NOT NULL REFERENCES condicao_pagamento(id),
     forma_pagamento_id INTEGER REFERENCES forma_pagamento(id),
-    status VARCHAR(20) NOT NULL DEFAULT 'ORCAMENTO' CHECK (status IN ('ORCAMENTO', 'PEDIDO', 'PRODUCAO', 'FATURADO', 'ENTREGUE', 'CANCELADO')),
-    tipo_venda VARCHAR(20) NOT NULL DEFAULT 'VENDA' CHECK (tipo_venda IN ('VENDA', 'ORCAMENTO', 'CONSIGNACAO', 'BONIFICACAO')),
-    tipo_frete VARCHAR(20) DEFAULT 'CIF' CHECK (tipo_frete IN ('CIF', 'FOB', 'SEM_FRETE')),
+    funcionario_id INTEGER REFERENCES funcionario(id), -- Responsável pela venda
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE' CHECK (status IN ('PENDENTE', 'APROVADO', 'ENVIADO', 'ENTREGUE', 'CANCELADO')),
+    tipo_frete VARCHAR(20) DEFAULT 'CIF' CHECK (tipo_frete IN ('CIF', 'FOB')),
     transportadora_id INTEGER REFERENCES transportadora(id),
-    endereco_entrega TEXT,
     valor_frete DECIMAL(15,2) DEFAULT 0.00,
     valor_seguro DECIMAL(15,2) DEFAULT 0.00,
+    outras_despesas DECIMAL(15,2) DEFAULT 0.00, -- Outras despesas
     valor_desconto DECIMAL(15,2) DEFAULT 0.00,
-    percentual_desconto DECIMAL(5,2) DEFAULT 0.00,
     valor_acrescimo DECIMAL(15,2) DEFAULT 0.00,
-    valor_produtos DECIMAL(15,2) NOT NULL DEFAULT 0.00,
-    valor_total DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+    total_produtos DECIMAL(15,2) NOT NULL DEFAULT 0.00, -- Total dos produtos
+    total_a_pagar DECIMAL(15,2) NOT NULL DEFAULT 0.00, -- Total a pagar (valor final)
+    valor_produtos DECIMAL(15,2) NOT NULL DEFAULT 0.00, -- Mantido para compatibilidade
+    valor_total DECIMAL(15,2) NOT NULL DEFAULT 0.00, -- Mantido para compatibilidade
     observacoes TEXT,
     aprovado_por INTEGER REFERENCES funcionario(id),
     data_aprovacao TIMESTAMP,
     nfe_id INTEGER REFERENCES nfe(id), -- NFe gerada para esta venda
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (numero_pedido, modelo, serie, cliente_id)
 );
 
 -- Tabela item_venda (Itens do Pedido de Venda)
 CREATE TABLE item_venda (
     id SERIAL PRIMARY KEY,
-    venda_id INTEGER NOT NULL REFERENCES venda(id) ON DELETE CASCADE,
+    venda_numero_pedido VARCHAR(20) NOT NULL,
+    venda_modelo VARCHAR(10) NOT NULL,
+    venda_serie VARCHAR(10) NOT NULL,
+    venda_cliente_id INTEGER NOT NULL,
+    codigo VARCHAR(50) NOT NULL, -- Código do produto
     produto_id INTEGER NOT NULL REFERENCES produto(id),
+    produto VARCHAR(255) NOT NULL, -- Nome do produto
+    unidade VARCHAR(20) NOT NULL, -- Unidade de medida
     quantidade DECIMAL(15,3) NOT NULL,
-    valor_unitario DECIMAL(15,4) NOT NULL,
-    valor_desconto DECIMAL(15,2) DEFAULT 0.00,
-    percentual_desconto DECIMAL(5,2) DEFAULT 0.00,
-    valor_total DECIMAL(15,2) NOT NULL,
+    preco_un DECIMAL(15,4) NOT NULL, -- Preço unitário
+    desc_un DECIMAL(15,4) DEFAULT 0.00, -- Desconto unitário
+    liquido_un DECIMAL(15,4) NOT NULL, -- Valor líquido unitário
+    total DECIMAL(15,2) NOT NULL, -- Total do item
+    rateio DECIMAL(15,2) DEFAULT 0.00, -- Rateio
+    custo_final_un DECIMAL(15,4) NOT NULL, -- Custo final unitário
+    custo_final DECIMAL(15,2) NOT NULL, -- Custo final total
+    valor_unitario DECIMAL(15,4), -- Mantido para compatibilidade
+    valor_desconto DECIMAL(15,2) DEFAULT 0.00, -- Mantido para compatibilidade
+    valor_total DECIMAL(15,2), -- Mantido para compatibilidade (será igual a total)
     quantidade_entregue DECIMAL(15,3) DEFAULT 0.00,
     data_entrega_item DATE,
     observacoes TEXT,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id) 
+        REFERENCES venda(numero_pedido, modelo, serie, cliente_id) ON DELETE CASCADE
+);
+
+-- Tabela parcela_venda (Parcelas do Pedido de Venda)
+CREATE TABLE parcela_venda (
+    id SERIAL PRIMARY KEY,
+    venda_numero_pedido VARCHAR(20) NOT NULL,
+    venda_modelo VARCHAR(10) NOT NULL,
+    venda_serie VARCHAR(10) NOT NULL,
+    venda_cliente_id INTEGER NOT NULL,
+    parcela INTEGER NOT NULL, -- Número da parcela
+    codigo_forma_pagto VARCHAR(20) NOT NULL, -- Código da forma de pagamento
+    forma_pagamento_id INTEGER NOT NULL REFERENCES forma_pagamento(id),
+    forma_pagamento VARCHAR(100) NOT NULL, -- Nome da forma de pagamento
+    data_vencimento DATE NOT NULL, -- Data de vencimento da parcela
+    valor_parcela DECIMAL(15,2) NOT NULL, -- Valor da parcela
+    status VARCHAR(20) DEFAULT 'PENDENTE' CHECK (status IN ('PENDENTE', 'PAGO', 'VENCIDO', 'CANCELADO')),
+    data_pagamento DATE,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id) 
+        REFERENCES venda(numero_pedido, modelo, serie, cliente_id) ON DELETE CASCADE,
+    CONSTRAINT uk_parcela_venda UNIQUE (venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id, parcela)
 );
 
 -- Tabela entrega_venda (Controle de Entregas)
 CREATE TABLE entrega_venda (
     id SERIAL PRIMARY KEY,
-    venda_id INTEGER NOT NULL REFERENCES venda(id),
+    venda_numero_pedido VARCHAR(20) NOT NULL,
+    venda_modelo VARCHAR(10) NOT NULL,
+    venda_serie VARCHAR(10) NOT NULL,
+    venda_cliente_id INTEGER NOT NULL,
     numero_entrega VARCHAR(20) NOT NULL UNIQUE,
     data_entrega DATE NOT NULL DEFAULT CURRENT_DATE,
     funcionario_responsavel_id INTEGER NOT NULL REFERENCES funcionario(id),
@@ -851,7 +898,9 @@ CREATE TABLE entrega_venda (
     assinatura_recebimento TEXT, -- Pode armazenar o nome de quem recebeu
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id) 
+        REFERENCES venda(numero_pedido, modelo, serie, cliente_id)
 );
 
 -- Tabela item_entrega_venda (Itens Entregues)
@@ -924,7 +973,10 @@ CREATE TABLE contas_pagar (
 -- Tabela contas_receber (Contas a Receber - Geradas das Vendas)
 CREATE TABLE contas_receber (
     id SERIAL PRIMARY KEY,
-    venda_id INTEGER REFERENCES venda(id),
+    venda_numero_pedido VARCHAR(20),
+    venda_modelo VARCHAR(10),
+    venda_serie VARCHAR(10),
+    venda_cliente_id INTEGER,
     cliente_id INTEGER NOT NULL REFERENCES cliente(id),
     numero_documento VARCHAR(50) NOT NULL,
     tipo_documento VARCHAR(20) NOT NULL DEFAULT 'FATURA' CHECK (tipo_documento IN ('FATURA', 'DUPLICATA', 'BOLETO', 'NOTA_FISCAL')),
@@ -943,7 +995,9 @@ CREATE TABLE contas_receber (
     recebido_por INTEGER REFERENCES funcionario(id),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id) 
+        REFERENCES venda(numero_pedido, modelo, serie, cliente_id)
 );
 
 -- Tabela orcamento (Orçamentos separados das Vendas)
@@ -961,11 +1015,16 @@ CREATE TABLE orcamento (
     percentual_desconto DECIMAL(5,2) DEFAULT 0.00,
     valor_total DECIMAL(15,2) NOT NULL DEFAULT 0.00,
     observacoes TEXT,
-    venda_id INTEGER REFERENCES venda(id), -- Se foi convertido em venda
+    venda_numero_pedido VARCHAR(20), -- Se foi convertido em venda
+    venda_modelo VARCHAR(10),
+    venda_serie VARCHAR(10),
+    venda_cliente_id INTEGER,
     data_conversao TIMESTAMP,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id) 
+        REFERENCES venda(numero_pedido, modelo, serie, cliente_id)
 );
 
 -- Tabela item_orcamento (Itens do Orçamento)
@@ -1077,15 +1136,15 @@ CREATE INDEX idx_recebimento_compra_data ON recebimento_compra(data_recebimento)
 CREATE INDEX idx_item_recebimento_recebimento_id ON item_recebimento_compra(recebimento_id);
 CREATE INDEX idx_item_recebimento_item_compra_id ON item_recebimento_compra(item_compra_id);
 CREATE INDEX idx_venda_cliente_id ON venda(cliente_id);
-CREATE INDEX idx_venda_vendedor_id ON venda(vendedor_id);
-CREATE INDEX idx_venda_data_pedido ON venda(data_pedido);
+CREATE INDEX idx_venda_funcionario_id ON venda(funcionario_id);
+CREATE INDEX idx_venda_data_emissao ON venda(data_emissao);
 CREATE INDEX idx_venda_status ON venda(status);
 CREATE INDEX idx_venda_condicao_pagamento_id ON venda(condicao_pagamento_id);
 CREATE INDEX idx_venda_transportadora_id ON venda(transportadora_id);
 CREATE INDEX idx_venda_nfe_id ON venda(nfe_id);
-CREATE INDEX idx_item_venda_venda_id ON item_venda(venda_id);
+CREATE INDEX idx_item_venda_venda_numero ON item_venda(venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id);
 CREATE INDEX idx_item_venda_produto_id ON item_venda(produto_id);
-CREATE INDEX idx_entrega_venda_venda_id ON entrega_venda(venda_id);
+CREATE INDEX idx_entrega_venda_venda_numero ON entrega_venda(venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id);
 CREATE INDEX idx_entrega_venda_data ON entrega_venda(data_entrega);
 CREATE INDEX idx_entrega_venda_status ON entrega_venda(status);
 CREATE INDEX idx_item_entrega_entrega_id ON item_entrega_venda(entrega_id);
@@ -1099,14 +1158,14 @@ CREATE INDEX idx_contas_pagar_compra ON contas_pagar(compra_numero_pedido, compr
 CREATE INDEX idx_contas_pagar_vencimento ON contas_pagar(data_vencimento);
 CREATE INDEX idx_contas_pagar_status ON contas_pagar(status);
 CREATE INDEX idx_contas_receber_cliente_id ON contas_receber(cliente_id);
-CREATE INDEX idx_contas_receber_venda_id ON contas_receber(venda_id);
+CREATE INDEX idx_contas_receber_venda_numero ON contas_receber(venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id);
 CREATE INDEX idx_contas_receber_vencimento ON contas_receber(data_vencimento);
 CREATE INDEX idx_contas_receber_status ON contas_receber(status);
 CREATE INDEX idx_orcamento_cliente_id ON orcamento(cliente_id);
 CREATE INDEX idx_orcamento_vendedor_id ON orcamento(vendedor_id);
 CREATE INDEX idx_orcamento_data ON orcamento(data_orcamento);
 CREATE INDEX idx_orcamento_status ON orcamento(status);
-CREATE INDEX idx_orcamento_venda_id ON orcamento(venda_id);
+CREATE INDEX idx_orcamento_venda_numero ON orcamento(venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id);
 CREATE INDEX idx_item_orcamento_orcamento_id ON item_orcamento(orcamento_id);
 CREATE INDEX idx_item_orcamento_produto_id ON item_orcamento(produto_id);
 -- Triggers para atualizar o campo updated_at automaticamente

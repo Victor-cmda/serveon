@@ -915,6 +915,22 @@ export const salesApi = {
     return handleResponse(response);
   },
 
+  checkExists: async (
+    numeroPedido: string,
+    modelo: string,
+    serie: string,
+    clienteId: string,
+  ): Promise<{ exists: boolean }> => {
+    const params = new URLSearchParams({
+      numeroPedido,
+      modelo,
+      serie,
+      clienteId,
+    });
+    const response = await fetch(`${API_URL}/sales/check-exists?${params}`);
+    return handleResponse(response);
+  },
+
   create: async (sale: CreateSaleDto): Promise<Sale> => {
     const response = await fetch(`${API_URL}/sales`, {
       method: 'POST',
@@ -940,6 +956,27 @@ export const salesApi = {
   delete: async (id: number): Promise<void> => {
     const response = await fetch(`${API_URL}/sales/${id}`, {
       method: 'DELETE',
+    });
+    return handleResponse(response);
+  },
+
+  approve: async (id: number): Promise<Sale> => {
+    const response = await fetch(`${API_URL}/sales/${id}/approve`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return handleResponse(response);
+  },
+
+  deny: async (id: number, motivo?: string): Promise<Sale> => {
+    const response = await fetch(`${API_URL}/sales/${id}/deny`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ motivo }),
     });
     return handleResponse(response);
   },

@@ -561,38 +561,145 @@ INSERT INTO parcela_compra (
 -- VENDAS
 -- =====================================================
 
+-- Primeira venda
 INSERT INTO venda (
-    numero_pedido, cliente_id, vendedor_id, data_pedido, data_entrega_prevista,
-    condicao_pagamento_id, forma_pagamento_id, status, tipo_venda, tipo_frete,
-    transportadora_id, endereco_entrega, valor_frete, valor_produtos, valor_total, observacoes
+    numero_pedido, modelo, serie, cliente_id,
+    data_emissao, data_entrega, condicao_pagamento_id, forma_pagamento_id, funcionario_id,
+    tipo_frete, valor_frete, valor_seguro, outras_despesas, valor_desconto, valor_acrescimo, 
+    total_produtos, total_a_pagar, valor_produtos, valor_total, status, 
+    transportadora_id, observacoes
 ) VALUES (
-    '1',
-    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    '1', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    CURRENT_DATE, CURRENT_DATE + INTERVAL '3 days', 
+    (SELECT id FROM condicao_pagamento WHERE nome = 'À VISTA'), 
+    (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 
     (SELECT id FROM funcionario WHERE email = 'vendedor@exemplo.com'),
-    CURRENT_DATE, CURRENT_DATE + INTERVAL '3 days',
-    (SELECT id FROM condicao_pagamento WHERE nome = 'À VISTA'), (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'FATURADO', 'VENDA', 'CIF',
-    (SELECT id FROM transportadora WHERE cnpj = '98765432000155'), 'AV. CENTRAL, 200 - CENTRO - SÃO PAULO/SP', 50.00, 800.00, 850.00, 'VENDA INICIAL'
+    'CIF', 50.00, 0.00, 0.00, 0.00, 0.00,
+    800.00, 850.00, 800.00, 850.00, 'APROVADO',
+    (SELECT id FROM transportadora WHERE cnpj = '98765432000155'), 'VENDA INICIAL DE ESTOQUE'
 );
 
 INSERT INTO item_venda (
-    venda_id, produto_id, quantidade, valor_unitario, valor_total
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id,
+    codigo, produto_id, produto, unidade, quantidade, preco_un, desc_un, liquido_un, total, 
+    rateio, custo_final_un, custo_final, valor_unitario, valor_desconto, valor_total, quantidade_entregue
 ) VALUES (
-    (SELECT id FROM venda WHERE numero_pedido = '1'), (SELECT id FROM produto WHERE codigo = 'P0001'), 10.000, 80.00, 800.00
+    '1', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    'P0001', (SELECT id FROM produto WHERE codigo = 'P0001'), 'PRODUTO A', 'UN', 
+    10.000, 80.00, 0.00, 80.00, 800.00,
+    0.00, 80.00, 800.00, 80.00, 0.00, 800.00, 10.000
 );
 
+INSERT INTO parcela_venda (
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id,
+    parcela, codigo_forma_pagto, forma_pagamento_id, forma_pagamento, data_vencimento, valor_parcela, status
+) VALUES (
+    '1', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    1, 'PIX', (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'PIX', 
+    CURRENT_DATE, 850.00, 'PENDENTE'
+);
+
+-- Segunda venda - Demonstra a chave composta permitindo mesmo numero_pedido com série diferente
+INSERT INTO venda (
+    numero_pedido, modelo, serie, cliente_id,
+    data_emissao, data_entrega, condicao_pagamento_id, forma_pagamento_id, funcionario_id,
+    tipo_frete, valor_frete, valor_seguro, outras_despesas, valor_desconto, valor_acrescimo, 
+    total_produtos, total_a_pagar, valor_produtos, valor_total, status, 
+    transportadora_id, observacoes
+) VALUES (
+    '2', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    CURRENT_DATE, CURRENT_DATE + INTERVAL '5 days', 
+    (SELECT id FROM condicao_pagamento WHERE nome = '30/60'), 
+    (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 
+    (SELECT id FROM funcionario WHERE email = 'vendedor@exemplo.com'),
+    'CIF', 25.00, 0.00, 0.00, 50.00, 0.00,
+    500.00, 475.00, 500.00, 475.00, 'PENDENTE',
+    (SELECT id FROM transportadora WHERE cnpj = '98765432000155'), 'SEGUNDA VENDA - PRODUTO B'
+);
+
+INSERT INTO item_venda (
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id,
+    codigo, produto_id, produto, unidade, quantidade, preco_un, desc_un, liquido_un, total, 
+    rateio, custo_final_un, custo_final, valor_unitario, valor_desconto, valor_total, quantidade_entregue
+) VALUES (
+    '2', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    'P0002', (SELECT id FROM produto WHERE codigo = 'P0002'), 'PRODUTO B', 'UN', 
+    10.000, 50.00, 0.00, 50.00, 500.00,
+    0.00, 50.00, 500.00, 50.00, 0.00, 500.00, 0.00
+);
+
+INSERT INTO parcela_venda (
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id,
+    parcela, codigo_forma_pagto, forma_pagamento_id, forma_pagamento, data_vencimento, valor_parcela, status
+) VALUES (
+    '2', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    1, 'BOL', (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'BOLETO BANCÁRIO', 
+    CURRENT_DATE + INTERVAL '30 days', 237.50, 'PENDENTE'
+),
+(
+    '2', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    2, 'BOL', (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'BOLETO BANCÁRIO', 
+    CURRENT_DATE + INTERVAL '60 days', 237.50, 'PENDENTE'
+);
+
+-- Terceira venda - Mesmo número 1, mas série diferente (demonstra unicidade da chave composta)
+INSERT INTO venda (
+    numero_pedido, modelo, serie, cliente_id,
+    data_emissao, data_entrega, condicao_pagamento_id, forma_pagamento_id, funcionario_id,
+    tipo_frete, valor_frete, valor_seguro, outras_despesas, valor_desconto, valor_acrescimo, 
+    total_produtos, total_a_pagar, valor_produtos, valor_total, status, 
+    transportadora_id, observacoes
+) VALUES (
+    '1', '55', '2', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    CURRENT_DATE, CURRENT_DATE + INTERVAL '7 days', 
+    (SELECT id FROM condicao_pagamento WHERE nome = '30 DIAS'), 
+    (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 
+    (SELECT id FROM funcionario WHERE email = 'vendedor@exemplo.com'),
+    'FOB', 0.00, 0.00, 0.00, 0.00, 0.00,
+    400.00, 400.00, 400.00, 400.00, 'PENDENTE',
+    NULL, 'TERCEIRA VENDA - MESMA NUMERAÇÃO MAS SÉRIE DIFERENTE'
+);
+
+INSERT INTO item_venda (
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id,
+    codigo, produto_id, produto, unidade, quantidade, preco_un, desc_un, liquido_un, total, 
+    rateio, custo_final_un, custo_final, valor_unitario, valor_desconto, valor_total, quantidade_entregue
+) VALUES (
+    '1', '55', '2', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    'P0001', (SELECT id FROM produto WHERE codigo = 'P0001'), 'PRODUTO A', 'UN', 
+    5.000, 80.00, 0.00, 80.00, 400.00,
+    0.00, 80.00, 400.00, 80.00, 0.00, 400.00, 0.00
+);
+
+INSERT INTO parcela_venda (
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id,
+    parcela, codigo_forma_pagto, forma_pagamento_id, forma_pagamento, data_vencimento, valor_parcela, status
+) VALUES (
+    '1', '55', '2', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    1, 'BOL', (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'BOLETO BANCÁRIO', 
+    CURRENT_DATE + INTERVAL '30 days', 400.00, 'PENDENTE'
+);
+
+-- Entregas das vendas
 INSERT INTO entrega_venda (
-    venda_id, numero_entrega, data_entrega, funcionario_responsavel_id, transportadora_id, veiculo_id,
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id,
+    numero_entrega, data_entrega, funcionario_responsavel_id, transportadora_id, veiculo_id,
     endereco_entrega, valor_total_entregue, status, data_saida
 ) VALUES (
-    (SELECT id FROM venda WHERE numero_pedido = '1'), '1', CURRENT_DATE + INTERVAL '3 days', (SELECT id FROM funcionario WHERE email = 'vendedor@exemplo.com'),
-    (SELECT id FROM transportadora WHERE cnpj = '98765432000155'), (SELECT id FROM veiculo WHERE placa = 'ABC1D23'),
+    '1', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    '1', CURRENT_DATE + INTERVAL '3 days', 
+    (SELECT id FROM funcionario WHERE email = 'vendedor@exemplo.com'),
+    (SELECT id FROM transportadora WHERE cnpj = '98765432000155'), 
+    (SELECT id FROM veiculo WHERE placa = 'ABC1D23'),
     'AV. CENTRAL, 200 - CENTRO - SÃO PAULO/SP', 800.00, 'TRANSPORTE', CURRENT_TIMESTAMP
 );
 
 INSERT INTO item_entrega_venda (
     entrega_id, item_venda_id, quantidade_entregue, valor_unitario_entregue, lote
 ) VALUES (
-    (SELECT id FROM entrega_venda WHERE numero_entrega = '1'), (SELECT id FROM item_venda LIMIT 1), 10.000, 80.00, 'Lote-001'
+    (SELECT id FROM entrega_venda WHERE numero_entrega = '1'), 
+    (SELECT id FROM item_venda WHERE venda_numero_pedido = '1' AND venda_modelo = '55' AND venda_serie = '1' LIMIT 1), 
+    10.000, 80.00, 'Lote-001'
 );
 
 -- =====================================================
@@ -659,12 +766,12 @@ INSERT INTO estoque_movimento (
     0.000, 100.000, 100.000, 50.00, 5000.00, 'Lote-001'
 );
 
--- Saída de estoque da venda
+-- Saída de estoque da venda (documento_origem_id NULL pois venda usa chave composta)
 INSERT INTO estoque_movimento (
     produto_id, tipo_movimento, origem, documento_origem_id, numero_documento, data_movimento, funcionario_id,
     quantidade_anterior, quantidade_movimento, quantidade_atual, valor_unitario, valor_total, lote
 ) VALUES (
-    (SELECT id FROM produto WHERE codigo = 'P0001'), 'SAIDA', 'VENDA', (SELECT id FROM venda WHERE numero_pedido = '1'), '1', CURRENT_DATE + INTERVAL '3 days',
+    (SELECT id FROM produto WHERE codigo = 'P0001'), 'SAIDA', 'VENDA', NULL, '1-55-1', CURRENT_DATE + INTERVAL '3 days',
     (SELECT id FROM funcionario WHERE email = 'vendedor@exemplo.com'),
     100.000, -10.000, 90.000, 80.00, 800.00, 'Lote-001'
 );
@@ -703,12 +810,35 @@ INSERT INTO contas_pagar (
     800.00, 800.00, (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'ABERTO', 'A PAGAR DA COMPRA 1 SÉRIE 2'
 );
 
+-- Contas a receber das vendas
 INSERT INTO contas_receber (
-    venda_id, cliente_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id,
+    cliente_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
     valor_original, valor_saldo, forma_pagamento_id, status, observacoes
 ) VALUES (
-    (SELECT id FROM venda WHERE numero_pedido = '1'), (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 'REC-0001', 'DUPLICATA', CURRENT_DATE, CURRENT_DATE + INTERVAL '5 days',
-    850.00, 850.00, (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'ABERTO', 'A RECEBER DA VENDA 1'
+    '1', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 'REC-0001', 'DUPLICATA', CURRENT_DATE, CURRENT_DATE,
+    850.00, 850.00, (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'ABERTO', 'A RECEBER DA VENDA 1-55-1'
+);
+
+INSERT INTO contas_receber (
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id,
+    cliente_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
+    valor_original, valor_saldo, forma_pagamento_id, status, observacoes
+) VALUES (
+    '2', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 'REC-0002', 'BOLETO', CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days',
+    475.00, 475.00, (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 'A RECEBER DA VENDA 2-55-1'
+);
+
+INSERT INTO contas_receber (
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id,
+    cliente_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
+    valor_original, valor_saldo, forma_pagamento_id, status, observacoes
+) VALUES (
+    '1', '55', '2', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 'REC-0003', 'BOLETO', CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days',
+    400.00, 400.00, (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 'A RECEBER DA VENDA 1-55-2'
 );
 
 -- =====================================================
