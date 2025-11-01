@@ -4,9 +4,20 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, addDays, parseISO } from 'date-fns';
-import { ArrowLeft, Save, Loader2, Search, Plus, Trash } from 'lucide-react';
+import { DatePicker, stringToDate, dateToString } from '@/components/ui/date-picker';
+import { 
+  ArrowLeft, 
+  Save, 
+  Loader2, 
+  Search, 
+  Plus, 
+  Trash, 
+  FileText, 
+  Hash, 
+  DollarSign
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input, InputWithIcon } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   customerApi,
@@ -32,7 +43,7 @@ import { Product } from '@/types/product';
 import { PaymentTerm } from '@/types/payment-term';
 import { Transporter } from '@/types/transporter';
 import { PaymentMethod } from '@/types/payment-method';
-// import CustomerCreationDialog from './components/CustomerCreationDialog'; // TODO: Criar componente
+import CustomerCreationDialog from '@/components/dialogs/CustomerCreationDialog';
 
 // Funções para formatar e desformatar moeda (trabalha em centavos)
 const formatCurrency = (valueInCents: number): string => {
@@ -450,14 +461,12 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
   const onCreateNewCustomer = () => {
     setCustomerToEdit(null);
     setCustomerDialogOpen(true);
-    setCustomerSearchOpen(false);
   };
 
   // Função para editar cliente
   const handleEditCustomer = (customer: Customer) => {
     setCustomerToEdit(customer);
     setCustomerDialogOpen(true);
-    setCustomerSearchOpen(false);
   };
 
   // Função chamada quando cliente é criado
@@ -651,7 +660,7 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
         formaPagamentoId: data.idFormaPagamento
           ? parseInt(data.idFormaPagamento)
           : undefined,
-        funcionarioId: 1, // TODO: Obter do contexto de autenticação
+        // funcionarioId será auto-selecionado pelo backend (primeiro funcionário ativo)
         observacoes: data.observacao,
         itens: produtosComRateio.map((p) => ({
           produtoId: parseInt(p.idProduto),
@@ -752,7 +761,8 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                         <FormItem>
                           <FormLabel>Número da Nota*</FormLabel>
                           <FormControl>
-                            <Input
+                            <InputWithIcon
+                              icon={<Hash className="h-4 w-4" />}
                               {...field}
                               disabled={isHeaderLocked || isLoading}
                               className={duplicateError ? 'border-red-500' : ''}
@@ -776,7 +786,8 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                         <FormItem>
                           <FormLabel>Modelo *</FormLabel>
                           <FormControl>
-                            <Input
+                            <InputWithIcon
+                              icon={<FileText className="h-4 w-4" />}
                               {...field}
                               disabled={isHeaderLocked || isLoading}
                               className={duplicateError ? 'border-red-500' : ''}
@@ -796,7 +807,8 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                         <FormItem>
                           <FormLabel>Série *</FormLabel>
                           <FormControl>
-                            <Input
+                            <InputWithIcon
+                              icon={<FileText className="h-4 w-4" />}
                               {...field}
                               disabled={isHeaderLocked || isLoading}
                               className={duplicateError ? 'border-red-500' : ''}
@@ -816,10 +828,21 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                         <FormItem>
                           <FormLabel>Data Emissão *</FormLabel>
                           <FormControl>
-                            <Input
-                              type="date"
-                              {...field}
+                            <DatePicker
+                              date={field.value ? stringToDate(field.value) : undefined}
+                              onSelect={(date) => {
+                                field.onChange(date ? dateToString(date) : '');
+                              }}
+                              placeholder="Selecione a data de emissão"
                               disabled={isHeaderLocked || isLoading}
+                              disabledDate={(date) => {
+                                // Não pode ser data futura
+                                const today = new Date();
+                                today.setHours(23, 59, 59, 999);
+                                return date > today;
+                              }}
+                              fromYear={2000}
+                              toYear={2050}
                             />
                           </FormControl>
                           <FormMessage />
@@ -1179,7 +1202,8 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                           <FormItem>
                             <FormLabel>Valor Frete</FormLabel>
                             <FormControl>
-                              <Input
+                              <InputWithIcon
+                                icon={<DollarSign className="h-4 w-4" />}
                                 {...field}
                                 onChange={(e) => {
                                   const parsed = parseCurrency(e.target.value);
@@ -1209,7 +1233,8 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                           <FormItem>
                             <FormLabel>Valor Seguro</FormLabel>
                             <FormControl>
-                              <Input
+                              <InputWithIcon
+                                icon={<DollarSign className="h-4 w-4" />}
                                 {...field}
                                 onChange={(e) => {
                                   const parsed = parseCurrency(e.target.value);
@@ -1579,15 +1604,14 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
       />
 
       {/* Diálogo de criação/edição de cliente */}
-      {/* TODO: Implementar CustomerCreationDialog similar ao SupplierCreationDialog */}
-      {/* <CustomerCreationDialog
+      <CustomerCreationDialog
         open={customerDialogOpen}
         onOpenChange={setCustomerDialogOpen}
         onSuccess={
           customerToEdit ? handleCustomerUpdated : handleCustomerCreated
         }
         customer={customerToEdit}
-      /> */}
+      />
     </div>
   );
 }

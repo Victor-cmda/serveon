@@ -333,6 +333,7 @@ const PurchasesList: React.FC = () => {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
                               onClick={() => handleApprove(purchase.id)}
+                              disabled={purchase.status === 'APROVADO' || purchase.status === 'CANCELADO'}
                               className="cursor-pointer"
                             >
                               <Check className="mr-2 h-4 w-4" />
@@ -341,6 +342,7 @@ const PurchasesList: React.FC = () => {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => handleDeny(purchase.id)}
+                              disabled={purchase.status === 'APROVADO' || purchase.status === 'CANCELADO'}
                               className="cursor-pointer text-red-600"
                             >
                               <X className="mr-2 h-4 w-4" />

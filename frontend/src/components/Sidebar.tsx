@@ -107,12 +107,12 @@ const Sidebar = ({ collapsed = false }: SidebarProps) => {
           icon: <Package className="h-4 w-4" />,
           path: '/products',
         },
-        {
-          id: 'invoices',
-          title: 'Notas Fiscais',
-          icon: <FileText className="h-4 w-4" />,
-          path: '/invoices',
-        },
+        // {
+        //   id: 'invoices',
+        //   title: 'Notas Fiscais',
+        //   icon: <FileText className="h-4 w-4" />,
+        //   path: '/invoices',
+        // },
       ],
     },
     {

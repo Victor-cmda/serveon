@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { supplierApi, cityApi, paymentTermApi, countryApi } from '@/services/api';
+import {
+  supplierApi,
+  cityApi,
+  paymentTermApi,
+  countryApi,
+} from '@/services/api';
 import { City, Country } from '@/types/location';
 import { PaymentTerm } from '@/types/payment-term';
 import { toast } from 'sonner';
@@ -34,7 +39,7 @@ const validateCPF = (cpf: string): boolean => {
   const digits = cpf.replace(/\D/g, '');
   if (digits.length !== 11) return false;
   if (/^(\d)\1{10}$/.test(digits)) return false;
-  
+
   const calcDigit = (base: string): number => {
     let sum = 0;
     for (let i = 0; i < base.length; i++) {
@@ -43,10 +48,10 @@ const validateCPF = (cpf: string): boolean => {
     const remainder = sum % 11;
     return remainder < 2 ? 0 : 11 - remainder;
   };
-  
+
   const digit1 = calcDigit(digits.slice(0, 9));
   const digit2 = calcDigit(digits.slice(0, 10));
-  
+
   return digit1 === parseInt(digits[9]) && digit2 === parseInt(digits[10]);
 };
 
@@ -55,7 +60,7 @@ const validateCNPJ = (cnpj: string): boolean => {
   const digits = cnpj.replace(/\D/g, '');
   if (digits.length !== 14) return false;
   if (/^(\d)\1{13}$/.test(digits)) return false;
-  
+
   const calcDigit = (base: string, weights: number[]): number => {
     let sum = 0;
     for (let i = 0; i < base.length; i++) {
@@ -64,13 +69,13 @@ const validateCNPJ = (cnpj: string): boolean => {
     const remainder = sum % 11;
     return remainder < 2 ? 0 : 11 - remainder;
   };
-  
+
   const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
   const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-  
+
   const digit1 = calcDigit(digits.slice(0, 12), weights1);
   const digit2 = calcDigit(digits.slice(0, 13), weights2);
-  
+
   return digit1 === parseInt(digits[12]) && digit2 === parseInt(digits[13]);
 };
 
@@ -173,144 +178,188 @@ const formatters = {
   },
 };
 
-const formSchema = z.object({
-  tipo: z.enum(['F', 'J']),
-  isEstrangeiro: z.boolean().default(false),
-  cnpjCpf: z.string()
-    .min(1, 'CNPJ/CPF é obrigatório')
-    .refine((value) => {
-      const digits = value.replace(/\D/g, '');
-      return digits.length >= 11;
-    }, 'Documento deve ter pelo menos 11 dígitos'),
-  razaoSocial: z.string()
-    .min(2, 'Razão Social/Nome deve ter pelo menos 2 caracteres')
-    .max(100, 'Razão Social/Nome deve ter no máximo 100 caracteres')
-    .refine((value) => value.trim().length > 0, 'Razão Social/Nome é obrigatório'),
-  nomeFantasia: z.string()
-    .max(100, 'Nome Fantasia/Apelido deve ter no máximo 100 caracteres')
-    .nullable()
-    .optional(),
-  inscricaoEstadual: z.string()
-    .max(20, 'Inscrição Estadual/RG deve ter no máximo 20 caracteres')
-    .nullable()
-    .optional(),
-  endereco: z.string()
-    .max(100, 'Endereço deve ter no máximo 100 caracteres')
-    .nullable()
-    .optional(),
-  numero: z.string()
-    .max(10, 'Número deve ter no máximo 10 caracteres')
-    .nullable()
-    .optional(),
-  complemento: z.string()
-    .max(50, 'Complemento deve ter no máximo 50 caracteres')
-    .nullable()
-    .optional(),
-  bairro: z.string()
-    .max(50, 'Bairro deve ter no máximo 50 caracteres')
-    .nullable()
-    .optional(),
-  cidadeId: z.number().optional(),
-  cep: z.string()
-    .nullable()
-    .optional()
-    .refine((value) => {
-      if (!value) return true;
-      const digits = value.replace(/\D/g, '');
-      return digits.length === 0 || digits.length === 8;
-    }, 'CEP deve ter 8 dígitos'),
-  telefone: z.string()
-    .nullable()
-    .optional()
-    .refine((value) => {
-      if (!value) return true;
-      const digits = value.replace(/\D/g, '');
-      return digits.length === 0 || digits.length >= 10;
-    }, 'Telefone deve ter pelo menos 10 dígitos'),
-  email: z.string()
-    .nullable()
-    .optional()
-    .refine((value) => {
-      if (!value) return true;
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-    }, 'Email inválido'),
-  limiteCredito: z.number()
-    .optional()
-    .refine((value) => {
-      return value === undefined || value >= 0;
-    }, 'Limite de crédito deve ser maior ou igual a zero'),
-  nacionalidadeId: z.number().optional(),
-  ativo: z.boolean().default(true),
-  website: z.string()
-    .nullish()
-    .default('')
-    .transform(val => val || '')
-    .refine((value) => {
-      if (!value) return true;
-      
-      const trimmedWebsite = value.trim();
-      if (!trimmedWebsite) return true;
-      
-      try {
-        // Converte para lowercase para verificação de protocolo
-        const lowerWebsite = trimmedWebsite.toLowerCase();
-        const urlWithProtocol = lowerWebsite.startsWith('http://') || lowerWebsite.startsWith('https://') 
-          ? trimmedWebsite 
-          : `https://${trimmedWebsite}`;
-        
-        const url = new URL(urlWithProtocol);
-        return url.hostname.includes('.');
-      } catch {
-        // Remove protocolo case-insensitive para regex
-        const withoutProtocol = trimmedWebsite.replace(/^https?:\/\//i, '');
-        const simpleRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.([a-zA-Z]{2,}|[0-9]{1,3})$/i;
-        return simpleRegex.test(withoutProtocol);
-      }
-    }, 'URL inválida (ex: https://exemplo.com)')
-    .refine((value) => {
-      return !value || value.length <= 200;
-    }, 'Website deve ter no máximo 200 caracteres'),
-  observacoes: z.string()
-    .nullish()
-    .default('')
-    .transform(val => val || '')
-    .refine((value) => {
-      return !value || value.length <= 500;
-    }, 'Observações deve ter no máximo 500 caracteres'),
-  responsavel: z.string()
-    .nullish()
-    .default('')
-    .transform(val => val || '')
-    .refine((value) => {
-      return !value || value.length <= 100;
-    }, 'Nome do responsável deve ter no máximo 100 caracteres'),
-  celularResponsavel: z.string()
-    .nullish()
-    .default('')
-    .transform(val => val || '')
-    .refine((value) => {
-      if (!value) return true;
-      const digits = value.replace(/\D/g, '');
-      return digits.length === 0 || digits.length >= 10;
-    }, 'Celular deve ter pelo menos 10 dígitos'),
-  condicaoPagamentoId: z.number().optional(),
-}).refine((data) => {
-  // Validação específica para CPF/CNPJ baseada no tipo
-  if (data.isEstrangeiro) return true;
-  
-  if (data.tipo === 'F') {
-    return validateCPF(data.cnpjCpf);
-  } else {
-    return validateCNPJ(data.cnpjCpf);
-  }
-}, {
-  message: 'Documento inválido',
-  path: ['cnpjCpf']
-});
+const formSchema = z
+  .object({
+    tipo: z.enum(['F', 'J']),
+    isEstrangeiro: z.boolean().default(false),
+    cnpjCpf: z
+      .string()
+      .min(1, 'CNPJ/CPF é obrigatório')
+      .refine((value) => {
+        const digits = value.replace(/\D/g, '');
+        return digits.length >= 11;
+      }, 'Documento deve ter pelo menos 11 dígitos'),
+    razaoSocial: z
+      .string()
+      .min(2, 'Razão Social/Nome deve ter pelo menos 2 caracteres')
+      .max(100, 'Razão Social/Nome deve ter no máximo 100 caracteres')
+      .refine(
+        (value) => value.trim().length > 0,
+        'Razão Social/Nome é obrigatório',
+      ),
+    nomeFantasia: z
+      .string()
+      .max(100, 'Nome Fantasia/Apelido deve ter no máximo 100 caracteres')
+      .nullable()
+      .optional(),
+    inscricaoEstadual: z
+      .string()
+      .max(20, 'Inscrição Estadual/RG deve ter no máximo 20 caracteres')
+      .nullable()
+      .optional(),
+    endereco: z
+      .string()
+      .max(100, 'Endereço deve ter no máximo 100 caracteres')
+      .nullable()
+      .optional(),
+    numero: z
+      .string()
+      .max(10, 'Número deve ter no máximo 10 caracteres')
+      .nullable()
+      .optional(),
+    complemento: z
+      .string()
+      .max(50, 'Complemento deve ter no máximo 50 caracteres')
+      .nullable()
+      .optional(),
+    bairro: z
+      .string()
+      .max(50, 'Bairro deve ter no máximo 50 caracteres')
+      .nullable()
+      .optional(),
+    cidadeId: z.number().optional(),
+    cep: z
+      .string()
+      .nullable()
+      .optional()
+      .refine((value) => {
+        if (!value) return true;
+        const digits = value.replace(/\D/g, '');
+        return digits.length === 0 || digits.length === 8;
+      }, 'CEP deve ter 8 dígitos'),
+    telefone: z
+      .string()
+      .nullable()
+      .optional()
+      .refine((value) => {
+        if (!value) return true;
+        const digits = value.replace(/\D/g, '');
+        return digits.length === 0 || digits.length >= 10;
+      }, 'Telefone deve ter pelo menos 10 dígitos'),
+    email: z
+      .string()
+      .nullable()
+      .optional()
+      .refine((value) => {
+        if (!value) return true;
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      }, 'Email inválido'),
+    limiteCredito: z
+      .number()
+      .optional()
+      .refine((value) => {
+        return value === undefined || value >= 0;
+      }, 'Limite de crédito deve ser maior ou igual a zero'),
+    nacionalidadeId: z.number().optional(),
+    ativo: z.boolean().default(true),
+    website: z
+      .string()
+      .nullish()
+      .default('')
+      .transform((val) => val || '')
+      .refine((value) => {
+        if (!value) return true;
 
-export default function SupplierForm() {
+        const trimmedWebsite = value.trim();
+        if (!trimmedWebsite) return true;
+
+        try {
+          // Converte para lowercase para verificação de protocolo
+          const lowerWebsite = trimmedWebsite.toLowerCase();
+          const urlWithProtocol =
+            lowerWebsite.startsWith('http://') ||
+            lowerWebsite.startsWith('https://')
+              ? trimmedWebsite
+              : `https://${trimmedWebsite}`;
+
+          const url = new URL(urlWithProtocol);
+          return url.hostname.includes('.');
+        } catch {
+          // Remove protocolo case-insensitive para regex
+          const withoutProtocol = trimmedWebsite.replace(/^https?:\/\//i, '');
+          const simpleRegex =
+            /^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.([a-zA-Z]{2,}|[0-9]{1,3})$/i;
+          return simpleRegex.test(withoutProtocol);
+        }
+      }, 'URL inválida (ex: https://exemplo.com)')
+      .refine((value) => {
+        return !value || value.length <= 200;
+      }, 'Website deve ter no máximo 200 caracteres'),
+    observacoes: z
+      .string()
+      .nullish()
+      .default('')
+      .transform((val) => val || '')
+      .refine((value) => {
+        return !value || value.length <= 500;
+      }, 'Observações deve ter no máximo 500 caracteres'),
+    responsavel: z
+      .string()
+      .nullish()
+      .default('')
+      .transform((val) => val || '')
+      .refine((value) => {
+        return !value || value.length <= 100;
+      }, 'Nome do responsável deve ter no máximo 100 caracteres'),
+    celularResponsavel: z
+      .string()
+      .nullish()
+      .default('')
+      .transform((val) => val || '')
+      .refine((value) => {
+        if (!value) return true;
+        const digits = value.replace(/\D/g, '');
+        return digits.length === 0 || digits.length >= 10;
+      }, 'Celular deve ter pelo menos 10 dígitos'),
+    condicaoPagamentoId: z.number().optional(),
+  })
+  .refine(
+    (data) => {
+      // Validação específica para CPF/CNPJ baseada no tipo
+      if (data.isEstrangeiro) return true;
+
+      if (data.tipo === 'F') {
+        return validateCPF(data.cnpjCpf);
+      } else {
+        return validateCNPJ(data.cnpjCpf);
+      }
+    },
+    {
+      message: 'Documento inválido',
+      path: ['cnpjCpf'],
+    },
+  );
+
+interface SupplierFormProps {
+  mode?: 'page' | 'dialog';
+  supplierId?: number;
+  initialData?: Partial<any>;
+  onSuccess?: (supplier: any) => void;
+  onCancel?: () => void;
+}
+
+const SupplierForm = ({
+  mode = 'page',
+  supplierId,
+  initialData,
+  onSuccess,
+  onCancel,
+}: SupplierFormProps) => {
+  const { id: paramId } = useParams<{ id: string }>();
+  const id =
+    mode === 'dialog' ? supplierId : paramId ? Number(paramId) : undefined;
   const navigate = useNavigate();
-  const { id } = useParams();
+  const location = useLocation();
   const isEditing = !!id;
   const [isLoading, setIsLoading] = useState(false);
   const [supplierData, setSupplierData] = useState<any>(null);
@@ -338,7 +387,7 @@ export default function SupplierForm() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       cnpjCpf: '',
       tipo: 'J' as const,
       isEstrangeiro: false,
@@ -365,6 +414,21 @@ export default function SupplierForm() {
   });
   const watchTipo = form.watch('tipo');
   const watchIsEstrangeiro = form.watch('isEstrangeiro');
+
+  useEffect(() => {
+    if (mode === 'page') {
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        e.preventDefault();
+        e.returnValue = '';
+      };
+
+      window.addEventListener('beforeunload', handleBeforeUnload);
+
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }
+  }, [mode]);
 
   useEffect(() => {
     async function loadData() {
@@ -397,7 +461,9 @@ export default function SupplierForm() {
               }
             }
             if (supplier.nacionalidadeId) {
-              const country = countriesData.find((c) => c.id === supplier.nacionalidadeId);
+              const country = countriesData.find(
+                (c) => c.id === supplier.nacionalidadeId,
+              );
               if (country) {
                 setSelectedCountry(country);
               }
@@ -449,14 +515,26 @@ export default function SupplierForm() {
           delete formattedData[typedKey];
         }
       });
+
+      let createdOrUpdatedSupplier;
       if (isEditing) {
-        await supplierApi.update(Number(id), formattedData);
+        createdOrUpdatedSupplier = await supplierApi.update(
+          Number(id),
+          formattedData,
+        );
         toast.success('Fornecedor atualizado com sucesso');
       } else {
-        await supplierApi.create(formattedData);
+        createdOrUpdatedSupplier = await supplierApi.create(formattedData);
         toast.success('Fornecedor criado com sucesso');
       }
 
+      // Se está em modo dialog, chama o callback de sucesso
+      if (mode === 'dialog' && onSuccess) {
+        onSuccess(createdOrUpdatedSupplier);
+        return;
+      }
+
+      // Modo page: navega conforme returnUrl ou vai para lista
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
         navigate(returnUrl);
@@ -590,41 +668,41 @@ export default function SupplierForm() {
     }
 
     setCountryToEdit(null);
-    toast.success(
-      `País ${updatedCountry.nome} atualizado com sucesso!`,
-    );
+    toast.success(`País ${updatedCountry.nome} atualizado com sucesso!`);
   };
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link to="/suppliers">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {isEditing ? 'Editar Fornecedor' : 'Novo Fornecedor'}
-            </h1>
-            <p className="text-muted-foreground">
-              {isEditing
-                ? 'Edite as informações do fornecedor abaixo'
-                : 'Preencha as informações para criar um novo fornecedor'}
-            </p>
+      {mode === 'page' && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link to="/suppliers">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {isEditing ? 'Editar Fornecedor' : 'Novo Fornecedor'}
+              </h1>
+              <p className="text-muted-foreground">
+                {isEditing
+                  ? 'Edite as informações do fornecedor abaixo'
+                  : 'Preencha as informações para criar um novo fornecedor'}
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* AuditSection no header */}
-        <AuditSection
-          form={form}
-          data={supplierData}
-          variant="header"
-          isEditing={isEditing}
-          statusFieldName="ativo" // Campo de status é 'ativo' para Supplier
-        />
-      </div>
+          {/* AuditSection no header */}
+          <AuditSection
+            form={form}
+            data={supplierData}
+            variant="header"
+            isEditing={isEditing}
+            statusFieldName="ativo" // Campo de status é 'ativo' para Supplier
+          />
+        </div>
+      )}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
@@ -652,7 +730,7 @@ export default function SupplierForm() {
                 setCitySearchOpen={setCitySearchOpen}
                 setSelectedCity={setSelectedCity}
               />
-              
+
               <ContactSection
                 form={form}
                 isLoading={isLoading}
@@ -696,11 +774,22 @@ export default function SupplierForm() {
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Link to="/suppliers">
-              <Button type="button" variant="outline">
+            {mode === 'page' ? (
+              <Link to="/suppliers">
+                <Button type="button" variant="outline">
+                  Cancelar
+                </Button>
+              </Link>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isLoading}
+              >
                 Cancelar
               </Button>
-            </Link>
+            )}
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isEditing ? 'Atualizar' : 'Salvar'}
@@ -718,7 +807,6 @@ export default function SupplierForm() {
         onSelect={onCitySelected}
         onCreateNew={() => {
           setCityToEdit(null);
-          setCitySearchOpen(false);
           setCityCreationOpen(true);
         }}
         onEdit={handleEditCity}
@@ -740,7 +828,6 @@ export default function SupplierForm() {
         onSelect={onPaymentTermSelected}
         onCreateNew={() => {
           setPaymentTermToEdit(null);
-          setPaymentTermSearchOpen(false);
           setPaymentTermCreationOpen(true);
         }}
         onEdit={handleEditPaymentTerm}
@@ -756,7 +843,6 @@ export default function SupplierForm() {
         entityType="condições de pagamento"
         description="Selecione uma condição de pagamento para o cadastro do fornecedor ou cadastre uma nova."
       />
-
       <SearchDialog
         title="Selecione uma nacionalidade"
         open={countrySearchOpen}
@@ -766,7 +852,6 @@ export default function SupplierForm() {
         onSelect={onCountrySelected}
         onCreateNew={() => {
           setCountryToEdit(null);
-          setCountrySearchOpen(false);
           setCountryCreationOpen(true);
         }}
         onEdit={handleEditCountry}
@@ -779,7 +864,6 @@ export default function SupplierForm() {
         entityType="países"
         description="Selecione uma nacionalidade para o fornecedor ou cadastre um novo país."
       />
-
       {/* Diálogos de criação */}
       <StateCreationDialog
         open={stateCreationOpen}
@@ -805,17 +889,14 @@ export default function SupplierForm() {
         }
         paymentTerm={paymentTermToEdit}
       />
-
       <CountryCreationDialog
         open={countryCreationOpen}
         onOpenChange={setCountryCreationOpen}
-        onSuccess={
-          countryToEdit
-            ? handleCountryUpdated
-            : handleCountryCreated
-        }
+        onSuccess={countryToEdit ? handleCountryUpdated : handleCountryCreated}
         country={countryToEdit}
       />
     </div>
   );
-}
+};
+
+export default SupplierForm;

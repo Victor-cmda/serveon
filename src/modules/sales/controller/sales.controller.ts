@@ -77,8 +77,8 @@ export class SalesController {
   @ApiResponse({ status: 404, description: 'Venda não encontrada.' })
   approve(@Param('id') id: string) {
     // TODO: Obter ID do usuário logado do contexto de autenticação
-    const aprovadoPor = 4; // Temporário - deve vir do contexto
-    return this.salesService.approve(+id, aprovadoPor);
+    // Passa undefined para usar o funcionário padrão do seed
+    return this.salesService.approve(+id);
   }
 
   @Patch(':id/deny')

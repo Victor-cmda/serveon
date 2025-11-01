@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -240,9 +240,25 @@ const formSchema = z.object({
   path: ['cnpjCpf']
 });
 
-const CustomerForm = () => {
-  const { id } = useParams<{ id: string }>();
+interface CustomerFormProps {
+  mode?: 'page' | 'dialog';
+  customerId?: number;
+  initialData?: Partial<any>;
+  onSuccess?: (customer: any) => void;
+  onCancel?: () => void;
+}
+
+const CustomerForm = ({
+  mode = 'page',
+  customerId,
+  initialData,
+  onSuccess,
+  onCancel
+}: CustomerFormProps) => {
+  const { id: paramId } = useParams<{ id: string }>();
+  const id = mode === 'dialog' ? customerId : paramId ? Number(paramId) : undefined;
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [customerData, setCustomerData] = useState<any>(null);
   const [states, setStates] = useState<State[]>([]);
@@ -267,7 +283,7 @@ const CustomerForm = () => {
     useState<PaymentTerm | null>(null);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       id: id ? Number(id) : undefined,
       cnpjCpf: '',
       tipo: 'J' as const,
@@ -291,6 +307,21 @@ const CustomerForm = () => {
 
   const watchTipo = form.watch('tipo');
   const watchIsEstrangeiro = form.watch('isEstrangeiro');
+
+  useEffect(() => {
+    if (mode === 'page') {
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        e.preventDefault();
+        e.returnValue = '';
+      };
+
+      window.addEventListener('beforeunload', handleBeforeUnload);
+
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }
+  }, [mode]);
 
   const fetchCities = async () => {
     try {
@@ -459,13 +490,11 @@ const CustomerForm = () => {
   // Funções para manipulação da condição de pagamento
   const onCreateNewPaymentTerm = () => {
     setPaymentTermToEdit(null);
-    setPaymentTermSearchOpen(false);
     setPaymentTermDialogOpen(true);
   };
 
   const handleEditPaymentTerm = (paymentTerm: PaymentTerm) => {
     setPaymentTermToEdit(paymentTerm);
-    setPaymentTermSearchOpen(false);
     setPaymentTermDialogOpen(true);
   };
   const handlePaymentTermCreated = (newPaymentTerm: PaymentTerm) => {
@@ -525,37 +554,47 @@ const CustomerForm = () => {
         condicaoPagamentoId: data.condicaoPagamentoId || undefined,
       };
       
+      let createdOrUpdatedCustomer;
       if (id) {
-        await customerApi.update(Number(id), formattedData);
+        createdOrUpdatedCustomer = await customerApi.update(Number(id), formattedData);
         toast.success('Cliente atualizado com sucesso!');
       } else {
-        await customerApi.create(formattedData);
+        createdOrUpdatedCustomer = await customerApi.create(formattedData);
         toast.success('Cliente criado com sucesso!');
-        form.reset({
-          id: 0,
-          cnpjCpf: '',
-          tipo: 'J',
-          isEstrangeiro: false,
-          razaoSocial: '',
-          nomeFantasia: '',
-          inscricaoEstadual: '',
-          endereco: '',
-          numero: '',
-          complemento: '',
-          bairro: '',
-          cep: '',
-          telefone: '',
-          email: '',
-          cidadeId: undefined,
-          ativo: true,
-          condicaoPagamentoId: undefined,
-          observacoes: '',
-        });
-        setSelectedCity(null);
-        setSelectedStateId(undefined);
+        
+        if (mode === 'page') {
+          form.reset({
+            id: 0,
+            cnpjCpf: '',
+            tipo: 'J',
+            isEstrangeiro: false,
+            razaoSocial: '',
+            nomeFantasia: '',
+            inscricaoEstadual: '',
+            endereco: '',
+            numero: '',
+            complemento: '',
+            bairro: '',
+            cep: '',
+            telefone: '',
+            email: '',
+            cidadeId: undefined,
+            ativo: true,
+            condicaoPagamentoId: undefined,
+            observacoes: '',
+          });
+          setSelectedCity(null);
+          setSelectedStateId(undefined);
+        }
       }
 
-      // Check if we need to return to a parent form in a cascading scenario
+      // Se está em modo dialog, chama o callback de sucesso
+      if (mode === 'dialog' && onSuccess) {
+        onSuccess(createdOrUpdatedCustomer);
+        return;
+      }
+
+      // Modo page: navega conforme returnUrl ou vai para lista
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
         navigate(returnUrl);
@@ -626,13 +665,11 @@ const CustomerForm = () => {
 
   const handleEditCity = (city: City) => {
     setCityToEdit(city);
-    setCitySearchOpen(false);
     setNewCityDialogOpen(true);
   };
 
   const handleEditState = (state: State) => {
     setStateToEdit(state);
-    setStateSearchOpen(false);
     setNewStateDialogOpen(true);
   };
 
@@ -680,40 +717,42 @@ const CustomerForm = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link to="/customers">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {id ? 'Editar Cliente' : 'Novo Cliente'}
-            </h1>
-            <p className="text-muted-foreground">
-              {id
-                ? 'Edite as informações do cliente abaixo'
-                : 'Preencha as informações para criar um novo cliente'}
-            </p>
+      {mode === 'page' && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link to="/customers">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {id ? 'Editar Cliente' : 'Novo Cliente'}
+              </h1>
+              <p className="text-muted-foreground">
+                {id
+                  ? 'Edite as informações do cliente abaixo'
+                  : 'Preencha as informações para criar um novo cliente'}
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* AuditSection no header - não ocupa espaço do formulário */}
-        <AuditSection
-          form={form}
-          data={{
-            id: id ? customerData?.id : undefined,
-            ativo: form.watch('ativo'),
-            createdAt: customerData?.createdAt,
-            updatedAt: customerData?.updatedAt,
-          }}
-          variant="header"
-          isEditing={!!id}
-          statusFieldName="ativo" // Campo de status é 'ativo' para Customer
-        />
-      </div>
+          {/* AuditSection no header - não ocupa espaço do formulário */}
+          <AuditSection
+            form={form}
+            data={{
+              id: id ? customerData?.id : undefined,
+              ativo: form.watch('ativo'),
+              createdAt: customerData?.createdAt,
+              updatedAt: customerData?.updatedAt,
+            }}
+            variant="header"
+            isEditing={!!id}
+            statusFieldName="ativo" // Campo de status é 'ativo' para Customer
+          />
+        </div>
+      )}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
@@ -730,7 +769,7 @@ const CustomerForm = () => {
                 form={form}
                 isLoading={isLoading}
                 watchTipo={watchTipo}
-                id={id}
+                id={id ? String(id) : undefined}
                 formatters={formatters}
               />
 
@@ -771,11 +810,22 @@ const CustomerForm = () => {
             </div>
           </div>
           <div className="flex justify-end space-x-4">
-            <Link to="/customers">
-              <Button type="button" variant="outline">
+            {mode === 'page' ? (
+              <Link to="/customers">
+                <Button type="button" variant="outline">
+                  Cancelar
+                </Button>
+              </Link>
+            ) : (
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onCancel}
+                disabled={isLoading}
+              >
                 Cancelar
               </Button>
-            </Link>
+            )}
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {id ? 'Atualizar' : 'Salvar'}

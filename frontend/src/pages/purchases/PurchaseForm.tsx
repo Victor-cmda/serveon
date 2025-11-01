@@ -4,9 +4,20 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, addDays, parseISO } from 'date-fns';
-import { ArrowLeft, Save, Loader2, Search, Plus, Trash } from 'lucide-react';
+import { DatePicker, stringToDate, dateToString } from '@/components/ui/date-picker';
+import { 
+  ArrowLeft, 
+  Save, 
+  Loader2, 
+  Search, 
+  Plus, 
+  Trash, 
+  FileText, 
+  Hash, 
+  DollarSign
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input, InputWithIcon } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   supplierApi,
@@ -452,14 +463,12 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
   const onCreateNewSupplier = () => {
     setSupplierToEdit(null);
     setSupplierDialogOpen(true);
-    setSupplierSearchOpen(false);
   };
 
   // Função para editar fornecedor
   const handleEditSupplier = (supplier: Supplier) => {
     setSupplierToEdit(supplier);
     setSupplierDialogOpen(true);
-    setSupplierSearchOpen(false);
   };
 
   // Função chamada quando fornecedor é criado
@@ -646,7 +655,10 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
         tipoFrete: data.tipoFrete,
         valorFrete: roundToDecimals(parseCurrency(data.valorFrete) / 100, 2), // Converter centavos para reais com 2 decimais
         valorSeguro: roundToDecimals(parseCurrency(data.valorSeguro) / 100, 2), // Converter centavos para reais com 2 decimais
-        outrasDespesas: roundToDecimals(parseCurrency(data.outrasDespesas) / 100, 2), // Converter centavos para reais com 2 decimais
+        outrasDespesas: roundToDecimals(
+          parseCurrency(data.outrasDespesas) / 100,
+          2,
+        ), // Converter centavos para reais com 2 decimais
         transportadoraId: data.idTransportadora
           ? parseInt(data.idTransportadora)
           : undefined,
@@ -654,7 +666,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
         formaPagamentoId: data.idFormaPagamento
           ? parseInt(data.idFormaPagamento)
           : undefined,
-        funcionarioId: 4, // TODO: Obter do contexto de autenticação
+        // funcionarioId será auto-selecionado pelo backend (primeiro funcionário ativo)
         observacoes: data.observacao,
         itens: produtosComRateio.map((p) => ({
           produtoId: parseInt(p.idProduto),
@@ -666,10 +678,14 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
           rateio: roundToDecimals((p.valorRateio || 0) / 100, 2), // Converter centavos para reais com 2 decimais
           custoFinalUn: roundToDecimals(
             (p.precoTotal + (p.valorRateio || 0)) /
-              parseFloat(p.quantidade.replace(',', '.')) / 100,
-            4
+              parseFloat(p.quantidade.replace(',', '.')) /
+              100,
+            4,
           ), // Converter centavos para reais com 4 decimais
-          custoFinal: roundToDecimals((p.precoTotal + (p.valorRateio || 0)) / 100, 2), // Converter centavos para reais com 2 decimais
+          custoFinal: roundToDecimals(
+            (p.precoTotal + (p.valorRateio || 0)) / 100,
+            2,
+          ), // Converter centavos para reais com 2 decimais
         })),
         parcelas: parcelas.map((p) => ({
           parcela: p.num_parcela,
@@ -755,7 +771,8 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                         <FormItem>
                           <FormLabel>Número da Nota*</FormLabel>
                           <FormControl>
-                            <Input
+                            <InputWithIcon
+                              icon={<Hash className="h-4 w-4" />}
                               {...field}
                               disabled={isHeaderLocked || isLoading}
                               className={duplicateError ? 'border-red-500' : ''}
@@ -779,7 +796,8 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                         <FormItem>
                           <FormLabel>Modelo *</FormLabel>
                           <FormControl>
-                            <Input
+                            <InputWithIcon
+                              icon={<FileText className="h-4 w-4" />}
                               {...field}
                               disabled={isHeaderLocked || isLoading}
                               className={duplicateError ? 'border-red-500' : ''}
@@ -799,7 +817,8 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                         <FormItem>
                           <FormLabel>Série *</FormLabel>
                           <FormControl>
-                            <Input
+                            <InputWithIcon
+                              icon={<FileText className="h-4 w-4" />}
                               {...field}
                               disabled={isHeaderLocked || isLoading}
                               className={duplicateError ? 'border-red-500' : ''}
@@ -819,10 +838,21 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                         <FormItem>
                           <FormLabel>Data Emissão *</FormLabel>
                           <FormControl>
-                            <Input
-                              type="date"
-                              {...field}
+                            <DatePicker
+                              date={field.value ? stringToDate(field.value) : undefined}
+                              onSelect={(date) => {
+                                field.onChange(date ? dateToString(date) : '');
+                              }}
+                              placeholder="Selecione a data de emissão"
                               disabled={isHeaderLocked || isLoading}
+                              disabledDate={(date) => {
+                                // Não pode ser data futura
+                                const today = new Date();
+                                today.setHours(23, 59, 59, 999);
+                                return date > today;
+                              }}
+                              fromYear={2000}
+                              toYear={2050}
                             />
                           </FormControl>
                           <FormMessage />
@@ -835,19 +865,40 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                     <FormField
                       control={form.control}
                       name="dataChegada"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Data Chegada *</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="date"
-                              {...field}
-                              disabled={isHeaderLocked || isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      render={({ field }) => {
+                        const dataEmissao = form.watch('dataEmissao');
+                        const isDataChegadaDisabled = !dataEmissao || isHeaderLocked || isLoading;
+                        
+                        return (
+                          <FormItem>
+                            <FormLabel>Data Chegada *</FormLabel>
+                            <FormControl>
+                              <DatePicker
+                                date={field.value ? stringToDate(field.value) : undefined}
+                                onSelect={(date) => {
+                                  field.onChange(date ? dateToString(date) : '');
+                                }}
+                                placeholder={dataEmissao ? "Selecione a data de chegada" : "Primeiro selecione a data de emissão"}
+                                disabled={isDataChegadaDisabled}
+                                disabledDate={(date) => {
+                                  // Não pode ser anterior à data de emissão
+                                  if (dataEmissao) {
+                                    const emissaoDate = stringToDate(dataEmissao);
+                                    emissaoDate.setHours(0, 0, 0, 0);
+                                    const checkDate = new Date(date);
+                                    checkDate.setHours(0, 0, 0, 0);
+                                    return checkDate < emissaoDate;
+                                  }
+                                  return false;
+                                }}
+                                fromYear={2000}
+                                toYear={2050}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        );
+                      }}
                     />
                   </div>
                 </div>
@@ -1271,7 +1322,8 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                           <FormItem>
                             <FormLabel>Valor Frete</FormLabel>
                             <FormControl>
-                              <Input
+                              <InputWithIcon
+                                icon={<DollarSign className="h-4 w-4" />}
                                 {...field}
                                 onChange={(e) => {
                                   const parsed = parseCurrency(e.target.value);
@@ -1301,7 +1353,8 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                           <FormItem>
                             <FormLabel>Valor Seguro</FormLabel>
                             <FormControl>
-                              <Input
+                              <InputWithIcon
+                                icon={<DollarSign className="h-4 w-4" />}
                                 {...field}
                                 onChange={(e) => {
                                   const parsed = parseCurrency(e.target.value);
@@ -1331,7 +1384,8 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                           <FormItem>
                             <FormLabel>Outras Despesas</FormLabel>
                             <FormControl>
-                              <Input
+                              <InputWithIcon
+                                icon={<DollarSign className="h-4 w-4" />}
                                 {...field}
                                 onChange={(e) => {
                                   const parsed = parseCurrency(e.target.value);

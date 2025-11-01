@@ -29,6 +29,21 @@ export class SalesService {
       try {
         await client.query('BEGIN');
 
+        // Se funcionarioId não foi fornecido, buscar o primeiro funcionário ativo
+        let funcionarioId = createSaleDto.funcionarioId;
+        if (!funcionarioId) {
+          const funcionarioResult = await client.query(
+            `SELECT id FROM dbo.funcionario WHERE ativo = true ORDER BY id LIMIT 1`
+          );
+          
+          if (funcionarioResult.rows.length === 0) {
+            throw new BadRequestException('Nenhum funcionário ativo encontrado no sistema');
+          }
+          
+          funcionarioId = funcionarioResult.rows[0].id;
+          console.log(`[CRIAÇÃO VENDA] Usando funcionário padrão ID: ${funcionarioId}`);
+        }
+
         // Usar o número do pedido informado pelo usuário ou gerar um sequencial
         let numeroPedido: string;
         
@@ -98,7 +113,7 @@ export class SalesService {
             createSaleDto.dataEntregaRealizada || null,
             createSaleDto.condicaoPagamentoId,
             createSaleDto.formaPagamentoId || null,
-            createSaleDto.funcionarioId,
+            funcionarioId,
             createSaleDto.tipoFrete || 'CIF',
             valorFrete,
             valorSeguro,
@@ -635,6 +650,32 @@ export class SalesService {
           throw new NotFoundException(`Venda com ID ${id} não encontrada`);
         }
 
+        // Se não foi fornecido um funcionário, buscar o primeiro funcionário ativo disponível
+        let funcionarioId = aprovadoPor;
+        
+        if (!funcionarioId) {
+          const defaultEmployee = await client.query(
+            'SELECT id FROM dbo.funcionario WHERE ativo = true ORDER BY id LIMIT 1',
+          );
+
+          if (defaultEmployee.rows.length > 0) {
+            funcionarioId = defaultEmployee.rows[0].id;
+            console.log(`[APROVAÇÃO] Usando funcionário padrão ID: ${funcionarioId}`);
+          } else {
+            throw new NotFoundException('Nenhum funcionário ativo encontrado para aprovar a venda');
+          }
+        } else {
+          // Validar se o funcionário fornecido existe
+          const employeeCheck = await client.query(
+            'SELECT id FROM dbo.funcionario WHERE id = $1 AND ativo = true',
+            [funcionarioId],
+          );
+
+          if (employeeCheck.rows.length === 0) {
+            throw new NotFoundException(`Funcionário com ID ${funcionarioId} não encontrado ou inativo`);
+          }
+        }
+
         // Atualizar status para APROVADO
         const updateResult = await client.query(
           `UPDATE dbo.venda 
@@ -644,7 +685,7 @@ export class SalesService {
                updated_at = CURRENT_TIMESTAMP
            WHERE numero_sequencial = $3
            RETURNING *`,
-          ['APROVADO', aprovadoPor || null, id],
+          ['APROVADO', funcionarioId, id],
         );
 
         await client.query('COMMIT');

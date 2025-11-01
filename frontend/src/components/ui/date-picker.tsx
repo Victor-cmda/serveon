@@ -21,6 +21,7 @@ interface DatePickerProps {
   fromYear?: number;
   toYear?: number;
   showClear?: boolean;
+  disabledDate?: (date: Date) => boolean;
 }
 
 // Função para converter data para string no formato YYYY-MM-DD sem problemas de fuso horário
@@ -60,8 +61,10 @@ export function DatePicker({
   fromYear = 1900,
   toYear = 2030,
   showClear = true,
+  disabledDate,
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState<Date>(date || new Date());
 
   const handleSelect = (selectedDate: Date | undefined) => {
     if (selectedDate) {
@@ -74,26 +77,54 @@ export function DatePicker({
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     onSelect?.(undefined);
+  };
+
+  const handleTriggerClick = () => {
+    if (!disabled) {
+      setOpen(!open);
+      if (!open) {
+        setCurrentMonth(date || new Date());
+      }
+    }
+  };
+
+  const handlePreviousMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+  };
+
+  const handlePreviousYear = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear() - 1, currentMonth.getMonth()));
+  };
+
+  const handleNextYear = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear() + 1, currentMonth.getMonth()));
   };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
+        <button
+          type="button"
+          onClick={handleTriggerClick}
+          disabled={disabled}
           className={cn(
-            'w-full justify-start text-left font-normal h-10 bg-background hover:bg-accent hover:text-accent-foreground',
-            'border-input shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            'flex h-10 w-full items-center justify-start rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm',
+            'hover:bg-accent hover:text-accent-foreground',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
             'transition-colors duration-200',
+            'disabled:cursor-not-allowed disabled:opacity-50',
             !date && 'text-muted-foreground',
-            disabled && 'cursor-not-allowed opacity-50',
             className,
           )}
-          disabled={disabled}
         >
-          <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-          <span className="flex-1 text-left">
+          <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+          <span className="flex-1 text-left truncate">
             {date ? (
               format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
             ) : (
@@ -102,47 +133,78 @@ export function DatePicker({
           </span>
           {date && showClear && !disabled && (
             <X 
-              className="ml-2 h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-pointer" 
+              className="ml-2 h-4 w-4 text-muted-foreground hover:text-foreground transition-colors cursor-pointer shrink-0" 
               onClick={handleClear}
             />
           )}
-        </Button>
+        </button>
       </PopoverTrigger>
       <PopoverContent 
         className="w-auto p-0 shadow-lg border-0 bg-background" 
         align="start"
         sideOffset={4}
+        onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <div className="rounded-lg border bg-card text-card-foreground shadow-lg">
+          {/* Controles customizados de navegação */}
+          <div className="flex items-center justify-between p-3 border-b">
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handlePreviousYear}
+                className="h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md transition-opacity"
+              >
+                <span className="text-sm">«</span>
+              </button>
+              <button
+                type="button"
+                onClick={handlePreviousMonth}
+                className="h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md transition-opacity"
+              >
+                <span className="text-sm">‹</span>
+              </button>
+            </div>
+            
+            <div className="text-sm font-medium capitalize">
+              {format(currentMonth, "MMMM 'de' yyyy", { locale: ptBR })}
+            </div>
+            
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handleNextMonth}
+                className="h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md transition-opacity"
+              >
+                <span className="text-sm">›</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleNextYear}
+                className="h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md transition-opacity"
+              >
+                <span className="text-sm">»</span>
+              </button>
+            </div>
+          </div>
+
           <Calendar
             mode="single"
             selected={date}
             onSelect={handleSelect}
-            disabled={disabled}
-            initialFocus
+            month={currentMonth}
+            onMonthChange={setCurrentMonth}
+            disabled={disabledDate ? disabledDate : disabled}
             locale={ptBR}
             fixedWeeks
             showOutsideDays={false}
-            captionLayout="dropdown"
             fromYear={fromYear}
             toYear={toYear}
-            formatters={{
-              formatMonthDropdown: (date) =>
-                date.toLocaleString('pt-BR', { month: 'long' }).charAt(0).toUpperCase() + 
-                date.toLocaleString('pt-BR', { month: 'long' }).slice(1),
-            }}
             className="p-3"
             classNames={{
               months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
               month: "space-y-4",
-              caption: "flex justify-center pt-1 relative items-center",
-              caption_label: "text-sm font-medium",
-              nav: "space-x-1 flex items-center",
-              nav_button: cn(
-                "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-              ),
-              nav_button_previous: "absolute left-1",
-              nav_button_next: "absolute right-1",
+              caption: "hidden",
+              nav: "hidden",
               table: "w-full border-collapse space-y-1",
               head_row: "flex",
               head_cell: "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]",

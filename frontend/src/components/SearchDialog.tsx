@@ -392,7 +392,15 @@ export function SearchDialog<T extends Entity = Entity>({
               {extraActions}
 
               {!hideNewButton && onCreateNew && (
-                <Button onClick={onCreateNew} size="lg" className="h-10">
+                <Button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onCreateNew();
+                  }} 
+                  size="lg" 
+                  className="h-10"
+                >
                   <Plus className="mr-2 h-5 w-5" />
                   Novo
                 </Button>

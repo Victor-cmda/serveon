@@ -303,10 +303,11 @@ export class CreateSaleDto {
   @ApiProperty({
     description: 'ID do funcionário responsável pela venda',
     example: 1,
+    required: false,
   })
-  @IsNotEmpty({ message: 'ID do funcionário é obrigatório' })
+  @IsOptional()
   @IsNumber({}, { message: 'ID do funcionário deve ser um número' })
-  funcionarioId: number;
+  funcionarioId?: number;
 
   @ApiProperty({
     description: 'Status da venda',

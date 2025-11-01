@@ -42,4 +42,29 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
 Input.displayName = "Input"
 
-export { Input }
+export interface InputWithIconProps extends InputProps {
+  icon?: React.ReactNode;
+}
+
+const InputWithIcon = React.forwardRef<HTMLInputElement, InputWithIconProps>(
+  ({ className, icon, ...props }, ref) => {
+    return (
+      <div className="relative">
+        {icon && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+            {icon}
+          </div>
+        )}
+        <Input
+          ref={ref}
+          className={cn(icon && "pl-9", className)}
+          {...props}
+        />
+      </div>
+    );
+  }
+);
+
+InputWithIcon.displayName = "InputWithIcon"
+
+export { Input, InputWithIcon }

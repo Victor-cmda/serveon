@@ -67,7 +67,7 @@ export interface CreateSaleDto {
   dataEntregaRealizada?: string;
   condicaoPagamentoId: number;
   formaPagamentoId?: number;
-  funcionarioId: number;
+  funcionarioId?: number;
   tipoFrete?: 'CIF' | 'FOB';
   valorFrete?: number;
   valorSeguro?: number;
