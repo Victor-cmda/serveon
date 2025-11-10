@@ -3968,6 +3968,61 @@
           "Accounts Payable"
         ]
       }
+    },
+    "/api/company-settings": {
+      "get": {
+        "operationId": "CompanySettingsController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Configurações retornadas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanySettings"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Obter configurações da empresa",
+        "tags": [
+          "Company Settings"
+        ]
+      },
+      "put": {
+        "operationId": "CompanySettingsController_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanySettingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Configurações atualizadas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanySettings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos"
+          }
+        },
+        "summary": "Atualizar configurações da empresa",
+        "tags": [
+          "Company Settings"
+        ]
+      }
     }
   },
   "info": {
@@ -7501,6 +7556,11 @@
             "description": "ID do fornecedor na compra",
             "example": 1
           },
+          "parcela": {
+            "type": "number",
+            "description": "Número da parcela da compra",
+            "example": 1
+          },
           "fornecedorId": {
             "type": "number",
             "description": "ID do fornecedor",
@@ -7617,6 +7677,11 @@
           "compraFornecedorId": {
             "type": "number",
             "description": "ID do fornecedor na compra",
+            "example": 1
+          },
+          "parcela": {
+            "type": "number",
+            "description": "Número da parcela da compra",
             "example": 1
           },
           "fornecedorId": {
@@ -7896,6 +7961,245 @@
           "valorPago",
           "formaPagamentoId"
         ]
+      },
+      "CompanySettings": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID único do registro",
+            "example": 1
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Status ativo/inativo do registro",
+            "example": true,
+            "default": true
+          },
+          "createdAt": {
+            "type": "object",
+            "description": "Data de criação do registro",
+            "example": "2025-06-19T10:00:00Z"
+          },
+          "updatedAt": {
+            "type": "object",
+            "description": "Data da última atualização do registro",
+            "example": "2025-06-19T10:00:00Z"
+          },
+          "razaoSocial": {
+            "type": "string",
+            "description": "Razão Social da empresa",
+            "example": "ServeOn Tecnologia Ltda"
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "description": "Nome Fantasia da empresa",
+            "example": "ServeOn"
+          },
+          "cnpj": {
+            "type": "string",
+            "description": "CNPJ da empresa",
+            "example": "12.345.678/0001-90"
+          },
+          "inscricaoEstadual": {
+            "type": "string",
+            "description": "Inscrição Estadual",
+            "example": "123.456.789.012"
+          },
+          "inscricaoMunicipal": {
+            "type": "string",
+            "description": "Inscrição Municipal",
+            "example": "123456"
+          },
+          "endereco": {
+            "type": "string",
+            "description": "Endereço da empresa",
+            "example": "Rua das Flores"
+          },
+          "numero": {
+            "type": "string",
+            "description": "Número do endereço",
+            "example": "123"
+          },
+          "complemento": {
+            "type": "string",
+            "description": "Complemento do endereço",
+            "example": "Sala 301"
+          },
+          "bairro": {
+            "type": "string",
+            "description": "Bairro",
+            "example": "Centro"
+          },
+          "cidade": {
+            "type": "string",
+            "description": "Cidade",
+            "example": "São Paulo"
+          },
+          "estado": {
+            "type": "string",
+            "description": "Estado (UF)",
+            "example": "SP"
+          },
+          "cep": {
+            "type": "string",
+            "description": "CEP",
+            "example": "01234-567"
+          },
+          "telefone": {
+            "type": "string",
+            "description": "Telefone",
+            "example": "(11) 1234-5678"
+          },
+          "email": {
+            "type": "string",
+            "description": "E-mail",
+            "example": "contato@serveon.com.br"
+          },
+          "website": {
+            "type": "string",
+            "description": "Website",
+            "example": "www.serveon.com.br"
+          },
+          "logoBase64": {
+            "type": "string",
+            "description": "Logo da empresa em Base64",
+            "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+          },
+          "regimeTributario": {
+            "type": "string",
+            "description": "Regime Tributário",
+            "enum": [
+              "SIMPLES_NACIONAL",
+              "LUCRO_PRESUMIDO",
+              "LUCRO_REAL"
+            ],
+            "example": "SIMPLES_NACIONAL"
+          },
+          "observacoesFiscais": {
+            "type": "string",
+            "description": "Observações fiscais para documentos",
+            "example": "Documento emitido por ME ou EPP optante pelo Simples Nacional"
+          }
+        },
+        "required": [
+          "id",
+          "ativo",
+          "createdAt",
+          "updatedAt",
+          "razaoSocial",
+          "nomeFantasia",
+          "cnpj",
+          "endereco",
+          "numero",
+          "bairro",
+          "cidade",
+          "estado",
+          "cep",
+          "telefone",
+          "email",
+          "regimeTributario"
+        ]
+      },
+      "UpdateCompanySettingsDto": {
+        "type": "object",
+        "properties": {
+          "razaoSocial": {
+            "type": "string",
+            "description": "Razão Social da empresa",
+            "example": "ServeOn Tecnologia Ltda"
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "description": "Nome Fantasia da empresa",
+            "example": "ServeOn"
+          },
+          "cnpj": {
+            "type": "string",
+            "description": "CNPJ da empresa",
+            "example": "12.345.678/0001-90"
+          },
+          "inscricaoEstadual": {
+            "type": "string",
+            "description": "Inscrição Estadual",
+            "example": "123.456.789.012"
+          },
+          "inscricaoMunicipal": {
+            "type": "string",
+            "description": "Inscrição Municipal",
+            "example": "123456"
+          },
+          "endereco": {
+            "type": "string",
+            "description": "Endereço da empresa",
+            "example": "Rua das Flores"
+          },
+          "numero": {
+            "type": "string",
+            "description": "Número do endereço",
+            "example": "123"
+          },
+          "complemento": {
+            "type": "string",
+            "description": "Complemento do endereço",
+            "example": "Sala 301"
+          },
+          "bairro": {
+            "type": "string",
+            "description": "Bairro",
+            "example": "Centro"
+          },
+          "cidade": {
+            "type": "string",
+            "description": "Cidade",
+            "example": "São Paulo"
+          },
+          "estado": {
+            "type": "string",
+            "description": "Estado (UF)",
+            "example": "SP"
+          },
+          "cep": {
+            "type": "string",
+            "description": "CEP",
+            "example": "01234-567"
+          },
+          "telefone": {
+            "type": "string",
+            "description": "Telefone",
+            "example": "(11) 1234-5678"
+          },
+          "email": {
+            "type": "string",
+            "description": "E-mail",
+            "example": "contato@serveon.com.br"
+          },
+          "website": {
+            "type": "string",
+            "description": "Website",
+            "example": "www.serveon.com.br"
+          },
+          "logoBase64": {
+            "type": "string",
+            "description": "Logo da empresa em Base64",
+            "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+          },
+          "regimeTributario": {
+            "type": "string",
+            "description": "Regime Tributário",
+            "enum": [
+              "SIMPLES_NACIONAL",
+              "LUCRO_PRESUMIDO",
+              "LUCRO_REAL"
+            ],
+            "example": "SIMPLES_NACIONAL"
+          },
+          "observacoesFiscais": {
+            "type": "string",
+            "description": "Observações fiscais para documentos",
+            "example": "Documento emitido por ME ou EPP optante pelo Simples Nacional"
+          }
+        }
       }
     }
   }

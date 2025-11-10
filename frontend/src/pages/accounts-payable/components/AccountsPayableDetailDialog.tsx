@@ -250,6 +250,16 @@ export function AccountsPayableDetailDialog({
                       <Label className="text-xs text-muted-foreground">Tipo</Label>
                       <p className="font-medium">{getTipoDocumentoLabel(account.tipoDocumento)}</p>
                     </div>
+                    {account.parcela && (
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Parcela</Label>
+                        <p className="font-medium">
+                          <span className="inline-flex items-center justify-center rounded-md bg-blue-100 dark:bg-blue-900 px-2 py-1 text-sm font-medium text-blue-800 dark:text-blue-300">
+                            {account.parcela}
+                          </span>
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 

@@ -41,12 +41,30 @@ import SalesList from './pages/sales/SalesList';
 import SaleForm from './pages/sales/SaleForm';
 import { AccountsPayableList, AccountsPayableForm } from './pages/accounts-payable';
 import { FormStateProvider } from './contexts/FormStateContext';
+// Print Components
+import SalePrintRoute from './components/print/SalePrintRoute';
+import PurchasePrintRoute from './components/print/PurchasePrintRoute';
+import AccountPayablePrintRoute from './components/print/AccountPayablePrintRoute';
+import CompanySettingsPage from './pages/settings/CompanySettingsPage';
 
 const router = createBrowserRouter([
   // Rota de Login (sem Layout)
   {
     path: '/login',
     element: <Login />,
+  },
+  // Rotas de Impressão (sem Layout)
+  {
+    path: '/sales/print/:id',
+    element: <SalePrintRoute />,
+  },
+  {
+    path: '/purchases/print/:id',
+    element: <PurchasePrintRoute />,
+  },
+  {
+    path: '/accounts-payable/print/:id',
+    element: <AccountPayablePrintRoute />,
   },
   {
     path: '/',
@@ -280,6 +298,11 @@ const router = createBrowserRouter([
       {
         path: 'transporters/edit/:id',
         element: <TransporterForm />,
+      },
+      // Configurações
+      {
+        path: 'settings',
+        element: <CompanySettingsPage />,
       },
       // Rota de fallback
       {

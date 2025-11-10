@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Eye, ShoppingCart, MoreVertical, Check, X } from 'lucide-react';
+import { Plus, Eye, ShoppingCart, MoreVertical, Check, X, Printer } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { purchaseApi } from '../../services/api';
 import { Purchase } from '../../types/purchase';
@@ -331,6 +331,14 @@ const PurchasesList: React.FC = () => {
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => window.open(`/purchases/print/${purchase.id}`, '_blank')}
+                              className="cursor-pointer"
+                            >
+                              <Printer className="mr-2 h-4 w-4" />
+                              <span>Imprimir Compra</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => handleApprove(purchase.id)}
                               disabled={purchase.status === 'APROVADO' || purchase.status === 'CANCELADO'}

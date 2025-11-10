@@ -43,17 +43,18 @@ export class AccountsPayableService {
         // Inserir a conta a pagar
         const result = await client.query(
           `INSERT INTO dbo.contas_pagar
-            (compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
+            (compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id, parcela,
              fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
              valor_original, valor_desconto, valor_juros, valor_multa, valor_saldo,
              forma_pagamento_id, status, observacoes)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
           RETURNING *`,
           [
             createAccountPayableDto.compraNumeroPedido || null,
             createAccountPayableDto.compraModelo || null,
             createAccountPayableDto.compraSerie || null,
             createAccountPayableDto.compraFornecedorId || null,
+            createAccountPayableDto.parcela || null,
             createAccountPayableDto.fornecedorId,
             createAccountPayableDto.numeroDocumento,
             createAccountPayableDto.tipoDocumento || 'FATURA',
@@ -618,6 +619,7 @@ export class AccountsPayableService {
       compraModelo: row.compra_modelo,
       compraSerie: row.compra_serie,
       compraFornecedorId: row.compra_fornecedor_id,
+      parcela: row.parcela,
       fornecedorId: row.fornecedor_id,
       fornecedorNome: row.fornecedor_nome,
       fornecedorCnpjCpf: row.fornecedor_cnpj_cpf,

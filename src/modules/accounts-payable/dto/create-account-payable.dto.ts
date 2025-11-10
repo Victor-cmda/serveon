@@ -52,6 +52,16 @@ export class CreateAccountPayableDto {
   compraFornecedorId?: number;
 
   @ApiProperty({
+    description: 'Número da parcela da compra',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'Número da parcela deve ser um número' })
+  @Min(1, { message: 'Número da parcela deve ser maior ou igual a 1' })
+  parcela?: number;
+
+  @ApiProperty({
     description: 'ID do fornecedor',
     example: 1,
   })

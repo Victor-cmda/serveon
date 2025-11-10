@@ -31,6 +31,13 @@ export class AccountPayable extends BaseEntity {
   compraFornecedorId?: number;
 
   @ApiProperty({
+    description: 'Número da parcela da compra',
+    example: 1,
+    required: false,
+  })
+  parcela?: number;
+
+  @ApiProperty({
     description: 'ID do fornecedor',
     example: 1,
   })

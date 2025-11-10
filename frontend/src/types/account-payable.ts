@@ -4,6 +4,7 @@ export interface AccountPayable {
   compraModelo?: string;
   compraSerie?: string;
   compraFornecedorId?: number;
+  parcela?: number;
   fornecedorId: number;
   fornecedorNome?: string;
   fornecedorCnpjCpf?: string;
@@ -34,6 +35,7 @@ export interface CreateAccountPayableDto {
   compraModelo?: string;
   compraSerie?: string;
   compraFornecedorId?: number;
+  parcela?: number;
   fornecedorId: number;
   numeroDocumento: string;
   tipoDocumento?: 'FATURA' | 'DUPLICATA' | 'BOLETO' | 'NOTA_FISCAL';

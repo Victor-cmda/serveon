@@ -947,6 +947,7 @@ CREATE TABLE contas_pagar (
     compra_modelo VARCHAR(10),
     compra_serie VARCHAR(10),
     compra_fornecedor_id INTEGER,
+    parcela INTEGER,
     fornecedor_id INTEGER NOT NULL REFERENCES fornecedor(id),
     numero_documento VARCHAR(50) NOT NULL,
     tipo_documento VARCHAR(20) NOT NULL DEFAULT 'FATURA' CHECK (tipo_documento IN ('FATURA', 'DUPLICATA', 'BOLETO', 'NOTA_FISCAL')),
@@ -1402,5 +1403,54 @@ COMMENT ON TABLE dbo.itemnfe IS 'Itens de notas fiscais';
 COMMENT ON TABLE dbo.fatura IS 'faturas de pagamento de notas fiscais';
 COMMENT ON TABLE dbo.parcela IS 'parcelas de pagamento das faturas';
 COMMENT ON TABLE dbo.volume IS 'volumes de transporte das notas fiscais';
+
+-- =============================================================
+-- TABELA DE CONFIGURAÇÕES DA EMPRESA
+-- =============================================================
+
+-- Criar tabela de configurações da empresa
+CREATE TABLE configuracoes_empresa (
+    id SERIAL PRIMARY KEY,
+    razao_social VARCHAR(255) NOT NULL,
+    nome_fantasia VARCHAR(255) NOT NULL,
+    cnpj VARCHAR(18) NOT NULL,
+    inscricao_estadual VARCHAR(50),
+    inscricao_municipal VARCHAR(50),
+    endereco VARCHAR(255) NOT NULL,
+    numero VARCHAR(20) NOT NULL,
+    complemento VARCHAR(100),
+    bairro VARCHAR(100) NOT NULL,
+    cidade VARCHAR(100) NOT NULL,
+    estado VARCHAR(2) NOT NULL,
+    cep VARCHAR(10) NOT NULL,
+    telefone VARCHAR(20) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    website VARCHAR(255),
+    logo_base64 TEXT,
+    regime_tributario VARCHAR(50) NOT NULL DEFAULT 'SIMPLES_NACIONAL',
+    observacoes_fiscais TEXT,
+    ativo BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Adicionar comentários na tabela
+COMMENT ON TABLE dbo.configuracoes_empresa IS 'Configurações da empresa para uso em documentos fiscais';
+COMMENT ON COLUMN dbo.configuracoes_empresa.razao_social IS 'Razão Social da empresa';
+COMMENT ON COLUMN dbo.configuracoes_empresa.nome_fantasia IS 'Nome Fantasia da empresa';
+COMMENT ON COLUMN dbo.configuracoes_empresa.cnpj IS 'CNPJ da empresa';
+COMMENT ON COLUMN dbo.configuracoes_empresa.inscricao_estadual IS 'Inscrição Estadual';
+COMMENT ON COLUMN dbo.configuracoes_empresa.inscricao_municipal IS 'Inscrição Municipal';
+COMMENT ON COLUMN dbo.configuracoes_empresa.regime_tributario IS 'Regime tributário: SIMPLES_NACIONAL, LUCRO_PRESUMIDO ou LUCRO_REAL';
+COMMENT ON COLUMN dbo.configuracoes_empresa.observacoes_fiscais IS 'Observações fiscais para impressão em documentos';
+
+-- Criar índice único para CNPJ
+CREATE UNIQUE INDEX idx_configuracoes_empresa_cnpj 
+ON dbo.configuracoes_empresa(cnpj) WHERE ativo = true;
+
+-- Trigger para atualizar updated_at
+CREATE TRIGGER update_configuracoes_empresa_timestamp BEFORE
+UPDATE ON configuracoes_empresa FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+
 -- Confirmando a transação apenas se tudo executar corretamente
 COMMIT;

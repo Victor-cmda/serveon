@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Eye, ShoppingBag, MoreVertical, Check, X } from 'lucide-react';
+import { Plus, Eye, ShoppingBag, MoreVertical, Check, X, Printer } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { salesApi } from '../../services/api';
 import { Sale } from '../../types/sale';
@@ -331,6 +331,14 @@ const SalesList: React.FC = () => {
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => window.open(`/sales/print/${sale.id}`, '_blank')}
+                              className="cursor-pointer"
+                            >
+                              <Printer className="mr-2 h-4 w-4" />
+                              <span>Imprimir Venda</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => handleApprove(sale.id)}
                               disabled={sale.status === 'APROVADO' || sale.status === 'CANCELADO'}

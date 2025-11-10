@@ -1076,3 +1076,22 @@ export const accountsPayableApi = {
     return handleResponse(response);
   },
 };
+
+// Company Settings API
+export const companySettingsApi = {
+  get: async () => {
+    const response = await fetch(`${API_URL}/company-settings`);
+    return handleResponse(response);
+  },
+
+  update: async (data: any) => {
+    const response = await fetch(`${API_URL}/company-settings`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+};

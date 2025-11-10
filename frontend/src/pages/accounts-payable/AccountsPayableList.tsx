@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Eye, Receipt, MoreVertical, X } from 'lucide-react';
+import { Plus, Eye, Receipt, MoreVertical, X, Printer } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { accountsPayableApi } from '@/services/api';
 import { AccountPayable } from '@/types/account-payable';
@@ -170,11 +170,11 @@ const AccountsPayableList: React.FC = () => {
     return format(parseISO(dateString), 'dd/MM/yyyy', { locale: ptBR });
   };
 
-  const formatCurrency = (cents: number) => {
+  const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
-    }).format(cents / 100);
+    }).format(value);
   };
 
   const getStatusLabel = (status: string) => {
@@ -252,6 +252,9 @@ const AccountsPayableList: React.FC = () => {
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Documento
                 </th>
+                <th className="h-12 px-4 text-center align-middle font-medium text-muted-foreground">
+                  Parcela
+                </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Fornecedor
                 </th>
@@ -281,7 +284,7 @@ const AccountsPayableList: React.FC = () => {
             <tbody>
               {filteredAccounts.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="h-24 text-center">
+                  <td colSpan={10} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Receipt className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -300,6 +303,15 @@ const AccountsPayableList: React.FC = () => {
                       <div className="text-sm text-muted-foreground">
                         {getTipoDocumentoLabel(account.tipoDocumento)}
                       </div>
+                    </td>
+                    <td className="p-4 text-center">
+                      {account.parcela ? (
+                        <div className="inline-flex items-center justify-center rounded-md bg-blue-100 dark:bg-blue-900 px-2 py-1 text-xs font-medium text-blue-800 dark:text-blue-300">
+                          {account.parcela}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
                     </td>
                     <td className="p-4">
                       <div className="font-medium">{account.fornecedorNome || '-'}</div>
@@ -361,6 +373,13 @@ const AccountsPayableList: React.FC = () => {
                               </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => window.open(`/accounts-payable/print/${account.id}`, '_blank')}
+                                className="cursor-pointer"
+                              >
+                                <Printer className="mr-2 h-4 w-4" />
+                                <span>Imprimir Comprovante</span>
+                              </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => handleCancel(account.id)}
                                 className="cursor-pointer text-red-600"
