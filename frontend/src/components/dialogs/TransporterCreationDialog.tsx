@@ -35,7 +35,9 @@ const TransporterCreationDialog = ({
       <DialogContent className="sm:max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw] xl:max-w-[60vw] max-h-[90vh] p-6 overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            {transporter ? 'Editar transportadora' : 'Adicionar nova transportadora'}
+            {transporter
+              ? 'Editar transportadora'
+              : 'Adicionar nova transportadora'}
           </DialogTitle>
           <DialogDescription className="text-base">
             {transporter

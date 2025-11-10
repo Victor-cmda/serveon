@@ -35,7 +35,9 @@ const UnitMeasureCreationDialog = ({
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            {unitMeasure ? 'Editar unidade de medida' : 'Adicionar nova unidade de medida'}
+            {unitMeasure
+              ? 'Editar unidade de medida'
+              : 'Adicionar nova unidade de medida'}
           </DialogTitle>
           <DialogDescription className="text-base">
             {unitMeasure
