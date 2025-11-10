@@ -32,6 +32,15 @@ const navigationItems: NavigationItem[] = [
     keywords: ['inicio', 'home', 'painel', 'visao geral', 'dashboard', 'kpi', 'metricas', 'estatisticas'],
     priority: 10
   },
+  // Login
+  {
+    title: 'Login',
+    path: '/login',
+    description: 'Página de autenticação do sistema',
+    category: 'Principal',
+    keywords: ['login', 'entrar', 'autenticacao', 'acesso', 'senha', 'usuario'],
+    priority: 5
+  },
 
   // Operacional - Vendas e Compras
   {

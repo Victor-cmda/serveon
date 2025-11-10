@@ -2,6 +2,7 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/dashboard/Dashboard';
+import Login from './pages/login/Login';
 import CountriesList from './pages/countries/CountriesList';
 import CountryForm from './pages/countries/CountryForm';
 import StatesList from './pages/states/StatesList';
@@ -42,6 +43,11 @@ import { AccountsPayableList, AccountsPayableForm } from './pages/accounts-payab
 import { FormStateProvider } from './contexts/FormStateContext';
 
 const router = createBrowserRouter([
+  // Rota de Login (sem Layout)
+  {
+    path: '/login',
+    element: <Login />,
+  },
   {
     path: '/',
     element: <Layout />,
