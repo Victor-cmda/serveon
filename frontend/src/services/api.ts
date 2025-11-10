@@ -79,6 +79,13 @@ import {
   CreatePurchaseData,
   UpdatePurchaseData,
 } from '../types/purchase';
+import {
+  AccountPayable,
+  CreateAccountPayableDto,
+  UpdateAccountPayableDto,
+  PayAccountDto,
+  AccountPayableFilters,
+} from '../types/account-payable';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -977,6 +984,94 @@ export const salesApi = {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ motivo }),
+    });
+    return handleResponse(response);
+  },
+};
+
+// Accounts Payable API
+export const accountsPayableApi = {
+  getAll: async (filters?: AccountPayableFilters): Promise<AccountPayable[]> => {
+    const params = new URLSearchParams();
+    if (filters?.fornecedorId) params.append('fornecedorId', filters.fornecedorId.toString());
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.dataInicio) params.append('dataInicio', filters.dataInicio);
+    if (filters?.dataFim) params.append('dataFim', filters.dataFim);
+
+    const queryString = params.toString();
+    const url = queryString ? `${API_URL}/accounts-payable?${queryString}` : `${API_URL}/accounts-payable`;
+    
+    const response = await fetch(url);
+    return handleResponse(response);
+  },
+
+  getById: async (id: number): Promise<AccountPayable> => {
+    const response = await fetch(`${API_URL}/accounts-payable/${id}`);
+    return handleResponse(response);
+  },
+
+  getOverdue: async (): Promise<AccountPayable[]> => {
+    const response = await fetch(`${API_URL}/accounts-payable/overdue`);
+    return handleResponse(response);
+  },
+
+  getBySupplier: async (fornecedorId: number): Promise<AccountPayable[]> => {
+    const response = await fetch(`${API_URL}/accounts-payable/supplier/${fornecedorId}`);
+    return handleResponse(response);
+  },
+
+  getByPeriod: async (dataInicio: string, dataFim: string): Promise<AccountPayable[]> => {
+    const params = new URLSearchParams({
+      dataInicio,
+      dataFim,
+    });
+    const response = await fetch(`${API_URL}/accounts-payable/period?${params}`);
+    return handleResponse(response);
+  },
+
+  create: async (data: CreateAccountPayableDto): Promise<AccountPayable> => {
+    const response = await fetch(`${API_URL}/accounts-payable`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (id: number, data: UpdateAccountPayableDto): Promise<AccountPayable> => {
+    const response = await fetch(`${API_URL}/accounts-payable/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  pay: async (id: number, data: PayAccountDto): Promise<AccountPayable> => {
+    const response = await fetch(`${API_URL}/accounts-payable/${id}/pay`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  cancel: async (id: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/accounts-payable/${id}/cancel`, {
+      method: 'POST',
+    });
+    return handleResponse(response);
+  },
+
+  updateOverdueStatus: async (): Promise<number> => {
+    const response = await fetch(`${API_URL}/accounts-payable/update-overdue-status`, {
+      method: 'POST',
     });
     return handleResponse(response);
   },

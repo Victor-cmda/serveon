@@ -101,7 +101,7 @@ const CountriesList: React.FC = () => {
                   Código
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                  Nome
+                  País
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Sigla

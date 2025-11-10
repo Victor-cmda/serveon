@@ -101,7 +101,7 @@ const BrandsList: React.FC = () => {
                   Código
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                  Nome
+                  Marca
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Descrição

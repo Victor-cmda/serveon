@@ -38,6 +38,7 @@ import PurchasesList from './pages/purchases/PurchasesList';
 import PurchaseForm from './pages/purchases/PurchaseForm';
 import SalesList from './pages/sales/SalesList';
 import SaleForm from './pages/sales/SaleForm';
+import { AccountsPayableList, AccountsPayableForm } from './pages/accounts-payable';
 import { FormStateProvider } from './contexts/FormStateContext';
 
 const router = createBrowserRouter([
@@ -74,6 +75,15 @@ const router = createBrowserRouter([
       {
         path: 'sales/edit/:id',
         element: <SaleForm />,
+      },
+      // Contas a Pagar
+      {
+        path: 'accounts-payable',
+        element: <AccountsPayableList />,
+      },
+      {
+        path: 'accounts-payable/new',
+        element: <AccountsPayableForm />,
       },
       //Clientes
       {

@@ -19,6 +19,7 @@ import {
   Layers,
   Scale,
   ShoppingCart,
+  Receipt,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -82,6 +83,12 @@ const Sidebar = ({ collapsed = false }: SidebarProps) => {
           title: 'Vendas',
           icon: <ShoppingCart className="h-4 w-4" />,
           path: '/sales',
+        },
+        {
+          id: 'accounts-payable',
+          title: 'Contas a Pagar',
+          icon: <Receipt className="h-4 w-4" />,
+          path: '/accounts-payable',
         },
         {
           id: 'customers',

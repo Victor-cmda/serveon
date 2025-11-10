@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -21,30 +21,27 @@ const PositionCreationDialog = ({
   onSuccess,
   position,
 }: PositionCreationDialogProps) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(open);
-
-  useEffect(() => {
-    setIsDialogOpen(open);
-  }, [open]);
-
   const handleSuccess = (savedPosition: Position) => {
-    setIsDialogOpen(false);
-    onOpenChange(false);
     onSuccess(savedPosition);
+    onOpenChange(false);
   };
 
   const handleCancel = () => {
-    setIsDialogOpen(false);
     onOpenChange(false);
   };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={handleCancel}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {position ? 'Editar Cargo' : 'Novo Cargo'}
           </DialogTitle>
+          <DialogDescription>
+            {position
+              ? 'Altere os campos abaixo para atualizar o cargo.'
+              : 'Preencha os campos abaixo para cadastrar um novo cargo.'}
+          </DialogDescription>
         </DialogHeader>
         <PositionForm
           key={position?.id || 'new'}

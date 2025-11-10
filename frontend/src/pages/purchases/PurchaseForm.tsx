@@ -39,6 +39,8 @@ import {
 } from '@/components/ui/form';
 import AuditSection from '@/components/AuditSection';
 import SupplierCreationDialog from '@/components/dialogs/SupplierCreationDialog';
+import TransporterCreationDialog from '@/components/dialogs/TransporterCreationDialog';
+import ProductCreationDialog from '@/components/dialogs/ProductCreationDialog';
 import { Supplier } from '@/types/supplier';
 import { Product } from '@/types/product';
 import { PaymentTerm } from '@/types/payment-term';
@@ -154,9 +156,13 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
   const [paymentTermSearchOpen, setPaymentTermSearchOpen] = useState(false);
   const [transporterSearchOpen, setTransporterSearchOpen] = useState(false);
   const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
+  const [transporterDialogOpen, setTransporterDialogOpen] = useState(false);
+  const [productDialogOpen, setProductDialogOpen] = useState(false);
 
   // Estados para edição
   const [supplierToEdit, setSupplierToEdit] = useState<Supplier | null>(null);
+  const [transporterToEdit, setTransporterToEdit] = useState<Transporter | null>(null);
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null);
 
   // Estados para controle de bloqueio
   const [isHeaderLocked, setIsHeaderLocked] = useState(false);
@@ -541,6 +547,62 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
     setProductSearchOpen(false);
   };
 
+  // Função para criar novo produto
+  const onCreateNewProduct = () => {
+    setProductToEdit(null);
+    setProductDialogOpen(true);
+  };
+
+  // Função para editar produto
+  const handleEditProduct = (product: Product) => {
+    setProductToEdit(product);
+    setProductDialogOpen(true);
+  };
+
+  // Função chamada quando produto é criado
+  const handleProductCreated = async (newProduct: Product) => {
+    setProductDialogOpen(false);
+    setProductToEdit(null);
+    
+    // Recarregar produtos
+    const productsData = await productApi.getAll();
+    setProducts(productsData);
+    
+    // Selecionar o novo produto
+    setProdutoAtual({
+      idProduto: newProduct.id.toString(),
+      nomeProduto: newProduct.produto,
+      unidade: newProduct.unidadeMedidaNome || newProduct.unidade || '',
+      quantidade: '1',
+      preco: formatCurrency(newProduct.valorCompra || 0),
+      desconto: '0,00',
+    });
+    
+    toast.success(`Produto ${newProduct.produto} criado com sucesso!`);
+  };
+
+  // Função chamada quando produto é atualizado
+  const handleProductUpdated = async (updatedProduct: Product) => {
+    setProductDialogOpen(false);
+    setProductToEdit(null);
+    
+    // Recarregar produtos
+    const productsData = await productApi.getAll();
+    setProducts(productsData);
+    
+    // Se o produto editado estava no item atual, atualizar
+    if (produtoAtual.idProduto === updatedProduct.id.toString()) {
+      setProdutoAtual({
+        ...produtoAtual,
+        nomeProduto: updatedProduct.produto,
+        unidade: updatedProduct.unidadeMedidaNome || updatedProduct.unidade || '',
+        preco: formatCurrency(updatedProduct.valorCompra || 0),
+      });
+    }
+    
+    toast.success(`Produto ${updatedProduct.produto} atualizado com sucesso!`);
+  };
+
   // Função para selecionar condição de pagamento
   const onSelectPaymentTerm = (paymentTerm: PaymentTerm) => {
     setSelectedPaymentTerm(paymentTerm);
@@ -554,6 +616,51 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
     setSelectedTransporter(transporter);
     form.setValue('idTransportadora', transporter.id.toString());
     setTransporterSearchOpen(false);
+  };
+
+  // Função para criar nova transportadora
+  const onCreateNewTransporter = () => {
+    setTransporterToEdit(null);
+    setTransporterDialogOpen(true);
+  };
+
+  // Função para editar transportadora
+  const handleEditTransporter = (transporter: Transporter) => {
+    setTransporterToEdit(transporter);
+    setTransporterDialogOpen(true);
+  };
+
+  // Função chamada quando transportadora é criada
+  const handleTransporterCreated = async (newTransporter: Transporter) => {
+    setTransporterDialogOpen(false);
+    setTransporterToEdit(null);
+    
+    // Recarregar transportadoras
+    const transportersData = await transporterApi.getAll();
+    setTransporters(transportersData);
+    
+    // Selecionar a nova transportadora
+    setSelectedTransporter(newTransporter);
+    form.setValue('idTransportadora', newTransporter.id.toString());
+    
+    toast.success(`Transportadora ${newTransporter.nome} criada com sucesso!`);
+  };
+
+  // Função chamada quando transportadora é atualizada
+  const handleTransporterUpdated = async (updatedTransporter: Transporter) => {
+    setTransporterDialogOpen(false);
+    setTransporterToEdit(null);
+    
+    // Recarregar transportadoras
+    const transportersData = await transporterApi.getAll();
+    setTransporters(transportersData);
+    
+    // Se a transportadora editada estava selecionada, atualizar seleção
+    if (selectedTransporter?.id === updatedTransporter.id) {
+      setSelectedTransporter(updatedTransporter);
+    }
+    
+    toast.success(`Transportadora ${updatedTransporter.nome} atualizada com sucesso!`);
   };
 
   // Função para adicionar produto à lista
@@ -1736,6 +1843,8 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
         entities={products}
         isLoading={isLoading}
         onSelect={onSelectProduct}
+        onCreateNew={onCreateNewProduct}
+        onEdit={(item) => handleEditProduct(item as Product)}
         displayColumns={[
           { key: 'produto', header: 'Nome' },
           { key: 'referencia', header: 'Referência' },
@@ -1773,6 +1882,8 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
         entities={transporters}
         isLoading={isLoading}
         onSelect={onSelectTransporter}
+        onCreateNew={onCreateNewTransporter}
+        onEdit={(item) => handleEditTransporter(item as Transporter)}
         displayColumns={[
           { key: 'nome', header: 'Nome' },
           { key: 'cnpj', header: 'CNPJ' },
@@ -1791,6 +1902,26 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
           supplierToEdit ? handleSupplierUpdated : handleSupplierCreated
         }
         supplier={supplierToEdit}
+      />
+
+      {/* Diálogo de criação/edição de transportadora */}
+      <TransporterCreationDialog
+        open={transporterDialogOpen}
+        onOpenChange={setTransporterDialogOpen}
+        onSuccess={
+          transporterToEdit ? handleTransporterUpdated : handleTransporterCreated
+        }
+        transporter={transporterToEdit}
+      />
+
+      {/* Diálogo de criação/edição de produto */}
+      <ProductCreationDialog
+        open={productDialogOpen}
+        onOpenChange={setProductDialogOpen}
+        onSuccess={
+          productToEdit ? handleProductUpdated : handleProductCreated
+        }
+        product={productToEdit}
       />
     </div>
   );

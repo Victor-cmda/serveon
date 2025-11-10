@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { 
-  IsNotEmpty, 
   IsOptional, 
   IsNumber, 
   IsEnum,
@@ -11,68 +10,22 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class CreateAccountPayableDto {
-  @ApiProperty({
-    description: 'Número do pedido de compra',
-    example: 'PC-0001',
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'Número do pedido deve ser uma string' })
-  @MaxLength(20, { message: 'Número do pedido deve ter no máximo 20 caracteres' })
-  compraNumeroPedido?: string;
-
-  @ApiProperty({
-    description: 'Modelo da nota fiscal',
-    example: '55',
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'Modelo deve ser uma string' })
-  @MaxLength(10, { message: 'Modelo deve ter no máximo 10 caracteres' })
-  compraModelo?: string;
-
-  @ApiProperty({
-    description: 'Série da nota fiscal',
-    example: '001',
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'Série deve ser uma string' })
-  @MaxLength(10, { message: 'Série deve ter no máximo 10 caracteres' })
-  compraSerie?: string;
-
-  @ApiProperty({
-    description: 'ID do fornecedor na compra',
-    example: 1,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber({}, { message: 'ID do fornecedor na compra deve ser um número' })
-  compraFornecedorId?: number;
-
-  @ApiProperty({
-    description: 'ID do fornecedor',
-    example: 1,
-  })
-  @IsNotEmpty({ message: 'ID do fornecedor é obrigatório' })
-  @IsNumber({}, { message: 'ID do fornecedor deve ser um número' })
-  fornecedorId: number;
-
+export class UpdateAccountPayableDto {
   @ApiProperty({
     description: 'Número do documento',
     example: 'FAT-001',
+    required: false,
   })
-  @IsNotEmpty({ message: 'Número do documento é obrigatório' })
+  @IsOptional()
   @IsString({ message: 'Número do documento deve ser uma string' })
   @MaxLength(50, { message: 'Número do documento deve ter no máximo 50 caracteres' })
-  numeroDocumento: string;
+  numeroDocumento?: string;
 
   @ApiProperty({
     description: 'Tipo do documento',
     example: 'FATURA',
     enum: ['FATURA', 'DUPLICATA', 'BOLETO', 'NOTA_FISCAL'],
-    default: 'FATURA',
+    required: false,
   })
   @IsOptional()
   @IsEnum(['FATURA', 'DUPLICATA', 'BOLETO', 'NOTA_FISCAL'], {
@@ -83,33 +36,46 @@ export class CreateAccountPayableDto {
   @ApiProperty({
     description: 'Data de emissão',
     example: '2024-01-15',
+    required: false,
   })
-  @IsNotEmpty({ message: 'Data de emissão é obrigatória' })
+  @IsOptional()
   @Type(() => Date)
   @IsDate({ message: 'Data de emissão deve ser uma data válida' })
-  dataEmissao: Date;
+  dataEmissao?: Date;
 
   @ApiProperty({
     description: 'Data de vencimento',
     example: '2024-02-15',
+    required: false,
   })
-  @IsNotEmpty({ message: 'Data de vencimento é obrigatória' })
+  @IsOptional()
   @Type(() => Date)
   @IsDate({ message: 'Data de vencimento deve ser uma data válida' })
-  dataVencimento: Date;
+  dataVencimento?: Date;
+
+  @ApiProperty({
+    description: 'Data de pagamento',
+    example: '2024-02-10',
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate({ message: 'Data de pagamento deve ser uma data válida' })
+  dataPagamento?: Date;
 
   @ApiProperty({
     description: 'Valor original',
     example: 1500.00,
+    required: false,
   })
-  @IsNotEmpty({ message: 'Valor original é obrigatório' })
+  @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Valor original deve ser um número com no máximo 2 casas decimais' })
-  @Min(0.01, { message: 'Valor original deve ser maior que 0' })
-  valorOriginal: number;
+  @Min(0, { message: 'Valor original deve ser maior ou igual a 0' })
+  valorOriginal?: number;
 
   @ApiProperty({
     description: 'Valor de desconto',
-    example: 0.00,
+    example: 50.00,
     required: false,
   })
   @IsOptional()
@@ -119,7 +85,7 @@ export class CreateAccountPayableDto {
 
   @ApiProperty({
     description: 'Valor de juros',
-    example: 0.00,
+    example: 25.00,
     required: false,
   })
   @IsOptional()
@@ -129,13 +95,23 @@ export class CreateAccountPayableDto {
 
   @ApiProperty({
     description: 'Valor de multa',
-    example: 0.00,
+    example: 15.00,
     required: false,
   })
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Valor de multa deve ser um número com no máximo 2 casas decimais' })
   @Min(0, { message: 'Valor de multa deve ser maior ou igual a 0' })
   valorMulta?: number;
+
+  @ApiProperty({
+    description: 'Valor pago',
+    example: 1490.00,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Valor pago deve ser um número com no máximo 2 casas decimais' })
+  @Min(0, { message: 'Valor pago deve ser maior ou igual a 0' })
+  valorPago?: number;
 
   @ApiProperty({
     description: 'ID da forma de pagamento',
@@ -147,8 +123,29 @@ export class CreateAccountPayableDto {
   formaPagamentoId?: number;
 
   @ApiProperty({
+    description: 'Status da conta',
+    example: 'ABERTO',
+    enum: ['ABERTO', 'PAGO', 'PARCIAL', 'VENCIDO', 'CANCELADO'],
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(['ABERTO', 'PAGO', 'PARCIAL', 'VENCIDO', 'CANCELADO'], {
+    message: 'Status deve ser ABERTO, PAGO, PARCIAL, VENCIDO ou CANCELADO'
+  })
+  status?: string;
+
+  @ApiProperty({
+    description: 'ID do funcionário que realizou o pagamento',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'ID do funcionário deve ser um número' })
+  pagoPor?: number;
+
+  @ApiProperty({
     description: 'Observações',
-    example: 'Conta referente à compra de materiais',
+    example: 'Pagamento com desconto negociado',
     required: false,
   })
   @IsOptional()

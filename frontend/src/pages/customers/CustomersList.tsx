@@ -124,7 +124,7 @@ const CustomersList: React.FC = () => {
                   Código
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                  Nome/Razão Social
+                  Clientes
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Nome Fantasia

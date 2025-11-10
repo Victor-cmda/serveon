@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -21,30 +21,27 @@ const DepartmentCreationDialog = ({
   onSuccess,
   department,
 }: DepartmentCreationDialogProps) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(open);
-
-  useEffect(() => {
-    setIsDialogOpen(open);
-  }, [open]);
-
   const handleSuccess = (savedDepartment: Department) => {
-    setIsDialogOpen(false);
-    onOpenChange(false);
     onSuccess(savedDepartment);
+    onOpenChange(false);
   };
 
   const handleCancel = () => {
-    setIsDialogOpen(false);
     onOpenChange(false);
   };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={handleCancel}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {department ? 'Editar Departamento' : 'Novo Departamento'}
           </DialogTitle>
+          <DialogDescription>
+            {department
+              ? 'Altere os campos abaixo para atualizar o departamento.'
+              : 'Preencha os campos abaixo para cadastrar um novo departamento.'}
+          </DialogDescription>
         </DialogHeader>
         <DepartmentForm
           key={department?.id || 'new'}

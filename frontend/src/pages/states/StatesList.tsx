@@ -140,7 +140,7 @@ const StatesList: React.FC = () => {
                   Código
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                  Nome
+                  Estado
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   UF

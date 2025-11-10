@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -21,25 +21,17 @@ const PaymentMethodCreationDialog = ({
   onSuccess,
   paymentMethod,
 }: PaymentMethodCreationDialogProps) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(open);
-
-  useEffect(() => {
-    setIsDialogOpen(open);
-  }, [open]);
-
   const handleSuccess = (savedPaymentMethod: PaymentMethod) => {
-    setIsDialogOpen(false);
-    onOpenChange(false);
     onSuccess(savedPaymentMethod);
+    onOpenChange(false);
   };
 
   const handleCancel = () => {
-    setIsDialogOpen(false);
     onOpenChange(false);
   };
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={handleCancel}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
@@ -47,6 +39,11 @@ const PaymentMethodCreationDialog = ({
               ? 'Editar Método de Pagamento'
               : 'Novo Método de Pagamento'}
           </DialogTitle>
+          <DialogDescription>
+            {paymentMethod
+              ? 'Altere os campos abaixo para atualizar o método de pagamento.'
+              : 'Preencha os campos abaixo para cadastrar um novo método de pagamento.'}
+          </DialogDescription>
         </DialogHeader>
         <PaymentMethodForm
           key={paymentMethod?.id || 'new'}

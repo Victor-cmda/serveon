@@ -329,6 +329,25 @@ VALUES ((SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'financei
 INSERT INTO fornecedor_telefone (fornecedor_id, telefone, tipo, principal)
 VALUES ((SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), '11888888888', 'COMERCIAL', true);
 
+-- Segundo fornecedor para diversificar os dados
+INSERT INTO fornecedor (
+    cnpj_cpf, tipo, is_estrangeiro, razao_social, nome_fantasia,
+    endereco, numero, bairro, cidade_id, cep, telefone, email, website,
+    nacionalidade_id, responsavel, celular_responsavel, limite_credito,
+    condicao_pagamento_id, transportadora_id
+) VALUES (
+    '11222333000144', 'J', false, 'DISTRIBUIDORA XYZ LTDA', 'DIST-XYZ',
+    'AV. DISTRIBUIDORES', '500', 'INDUSTRIAL', (SELECT id FROM cidade WHERE nome = 'SÃO PAULO'), '01345000', '11666666666', 'vendas@distxyz.com', 'www.distxyz.com',
+    (SELECT id FROM pais WHERE sigla = 'BR'), 'MARIA VENDAS', '11911111111', 75000.00,
+    (SELECT id FROM condicao_pagamento WHERE nome = '30/60'), (SELECT id FROM transportadora WHERE cnpj = '98765432000155')
+);
+
+INSERT INTO fornecedor_email (fornecedor_id, email, tipo, principal)
+VALUES ((SELECT id FROM fornecedor WHERE cnpj_cpf = '11222333000144'), 'financeiro@distxyz.com', 'FINANCEIRO', true);
+
+INSERT INTO fornecedor_telefone (fornecedor_id, telefone, tipo, principal)
+VALUES ((SELECT id FROM fornecedor WHERE cnpj_cpf = '11222333000144'), '11999999999', 'COMERCIAL', true);
+
 -- =====================================================
 -- PRODUTOS E RELACIONAMENTOS
 -- =====================================================
@@ -780,35 +799,156 @@ INSERT INTO estoque_movimento (
 -- FINANCEIRO
 -- =====================================================
 
+-- Contas a pagar das compras - ABERTO (vencimento futuro)
 INSERT INTO contas_pagar (
     compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
-    valor_original, valor_saldo, forma_pagamento_id, status, observacoes
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_pago, valor_saldo,
+    forma_pagamento_id, status, observacoes
 ) VALUES (
     '1', '55', '1', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
-    (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'DUP-0001', 'DUPLICATA', CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days',
-    5100.00, 5100.00, (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 'A PAGAR DA COMPRA 1 SÉRIE 1'
+    (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'FAT-2024-001', 'FATURA', 
+    CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days',
+    5100.00, 0.00, 0.00, 0.00, 0.00, 5100.00,
+    (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 
+    'Conta a pagar referente à compra PC-0001'
 );
 
+-- Conta a pagar PARCIALMENTE PAGA
 INSERT INTO contas_pagar (
     compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
-    valor_original, valor_saldo, forma_pagamento_id, status, observacoes
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_pago, valor_saldo,
+    forma_pagamento_id, status, observacoes, data_pagamento, pago_por
 ) VALUES (
     '2', '55', '1', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
-    (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'DUP-0002', 'DUPLICATA', CURRENT_DATE + INTERVAL '10 days', CURRENT_DATE + INTERVAL '40 days',
-    1400.00, 1400.00, (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 'A PAGAR DA COMPRA 2'
+    (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'FAT-2024-002', 'DUPLICATA', 
+    CURRENT_DATE - INTERVAL '15 days', CURRENT_DATE + INTERVAL '15 days',
+    1400.00, 0.00, 0.00, 0.00, 700.00, 700.00,
+    (SELECT id FROM forma_pagamento WHERE nome = 'TRANSFERÊNCIA BANCÁRIA'), 'PARCIAL', 
+    'Pagamento parcial de R$ 700,00', CURRENT_DATE - INTERVAL '5 days',
+    (SELECT id FROM funcionario WHERE email = 'comprador@exemplo.com')
 );
 
+-- Conta a pagar PAGA com desconto
+INSERT INTO contas_pagar (
+    fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_pago, valor_saldo,
+    forma_pagamento_id, status, observacoes, data_pagamento, pago_por
+) VALUES (
+    (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'FAT-2024-003', 'FATURA', 
+    CURRENT_DATE - INTERVAL '30 days', CURRENT_DATE - INTERVAL '5 days',
+    1000.00, 50.00, 0.00, 0.00, 950.00, 0.00,
+    (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'PAGO', 
+    'Pagamento antecipado com 5% de desconto', CURRENT_DATE - INTERVAL '10 days',
+    (SELECT id FROM funcionario WHERE email = 'comprador@exemplo.com')
+);
+
+-- Conta a pagar VENCIDA
+INSERT INTO contas_pagar (
+    fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_pago, valor_saldo,
+    status, observacoes
+) VALUES (
+    (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'FAT-2024-004', 'BOLETO', 
+    CURRENT_DATE - INTERVAL '60 days', CURRENT_DATE - INTERVAL '15 days',
+    800.00, 0.00, 16.00, 16.00, 0.00, 832.00,
+    'VENCIDO', 'Conta vencida - juros de 2% e multa de 2% aplicados'
+);
+
+-- Conta a pagar CANCELADA
+INSERT INTO contas_pagar (
+    fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_pago, valor_saldo,
+    status, observacoes
+) VALUES (
+    (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'FAT-2024-005', 'NOTA_FISCAL', 
+    CURRENT_DATE - INTERVAL '20 days', CURRENT_DATE + INTERVAL '10 days',
+    1500.00, 0.00, 0.00, 0.00, 0.00, 1500.00,
+    'CANCELADO', 'Cancelada por duplicidade de lançamento'
+);
+
+-- Conta a pagar vinculada à compra 1 série 2
 INSERT INTO contas_pagar (
     compra_numero_pedido, compra_modelo, compra_serie, compra_fornecedor_id,
     fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
-    valor_original, valor_saldo, forma_pagamento_id, status, observacoes
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_pago, valor_saldo,
+    forma_pagamento_id, status, observacoes
 ) VALUES (
     '1', '55', '2', (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'),
-    (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'DUP-0003', 'DUPLICATA', CURRENT_DATE + INTERVAL '20 days', CURRENT_DATE + INTERVAL '40 days',
-    800.00, 800.00, (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'ABERTO', 'A PAGAR DA COMPRA 1 SÉRIE 2'
+    (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'FAT-2024-006', 'FATURA', 
+    CURRENT_DATE, CURRENT_DATE + INTERVAL '45 days',
+    800.00, 0.00, 0.00, 0.00, 0.00, 800.00,
+    (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 
+    'Conta a pagar referente à compra PC-0001 série 2'
 );
+
+-- Contas a pagar do segundo fornecedor (DIST-XYZ)
+INSERT INTO contas_pagar (
+    fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_pago, valor_saldo,
+    forma_pagamento_id, status, observacoes
+) VALUES (
+    (SELECT id FROM fornecedor WHERE cnpj_cpf = '11222333000144'), 'FAT-2024-007', 'FATURA', 
+    CURRENT_DATE, CURRENT_DATE + INTERVAL '60 days',
+    3500.00, 0.00, 0.00, 0.00, 0.00, 3500.00,
+    (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 
+    'Compra de equipamentos - prazo 60 dias'
+);
+
+-- Conta com pagamento parcial do segundo fornecedor
+INSERT INTO contas_pagar (
+    fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_pago, valor_saldo,
+    forma_pagamento_id, status, observacoes, data_pagamento, pago_por
+) VALUES (
+    (SELECT id FROM fornecedor WHERE cnpj_cpf = '11222333000144'), 'FAT-2024-008', 'DUPLICATA', 
+    CURRENT_DATE - INTERVAL '10 days', CURRENT_DATE + INTERVAL '20 days',
+    6000.00, 0.00, 0.00, 0.00, 4000.00, 2000.00,
+    (SELECT id FROM forma_pagamento WHERE nome = 'TRANSFERÊNCIA BANCÁRIA'), 'PARCIAL', 
+    'Pagamento parcial de R$ 4.000,00 - Saldo de R$ 2.000,00', CURRENT_DATE - INTERVAL '3 days',
+    (SELECT id FROM funcionario WHERE email = 'comprador@exemplo.com')
+);
+
+-- Conta pequena para pagamento à vista
+INSERT INTO contas_pagar (
+    fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_pago, valor_saldo,
+    status, observacoes
+) VALUES (
+    (SELECT id FROM fornecedor WHERE cnpj_cpf = '11222333000144'), 'FAT-2024-009', 'FATURA', 
+    CURRENT_DATE, CURRENT_DATE,
+    250.00, 0.00, 0.00, 0.00, 0.00, 250.00,
+    'ABERTO', 'Pequenas despesas - pagamento à vista'
+);
+
+-- Conta com vencimento futuro distante
+INSERT INTO contas_pagar (
+    fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_pago, valor_saldo,
+    forma_pagamento_id, status, observacoes
+) VALUES (
+    (SELECT id FROM fornecedor WHERE cnpj_cpf = '11222333000144'), 'FAT-2024-010', 'BOLETO', 
+    CURRENT_DATE, CURRENT_DATE + INTERVAL '90 days',
+    12000.00, 0.00, 0.00, 0.00, 0.00, 12000.00,
+    (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 
+    'Compra de grande volume - prazo especial 90 dias'
+);
+
+-- Conta paga com juros por atraso
+INSERT INTO contas_pagar (
+    fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_pago, valor_saldo,
+    forma_pagamento_id, status, observacoes, data_pagamento, pago_por
+) VALUES (
+    (SELECT id FROM fornecedor WHERE cnpj_cpf = '66777888000155'), 'FAT-2024-011', 'DUPLICATA', 
+    CURRENT_DATE - INTERVAL '50 days', CURRENT_DATE - INTERVAL '20 days',
+    2000.00, 0.00, 40.00, 40.00, 2080.00, 0.00,
+    (SELECT id FROM forma_pagamento WHERE nome = 'TRANSFERÊNCIA BANCÁRIA'), 'PAGO', 
+    'Pago com atraso - juros de 2% e multa de 2%', CURRENT_DATE - INTERVAL '5 days',
+    (SELECT id FROM funcionario WHERE email = 'comprador@exemplo.com')
+);
+
 
 -- Contas a receber das vendas
 INSERT INTO contas_receber (

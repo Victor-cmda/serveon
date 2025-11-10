@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, useLocation, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -81,9 +81,25 @@ const formSchema = z.object({
   ativo: z.boolean().default(true),
 });
 
-const TransporterForm = () => {
-  const { id } = useParams<{ id: string }>();
+interface TransporterFormProps {
+  mode?: 'page' | 'dialog';
+  transporterId?: number;
+  initialData?: Partial<any>;
+  onSuccess?: (transporter: any) => void;
+  onCancel?: () => void;
+}
+
+const TransporterForm = ({
+  mode = 'page',
+  transporterId,
+  initialData,
+  onSuccess,
+  onCancel,
+}: TransporterFormProps) => {
+  const { id: paramId } = useParams<{ id: string }>();
+  const id = mode === 'dialog' ? transporterId : paramId ? Number(paramId) : undefined;
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [transporterData, setTransporterData] = useState<any>(null);
   const [states, setStates] = useState<State[]>([]);
@@ -102,7 +118,7 @@ const TransporterForm = () => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       id: id ? Number(id) : undefined,
       cnpj: '',
       nome: '',
@@ -277,39 +293,47 @@ const TransporterForm = () => {
         cidadeId: data.cidadeId,
       };
 
+      let savedTransporter;
       if (id) {
-        await transporterApi.update(Number(id), formattedData);
+        savedTransporter = await transporterApi.update(Number(id), formattedData);
         toast.success('Transportadora atualizada com sucesso!');
       } else {
-        await transporterApi.create(formattedData);
+        savedTransporter = await transporterApi.create(formattedData);
         toast.success('Transportadora criada com sucesso!');
-        form.reset({
-          id: 0,
-          cnpj: '',
-          nome: '',
-          nomeFantasia: '',
-          paisId: undefined,
-          estadoId: undefined,
-          cidadeId: undefined,
-          endereco: '',
-          numero: '',
-          complemento: '',
-          bairro: '',
-          cep: '',
-          website: '',
-          observacoes: '',
-          ativo: true,
-        });
-        setSelectedCity(null);
-        setSelectedStateId(undefined);
       }
 
-      // Check if we need to return to a parent form in a cascading scenario
-      const returnUrl = new URLSearchParams(location.search).get('returnUrl');
-      if (returnUrl) {
-        navigate(returnUrl);
+      if (mode === 'dialog' && onSuccess) {
+        onSuccess(savedTransporter);
       } else {
-        navigate('/transporters');
+        if (!id) {
+          form.reset({
+            id: 0,
+            cnpj: '',
+            nome: '',
+            nomeFantasia: '',
+            paisId: undefined,
+            estadoId: undefined,
+            cidadeId: undefined,
+            endereco: '',
+            numero: '',
+            complemento: '',
+            bairro: '',
+            cep: '',
+            website: '',
+            observacoes: '',
+            ativo: true,
+          });
+          setSelectedCity(null);
+          setSelectedStateId(undefined);
+        }
+
+        // Check if we need to return to a parent form in a cascading scenario
+        const returnUrl = new URLSearchParams(location.search).get('returnUrl');
+        if (returnUrl) {
+          navigate(returnUrl);
+        } else {
+          navigate('/transporters');
+        }
       }
     } catch (error: unknown) {
       console.error('Erro ao salvar transportadora:', error);
@@ -400,57 +424,61 @@ const TransporterForm = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link to="/transporters">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {id ? 'Editar Transportadora' : 'Nova Transportadora'}
-            </h1>
-            <p className="text-muted-foreground">
-              {id
-                ? 'Edite as informações da transportadora abaixo'
-                : 'Preencha as informações para criar uma nova transportadora'}
-            </p>
+      {mode === 'page' && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link to="/transporters">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {id ? 'Editar Transportadora' : 'Nova Transportadora'}
+              </h1>
+              <p className="text-muted-foreground">
+                {id
+                  ? 'Edite as informações da transportadora abaixo'
+                  : 'Preencha as informações para criar uma nova transportadora'}
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* AuditSection no header - não ocupa espaço do formulário */}
-        <AuditSection
-          form={form}
-          data={{
-            id: id ? transporterData?.id : undefined,
-            ativo: form.watch('ativo'),
-            createdAt: transporterData?.createdAt,
-            updatedAt: transporterData?.updatedAt,
-          }}
-          variant="header"
-          isEditing={!!id}
-          statusFieldName="ativo" // Campo de status é 'ativo' para Transporter
-        />
-      </div>
+          {/* AuditSection no header - não ocupa espaço do formulário */}
+          <AuditSection
+            form={form}
+            data={{
+              id: id ? transporterData?.id : undefined,
+              ativo: form.watch('ativo'),
+              createdAt: transporterData?.createdAt,
+              updatedAt: transporterData?.updatedAt,
+            }}
+            variant="header"
+            isEditing={!!id}
+            statusFieldName="ativo" // Campo de status é 'ativo' para Transporter
+          />
+        </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="flex flex-col space-y-1.5 p-6">
-              <h3 className="text-2xl font-semibold leading-none tracking-tight">
-                Informações da Transportadora
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Preencha todas as informações necessárias da transportadora
-              </p>
-            </div>
-            <div className="p-6 pt-0 space-y-6">
+            {mode === 'page' && (
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Informações da Transportadora
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Preencha todas as informações necessárias da transportadora
+                </p>
+              </div>
+            )}
+            <div className={mode === 'dialog' ? 'p-4 space-y-4' : 'p-6 pt-0 space-y-6'}>
               <GeneralDataSection
                 form={form}
                 isLoading={isLoading}
-                id={id}
+                id={id?.toString()}
                 formatters={formatters}
               />
 
@@ -484,16 +512,36 @@ const TransporterForm = () => {
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Link to="/transporters">
-              <Button type="button" variant="outline">
-                Cancelar
-              </Button>
-            </Link>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {id ? 'Atualizar' : 'Salvar'}
-              <Save className="ml-2 h-4 w-4" />
-            </Button>
+            {mode === 'page' ? (
+              <>
+                <Link to="/transporters">
+                  <Button type="button" variant="outline">
+                    Cancelar
+                  </Button>
+                </Link>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {id ? 'Atualizar' : 'Salvar'}
+                  <Save className="ml-2 h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={onCancel}
+                  disabled={isLoading}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {id ? 'Atualizar' : 'Salvar'}
+                  <Save className="ml-2 h-4 w-4" />
+                </Button>
+              </>
+            )}
           </div>
         </form>
       </Form>

@@ -106,8 +106,23 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const PaymentTermForm = () => {
-  const { id } = useParams();
+interface PaymentTermFormProps {
+  mode?: 'page' | 'dialog';
+  paymentTermId?: number;
+  initialData?: any;
+  onSuccess?: (paymentTerm: any) => void;
+  onCancel?: () => void;
+}
+
+const PaymentTermForm = ({
+  mode = 'page',
+  paymentTermId,
+  initialData,
+  onSuccess,
+  onCancel,
+}: PaymentTermFormProps) => {
+  const { id: paramId } = useParams();
+  const id = mode === 'dialog' ? paymentTermId?.toString() : paramId;
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(id ? true : false);
@@ -148,10 +163,48 @@ const PaymentTermForm = () => {
 
   useEffect(() => {
     fetchPaymentMethods();
-    if (id) {
+    
+    if (mode === 'dialog' && initialData) {
+      // Modo dialog: usar initialData
+      const sortedInstallments = initialData.installments
+        ? [...initialData.installments].sort(
+            (a: any, b: any) => a.installmentNumber - b.installmentNumber,
+          )
+        : [];
+
+      form.reset({
+        name: initialData.name,
+        description: initialData.description || '',
+        interestRate:
+          typeof initialData.interestRate === 'string'
+            ? parseFloat(initialData.interestRate)
+            : initialData.interestRate || 0,
+        fineRate:
+          typeof initialData.fineRate === 'string'
+            ? parseFloat(initialData.fineRate)
+            : initialData.fineRate || 0,
+        discountPercentage:
+          typeof initialData.discountPercentage === 'string'
+            ? parseFloat(initialData.discountPercentage)
+            : initialData.discountPercentage || 0,
+        ativo: initialData.ativo ?? true,
+        installments: sortedInstallments.map((inst: any) => ({
+          installmentNumber: inst.installmentNumber,
+          paymentMethodId: inst.paymentMethodId,
+          daysToPayment: inst.daysToPayment,
+          percentageValue:
+            typeof inst.percentageValue === 'string'
+              ? parseFloat(inst.percentageValue)
+              : inst.percentageValue,
+          ativo: inst.ativo ?? true,
+        })),
+      });
+      setPaymentTermData(initialData);
+    } else if (id) {
+      // Modo page: buscar do backend
       fetchPaymentTerm(id);
     }
-  }, [id]);
+  }, [id, mode, initialData]);
 
   const fetchPaymentMethods = async () => {
     try {
@@ -485,19 +538,27 @@ const PaymentTermForm = () => {
         setIsLoading(false);
         return;
       }
+      
+      let savedPaymentTerm;
       if (id) {
-        await paymentTermApi.update(Number(id), paymentTermData);
+        savedPaymentTerm = await paymentTermApi.update(Number(id), paymentTermData);
         toast.success('Sucesso', {
           description: 'Condição de pagamento atualizada com sucesso!',
         });
       } else {
-        await paymentTermApi.create(paymentTermData);
+        savedPaymentTerm = await paymentTermApi.create(paymentTermData);
         toast.success('Sucesso', {
           description: 'Condição de pagamento criada com sucesso!',
         });
       }
 
-      // Check if we need to return to a parent form in a cascading scenario
+      // Modo dialog: chamar callback de sucesso
+      if (mode === 'dialog' && onSuccess) {
+        onSuccess(savedPaymentTerm);
+        return;
+      }
+
+      // Modo page: navegar para lista
       const returnUrl = new URLSearchParams(location.search).get('returnUrl');
       if (returnUrl) {
         navigate(returnUrl);
@@ -559,37 +620,39 @@ const PaymentTermForm = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link to="/payment-terms">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {id
-                ? 'Editar Condição de Pagamento'
-                : 'Nova Condição de Pagamento'}
-            </h1>
-            <p className="text-muted-foreground">
-              {id
-                ? 'Edite as informações da condição de pagamento abaixo'
-                : 'Preencha as informações para criar uma nova condição de pagamento'}
-            </p>
+      {mode === 'page' && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link to="/payment-terms">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {id
+                  ? 'Editar Condição de Pagamento'
+                  : 'Nova Condição de Pagamento'}
+              </h1>
+              <p className="text-muted-foreground">
+                {id
+                  ? 'Edite as informações da condição de pagamento abaixo'
+                  : 'Preencha as informações para criar uma nova condição de pagamento'}
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* AuditSection no header */}
-        <AuditSection
-          form={form}
-          data={paymentTermData}
-          variant="header"
-          isEditing={!!id}
-          statusFieldName="ativo" // Campo de status é 'ativo' para PaymentTerm
-        />
-      </div>
+          {/* AuditSection no header */}
+          <AuditSection
+            form={form}
+            data={paymentTermData}
+            variant="header"
+            isEditing={!!id}
+            statusFieldName="ativo" // Campo de status é 'ativo' para PaymentTerm
+          />
+        </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -1082,16 +1145,31 @@ const PaymentTermForm = () => {
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Link to="/payment-terms">
-              <Button type="button" variant="outline">
-                Cancelar
-              </Button>
-            </Link>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {id ? 'Atualizar' : 'Salvar'}
-              <Save className="ml-2 h-4 w-4" />
-            </Button>
+            {mode === 'dialog' ? (
+              <>
+                <Button type="button" variant="outline" onClick={onCancel}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {id ? 'Atualizar' : 'Salvar'}
+                  <Save className="ml-2 h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/payment-terms">
+                  <Button type="button" variant="outline">
+                    Cancelar
+                  </Button>
+                </Link>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {id ? 'Atualizar' : 'Salvar'}
+                  <Save className="ml-2 h-4 w-4" />
+                </Button>
+              </>
+            )}
           </div>
         </form>
       </Form>

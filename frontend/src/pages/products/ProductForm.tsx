@@ -53,9 +53,24 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-const ProductForm = () => {
+interface ProductFormProps {
+  mode?: 'page' | 'dialog';
+  productId?: number;
+  initialData?: Partial<any>;
+  onSuccess?: (product: any) => void;
+  onCancel?: () => void;
+}
+
+const ProductForm = ({
+  mode = 'page',
+  productId,
+  initialData,
+  onSuccess,
+  onCancel,
+}: ProductFormProps) => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id: paramId } = useParams();
+  const id = mode === 'dialog' ? productId : paramId ? Number(paramId) : undefined;
   const [isLoading, setIsLoading] = useState(false);
   const [productData, setProductData] = useState<any>(null);
   
@@ -86,7 +101,7 @@ const ProductForm = () => {
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       produto: '',
       descricao: '',
       codigoBarras: '',
@@ -353,14 +368,20 @@ const ProductForm = () => {
         quantidade: data.quantidade || 0,
       };
 
+      let result;
       if (id) {
-        await productApi.update(Number(id), cleanedData);
+        result = await productApi.update(Number(id), cleanedData);
         toast.success('Produto atualizado com sucesso!');
       } else {
-        await productApi.create(cleanedData);
+        result = await productApi.create(cleanedData);
         toast.success('Produto criado com sucesso!');
       }
-      navigate('/products');
+
+      if (mode === 'dialog' && onSuccess) {
+        onSuccess(result);
+      } else {
+        navigate('/products');
+      }
     } catch (error) {
       console.error('Erro ao salvar produto:', error);
       toast.error('Erro ao salvar produto');
@@ -371,47 +392,51 @@ const ProductForm = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link to="/products">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {id ? 'Editar Produto' : 'Novo Produto'}
-            </h1>
-            <p className="text-muted-foreground">
-              {id
-                ? 'Edite as informações do produto abaixo'
-                : 'Preencha as informações para criar um novo produto'}
-            </p>
+      {mode === 'page' && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link to="/products">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Voltar
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {id ? 'Editar Produto' : 'Novo Produto'}
+              </h1>
+              <p className="text-muted-foreground">
+                {id
+                  ? 'Edite as informações do produto abaixo'
+                  : 'Preencha as informações para criar um novo produto'}
+              </p>
+            </div>
           </div>
+          
+          <AuditSection
+            form={form}
+            data={productData}
+            variant="header"
+            isEditing={!!id}
+            statusFieldName="ativo" // Campo de status é 'ativo' para Product
+          />
         </div>
-        
-        <AuditSection
-          form={form}
-          data={productData}
-          variant="header"
-          isEditing={!!id}
-          statusFieldName="ativo" // Campo de status é 'ativo' para Product
-        />
-      </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="flex flex-col space-y-1.5 p-6">
-              <h3 className="text-2xl font-semibold leading-none tracking-tight">
-                Informações do Produto
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Preencha todas as informações necessárias do produto
-              </p>
-            </div>
-            <div className="p-6 pt-0 space-y-6">
+            {mode === 'page' && (
+              <div className="flex flex-col space-y-1.5 p-6">
+                <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                  Informações do Produto
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Preencha todas as informações necessárias do produto
+                </p>
+              </div>
+            )}
+            <div className={mode === 'dialog' ? 'p-4 space-y-4' : 'p-6 pt-0 space-y-6'}>
               <ProductGeneralSection
                 form={form}
                 isLoading={isLoading}
@@ -421,7 +446,7 @@ const ProductForm = () => {
                 setCategorySearchOpen={setCategorySearchOpen}
                 setBrandSearchOpen={setBrandSearchOpen}
                 setUnitMeasureSearchOpen={setUnitMeasureSearchOpen}
-                id={id}
+                id={id?.toString()}
               />
               
               <ProductAdditionalSection
@@ -432,16 +457,36 @@ const ProductForm = () => {
           </div>
 
           <div className="flex justify-end space-x-4">
-            <Link to="/products">
-              <Button type="button" variant="outline">
-                Cancelar
-              </Button>
-            </Link>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {id ? 'Atualizar' : 'Salvar'}
-              <Save className="ml-2 h-4 w-4" />
-            </Button>
+            {mode === 'page' ? (
+              <>
+                <Link to="/products">
+                  <Button type="button" variant="outline">
+                    Cancelar
+                  </Button>
+                </Link>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {id ? 'Atualizar' : 'Salvar'}
+                  <Save className="ml-2 h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={onCancel}
+                  disabled={isLoading}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {id ? 'Atualizar' : 'Salvar'}
+                  <Save className="ml-2 h-4 w-4" />
+                </Button>
+              </>
+            )}
           </div>
         </form>
       </Form>
