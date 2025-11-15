@@ -182,11 +182,14 @@ const StateForm = ({
         country.id === updatedCountry.id ? updatedCountry : country,
       ),
     );
+    setCountryDialogOpen(false); // Fecha o dialog de edição
+    // O SearchDialog permanece aberto (countrySearchOpen = true)
     setCountryToEdit(null);
   };
 
   const handleEditCountry = (country: Country) => {
     setCountryToEdit(country);
+    // Mantém o SearchDialog aberto em background enquanto abre o dialog de edição
     setCountryDialogOpen(true);
   };
 
@@ -386,7 +389,13 @@ const StateForm = ({
       {/* Dialogs */}
       <CountryCreationDialog
         open={countryDialogOpen}
-        onOpenChange={setCountryDialogOpen}
+        onOpenChange={(open) => {
+          setCountryDialogOpen(open);
+          // Limpa o countryToEdit quando fecha o dialog (cancelar ou fechar)
+          if (!open) {
+            setCountryToEdit(null);
+          }
+        }}
         onSuccess={countryToEdit ? handleCountryUpdated : handleCountryCreated}
         country={countryToEdit}
       />

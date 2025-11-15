@@ -174,6 +174,7 @@ const PositionForm: React.FC<PositionFormProps> = ({
 
   const handleEditDepartment = (department: Department) => {
     setDepartmentToEdit(department);
+    // Mantém o SearchDialog aberto em background enquanto abre o dialog de edição
     setNewDepartmentDialogOpen(true);
   };
 
@@ -192,7 +193,8 @@ const PositionForm: React.FC<PositionFormProps> = ({
         dept.id === updatedDepartment.id ? updatedDepartment : dept,
       ),
     );
-
+    setNewDepartmentDialogOpen(false); // Fecha o dialog de edição
+    // O SearchDialog permanece aberto (departmentSearchOpen = true)
     setDepartmentToEdit(null);
   };
 

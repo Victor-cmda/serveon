@@ -387,16 +387,19 @@ const EmployeeForm: React.FC = () => {
   // Funções de edição
   const handleEditDepartment = (department: Department) => {
     setDepartmentToEdit(department);
+    // Mantém o SearchDialog aberto em background enquanto abre o dialog de edição
     setDepartmentDialogOpen(true);
   };
 
   const handleEditPosition = (position: Position) => {
     setPositionToEdit(position);
+    // Mantém o SearchDialog aberto em background enquanto abre o dialog de edição
     setPositionDialogOpen(true);
   };
 
   const handleEditCity = (city: City) => {
     setCityToEdit(city);
+    // Mantém o SearchDialog aberto em background enquanto abre o dialog de edição
     setCityDialogOpen(true);
   };
 
@@ -414,7 +417,8 @@ const EmployeeForm: React.FC = () => {
     if (selectedDepartment?.id === department.id) {
       setSelectedDepartment(department);
     }
-    setDepartmentDialogOpen(false);
+    setDepartmentDialogOpen(false); // Fecha o dialog de edição
+    // O SearchDialog permanece aberto (departmentSearchOpen = true)
   };
 
   const handlePositionCreated = (position: Position) => {
@@ -429,7 +433,8 @@ const EmployeeForm: React.FC = () => {
     if (selectedPosition?.id === position.id) {
       setSelectedPosition(position);
     }
-    setPositionDialogOpen(false);
+    setPositionDialogOpen(false); // Fecha o dialog de edição
+    // O SearchDialog permanece aberto (positionSearchOpen = true)
   };
 
   const handleCityCreated = (city: City) => {
@@ -444,7 +449,8 @@ const EmployeeForm: React.FC = () => {
     if (selectedCity?.id === city.id) {
       setSelectedCity(city);
     }
-    setCityDialogOpen(false);
+    setCityDialogOpen(false); // Fecha o dialog de edição
+    // O SearchDialog permanece aberto (citySearchOpen = true)
   };
   return (
     <div className="space-y-6">

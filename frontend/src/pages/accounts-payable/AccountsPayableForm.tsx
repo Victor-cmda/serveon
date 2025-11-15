@@ -253,6 +253,7 @@ export function AccountsPayableForm({
   // Função para editar fornecedor
   const handleEditSupplier = (supplier: Supplier) => {
     setSupplierToEdit(supplier);
+    // Mantém o SearchDialog aberto em background enquanto abre o dialog de edição
     setSupplierDialogOpen(true);
   };
 
@@ -278,9 +279,9 @@ export function AccountsPayableForm({
       setSelectedSupplier(updatedSupplier);
     }
 
+    setSupplierDialogOpen(false); // Fecha o dialog de edição
+    // O SearchDialog permanece aberto (supplierSearchOpen = true)
     setSupplierToEdit(null);
-    setSupplierDialogOpen(false);
-    setSupplierSearchOpen(true);
     toast.success(`Fornecedor ${updatedSupplier.razaoSocial} atualizado com sucesso!`);
   };
 
@@ -300,6 +301,7 @@ export function AccountsPayableForm({
   // Função para editar forma de pagamento
   const handleEditPaymentMethod = (paymentMethod: PaymentMethod) => {
     setPaymentMethodToEdit(paymentMethod);
+    // Mantém o SearchDialog aberto em background enquanto abre o dialog de edição
     setPaymentMethodDialogOpen(true);
   };
 
@@ -325,9 +327,9 @@ export function AccountsPayableForm({
       setSelectedPaymentMethod(updatedPaymentMethod);
     }
 
+    setPaymentMethodDialogOpen(false); // Fecha o dialog de edição
+    // O SearchDialog permanece aberto (paymentMethodSearchOpen = true)
     setPaymentMethodToEdit(null);
-    setPaymentMethodDialogOpen(false);
-    setPaymentMethodSearchOpen(true);
     toast.success(`Forma de pagamento ${updatedPaymentMethod.name} atualizada com sucesso!`);
   };
 
@@ -828,7 +830,13 @@ export function AccountsPayableForm({
       {/* Diálogo de criação/edição de fornecedor */}
       <SupplierCreationDialog
         open={supplierDialogOpen}
-        onOpenChange={setSupplierDialogOpen}
+        onOpenChange={(open) => {
+          setSupplierDialogOpen(open);
+          // Limpa o supplierToEdit quando fecha o dialog (cancelar ou fechar)
+          if (!open) {
+            setSupplierToEdit(null);
+          }
+        }}
         onSuccess={
           supplierToEdit ? handleSupplierUpdated : handleSupplierCreated
         }
@@ -838,7 +846,13 @@ export function AccountsPayableForm({
       {/* Diálogo de criação/edição de forma de pagamento */}
       <PaymentMethodCreationDialog
         open={paymentMethodDialogOpen}
-        onOpenChange={setPaymentMethodDialogOpen}
+        onOpenChange={(open) => {
+          setPaymentMethodDialogOpen(open);
+          // Limpa o paymentMethodToEdit quando fecha o dialog (cancelar ou fechar)
+          if (!open) {
+            setPaymentMethodToEdit(null);
+          }
+        }}
         onSuccess={
           paymentMethodToEdit ? handlePaymentMethodUpdated : handlePaymentMethodCreated
         }

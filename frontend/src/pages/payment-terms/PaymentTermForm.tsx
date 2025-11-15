@@ -598,11 +598,14 @@ const PaymentTermForm = ({
         method.id === updatedPaymentMethod.id ? updatedPaymentMethod : method,
       ),
     );
+    setPaymentMethodDialogOpen(false); // Fecha o dialog de edição
+    // O SearchDialog permanece aberto (paymentMethodSearchOpen !== null)
     setPaymentMethodToEdit(null);
   };
 
   const handleEditPaymentMethod = (method: PaymentMethod) => {
     setPaymentMethodToEdit(method);
+    // Mantém o SearchDialog aberto em background enquanto abre o dialog de edição
     setPaymentMethodDialogOpen(true);
   };
 

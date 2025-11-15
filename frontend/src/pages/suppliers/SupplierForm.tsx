@@ -580,7 +580,7 @@ const SupplierForm = ({
   // Funções para edição de cidades
   const handleEditCity = (city: City) => {
     setCityToEdit(city);
-    setCitySearchOpen(false);
+    // NÃO fecha o citySearchOpen - mantém aberto em segundo plano
     setCityCreationOpen(true);
   };
 
@@ -594,12 +594,14 @@ const SupplierForm = ({
     }
 
     setCityToEdit(null);
+    setCityCreationOpen(false);
+    // citySearchOpen permanece aberto
     toast.success(`Cidade ${updatedCity.nome} atualizada com sucesso!`);
   };
   const handleCityCreated = (newCity: City) => {
     setCities((prev) => [...prev, newCity]);
     setCityCreationOpen(false);
-    setCitySearchOpen(true);
+    // citySearchOpen já está aberto, só fecha o dialog de criação
     toast.success(
       `Cidade ${newCity.nome} criada com sucesso! Selecione-a na lista.`,
     );
@@ -608,13 +610,13 @@ const SupplierForm = ({
   // Funções para edição de condições de pagamento
   const handleEditPaymentTerm = (paymentTerm: PaymentTerm) => {
     setPaymentTermToEdit(paymentTerm);
-    setPaymentTermSearchOpen(false);
+    // NÃO fecha o paymentTermSearchOpen - mantém aberto em segundo plano
     setPaymentTermCreationOpen(true);
   };
   const handlePaymentTermCreated = (newPaymentTerm: PaymentTerm) => {
     setPaymentTerms((prev) => [...prev, newPaymentTerm]);
     setPaymentTermCreationOpen(false);
-    setPaymentTermSearchOpen(true);
+    // paymentTermSearchOpen já está aberto, só fecha o dialog de criação
     toast.success(
       `Condição de pagamento ${newPaymentTerm.name} criada com sucesso! Selecione-a na lista.`,
     );
@@ -635,6 +637,8 @@ const SupplierForm = ({
     }
 
     setPaymentTermToEdit(null);
+    setPaymentTermCreationOpen(false);
+    // paymentTermSearchOpen permanece aberto
     toast.success(
       `Condição de pagamento ${updatedPaymentTerm.name} atualizada com sucesso!`,
     );
@@ -643,14 +647,14 @@ const SupplierForm = ({
   // Funções para edição de países
   const handleEditCountry = (country: Country) => {
     setCountryToEdit(country);
-    setCountrySearchOpen(false);
+    // NÃO fecha o countrySearchOpen - mantém aberto em segundo plano
     setCountryCreationOpen(true);
   };
 
   const handleCountryCreated = (newCountry: Country) => {
     setCountries((prev) => [...prev, newCountry]);
     setCountryCreationOpen(false);
-    setCountrySearchOpen(true);
+    // countrySearchOpen já está aberto, só fecha o dialog de criação
     toast.success(
       `País ${newCountry.nome} criado com sucesso! Selecione-o na lista.`,
     );
@@ -668,6 +672,8 @@ const SupplierForm = ({
     }
 
     setCountryToEdit(null);
+    setCountryCreationOpen(false);
+    // countrySearchOpen permanece aberto
     toast.success(`País ${updatedCountry.nome} atualizado com sucesso!`);
   };
   return (
@@ -874,14 +880,26 @@ const SupplierForm = ({
       />{' '}
       <CityCreationDialog
         open={cityCreationOpen}
-        onOpenChange={setCityCreationOpen}
+        onOpenChange={(open) => {
+          setCityCreationOpen(open);
+          // Limpa o cityToEdit quando fecha o dialog (cancelar ou fechar)
+          if (!open) {
+            setCityToEdit(null);
+          }
+        }}
         onSuccess={cityToEdit ? handleCityUpdated : handleCityCreated}
         selectedStateId={undefined}
         city={cityToEdit}
       />
       <PaymentTermCreationDialog
         open={paymentTermCreationOpen}
-        onOpenChange={setPaymentTermCreationOpen}
+        onOpenChange={(open) => {
+          setPaymentTermCreationOpen(open);
+          // Limpa o paymentTermToEdit quando fecha o dialog (cancelar ou fechar)
+          if (!open) {
+            setPaymentTermToEdit(null);
+          }
+        }}
         onSuccess={
           paymentTermToEdit
             ? handlePaymentTermUpdated
@@ -891,7 +909,13 @@ const SupplierForm = ({
       />
       <CountryCreationDialog
         open={countryCreationOpen}
-        onOpenChange={setCountryCreationOpen}
+        onOpenChange={(open) => {
+          setCountryCreationOpen(open);
+          // Limpa o countryToEdit quando fecha o dialog (cancelar ou fechar)
+          if (!open) {
+            setCountryToEdit(null);
+          }
+        }}
         onSuccess={countryToEdit ? handleCountryUpdated : handleCountryCreated}
         country={countryToEdit}
       />

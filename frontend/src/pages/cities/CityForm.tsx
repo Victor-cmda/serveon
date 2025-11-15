@@ -195,11 +195,14 @@ const CityForm = ({
         state.id === updatedState.id ? updatedState : state,
       ),
     );
+    setStateDialogOpen(false); // Fecha o dialog de edição
+    // O SearchDialog permanece aberto (stateSearchOpen = true)
     setStateToEdit(null);
   };
 
   const handleEditState = (state: State) => {
     setStateToEdit(state);
+    // Mantém o SearchDialog aberto em background enquanto abre o dialog de edição
     setStateDialogOpen(true);
   };
 
@@ -384,7 +387,13 @@ const CityForm = ({
       {/* Dialogs */}{' '}
       <StateCreationDialog
         open={stateDialogOpen}
-        onOpenChange={setStateDialogOpen}
+        onOpenChange={(open) => {
+          setStateDialogOpen(open);
+          // Limpa o stateToEdit quando fecha o dialog (cancelar ou fechar)
+          if (!open) {
+            setStateToEdit(null);
+          }
+        }}
         onSuccess={stateToEdit ? handleStateUpdated : handleStateCreated}
         selectedCountryId={undefined}
         state={stateToEdit}
