@@ -27,6 +27,7 @@ export interface AccountsPayableFilterOptions {
   status: string;
   fornecedorId: string;
   tipoDocumento: string;
+  origem: string; // 'TODAS', 'COMPRAS', 'AVULSAS'
   dataEmissaoInicio: Date | undefined;
   dataEmissaoFim: Date | undefined;
   dataVencimentoInicio: Date | undefined;
@@ -81,6 +82,7 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
       filters.status !== 'TODOS' ||
       (filters.fornecedorId !== '' && filters.fornecedorId !== '0') ||
       filters.tipoDocumento !== 'TODOS' ||
+      filters.origem !== 'TODAS' ||
       filters.dataEmissaoInicio !== undefined ||
       filters.dataEmissaoFim !== undefined ||
       filters.dataVencimentoInicio !== undefined ||
@@ -98,6 +100,7 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
     if (filters.status !== 'TODOS') count++;
     if (filters.fornecedorId !== '' && filters.fornecedorId !== '0') count++;
     if (filters.tipoDocumento !== 'TODOS') count++;
+    if (filters.origem !== 'TODAS') count++;
     if (filters.dataEmissaoInicio || filters.dataEmissaoFim) count++;
     if (filters.dataVencimentoInicio || filters.dataVencimentoFim) count++;
     if (filters.dataPagamentoInicio || filters.dataPagamentoFim) count++;
@@ -167,7 +170,6 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
                       <SelectItem value="TODOS">Todos</SelectItem>
                       <SelectItem value="ABERTO">Aberto</SelectItem>
                       <SelectItem value="PAGO">Pago</SelectItem>
-                      <SelectItem value="PARCIAL">Parcial</SelectItem>
                       <SelectItem value="VENCIDO">Vencido</SelectItem>
                       <SelectItem value="CANCELADO">Cancelado</SelectItem>
                     </SelectContent>
@@ -212,6 +214,24 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
                       <SelectItem value="DUPLICATA">Duplicata</SelectItem>
                       <SelectItem value="BOLETO">Boleto</SelectItem>
                       <SelectItem value="NOTA_FISCAL">Nota Fiscal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Origem */}
+                <div className="space-y-2">
+                  <Label>Origem</Label>
+                  <Select
+                    value={filters.origem}
+                    onValueChange={(value) => handleFilterChange('origem', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todas as origens" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="TODAS">Todas</SelectItem>
+                      <SelectItem value="COMPRAS">Compras</SelectItem>
+                      <SelectItem value="AVULSAS">Avulsas</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -442,6 +462,17 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
               Tipo: {filters.tipoDocumento}
               <button
                 onClick={() => handleFilterChange('tipoDocumento', 'TODOS')}
+                className="ml-1 hover:text-primary"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+          {filters.origem !== 'TODAS' && (
+            <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium">
+              Origem: {filters.origem === 'COMPRAS' ? 'Compras' : 'Avulsas'}
+              <button
+                onClick={() => handleFilterChange('origem', 'TODAS')}
                 className="ml-1 hover:text-primary"
               >
                 <X className="h-3 w-3" />

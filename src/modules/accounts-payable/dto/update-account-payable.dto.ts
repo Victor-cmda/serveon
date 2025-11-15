@@ -125,12 +125,12 @@ export class UpdateAccountPayableDto {
   @ApiProperty({
     description: 'Status da conta',
     example: 'ABERTO',
-    enum: ['ABERTO', 'PAGO', 'PARCIAL', 'VENCIDO', 'CANCELADO'],
+    enum: ['ABERTO', 'PAGO', 'VENCIDO', 'CANCELADO'],
     required: false,
   })
   @IsOptional()
-  @IsEnum(['ABERTO', 'PAGO', 'PARCIAL', 'VENCIDO', 'CANCELADO'], {
-    message: 'Status deve ser ABERTO, PAGO, PARCIAL, VENCIDO ou CANCELADO'
+  @IsEnum(['ABERTO', 'PAGO', 'VENCIDO', 'CANCELADO'], {
+    message: 'Status deve ser ABERTO, PAGO, VENCIDO ou CANCELADO'
   })
   status?: string;
 

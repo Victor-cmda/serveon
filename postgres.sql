@@ -961,7 +961,7 @@ CREATE TABLE contas_pagar (
     valor_pago DECIMAL(15,2) DEFAULT 0.00,
     valor_saldo DECIMAL(15,2) NOT NULL,
     forma_pagamento_id INTEGER REFERENCES forma_pagamento(id),
-    status VARCHAR(20) NOT NULL DEFAULT 'ABERTO' CHECK (status IN ('ABERTO', 'PAGO', 'PARCIAL', 'VENCIDO', 'CANCELADO')),
+    status VARCHAR(20) NOT NULL DEFAULT 'ABERTO' CHECK (status IN ('ABERTO', 'PAGO', 'VENCIDO', 'CANCELADO')),
     observacoes TEXT,
     pago_por INTEGER REFERENCES funcionario(id),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,

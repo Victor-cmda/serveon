@@ -65,13 +65,17 @@ export function AccountsPayableDetailDialog({
       setLoading(true);
       const data = await accountsPayableApi.getById(accountId);
       setAccount(data);
+      
+      // Calcular o valor total a pagar (valor original - desconto + juros + multa)
+      const valorTotal = data.valorOriginal - (data.valorDesconto || 0) + (data.valorJuros || 0) + (data.valorMulta || 0);
+      
       setPaymentData({
-        valorPago: data.valorSaldo,
+        valorPago: valorTotal,
         dataPagamento: new Date().toISOString().split('T')[0],
         formaPagamentoId: data.formaPagamentoId || 0,
-        valorDesconto: 0,
-        valorJuros: 0,
-        valorMulta: 0,
+        valorDesconto: data.valorDesconto || 0,
+        valorJuros: data.valorJuros || 0,
+        valorMulta: data.valorMulta || 0,
       });
     } catch (error) {
       toast.error('Erro ao carregar conta');
@@ -131,7 +135,6 @@ export function AccountsPayableDetailDialog({
     const variants: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
       ABERTO: { label: 'Aberto', variant: 'default' },
       PAGO: { label: 'Pago', variant: 'secondary' },
-      PARCIAL: { label: 'Parcial', variant: 'outline' },
       VENCIDO: { label: 'Vencido', variant: 'destructive' },
       CANCELADO: { label: 'Cancelado', variant: 'outline' },
     };
@@ -166,7 +169,7 @@ export function AccountsPayableDetailDialog({
     return null;
   }
 
-  const canPay = account && (account.status === 'ABERTO' || account.status === 'PARCIAL' || account.status === 'VENCIDO');
+  const canPay = account && (account.status === 'ABERTO' || account.status === 'VENCIDO');
   // Só pode cancelar se não for de compra, não estiver pago e não estiver cancelado
   const canCancel = account && (account.status !== 'PAGO' && account.status !== 'CANCELADO') && !isFromPurchase(account);
   const hasCompraVinculada = account && (account.compraNumeroPedido || account.compraModelo || account.compraSerie);
@@ -258,6 +261,24 @@ export function AccountsPayableDetailDialog({
                             {account.parcela}
                           </span>
                         </p>
+                      </div>
+                    )}
+                    {account.compraNumeroPedido && (
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Número NF</Label>
+                        <p className="font-medium">{account.compraNumeroPedido}</p>
+                      </div>
+                    )}
+                    {account.compraModelo && (
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Modelo NF</Label>
+                        <p className="font-medium">{account.compraModelo}</p>
+                      </div>
+                    )}
+                    {account.compraSerie && (
+                      <div>
+                        <Label className="text-xs text-muted-foreground">Série NF</Label>
+                        <p className="font-medium">{account.compraSerie}</p>
                       </div>
                     )}
                   </CardContent>
@@ -438,27 +459,23 @@ export function AccountsPayableDetailDialog({
           <DialogHeader>
             <DialogTitle>Registrar Pagamento</DialogTitle>
             <DialogDescription>
-              Preencha os dados do pagamento para esta conta
+              Confirme o pagamento total desta conta
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Saldo Atual</Label>
+              <Label>Valor Total a Pagar</Label>
               <p className="text-2xl font-bold text-blue-600">
-                {account && formatCurrency(account.valorSaldo)}
+                {account && formatCurrency(
+                  account.valorOriginal - 
+                  (paymentData.valorDesconto || 0) + 
+                  (paymentData.valorJuros || 0) + 
+                  (paymentData.valorMulta || 0)
+                )}
               </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="valorPago">Valor Pago *</Label>
-              <Input
-                id="valorPago"
-                type="number"
-                step="0.01"
-                value={paymentData.valorPago}
-                onChange={(e) =>
-                  setPaymentData({ ...paymentData, valorPago: Number(e.target.value) })
-                }
-              />
+              <p className="text-xs text-muted-foreground">
+                O pagamento deve ser feito pelo valor total. Pagamento parcial não é permitido.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="dataPagamento">Data de Pagamento *</Label>
@@ -479,9 +496,16 @@ export function AccountsPayableDetailDialog({
                   type="number"
                   step="0.01"
                   value={paymentData.valorDesconto}
-                  onChange={(e) =>
-                    setPaymentData({ ...paymentData, valorDesconto: Number(e.target.value) })
-                  }
+                  onChange={(e) => {
+                    const desconto = Number(e.target.value);
+                    const valorTotal = account ? 
+                      account.valorOriginal - desconto + (paymentData.valorJuros || 0) + (paymentData.valorMulta || 0) : 0;
+                    setPaymentData({ 
+                      ...paymentData, 
+                      valorDesconto: desconto,
+                      valorPago: valorTotal 
+                    });
+                  }}
                 />
               </div>
               <div className="space-y-2">
@@ -491,9 +515,16 @@ export function AccountsPayableDetailDialog({
                   type="number"
                   step="0.01"
                   value={paymentData.valorJuros}
-                  onChange={(e) =>
-                    setPaymentData({ ...paymentData, valorJuros: Number(e.target.value) })
-                  }
+                  onChange={(e) => {
+                    const juros = Number(e.target.value);
+                    const valorTotal = account ? 
+                      account.valorOriginal - (paymentData.valorDesconto || 0) + juros + (paymentData.valorMulta || 0) : 0;
+                    setPaymentData({ 
+                      ...paymentData, 
+                      valorJuros: juros,
+                      valorPago: valorTotal 
+                    });
+                  }}
                 />
               </div>
               <div className="space-y-2">
@@ -503,9 +534,16 @@ export function AccountsPayableDetailDialog({
                   type="number"
                   step="0.01"
                   value={paymentData.valorMulta}
-                  onChange={(e) =>
-                    setPaymentData({ ...paymentData, valorMulta: Number(e.target.value) })
-                  }
+                  onChange={(e) => {
+                    const multa = Number(e.target.value);
+                    const valorTotal = account ? 
+                      account.valorOriginal - (paymentData.valorDesconto || 0) + (paymentData.valorJuros || 0) + multa : 0;
+                    setPaymentData({ 
+                      ...paymentData, 
+                      valorMulta: multa,
+                      valorPago: valorTotal 
+                    });
+                  }}
                 />
               </div>
             </div>

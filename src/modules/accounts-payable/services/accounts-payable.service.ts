@@ -212,7 +212,7 @@ export class AccountsPayableService {
            LEFT JOIN dbo.forma_pagamento fp ON cp.forma_pagamento_id = fp.id
            LEFT JOIN dbo.funcionario func ON cp.pago_por = func.id
            WHERE cp.ativo = TRUE
-             AND cp.status IN ('ABERTO', 'PARCIAL')
+             AND cp.status = 'ABERTO'
              AND cp.data_vencimento < CURRENT_DATE
            ORDER BY cp.data_vencimento ASC`,
         );
@@ -386,22 +386,24 @@ export class AccountsPayableService {
         const valorDescontoAtual = parseFloat(account.valor_desconto);
         const valorJurosAtual = parseFloat(account.valor_juros);
         const valorMultaAtual = parseFloat(account.valor_multa);
-        const valorPagoAtual = parseFloat(account.valor_pago);
 
         const valorDesconto = payAccountDto.valorDesconto ?? valorDescontoAtual;
         const valorJuros = payAccountDto.valorJuros ?? valorJurosAtual;
         const valorMulta = payAccountDto.valorMulta ?? valorMultaAtual;
-        const valorPago = valorPagoAtual + payAccountDto.valorPago;
-        const valorSaldo = valorOriginal - valorDesconto + valorJuros + valorMulta - valorPago;
+        
+        // Calcular o valor total a pagar
+        const valorTotal = valorOriginal - valorDesconto + valorJuros + valorMulta;
+        const valorPago = valorTotal;
+        const valorSaldo = 0;
 
-        // Determinar o novo status
-        let novoStatus: string;
-        if (valorSaldo <= 0) {
-          novoStatus = 'PAGO';
-        } else if (valorPago > 0) {
-          novoStatus = 'PARCIAL';
-        } else {
-          novoStatus = account.status;
+        // Sempre marca como PAGO quando realiza o pagamento
+        const novoStatus = 'PAGO';
+
+        // Validar se o valor pago informado corresponde ao valor total
+        if (Math.abs(payAccountDto.valorPago - valorTotal) > 0.01) {
+          throw new BadRequestException(
+            `O valor pago deve ser igual ao valor total da conta (${valorTotal.toFixed(2)}). Pagamento parcial não é permitido.`
+          );
         }
 
         // Atualizar a conta
@@ -553,7 +555,7 @@ export class AccountsPayableService {
         const result = await client.query(
           `UPDATE dbo.contas_pagar
            SET status = 'VENCIDO', updated_at = CURRENT_TIMESTAMP
-           WHERE status IN ('ABERTO', 'PARCIAL')
+           WHERE status = 'ABERTO'
              AND data_vencimento < CURRENT_DATE
              AND ativo = TRUE
            RETURNING id`,

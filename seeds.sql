@@ -903,7 +903,7 @@ INSERT INTO contas_pagar (
     'Compra de equipamentos - prazo 60 dias'
 );
 
--- Conta com pagamento parcial do segundo fornecedor
+-- Conta paga do segundo fornecedor
 INSERT INTO contas_pagar (
     fornecedor_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
     valor_original, valor_desconto, valor_juros, valor_multa, valor_pago, valor_saldo,
@@ -911,9 +911,9 @@ INSERT INTO contas_pagar (
 ) VALUES (
     (SELECT id FROM fornecedor WHERE cnpj_cpf = '11222333000144'), 'FAT-2024-004', 'DUPLICATA', 
     CURRENT_DATE - INTERVAL '10 days', CURRENT_DATE + INTERVAL '20 days',
-    6000.00, 0.00, 0.00, 0.00, 4000.00, 2000.00,
-    (SELECT id FROM forma_pagamento WHERE nome = 'TRANSFERÊNCIA BANCÁRIA'), 'PARCIAL', 
-    'Pagamento parcial de R$ 4.000,00 - Saldo de R$ 2.000,00', CURRENT_DATE - INTERVAL '3 days',
+    6000.00, 0.00, 0.00, 0.00, 6000.00, 0.00,
+    (SELECT id FROM forma_pagamento WHERE nome = 'TRANSFERÊNCIA BANCÁRIA'), 'PAGO', 
+    'Pagamento completo de R$ 6.000,00', CURRENT_DATE - INTERVAL '3 days',
     (SELECT id FROM funcionario WHERE email = 'comprador@exemplo.com')
 );
 

@@ -3280,9 +3280,9 @@
         ]
       }
     },
-    "/api/purchases/{id}/approve": {
+    "/api/purchases/{id}/cancel": {
       "patch": {
-        "operationId": "PurchasesController_approve",
+        "operationId": "PurchasesController_cancel",
         "parameters": [
           {
             "name": "id",
@@ -3295,40 +3295,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Compra aprovada com sucesso."
+            "description": "Compra cancelada com sucesso."
+          },
+          "400": {
+            "description": "Não é possível cancelar compra com contas pagas."
           },
           "404": {
             "description": "Compra não encontrada."
           }
         },
-        "summary": "Aprovar compra",
-        "tags": [
-          "purchases"
-        ]
-      }
-    },
-    "/api/purchases/{id}/deny": {
-      "patch": {
-        "operationId": "PurchasesController_deny",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Compra negada com sucesso."
-          },
-          "404": {
-            "description": "Compra não encontrada."
-          }
-        },
-        "summary": "Negar compra",
+        "summary": "Cancelar compra",
         "tags": [
           "purchases"
         ]
@@ -5449,6 +5425,7 @@
           "tipo",
           "isEstrangeiro",
           "razaoSocial",
+          "condicaoPagamentoId",
           "limiteCredito"
         ]
       },
@@ -7780,7 +7757,6 @@
             "enum": [
               "ABERTO",
               "PAGO",
-              "PARCIAL",
               "VENCIDO",
               "CANCELADO"
             ]
@@ -7894,7 +7870,6 @@
             "enum": [
               "ABERTO",
               "PAGO",
-              "PARCIAL",
               "VENCIDO",
               "CANCELADO"
             ]

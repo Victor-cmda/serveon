@@ -71,22 +71,13 @@ export class PurchasesController {
     return this.purchasesService.update(+id, updatePurchaseDto);
   }
 
-  @Patch(':id/approve')
-  @ApiOperation({ summary: 'Aprovar compra' })
-  @ApiResponse({ status: 200, description: 'Compra aprovada com sucesso.' })
+  @Patch(':id/cancel')
+  @ApiOperation({ summary: 'Cancelar compra' })
+  @ApiResponse({ status: 200, description: 'Compra cancelada com sucesso.' })
+  @ApiResponse({ status: 400, description: 'Não é possível cancelar compra com contas pagas.' })
   @ApiResponse({ status: 404, description: 'Compra não encontrada.' })
-  approve(@Param('id') id: string) {
-    // TODO: Obter ID do usuário logado do contexto de autenticação
-    // Passa undefined para usar o funcionário padrão do seed
-    return this.purchasesService.approve(+id);
-  }
-
-  @Patch(':id/deny')
-  @ApiOperation({ summary: 'Negar compra' })
-  @ApiResponse({ status: 200, description: 'Compra negada com sucesso.' })
-  @ApiResponse({ status: 404, description: 'Compra não encontrada.' })
-  deny(@Param('id') id: string, @Body() body?: { motivo?: string }) {
-    return this.purchasesService.deny(+id, body?.motivo);
+  cancel(@Param('id') id: string, @Body() body?: { motivo?: string }) {
+    return this.purchasesService.cancel(+id, body?.motivo);
   }
 
   @Delete(':id')

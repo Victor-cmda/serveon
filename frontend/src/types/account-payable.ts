@@ -21,7 +21,7 @@ export interface AccountPayable {
   valorSaldo: number;
   formaPagamentoId?: number;
   formaPagamentoNome?: string;
-  status: 'ABERTO' | 'PAGO' | 'PARCIAL' | 'VENCIDO' | 'CANCELADO';
+  status: 'ABERTO' | 'PAGO' | 'VENCIDO' | 'CANCELADO';
   pagoPor?: number;
   pagoPorNome?: string;
   observacoes?: string;
@@ -61,7 +61,7 @@ export interface UpdateAccountPayableDto {
   valorMulta?: number;
   valorPago?: number;
   formaPagamentoId?: number;
-  status?: 'ABERTO' | 'PAGO' | 'PARCIAL' | 'VENCIDO' | 'CANCELADO';
+  status?: 'ABERTO' | 'PAGO' | 'VENCIDO' | 'CANCELADO';
   pagoPor?: number;
   observacoes?: string;
 }

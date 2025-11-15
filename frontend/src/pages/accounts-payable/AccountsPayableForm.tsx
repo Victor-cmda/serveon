@@ -467,15 +467,15 @@ export function AccountsPayableForm({
               </p>
             </div>
             <div className="p-6 pt-0 space-y-4">
-              {/* Número e Tipo */}
+              {/* Número, Modelo, Série e Tipo */}
               <div className="grid grid-cols-12 gap-4">
-                <div className="col-span-6">
+                <div className="col-span-3">
                   <FormField
                     control={form.control}
                     name="numeroDocumento"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Número do Documento *</FormLabel>
+                        <FormLabel>Número *</FormLabel>
                         <FormControl>
                           <InputWithIcon
                             icon={<Hash className="h-4 w-4" />}
@@ -490,17 +490,57 @@ export function AccountsPayableForm({
                   />
                 </div>
 
-                <div className="col-span-6">
+                <div className="col-span-3">
+                  <FormField
+                    control={form.control}
+                    name="compraModelo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Modelo</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            disabled={isLoading}
+                            placeholder="Ex: 55"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="col-span-3">
+                  <FormField
+                    control={form.control}
+                    name="compraSerie"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Série</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            disabled={isLoading}
+                            placeholder="Ex: 001"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="col-span-3">
                   <FormField
                     control={form.control}
                     name="tipoDocumento"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Tipo de Documento *</FormLabel>
+                        <FormLabel>Tipo *</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value} disabled={isLoading}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Selecione o tipo" />
+                              <SelectValue placeholder="Selecione" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>

@@ -26,6 +26,7 @@ const AccountsPayableList: React.FC = () => {
     status: 'TODOS',
     fornecedorId: '0',
     tipoDocumento: 'TODOS',
+    origem: 'TODAS',
     dataEmissaoInicio: undefined,
     dataEmissaoFim: undefined,
     dataVencimentoInicio: undefined,
@@ -60,6 +61,7 @@ const AccountsPayableList: React.FC = () => {
       status: 'TODOS',
       fornecedorId: '0',
       tipoDocumento: 'TODOS',
+      origem: 'TODAS',
       dataEmissaoInicio: undefined,
       dataEmissaoFim: undefined,
       dataVencimentoInicio: undefined,
@@ -108,6 +110,16 @@ const AccountsPayableList: React.FC = () => {
       const matchesTipoDocumento =
         filters.tipoDocumento === 'TODOS' ||
         account.tipoDocumento === filters.tipoDocumento;
+
+      // Filtro de origem (compras vs avulsas)
+      let matchesOrigem = true;
+      if (filters.origem === 'COMPRAS') {
+        // Conta vinculada a compra tem compraNumeroPedido preenchido
+        matchesOrigem = !!account.compraNumeroPedido;
+      } else if (filters.origem === 'AVULSAS') {
+        // Conta avulsa não tem compraNumeroPedido
+        matchesOrigem = !account.compraNumeroPedido;
+      }
 
       // Filtro de data de emissão
       let matchesDataEmissao = true;
@@ -158,6 +170,7 @@ const AccountsPayableList: React.FC = () => {
         matchesStatus &&
         matchesFornecedor &&
         matchesTipoDocumento &&
+        matchesOrigem &&
         matchesDataEmissao &&
         matchesDataVencimento &&
         matchesValor &&
@@ -181,7 +194,6 @@ const AccountsPayableList: React.FC = () => {
     const labels: Record<string, string> = {
       ABERTO: 'Aberto',
       PAGO: 'Pago',
-      PARCIAL: 'Parcial',
       VENCIDO: 'Vencido',
       CANCELADO: 'Cancelado',
     };
@@ -192,7 +204,6 @@ const AccountsPayableList: React.FC = () => {
     const colors: Record<string, string> = {
       ABERTO: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
       PAGO: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-      PARCIAL: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
       VENCIDO: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
       CANCELADO: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300',
     };
@@ -246,37 +257,46 @@ const AccountsPayableList: React.FC = () => {
 
       <div className="rounded-md border">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full table-auto">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                  Documento
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[140px]">
+                  Número
                 </th>
-                <th className="h-12 px-4 text-center align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-2 text-center align-middle font-medium text-muted-foreground whitespace-nowrap w-[80px]">
+                  Modelo
+                </th>
+                <th className="h-12 px-2 text-center align-middle font-medium text-muted-foreground whitespace-nowrap w-[80px]">
+                  Série
+                </th>
+                <th className="h-12 px-3 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[100px]">
+                  Tipo
+                </th>
+                <th className="h-12 px-2 text-center align-middle font-medium text-muted-foreground whitespace-nowrap w-[80px]">
                   Parcela
                 </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">
                   Fornecedor
                 </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-3 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[100px]">
                   Emissão
                 </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-3 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[110px]">
                   Vencimento
                 </th>
-                <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-3 text-right align-middle font-medium text-muted-foreground whitespace-nowrap w-[120px]">
                   Valor Original
                 </th>
-                <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-3 text-right align-middle font-medium text-muted-foreground whitespace-nowrap w-[110px]">
                   Valor Pago
                 </th>
-                <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-3 text-right align-middle font-medium text-muted-foreground whitespace-nowrap w-[100px]">
                   Saldo
                 </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-3 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[100px]">
                   Status
                 </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-3 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[80px]">
                   Ações
                 </th>
               </tr>
@@ -284,7 +304,7 @@ const AccountsPayableList: React.FC = () => {
             <tbody>
               {filteredAccounts.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="h-24 text-center">
+                  <td colSpan={13} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Receipt className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -297,54 +317,62 @@ const AccountsPayableList: React.FC = () => {
                 </tr>
               ) : (
                 filteredAccounts.map((account) => (
-                  <tr key={account.id} className="border-b">
-                    <td className="p-4">
-                      <div className="font-medium">{account.numeroDocumento}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {getTipoDocumentoLabel(account.tipoDocumento)}
-                      </div>
+                  <tr key={account.id} className="border-b hover:bg-muted/50">
+                    <td className="p-4 w-[140px]">
+                      <div className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">{account.compraNumeroPedido || account.numeroDocumento}</div>
                     </td>
-                    <td className="p-4 text-center">
+                    <td className="p-2 text-center w-[80px]">
+                      <div className="text-sm whitespace-nowrap">{account.compraModelo || '-'}</div>
+                    </td>
+                    <td className="p-2 text-center w-[80px]">
+                      <div className="text-sm whitespace-nowrap">{account.compraSerie || '-'}</div>
+                    </td>
+                    <td className="p-3 w-[100px]">
+                      <div className="text-sm whitespace-nowrap overflow-hidden text-ellipsis">{getTipoDocumentoLabel(account.tipoDocumento)}</div>
+                    </td>
+                    <td className="p-2 text-center w-[80px]">
                       {account.parcela ? (
-                        <div className="inline-flex items-center justify-center rounded-md bg-blue-100 dark:bg-blue-900 px-2 py-1 text-xs font-medium text-blue-800 dark:text-blue-300">
+                        <div className="inline-flex items-center justify-center rounded-md bg-blue-100 dark:bg-blue-900 px-2 py-1 text-xs font-medium text-blue-800 dark:text-blue-300 whitespace-nowrap">
                           {account.parcela}
                         </div>
                       ) : (
-                        <span className="text-muted-foreground">-</span>
+                        <span className="text-muted-foreground whitespace-nowrap">-</span>
                       )}
                     </td>
                     <td className="p-4">
-                      <div className="font-medium">{account.fornecedorNome || '-'}</div>
+                      <div className="font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]" title={account.fornecedorNome || '-'}>
+                        {account.fornecedorNome || '-'}
+                      </div>
                       {account.fornecedorCnpjCpf && (
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-muted-foreground whitespace-nowrap">
                           {account.fornecedorCnpjCpf}
                         </div>
                       )}
                     </td>
-                    <td className="p-4">
-                      <div className="text-sm">{formatDate(account.dataEmissao)}</div>
+                    <td className="p-3 w-[100px]">
+                      <div className="text-sm whitespace-nowrap">{formatDate(account.dataEmissao)}</div>
                     </td>
-                    <td className="p-4">
-                      <div className="text-sm">{formatDate(account.dataVencimento)}</div>
+                    <td className="p-3 w-[110px]">
+                      <div className="text-sm whitespace-nowrap">{formatDate(account.dataVencimento)}</div>
                     </td>
-                    <td className="p-4 text-right">
-                      <div className="font-medium">{formatCurrency(account.valorOriginal)}</div>
+                    <td className="p-3 text-right w-[120px]">
+                      <div className="font-medium whitespace-nowrap">{formatCurrency(account.valorOriginal)}</div>
                     </td>
-                    <td className="p-4 text-right">
-                      <div className="text-sm text-green-600">{formatCurrency(account.valorPago)}</div>
+                    <td className="p-3 text-right w-[110px]">
+                      <div className="text-sm text-green-600 whitespace-nowrap">{formatCurrency(account.valorPago)}</div>
                     </td>
-                    <td className="p-4 text-right">
-                      <div className="font-medium text-blue-600">{formatCurrency(account.valorSaldo)}</div>
+                    <td className="p-3 text-right w-[100px]">
+                      <div className="font-medium text-blue-600 whitespace-nowrap">{formatCurrency(account.valorSaldo)}</div>
                     </td>
-                    <td className="p-4">
+                    <td className="p-3 w-[100px]">
                       <span
-                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(account.status)}`}
+                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${getStatusColor(account.status)}`}
                       >
                         {getStatusLabel(account.status)}
                       </span>
                     </td>
-                    <td className="p-4">
-                      <div className="flex items-center space-x-2">
+                    <td className="p-3 w-[80px]">
+                      <div className="flex items-center gap-2 justify-center">
                         <button
                           onClick={() => {
                             setSelectedAccountId(account.id);

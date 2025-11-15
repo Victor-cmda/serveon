@@ -321,7 +321,12 @@ const formSchema = z
         const digits = value.replace(/\D/g, '');
         return digits.length === 0 || digits.length >= 10;
       }, 'Celular deve ter pelo menos 10 dígitos'),
-    condicaoPagamentoId: z.number().optional(),
+    condicaoPagamentoId: z
+      .number({
+        required_error: 'Condição de pagamento é obrigatória',
+        invalid_type_error: 'Condição de pagamento é obrigatória',
+      })
+      .min(1, 'Condição de pagamento é obrigatória'),
   })
   .refine(
     (data) => {
@@ -409,7 +414,7 @@ const SupplierForm = ({
       observacoes: '',
       responsavel: '',
       celularResponsavel: '',
-      condicaoPagamentoId: undefined,
+      condicaoPagamentoId: 0, // Valor inicial inválido para forçar seleção
     },
   });
   const watchTipo = form.watch('tipo');
@@ -500,7 +505,7 @@ const SupplierForm = ({
         cidadeId: values.cidadeId || undefined,
         nacionalidadeId: values.nacionalidadeId || undefined,
         limiteCredito: values.limiteCredito || undefined,
-        condicaoPagamentoId: values.condicaoPagamentoId || undefined,
+        condicaoPagamentoId: values.condicaoPagamentoId,
         inscricaoEstadual: values.inscricaoEstadual || undefined,
         nomeFantasia: values.nomeFantasia || undefined,
         endereco: values.endereco || undefined,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Eye, ShoppingCart, MoreVertical, Check, X, Printer } from 'lucide-react';
+import { Plus, Eye, ShoppingCart, MoreVertical, X, Printer } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { purchaseApi } from '../../services/api';
 import { Purchase } from '../../types/purchase';
@@ -181,25 +181,19 @@ const PurchasesList: React.FC = () => {
     }
   };
 
-  const handleApprove = async (purchaseId: number) => {
-    try {
-      await purchaseApi.approve(purchaseId);
-      toast.success('Compra aprovada com sucesso!');
-      loadPurchases();
-    } catch (error) {
-      console.error('Erro ao aprovar compra:', error);
-      toast.error('Erro ao aprovar compra');
-    }
-  };
-
   const handleDeny = async (purchaseId: number) => {
+    if (!confirm('Tem certeza que deseja cancelar esta compra? Esta ação não poderá ser desfeita se houver contas pagas.')) {
+      return;
+    }
+    
     try {
-      await purchaseApi.deny(purchaseId);
-      toast.success('Compra negada com sucesso!');
+      await purchaseApi.cancel(purchaseId);
+      toast.success('Compra cancelada com sucesso!');
       loadPurchases();
-    } catch (error) {
-      console.error('Erro ao negar compra:', error);
-      toast.error('Erro ao negar compra');
+    } catch (error: any) {
+      console.error('Erro ao cancelar compra:', error);
+      const message = error?.response?.data?.message || 'Erro ao cancelar compra';
+      toast.error(message);
     }
   };
 
@@ -340,21 +334,12 @@ const PurchasesList: React.FC = () => {
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() => handleApprove(purchase.id)}
-                              disabled={purchase.status === 'APROVADO' || purchase.status === 'CANCELADO'}
-                              className="cursor-pointer"
-                            >
-                              <Check className="mr-2 h-4 w-4" />
-                              <span>Aprovar Nota</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
                               onClick={() => handleDeny(purchase.id)}
-                              disabled={purchase.status === 'APROVADO' || purchase.status === 'CANCELADO'}
+                              disabled={purchase.status === 'CANCELADO'}
                               className="cursor-pointer text-red-600"
                             >
                               <X className="mr-2 h-4 w-4" />
-                              <span>Negar Nota</span>
+                              <span>Cancelar Compra</span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

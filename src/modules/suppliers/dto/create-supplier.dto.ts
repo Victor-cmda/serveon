@@ -175,14 +175,14 @@ export class CreateSupplierDto {
   @ApiProperty({
     description: 'ID da condição de pagamento',
     example: 1,
-    required: false,
+    required: true,
   })
-  @IsOptional()
+  @IsNotEmpty({ message: 'Condição de pagamento é obrigatória' })
   @IsNumber(
     {},
     { message: 'ID da condição de pagamento deve ser um número válido' },
   )
-  condicaoPagamentoId?: number;
+  condicaoPagamentoId: number;
 
   @ApiProperty({
     description: 'Website do fornecedor',

@@ -888,18 +888,8 @@ export const purchaseApi = {
     return handleResponse(response);
   },
 
-  approve: async (id: number): Promise<Purchase> => {
-    const response = await fetch(`${API_URL}/purchases/${id}/approve`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    return handleResponse(response);
-  },
-
-  deny: async (id: number, motivo?: string): Promise<Purchase> => {
-    const response = await fetch(`${API_URL}/purchases/${id}/deny`, {
+  cancel: async (id: number, motivo?: string): Promise<Purchase> => {
+    const response = await fetch(`${API_URL}/purchases/${id}/cancel`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

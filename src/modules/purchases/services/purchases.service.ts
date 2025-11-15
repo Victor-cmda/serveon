@@ -274,6 +274,92 @@ export class PurchasesService {
               ],
             );
           }
+
+          // Criar contas a pagar automaticamente para cada parcela
+          console.log(`[CRIAÇÃO COMPRA] Criando ${createPurchaseDto.parcelas.length} contas a pagar`);
+          
+          // Buscar nome do fornecedor para as contas a pagar
+          const fornecedorResult = await client.query(
+            'SELECT razao_social FROM dbo.fornecedor WHERE id = $1',
+            [createPurchaseDto.fornecedorId]
+          );
+          const fornecedorNome = fornecedorResult.rows[0]?.razao_social || 'Fornecedor';
+
+          for (const parcela of createPurchaseDto.parcelas) {
+            // Formato do documento: chave composta da compra
+            const numeroDocumento = `${numeroPedido}-${createPurchaseDto.modelo}-${createPurchaseDto.serie}`;
+            
+            // Verificar se já existe uma conta a pagar para esta parcela
+            const contaExistente = await client.query(
+              `SELECT id FROM dbo.contas_pagar
+               WHERE compra_numero_pedido = $1
+               AND compra_modelo = $2
+               AND compra_serie = $3
+               AND compra_fornecedor_id = $4
+               AND parcela = $5`,
+              [
+                numeroPedido,
+                createPurchaseDto.modelo,
+                createPurchaseDto.serie,
+                createPurchaseDto.fornecedorId,
+                parcela.parcela,
+              ],
+            );
+
+            if (contaExistente.rows.length === 0) {
+              // Criar conta a pagar
+              const valorParcela = parseFloat(String(parcela.valorParcela));
+              
+              await client.query(
+                `INSERT INTO dbo.contas_pagar (
+                  compra_numero_pedido,
+                  compra_modelo,
+                  compra_serie,
+                  compra_fornecedor_id,
+                  parcela,
+                  fornecedor_id,
+                  numero_documento,
+                  tipo_documento,
+                  data_emissao,
+                  data_vencimento,
+                  valor_original,
+                  valor_desconto,
+                  valor_juros,
+                  valor_multa,
+                  valor_pago,
+                  valor_saldo,
+                  forma_pagamento_id,
+                  status,
+                  observacoes
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
+                [
+                  numeroPedido,
+                  createPurchaseDto.modelo,
+                  createPurchaseDto.serie,
+                  createPurchaseDto.fornecedorId,
+                  parcela.parcela,
+                  createPurchaseDto.fornecedorId,
+                  numeroDocumento,
+                  'FATURA',
+                  createPurchaseDto.dataEmissao || new Date(),
+                  parcela.dataVencimento,
+                  valorParcela,
+                  0,
+                  0,
+                  0,
+                  0,
+                  valorParcela,
+                  parcela.formaPagamentoId,
+                  'ABERTO',
+                  `Parcela ${parcela.parcela} de ${createPurchaseDto.parcelas.length} da compra ${numeroDocumento} - ${fornecedorNome}`,
+                ],
+              );
+
+              console.log(`[CRIAÇÃO COMPRA] Conta a pagar criada: ${numeroDocumento} - Parcela ${parcela.parcela}`);
+            } else {
+              console.log(`[CRIAÇÃO COMPRA] Conta a pagar já existe: ${numeroDocumento} - Parcela ${parcela.parcela}`);
+            }
+          }
         }
 
         await client.query('COMMIT');
@@ -639,19 +725,16 @@ export class PurchasesService {
     }
   }
 
-  async approve(id: number, aprovadoPor?: number): Promise<Purchase> {
+  async cancel(id: number, motivo?: string): Promise<Purchase> {
     try {
       const client = await this.databaseService.getClient();
 
       try {
         await client.query('BEGIN');
 
-        // Verificar se a compra existe e buscar seus dados
+        // Verificar se a compra existe
         const checkResult = await client.query(
-          `SELECT c.*, f.razao_social as fornecedor_nome
-           FROM dbo.compra c
-           LEFT JOIN dbo.fornecedor f ON c.fornecedor_id = f.id
-           WHERE c.numero_sequencial = $1`,
+          'SELECT numero_pedido, modelo, serie, fornecedor_id FROM dbo.compra WHERE numero_sequencial = $1',
           [id],
         );
 
@@ -661,178 +744,30 @@ export class PurchasesService {
 
         const compra = checkResult.rows[0];
 
-        // Se não foi fornecido um funcionário, buscar o primeiro funcionário ativo disponível
-        let funcionarioId = aprovadoPor;
-        
-        if (!funcionarioId) {
-          const defaultEmployee = await client.query(
-            'SELECT id FROM dbo.funcionario WHERE ativo = true ORDER BY id LIMIT 1',
-          );
-
-          if (defaultEmployee.rows.length > 0) {
-            funcionarioId = defaultEmployee.rows[0].id;
-            console.log(`[APROVAÇÃO COMPRA] Usando funcionário padrão ID: ${funcionarioId}`);
-          } else {
-            throw new NotFoundException('Nenhum funcionário ativo encontrado para aprovar a compra');
-          }
-        } else {
-          // Validar se o funcionário fornecido existe
-          const employeeCheck = await client.query(
-            'SELECT id FROM dbo.funcionario WHERE id = $1 AND ativo = true',
-            [funcionarioId],
-          );
-
-          if (employeeCheck.rows.length === 0) {
-            throw new NotFoundException(`Funcionário com ID ${funcionarioId} não encontrado ou inativo`);
-          }
-        }
-
-        // Atualizar status para APROVADO
-        const updateResult = await client.query(
-          `UPDATE dbo.compra 
-           SET status = $1, 
-               aprovado_por = $2, 
-               data_aprovacao = CURRENT_TIMESTAMP,
-               updated_at = CURRENT_TIMESTAMP
-           WHERE numero_sequencial = $3
-           RETURNING *`,
-          ['APROVADO', funcionarioId, id],
-        );
-
-        // Buscar as parcelas da compra
-        const parcelasResult = await client.query(
-          `SELECT * FROM dbo.parcela_compra
+        // Verificar se há contas a pagar desta compra que já foram pagas
+        const contasPagasResult = await client.query(
+          `SELECT COUNT(*) as total 
+           FROM dbo.contas_pagar 
            WHERE compra_numero_pedido = $1
            AND compra_modelo = $2
            AND compra_serie = $3
            AND compra_fornecedor_id = $4
-           ORDER BY parcela`,
+           AND status = 'PAGO'`,
           [compra.numero_pedido, compra.modelo, compra.serie, compra.fornecedor_id],
         );
 
-        // Criar contas a pagar para cada parcela
-        if (parcelasResult.rows.length > 0) {
-          console.log(`[APROVAÇÃO COMPRA] Criando ${parcelasResult.rows.length} contas a pagar`);
+        const totalContasPagas = parseInt(contasPagasResult.rows[0].total);
 
-          for (const parcela of parcelasResult.rows) {
-            // Verificar se já existe uma conta a pagar para esta parcela
-            // Formato do documento: apenas a chave composta da compra
-            const numeroDocumento = `${compra.numero_pedido}-${compra.modelo}-${compra.serie}`;
-            
-            const contaExistente = await client.query(
-              `SELECT id FROM dbo.contas_pagar
-               WHERE compra_numero_pedido = $1
-               AND compra_modelo = $2
-               AND compra_serie = $3
-               AND compra_fornecedor_id = $4
-               AND parcela = $5`,
-              [
-                compra.numero_pedido,
-                compra.modelo,
-                compra.serie,
-                compra.fornecedor_id,
-                parcela.parcela,
-              ],
-            );
-
-            if (contaExistente.rows.length === 0) {
-              // Criar conta a pagar
-              // Converter valor para número para evitar perda de centavos
-              const valorParcela = parseFloat(parcela.valor_parcela);
-              
-              await client.query(
-                `INSERT INTO dbo.contas_pagar (
-                  compra_numero_pedido,
-                  compra_modelo,
-                  compra_serie,
-                  compra_fornecedor_id,
-                  parcela,
-                  fornecedor_id,
-                  numero_documento,
-                  tipo_documento,
-                  data_emissao,
-                  data_vencimento,
-                  valor_original,
-                  valor_desconto,
-                  valor_juros,
-                  valor_multa,
-                  valor_pago,
-                  valor_saldo,
-                  forma_pagamento_id,
-                  status,
-                  observacoes
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
-                [
-                  compra.numero_pedido,
-                  compra.modelo,
-                  compra.serie,
-                  compra.fornecedor_id,
-                  parcela.parcela,
-                  compra.fornecedor_id,
-                  numeroDocumento,
-                  'FATURA',
-                  compra.data_emissao || new Date(),
-                  parcela.data_vencimento,
-                  valorParcela,
-                  0,
-                  0,
-                  0,
-                  0,
-                  valorParcela,
-                  parcela.forma_pagamento_id,
-                  'ABERTO',
-                  `Parcela ${parcela.parcela} de ${parcela.total_parcelas || '?'} da compra ${compra.numero_pedido}-${compra.modelo}-${compra.serie} - ${compra.fornecedor_nome || 'Fornecedor'}`,
-                ],
-              );
-
-              console.log(`[APROVAÇÃO COMPRA] Conta a pagar criada: ${numeroDocumento} - Parcela ${parcela.parcela}`);
-            } else {
-              console.log(`[APROVAÇÃO COMPRA] Conta a pagar já existe: ${numeroDocumento} - Parcela ${parcela.parcela}`);
-            }
-          }
-        } else {
-          console.log(`[APROVAÇÃO COMPRA] Nenhuma parcela encontrada para criar contas a pagar`);
+        if (totalContasPagas > 0) {
+          throw new BadRequestException(
+            `Não é possível cancelar esta compra pois ${totalContasPagas} conta(s) a pagar já foi(ram) paga(s)`,
+          );
         }
 
-        await client.query('COMMIT');
-
-        return this.mapToEntity(updateResult.rows[0]);
-      } catch (error) {
-        await client.query('ROLLBACK');
-        throw error;
-      } finally {
-        client.release();
-      }
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      console.error('Erro ao aprovar compra:', error);
-      throw new InternalServerErrorException('Erro ao aprovar compra');
-    }
-  }
-
-  async deny(id: number, motivo?: string): Promise<Purchase> {
-    try {
-      const client = await this.databaseService.getClient();
-
-      try {
-        await client.query('BEGIN');
-
-        // Verificar se a compra existe
-        const checkResult = await client.query(
-          'SELECT numero_sequencial FROM dbo.compra WHERE numero_sequencial = $1',
-          [id],
-        );
-
-        if (checkResult.rows.length === 0) {
-          throw new NotFoundException(`Compra com ID ${id} não encontrada`);
-        }
-
-        // Atualizar status para CANCELADO (negar = cancelar)
+        // Atualizar status para CANCELADO
         const observacoesUpdate = motivo 
-          ? `Negado: ${motivo}` 
-          : 'Compra negada';
+          ? `Cancelado: ${motivo}` 
+          : 'Compra cancelada';
 
         const updateResult = await client.query(
           `UPDATE dbo.compra 
@@ -844,6 +779,20 @@ export class PurchasesService {
           ['CANCELADO', observacoesUpdate, id],
         );
 
+        // Cancelar também as contas a pagar em aberto desta compra
+        await client.query(
+          `UPDATE dbo.contas_pagar
+           SET status = 'CANCELADO',
+               observacoes = COALESCE(observacoes || ' | ', '') || 'Cancelada junto com a compra',
+               updated_at = CURRENT_TIMESTAMP
+           WHERE compra_numero_pedido = $1
+           AND compra_modelo = $2
+           AND compra_serie = $3
+           AND compra_fornecedor_id = $4
+           AND status IN ('ABERTO', 'VENCIDO')`,
+          [compra.numero_pedido, compra.modelo, compra.serie, compra.fornecedor_id],
+        );
+
         await client.query('COMMIT');
 
         return this.mapToEntity(updateResult.rows[0]);
@@ -854,11 +803,11 @@ export class PurchasesService {
         client.release();
       }
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
-      console.error('Erro ao negar compra:', error);
-      throw new InternalServerErrorException('Erro ao negar compra');
+      console.error('Erro ao cancelar compra:', error);
+      throw new InternalServerErrorException('Erro ao cancelar compra');
     }
   }
 

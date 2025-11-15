@@ -76,7 +76,6 @@ const AccountPayablePrintView = ({
     const labels: Record<string, string> = {
       ABERTO: 'Em Aberto',
       PAGO: 'Pago',
-      PARCIAL: 'Pago Parcialmente',
       VENCIDO: 'Vencido',
       CANCELADO: 'Cancelado',
     };

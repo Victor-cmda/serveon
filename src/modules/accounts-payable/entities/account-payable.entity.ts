@@ -142,7 +142,7 @@ export class AccountPayable extends BaseEntity {
   @ApiProperty({
     description: 'Status da conta',
     example: 'ABERTO',
-    enum: ['ABERTO', 'PAGO', 'PARCIAL', 'VENCIDO', 'CANCELADO'],
+    enum: ['ABERTO', 'PAGO', 'VENCIDO', 'CANCELADO'],
   })
   status: string;
 

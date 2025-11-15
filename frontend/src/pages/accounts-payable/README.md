@@ -31,7 +31,7 @@ frontend/src/services/
 - ✅ Cards de resumo com totais por status (Abertas, Pagas, Vencidas, Parciais)
 - ✅ Filtros por:
   - Busca textual (documento, fornecedor)
-  - Status (ABERTO, PAGO, PARCIAL, VENCIDO, CANCELADO)
+  - Status (ABERTO, PAGO, VENCIDO, CANCELADO)
 - ✅ Tabela com informações principais:
   - Número do documento e tipo
   - Fornecedor (nome e CNPJ/CPF)
@@ -45,7 +45,6 @@ frontend/src/services/
 - **Total a Pagar**: Soma de todos os saldos não pagos/cancelados
 - **Abertas**: Total de contas com status ABERTO
 - **Vencidas**: Total de contas com status VENCIDO
-- **Parciais**: Total de contas com status PARCIAL
 - **Pagas**: Total de valores pagos
 
 ### 2. AccountsPayableForm
@@ -80,27 +79,24 @@ frontend/src/services/
   - **Datas**: Emissão, vencimento e pagamento
   - **Valores**: Detalhamento completo com desconto, juros, multa, total e saldo
 - ✅ Ações disponíveis:
-  - **Registrar Pagamento**: Modal para pagamento total ou parcial
+  - **Registrar Pagamento**: Modal para pagamento total da conta
   - **Editar**: Navega para formulário de edição
   - **Cancelar**: Cancela a conta (altera status)
   - **Excluir**: Remove permanentemente
 - ✅ Controle de permissões:
-  - Pagamento: Disponível para status ABERTO, PARCIAL ou VENCIDO
+  - Pagamento: Disponível para status ABERTO ou VENCIDO
   - Edição: Disponível se status não for PAGO ou CANCELADO
   - Cancelamento: Disponível se status não for PAGO ou CANCELADO
 
 #### Modal de Pagamento:
-- Exibe saldo atual
+- Exibe valor total a pagar
 - Campos para:
-  - Valor pago
   - Data de pagamento
   - Desconto adicional
   - Juros
   - Multa
-- Atualiza automaticamente o status:
-  - PAGO: Se valor pago >= saldo
-  - PARCIAL: Se valor pago < saldo
-- Recalcula o saldo automaticamente
+- **Atenção**: O pagamento deve ser sempre pelo valor total. Pagamento parcial não é permitido.
+- Atualiza automaticamente o status para PAGO após confirmação
 
 ## 🔌 API Integration
 
@@ -218,7 +214,6 @@ DTO específico para pagamento:
 ### Esquema de Cores (Status):
 - **Aberto**: Azul (`bg-blue-500`)
 - **Pago**: Verde (`bg-green-500`)
-- **Parcial**: Amarelo (`bg-yellow-500`)
 - **Vencido**: Vermelho (`bg-red-500`)
 - **Cancelado**: Cinza (`bg-gray-500`)
 
@@ -276,10 +271,10 @@ Localização: **Sidebar > Gestão Principal > Contas a Pagar**
 ### 3. Registrar Pagamento
 1. Na página de detalhes, clicar "Registrar Pagamento"
 2. Preencher modal com:
-   - Valor pago (pré-preenchido com saldo)
    - Data de pagamento
    - Desconto/juros/multa (opcional)
-3. Confirmar → Status atualizado automaticamente
+3. Confirmar → Status atualizado automaticamente para PAGO
+4. **Nota importante**: O sistema não permite pagamento parcial. O pagamento deve ser sempre pelo valor total da conta.
 
 ### 4. Editar Conta
 1. Na página de detalhes, clicar "Editar"

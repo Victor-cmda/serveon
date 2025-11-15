@@ -45,7 +45,7 @@ const PaymentSection = ({
           render={({ field }) => (
             <FormItem className="md:col-span-7">
               <FormLabel className="text-base font-medium">
-                Condição de Pagamento
+                Condição de Pagamento *
               </FormLabel>
               <div className="flex gap-2">
                 <FormControl>
