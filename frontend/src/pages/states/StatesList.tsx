@@ -149,13 +149,16 @@ const StatesList: React.FC = () => {
                   País
                 </th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Status
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Ações
                 </th>
               </tr>
             </thead>
             <tbody>              {filteredStates.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="h-24 text-center">
+                  <td colSpan={6} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <MapPin className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -178,6 +181,17 @@ const StatesList: React.FC = () => {
                     </td>
                     <td className="p-4">
                       <div className="text-sm">{state.paisNome}</div>
+                    </td>
+                    <td className="p-4">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                          state.ativo
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {state.ativo ? 'Ativo' : 'Inativo'}
+                      </span>
                     </td>
                     <td className="p-4">
                       <div className="flex items-center space-x-2">
