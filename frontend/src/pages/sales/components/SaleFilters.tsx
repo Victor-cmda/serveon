@@ -127,10 +127,22 @@ export const SaleFilters: React.FC<SaleFiltersProps> = ({
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[600px]" align="end">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Filtros Avançados</h3>
+          <PopoverContent 
+            className="w-[600px] border-0 shadow-2xl rounded-2xl overflow-hidden" 
+            align="end"
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+              boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+              opacity: 1,
+              // zIndex: 9999
+            }}
+          >
+            <div className="space-y-4 p-1">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-lg font-semibold tracking-tight">Filtros Avançados</h3>
                 {hasActiveFilters() && (
                   <Button
                     variant="ghost"
@@ -231,7 +243,17 @@ export const SaleFilters: React.FC<SaleFiltersProps> = ({
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent 
+                      className="w-auto p-0 border-0 shadow-2xl rounded-2xl overflow-hidden" 
+                      align="start"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(20px) saturate(180%)',
+                        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                        border: '1px solid rgba(255, 255, 255, 0.18)',
+                        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)'
+                      }}
+                    >
                       <Calendar
                         mode="single"
                         selected={filters.dataEmissaoInicio}
@@ -263,7 +285,17 @@ export const SaleFilters: React.FC<SaleFiltersProps> = ({
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent 
+                      className="w-auto p-0 border-0 shadow-2xl rounded-2xl overflow-hidden" 
+                      align="start"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(20px) saturate(180%)',
+                        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                        border: '1px solid rgba(255, 255, 255, 0.18)',
+                        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)'
+                      }}
+                    >
                       <Calendar
                         mode="single"
                         selected={filters.dataEmissaoFim}
@@ -295,7 +327,17 @@ export const SaleFilters: React.FC<SaleFiltersProps> = ({
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent 
+                      className="w-auto p-0 border-0 shadow-2xl rounded-2xl overflow-hidden" 
+                      align="start"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(20px) saturate(180%)',
+                        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                        border: '1px solid rgba(255, 255, 255, 0.18)',
+                        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)'
+                      }}
+                    >
                       <Calendar
                         mode="single"
                         selected={filters.dataEntregaInicio}
@@ -327,7 +369,17 @@ export const SaleFilters: React.FC<SaleFiltersProps> = ({
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent 
+                      className="w-auto p-0 border-0 shadow-2xl rounded-2xl overflow-hidden" 
+                      align="start"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(20px) saturate(180%)',
+                        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                        border: '1px solid rgba(255, 255, 255, 0.18)',
+                        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)'
+                      }}
+                    >
                       <Calendar
                         mode="single"
                         selected={filters.dataEntregaFim}
@@ -366,11 +418,18 @@ export const SaleFilters: React.FC<SaleFiltersProps> = ({
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t">
-                <Button variant="outline" onClick={() => setIsOpen(false)}>
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200/50">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsOpen(false)}
+                  className="rounded-xl px-6 border-gray-300 hover:bg-gray-100 transition-all duration-200"
+                >
                   Fechar
                 </Button>
-                <Button onClick={() => setIsOpen(false)}>
+                <Button 
+                  onClick={() => setIsOpen(false)}
+                  className="rounded-xl px-6 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/30 transition-all duration-200"
+                >
                   Aplicar Filtros
                 </Button>
               </div>

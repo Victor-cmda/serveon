@@ -135,10 +135,22 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[600px]" align="end">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Filtros Avançados</h3>
+          <PopoverContent 
+            className="w-[600px] border-0 shadow-2xl rounded-2xl overflow-hidden" 
+            align="end"
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              border: '1px solid rgba(255, 255, 255, 0.18)',
+              boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+              opacity: 1,
+              // zIndex: 9999
+            }}
+          >
+            <div className="space-y-4 p-1">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-lg font-semibold tracking-tight">Filtros Avançados</h3>
                 {hasActiveFilters() && (
                   <Button
                     variant="ghost"
@@ -273,7 +285,17 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent 
+                      className="w-auto p-0 border-0 shadow-2xl rounded-2xl overflow-hidden" 
+                      align="start"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(20px) saturate(180%)',
+                        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                        border: '1px solid rgba(255, 255, 255, 0.18)',
+                        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)'
+                      }}
+                    >
                       <Calendar
                         mode="single"
                         selected={filters.dataEmissaoInicio}
@@ -305,7 +327,17 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent 
+                      className="w-auto p-0 border-0 shadow-2xl rounded-2xl overflow-hidden" 
+                      align="start"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(20px) saturate(180%)',
+                        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                        border: '1px solid rgba(255, 255, 255, 0.18)',
+                        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)'
+                      }}
+                    >
                       <Calendar
                         mode="single"
                         selected={filters.dataEmissaoFim}
@@ -337,7 +369,17 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent 
+                      className="w-auto p-0 border-0 shadow-2xl rounded-2xl overflow-hidden" 
+                      align="start"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(20px) saturate(180%)',
+                        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                        border: '1px solid rgba(255, 255, 255, 0.18)',
+                        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)'
+                      }}
+                    >
                       <Calendar
                         mode="single"
                         selected={filters.dataVencimentoInicio}
@@ -369,7 +411,17 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent 
+                      className="w-auto p-0 border-0 shadow-2xl rounded-2xl overflow-hidden" 
+                      align="start"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(20px) saturate(180%)',
+                        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                        border: '1px solid rgba(255, 255, 255, 0.18)',
+                        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)'
+                      }}
+                    >
                       <Calendar
                         mode="single"
                         selected={filters.dataVencimentoFim}
@@ -408,11 +460,18 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t">
-                <Button variant="outline" onClick={() => setIsOpen(false)}>
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200/50">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsOpen(false)}
+                  className="rounded-xl px-6 border-gray-300 hover:bg-gray-100 transition-all duration-200"
+                >
                   Fechar
                 </Button>
-                <Button onClick={() => setIsOpen(false)}>
+                <Button 
+                  onClick={() => setIsOpen(false)}
+                  className="rounded-xl px-6 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/30 transition-all duration-200"
+                >
                   Aplicar Filtros
                 </Button>
               </div>
@@ -436,7 +495,7 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
       {hasActiveFilters() && (
         <div className="flex flex-wrap gap-2">
           {filters.status !== 'TODOS' && (
-            <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium">
+            <div className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 text-xs font-medium">
               Status: {filters.status}
               <button
                 onClick={() => handleFilterChange('status', 'TODOS')}
@@ -447,7 +506,7 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
             </div>
           )}
           {filters.fornecedorId !== '' && filters.fornecedorId !== '0' && (
-            <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium">
+            <div className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 text-xs font-medium">
               Fornecedor: {suppliers.find(s => s.id.toString() === filters.fornecedorId)?.nomeFantasia || suppliers.find(s => s.id.toString() === filters.fornecedorId)?.razaoSocial || 'ID ' + filters.fornecedorId}
               <button
                 onClick={() => handleFilterChange('fornecedorId', '0')}
@@ -458,7 +517,7 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
             </div>
           )}
           {filters.tipoDocumento !== 'TODOS' && (
-            <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium">
+            <div className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 text-xs font-medium">
               Tipo: {filters.tipoDocumento}
               <button
                 onClick={() => handleFilterChange('tipoDocumento', 'TODOS')}
@@ -469,7 +528,7 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
             </div>
           )}
           {filters.origem !== 'TODAS' && (
-            <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium">
+            <div className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 text-xs font-medium">
               Origem: {filters.origem === 'COMPRAS' ? 'Compras' : 'Avulsas'}
               <button
                 onClick={() => handleFilterChange('origem', 'TODAS')}
@@ -480,7 +539,7 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
             </div>
           )}
           {filters.apenaasVencidas && (
-            <div className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700">
+            <div className="inline-flex items-center gap-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-3 py-1 text-xs font-medium">
               Apenas Vencidas
               <button
                 onClick={() => handleFilterChange('apenaasVencidas', false)}
@@ -491,7 +550,7 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
             </div>
           )}
           {(filters.dataVencimentoInicio || filters.dataVencimentoFim) && (
-            <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium">
+            <div className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 text-xs font-medium">
               Vencimento: {filters.dataVencimentoInicio && format(filters.dataVencimentoInicio, 'dd/MM/yy')} - {filters.dataVencimentoFim && format(filters.dataVencimentoFim, 'dd/MM/yy')}
               <button
                 onClick={() => {
@@ -505,7 +564,7 @@ export const AccountsPayableFilters: React.FC<AccountsPayableFiltersProps> = ({
             </div>
           )}
           {(filters.valorMinimo !== '' || filters.valorMaximo !== '') && (
-            <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium">
+            <div className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 text-xs font-medium">
               Valor: R$ {filters.valorMinimo || '0'} - R$ {filters.valorMaximo || '∞'}
               <button
                 onClick={() => {
