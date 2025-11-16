@@ -642,3 +642,274 @@ html, body {
 .dark [data-sonner-toast] {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
+
+/* =================================================================
+   MODERN TABLE STYLES - Linhas Zebradas e Separadores de Coluna
+   ================================================================= */
+
+/* Container da tabela com borda moderna */
+.rounded-md.border {
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: hsl(var(--card));
+}
+
+/* Tabela base - espaçamento e tipografia moderna */
+table.w-full {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  width: 100%;
+}
+
+/* Cabeçalho da tabela - design moderno com gradiente sutil */
+table.w-full thead {
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--muted) / 0.8),
+    hsl(var(--muted) / 0.5)
+  );
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
+
+table.w-full thead tr {
+  border-bottom: 2px solid hsl(var(--border));
+}
+
+/* Células do cabeçalho com separadores verticais */
+table.w-full thead th {
+  height: 3rem;
+  padding: 1rem;
+  text-align: left;
+  vertical-align: middle;
+  font-weight: 600;
+  color: hsl(var(--foreground) / 0.9);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-right: 1px solid hsl(var(--border) / 0.5);
+  transition: all 0.2s ease;
+}
+
+table.w-full thead th:last-child {
+  border-right: none;
+}
+
+/* Hover no cabeçalho */
+table.w-full thead th:hover {
+  background: hsl(var(--muted) / 0.7);
+}
+
+/* Corpo da tabela */
+table.w-full tbody {
+  background: hsl(var(--background));
+}
+
+/* Linhas zebradas (alternadas) - Efeito moderno e VISÍVEL */
+table.w-full tbody tr {
+  border-bottom: 1px solid hsl(var(--border) / 0.4);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Linhas PARES - Fundo mais escuro (zebrado) */
+table.w-full tbody tr:nth-child(even) {
+  background: hsl(var(--muted) / 0.5) !important;
+}
+
+/* Linhas ÍMPARES - Fundo claro */
+table.w-full tbody tr:nth-child(odd) {
+  background: hsl(var(--background)) !important;
+}
+
+/* Hover nas linhas - Efeito dinâmico com elevação */
+table.w-full tbody tr:hover {
+  background: hsl(var(--accent) / 0.7) !important;
+  transform: scale(1.002);
+  box-shadow: 0 4px 12px hsl(var(--foreground) / 0.12);
+  z-index: 5;
+  cursor: pointer;
+}
+
+/* Células do corpo com separadores verticais */
+table.w-full tbody td {
+  padding: 1rem;
+  border-right: 1px solid hsl(var(--border) / 0.3);
+  transition: all 0.2s ease;
+  vertical-align: middle;
+}
+
+table.w-full tbody td:last-child {
+  border-right: none;
+}
+
+/* Hover nas células - Realce sutil */
+table.w-full tbody tr:hover td {
+  color: hsl(var(--foreground));
+}
+
+/* Texto de células vazias/sem dados */
+table.w-full tbody tr td[colspan] {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: hsl(var(--muted-foreground));
+  border-right: none;
+}
+
+/* Ícones dentro das células */
+table.w-full tbody td svg {
+  transition: transform 0.2s ease;
+}
+
+table.w-full tbody tr:hover td svg {
+  transform: scale(1.1);
+}
+
+/* Badges/Status dentro das tabelas */
+table.w-full tbody td .inline-flex {
+  transition: all 0.2s ease;
+}
+
+table.w-full tbody tr:hover td .inline-flex {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Botões de ação - Melhor posicionamento */
+table.w-full tbody td .flex.items-center.space-x-2 {
+  gap: 0.5rem;
+  justify-content: flex-start;
+}
+
+/* Efeito nos botões de ação ao hover da linha */
+table.w-full tbody tr:hover td button,
+table.w-full tbody tr:hover td a.inline-flex {
+  border-color: hsl(var(--primary) / 0.4);
+  background: hsl(var(--primary) / 0.05);
+}
+
+/* Responsividade - Melhor scroll horizontal */
+.overflow-x-auto {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted)) transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+  background-clip: padding-box;
+}
+
+/* Animação de entrada para linhas */
+@keyframes tableRowFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+table.w-full tbody tr {
+  animation: tableRowFadeIn 0.3s ease-out;
+  animation-fill-mode: backwards;
+}
+
+/* Delay progressivo para animação de entrada */
+table.w-full tbody tr:nth-child(1) { animation-delay: 0.05s; }
+table.w-full tbody tr:nth-child(2) { animation-delay: 0.1s; }
+table.w-full tbody tr:nth-child(3) { animation-delay: 0.15s; }
+table.w-full tbody tr:nth-child(4) { animation-delay: 0.2s; }
+table.w-full tbody tr:nth-child(5) { animation-delay: 0.25s; }
+table.w-full tbody tr:nth-child(n+6) { animation-delay: 0.3s; }
+
+/* Estado de loading - shimmer effect */
+table.w-full tbody tr.loading-row {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted) / 0.3) 0%,
+    hsl(var(--muted) / 0.5) 50%,
+    hsl(var(--muted) / 0.3) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Tema escuro - Ajustes específicos para contraste forte */
+.dark table.w-full thead {
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--muted) / 0.6),
+    hsl(var(--muted) / 0.3)
+  );
+}
+
+/* Linhas PARES no tema escuro - Mais escuras */
+.dark table.w-full tbody tr:nth-child(even) {
+  background: hsl(var(--muted) / 0.4) !important;
+}
+
+/* Linhas ÍMPARES no tema escuro - Mais claras */
+.dark table.w-full tbody tr:nth-child(odd) {
+  background: hsl(var(--background)) !important;
+}
+
+.dark table.w-full tbody tr:hover {
+  background: hsl(var(--accent) / 0.5) !important;
+  box-shadow: 0 4px 12px hsl(var(--foreground) / 0.2);
+}
+
+.dark table.w-full thead th {
+  color: hsl(var(--foreground) / 0.95);
+  border-right: 1px solid hsl(var(--border) / 0.3);
+}
+
+.dark table.w-full tbody td {
+  border-right: 1px solid hsl(var(--border) / 0.2);
+}
+
+/* Melhorias para mobile */
+@media (max-width: 768px) {
+  table.w-full thead th,
+  table.w-full tbody td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  table.w-full thead th {
+    font-size: 0.7rem;
+  }
+  
+  /* Remover animação em mobile para performance */
+  table.w-full tbody tr {
+    animation: none;
+  }
+}
