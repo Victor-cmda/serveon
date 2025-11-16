@@ -1,6 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import {
   Home,
   Users,
@@ -22,6 +21,7 @@ import {
   Receipt,
 } from 'lucide-react';
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface MenuItem {
   id: string;
@@ -46,6 +46,7 @@ const Sidebar = ({ collapsed = false }: SidebarProps) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(['main'])
   );
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev => {
@@ -114,12 +115,6 @@ const Sidebar = ({ collapsed = false }: SidebarProps) => {
           icon: <Package className="h-4 w-4" />,
           path: '/products',
         },
-        // {
-        //   id: 'invoices',
-        //   title: 'Notas Fiscais',
-        //   icon: <FileText className="h-4 w-4" />,
-        //   path: '/invoices',
-        // },
       ],
     },
     {
@@ -229,100 +224,202 @@ const Sidebar = ({ collapsed = false }: SidebarProps) => {
   };
 
   return (
-    <aside
-      className={cn(
-        "fixed left-0 top-0 z-20 h-full bg-background border-r border-border pt-16 transition-all duration-300",
-        collapsed ? "w-16" : "w-64"
-      )}
-    >
-      <nav className="h-full overflow-y-auto px-3 py-4">
-        {/* Dashboard */}
-        <div className="mb-6">
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start h-10",
-              collapsed && "justify-center px-0",
-              isActive(dashboardItem.path) 
-                ? "bg-primary text-primary-foreground" 
-                : "hover:bg-muted hover:text-foreground"
-            )}
-            asChild
+    <>
+      <motion.aside
+        initial={false}
+        animate={{ width: collapsed ? 64 : 256 }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        className="fixed left-0 top-0 z-20 h-full bg-background border-r border-border pt-16"
+      >
+        <nav className="h-full overflow-y-auto overflow-x-hidden px-3 py-4">
+          {/* Dashboard */}
+          <motion.div 
+            className="mb-6"
+            layout
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
           >
             <NavLink to={dashboardItem.path}>
-              <div className="flex items-center gap-3">
-                {dashboardItem.icon}
-                {!collapsed && <span className="font-medium">{dashboardItem.title}</span>}
-              </div>
-            </NavLink>
-          </Button>
-        </div>
-
-        {/* Categories */}
-        <div className="space-y-2">
-          {categories.map((category) => {
-            const isExpanded = expandedCategories.has(category.id);
-            const hasActiveItem = category.items.some(item => isActive(item.path));
-            
-            return (
-              <div key={category.id}>
-                {/* Category Header */}
-                {!collapsed && (
-                  <Button
-                    variant="ghost"
-                    onClick={() => toggleCategory(category.id)}
-                    className={cn(
-                      "w-full justify-between h-9 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted",
-                      hasActiveItem && "text-foreground bg-muted"
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      {category.icon}
-                      <span>{category.title}</span>
-                    </div>
-                    <ChevronDown 
-                      className={cn(
-                        "h-4 w-4 transition-transform",
-                        isExpanded && "rotate-180"
-                      )} 
-                    />
-                  </Button>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.15 }}
+                className={cn(
+                  'flex items-center gap-3 h-10 rounded-md px-3 transition-colors duration-200',
+                  collapsed && 'justify-center px-0',
+                  isActive(dashboardItem.path)
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'hover:bg-muted hover:text-foreground'
                 )}
-
-                {/* Category Items */}
-                <div className={cn(
-                  "space-y-1",
-                  !collapsed && !isExpanded && "hidden",
-                  !collapsed && "ml-2 mt-1"
-                )}>
-                  {category.items.map((item) => (
-                    <Button
-                      key={item.id}
-                      variant="ghost"
-                      className={cn(
-                        "w-full justify-start h-8 text-sm",
-                        collapsed ? "justify-center px-0" : "pl-6",
-                        isActive(item.path) 
-                          ? "bg-primary text-primary-foreground" 
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                      )}
-                      asChild
+              >
+                {dashboardItem.icon}
+                <AnimatePresence mode="wait">
+                  {!collapsed && (
+                    <motion.span
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: 'auto' }}
+                      exit={{ opacity: 0, width: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="font-medium whitespace-nowrap overflow-hidden"
                     >
-                      <NavLink to={item.path}>
-                        <div className="flex items-center gap-3">
-                          {item.icon}
-                          {!collapsed && <span>{item.title}</span>}
+                      {dashboardItem.title}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </NavLink>
+          </motion.div>
+
+          {/* Categories */}
+          <div className="space-y-2">
+            {categories.map((category, categoryIndex) => {
+              const isExpanded = expandedCategories.has(category.id);
+              const hasActiveItem = category.items.some(item => isActive(item.path));
+              const isHovered = hoveredCategory === category.id;
+
+              return (
+                <motion.div 
+                  key={category.id}
+                  layout
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  className="relative"
+                  data-category-index={categoryIndex}
+                  onMouseEnter={() => collapsed && setHoveredCategory(category.id)}
+                  onMouseLeave={() => collapsed && setHoveredCategory(null)}
+                >
+                  {/* Category Header */}
+                  {!collapsed ? (
+                    <motion.button
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={() => toggleCategory(category.id)}
+                      className={cn(
+                        'w-full flex items-center justify-between h-9 px-3 rounded-md text-sm font-medium transition-colors duration-200',
+                        hasActiveItem 
+                          ? 'text-foreground bg-muted' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      )}
+                    >
+                      <div className="flex items-center gap-2">
+                        {category.icon}
+                        <span>{category.title}</span>
+                      </div>
+                      <motion.div
+                        animate={{ rotate: isExpanded ? 180 : 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </motion.div>
+                    </motion.button>
+                  ) : (
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={cn(
+                        'flex items-center justify-center h-10 rounded-md cursor-pointer transition-colors duration-200',
+                        hasActiveItem 
+                          ? 'bg-muted text-foreground' 
+                          : 'hover:bg-muted hover:text-foreground text-muted-foreground'
+                      )}
+                    >
+                      {category.icon}
+                    </motion.div>
+                  )}
+
+                  {/* Expanded Category Items */}
+                  <AnimatePresence initial={false}>
+                    {!collapsed && isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: 'easeInOut' }}
+                        className="overflow-hidden"
+                      >
+                        <div className="space-y-1 ml-2 mt-1">
+                          {category.items.map((item) => (
+                            <NavLink key={item.id} to={item.path}>
+                              <motion.div
+                                whileHover={{ x: 4, scale: 1.01 }}
+                                whileTap={{ scale: 0.98 }}
+                                transition={{ duration: 0.15 }}
+                                className={cn(
+                                  'flex items-center gap-3 h-8 pl-6 pr-3 rounded-md text-sm transition-colors duration-200',
+                                  isActive(item.path)
+                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                                )}
+                              >
+                                {item.icon}
+                                <span>{item.title}</span>
+                              </motion.div>
+                            </NavLink>
+                          ))}
                         </div>
-                      </NavLink>
-                    </Button>
-                  ))}
-                </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </div>
+        </nav>
+      </motion.aside>
+
+      {/* Collapsed Popovers - Rendered outside sidebar to avoid overflow issues */}
+      <AnimatePresence>
+        {collapsed && hoveredCategory && categories.map((category, categoryIndex) => {
+          if (category.id !== hoveredCategory) return null;
+          
+          // Calculate position based on category index
+          // Dashboard takes ~88px (64px top padding + 24px margin)
+          // Each category is ~48px (40px height + 8px spacing)
+          const topPosition = 88 + categoryIndex * 48;
+          
+          return (
+            <motion.div
+              key={`popover-${category.id}`}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
+              style={{
+                position: 'fixed',
+                left: '72px',
+                top: `${topPosition}px`,
+                zIndex: 1000,
+                backgroundColor: 'hsl(var(--popover))',
+              }}
+              className="min-w-[200px] bg-popover border border-border rounded-md shadow-2xl p-2 backdrop-blur-sm"
+              onMouseEnter={() => setHoveredCategory(category.id)}
+              onMouseLeave={() => setHoveredCategory(null)}
+            >
+              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground border-b border-border mb-2">
+                {category.title}
               </div>
-            );
-          })}
-        </div>
-      </nav>
-    </aside>
+              <div className="space-y-1">
+                {category.items.map((item) => (
+                  <NavLink key={item.id} to={item.path}>
+                    <motion.div
+                      whileHover={{ x: 4 }}
+                      transition={{ duration: 0.15 }}
+                      className={cn(
+                        'flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors duration-200',
+                        isActive(item.path)
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'hover:bg-muted hover:text-foreground text-muted-foreground'
+                      )}
+                    >
+                      {item.icon}
+                      <span className="whitespace-nowrap">{item.title}</span>
+                    </motion.div>
+                  </NavLink>
+                ))}
+              </div>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+    </>
   );
 };
 
