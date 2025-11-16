@@ -467,9 +467,49 @@ export function AccountsPayableForm({
               </p>
             </div>
             <div className="p-6 pt-0 space-y-4">
-              {/* Número, Modelo, Série e Tipo */}
+              {/* Modelo, Série, Número e Fornecedor */}
               <div className="grid grid-cols-12 gap-4">
-                <div className="col-span-3">
+                <div className="col-span-2">
+                  <FormField
+                    control={form.control}
+                    name="compraModelo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Modelo</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            disabled={isLoading}
+                            placeholder="Ex: 55"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <FormField
+                    control={form.control}
+                    name="compraSerie"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Série</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            disabled={isLoading}
+                            placeholder="Ex: 001"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="col-span-2">
                   <FormField
                     control={form.control}
                     name="numeroDocumento"
@@ -490,75 +530,6 @@ export function AccountsPayableForm({
                   />
                 </div>
 
-                <div className="col-span-3">
-                  <FormField
-                    control={form.control}
-                    name="compraModelo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Modelo</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            disabled={isLoading}
-                            placeholder="Ex: 55"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="col-span-3">
-                  <FormField
-                    control={form.control}
-                    name="compraSerie"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Série</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            disabled={isLoading}
-                            placeholder="Ex: 001"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="col-span-3">
-                  <FormField
-                    control={form.control}
-                    name="tipoDocumento"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tipo *</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} disabled={isLoading}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="FATURA">Fatura</SelectItem>
-                            <SelectItem value="DUPLICATA">Duplicata</SelectItem>
-                            <SelectItem value="BOLETO">Boleto</SelectItem>
-                            <SelectItem value="NOTA_FISCAL">Nota Fiscal</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              {/* Fornecedor */}
-              <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-2">
                   <FormField
                     control={form.control}
@@ -590,7 +561,7 @@ export function AccountsPayableForm({
                   />
                 </div>
 
-                <div className="col-span-10">
+                <div className="col-span-4">
                   <FormItem>
                     <FormLabel>Fornecedor</FormLabel>
                     <FormControl>
@@ -604,9 +575,35 @@ export function AccountsPayableForm({
                 </div>
               </div>
 
-              {/* Datas */}
-              <div className="grid grid-cols-12 gap-4">
-                <div className="col-span-6">
+              {/* Tipo e Datas */}
+              <div className="grid grid-cols-11 gap-4">
+                <div className="col-span-1">
+                  <FormField
+                    control={form.control}
+                    name="tipoDocumento"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={isLoading}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="FATURA">Fatura</SelectItem>
+                            <SelectItem value="DUPLICATA">Duplicata</SelectItem>
+                            <SelectItem value="BOLETO">Boleto</SelectItem>
+                            <SelectItem value="NOTA_FISCAL">Nota Fiscal</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="col-span-5">
                   <FormField
                     control={form.control}
                     name="dataEmissao"
@@ -628,7 +625,7 @@ export function AccountsPayableForm({
                   />
                 </div>
 
-                <div className="col-span-6">
+                <div className="col-span-5">
                   <FormField
                     control={form.control}
                     name="dataVencimento"
@@ -670,6 +667,7 @@ export function AccountsPayableForm({
                               const value = parseCurrency(e.target.value);
                               field.onChange(formatCurrency(value));
                             }}
+                            className="text-right"
                           />
                         </FormControl>
                         <FormDescription>Digite apenas números</FormDescription>
@@ -696,6 +694,7 @@ export function AccountsPayableForm({
                               const value = parseCurrency(e.target.value);
                               field.onChange(formatCurrency(value));
                             }}
+                            className="text-right"
                           />
                         </FormControl>
                         <FormMessage />
@@ -723,6 +722,7 @@ export function AccountsPayableForm({
                               const value = parseCurrency(e.target.value);
                               field.onChange(formatCurrency(value));
                             }}
+                            className="text-right"
                           />
                         </FormControl>
                         <FormMessage />
@@ -748,6 +748,7 @@ export function AccountsPayableForm({
                               const value = parseCurrency(e.target.value);
                               field.onChange(formatCurrency(value));
                             }}
+                            className="text-right"
                           />
                         </FormControl>
                         <FormMessage />

@@ -756,31 +756,6 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                   <div className="col-span-2">
                     <FormField
                       control={form.control}
-                      name="numeroNota"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Número da Nota*</FormLabel>
-                          <FormControl>
-                            <InputWithIcon
-                              icon={<Hash className="h-4 w-4" />}
-                              {...field}
-                              disabled={isHeaderLocked || isLoading}
-                              className={duplicateError ? 'border-red-500' : ''}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                          {isCheckingDuplicate && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Verificando duplicidade...
-                            </p>
-                          )}
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <FormField
-                      control={form.control}
                       name="modelo"
                       render={({ field }) => (
                         <FormItem>
@@ -820,39 +795,32 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                     />
                   </div>
 
-                  <div className="col-span-6">
+                  <div className="col-span-2">
                     <FormField
                       control={form.control}
-                      name="dataEmissao"
+                      name="numeroNota"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Data Emissão *</FormLabel>
+                          <FormLabel>Número da Nota*</FormLabel>
                           <FormControl>
-                            <DatePicker
-                              date={field.value ? stringToDate(field.value) : undefined}
-                              onSelect={(date) => {
-                                field.onChange(date ? dateToString(date) : '');
-                              }}
-                              placeholder="Selecione a data de emissão"
+                            <InputWithIcon
+                              icon={<Hash className="h-4 w-4" />}
+                              {...field}
                               disabled={isHeaderLocked || isLoading}
-                              disabledDate={(date) => {
-                                // Não pode ser data futura
-                                const today = new Date();
-                                today.setHours(23, 59, 59, 999);
-                                return date > today;
-                              }}
-                              fromYear={2000}
-                              toYear={2050}
+                              className={duplicateError ? 'border-red-500' : ''}
                             />
                           </FormControl>
                           <FormMessage />
+                          {isCheckingDuplicate && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Verificando duplicidade...
+                            </p>
+                          )}
                         </FormItem>
                       )}
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-12 gap-4">
                   <div className="col-span-2">
                     <FormField
                       control={form.control}
@@ -887,7 +855,7 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                     />
                   </div>
 
-                  <div className="col-span-10">
+                  <div className="col-span-4">
                     <FormItem>
                       <FormLabel>Cliente</FormLabel>
                       <FormControl>
@@ -899,6 +867,39 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                         />
                       </FormControl>
                     </FormItem>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-12 gap-4">
+                  <div className="col-span-12">
+                    <FormField
+                      control={form.control}
+                      name="dataEmissao"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Data Emissão *</FormLabel>
+                          <FormControl>
+                            <DatePicker
+                              date={field.value ? stringToDate(field.value) : undefined}
+                              onSelect={(date) => {
+                                field.onChange(date ? dateToString(date) : '');
+                              }}
+                              placeholder="Selecione a data de emissão"
+                              disabled={isHeaderLocked || isLoading}
+                              disabledDate={(date) => {
+                                // Não pode ser data futura
+                                const today = new Date();
+                                today.setHours(23, 59, 59, 999);
+                                return date > today;
+                              }}
+                              fromYear={2000}
+                              toYear={2050}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </div>
 
@@ -989,6 +990,7 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                       disabled={
                         !isHeaderComplete || isProductsLocked || isLoading
                       }
+                      className="text-right"
                     />
                   </div>
 
@@ -1007,6 +1009,7 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                       disabled={
                         !isHeaderComplete || isProductsLocked || isLoading
                       }
+                      className="text-right"
                     />
                   </div>
 
@@ -1025,6 +1028,7 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                       disabled={
                         !isHeaderComplete || isProductsLocked || isLoading
                       }
+                      className="text-right"
                     />
                   </div>
 
@@ -1217,6 +1221,7 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                                   form.watch('tipoFrete') === 'CIF' ||
                                   isLoading
                                 }
+                                className="text-right"
                               />
                             </FormControl>
                             <FormMessage />
@@ -1248,6 +1253,7 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                                   form.watch('tipoFrete') === 'CIF' ||
                                   isLoading
                                 }
+                                className="text-right"
                               />
                             </FormControl>
                             <FormMessage />
@@ -1274,6 +1280,7 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                                   );
                                 }}
                                 disabled={!isHeaderComplete || isLoading}
+                                className="text-right"
                               />
                             </FormControl>
                             <FormMessage />
@@ -1290,6 +1297,7 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                             value={formatCurrency(totais.totalProdutos)}
                             readOnly
                             disabled
+                            className="text-right"
                           />
                         </FormControl>
                       </FormItem>
@@ -1303,7 +1311,7 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                             value={formatCurrency(totais.totalGeral)}
                             readOnly
                             disabled
-                            className="font-semibold"
+                            className="font-semibold text-right"
                           />
                         </FormControl>
                       </FormItem>

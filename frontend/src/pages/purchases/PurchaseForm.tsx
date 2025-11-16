@@ -873,31 +873,6 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                   <div className="col-span-2">
                     <FormField
                       control={form.control}
-                      name="numeroNota"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Número da Nota*</FormLabel>
-                          <FormControl>
-                            <InputWithIcon
-                              icon={<Hash className="h-4 w-4" />}
-                              {...field}
-                              disabled={isHeaderLocked || isLoading}
-                              className={duplicateError ? 'border-red-500' : ''}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                          {isCheckingDuplicate && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Verificando duplicidade...
-                            </p>
-                          )}
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <FormField
-                      control={form.control}
                       name="modelo"
                       render={({ field }) => (
                         <FormItem>
@@ -937,7 +912,83 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                     />
                   </div>
 
-                  <div className="col-span-3">
+                  <div className="col-span-2">
+                    <FormField
+                      control={form.control}
+                      name="numeroNota"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Número da Nota*</FormLabel>
+                          <FormControl>
+                            <InputWithIcon
+                              icon={<Hash className="h-4 w-4" />}
+                              {...field}
+                              disabled={isHeaderLocked || isLoading}
+                              className={duplicateError ? 'border-red-500' : ''}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                          {isCheckingDuplicate && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Verificando duplicidade...
+                            </p>
+                          )}
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <FormField
+                      control={form.control}
+                      name="idFornecedor"
+                      render={() => (
+                        <FormItem>
+                          <FormLabel>Cód. Fornecedor *</FormLabel>
+                          <FormControl>
+                            <div className="flex gap-1">
+                              <Input
+                                value={selectedSupplier?.id || ''}
+                                readOnly
+                                disabled={isHeaderLocked || isLoading}
+                                className={
+                                  duplicateError ? 'border-red-500' : ''
+                                }
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setSupplierSearchOpen(true)}
+                                disabled={isHeaderLocked || isLoading}
+                              >
+                                <Search className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="col-span-4">
+                    <FormItem>
+                      <FormLabel>Fornecedor</FormLabel>
+                      <FormControl>
+                        <Input
+                          value={selectedSupplier?.razaoSocial || ''}
+                          readOnly
+                          disabled
+                          className={duplicateError ? 'border-red-500' : ''}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-12 gap-4">
+                  <div className="col-span-6">
                     <FormField
                       control={form.control}
                       name="dataEmissao"
@@ -968,7 +1019,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                     />
                   </div>
 
-                  <div className="col-span-3">
+                  <div className="col-span-6">
                     <FormField
                       control={form.control}
                       name="dataChegada"
@@ -1007,56 +1058,6 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                         );
                       }}
                     />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-12 gap-4">
-                  <div className="col-span-2">
-                    <FormField
-                      control={form.control}
-                      name="idFornecedor"
-                      render={() => (
-                        <FormItem>
-                          <FormLabel>Cód. Fornecedor *</FormLabel>
-                          <FormControl>
-                            <div className="flex gap-1">
-                              <Input
-                                value={selectedSupplier?.id || ''}
-                                readOnly
-                                disabled={isHeaderLocked || isLoading}
-                                className={
-                                  duplicateError ? 'border-red-500' : ''
-                                }
-                              />
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                onClick={() => setSupplierSearchOpen(true)}
-                                disabled={isHeaderLocked || isLoading}
-                              >
-                                <Search className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="col-span-10">
-                    <FormItem>
-                      <FormLabel>Fornecedor</FormLabel>
-                      <FormControl>
-                        <Input
-                          value={selectedSupplier?.razaoSocial || ''}
-                          readOnly
-                          disabled
-                          className={duplicateError ? 'border-red-500' : ''}
-                        />
-                      </FormControl>
-                    </FormItem>
                   </div>
                 </div>
 
@@ -1157,6 +1158,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                       disabled={
                         !isHeaderComplete || isProductsLocked || isLoading
                       }
+                      className="text-right"
                     />
                   </div>
 
@@ -1174,6 +1176,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                       disabled={
                         !isHeaderComplete || isProductsLocked || isLoading
                       }
+                      className="text-right"
                     />
                   </div>
 
@@ -1197,8 +1200,8 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                           produtoAtual.quantidade.replace(',', '.'),
                         ) || 0) *
                           parseCurrency(produtoAtual.preco)
-                          ? 'border-red-500 focus-visible:ring-red-500'
-                          : ''
+                          ? 'border-red-500 focus-visible:ring-red-500 text-right'
+                          : 'text-right'
                       }
                     />
                     {parseCurrency(produtoAtual.desconto) >
@@ -1228,8 +1231,8 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                           produtoAtual.quantidade.replace(',', '.'),
                         ) || 0) *
                           parseCurrency(produtoAtual.preco)
-                          ? 'border-red-500'
-                          : ''
+                          ? 'border-red-500 text-right'
+                          : 'text-right'
                       }
                     />
                   </div>
@@ -1444,6 +1447,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                                   form.watch('tipoFrete') === 'CIF' ||
                                   isLoading
                                 }
+                                className="text-right"
                               />
                             </FormControl>
                             <FormMessage />
@@ -1475,6 +1479,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                                   form.watch('tipoFrete') === 'CIF' ||
                                   isLoading
                                 }
+                                className="text-right"
                               />
                             </FormControl>
                             <FormMessage />
@@ -1502,6 +1507,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                                   );
                                 }}
                                 disabled={!isHeaderComplete || isLoading}
+                                className="text-right"
                               />
                             </FormControl>
                             <FormMessage />
@@ -1518,6 +1524,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                             value={formatCurrency(totais.totalProdutos)}
                             readOnly
                             disabled
+                            className="text-right"
                           />
                         </FormControl>
                       </FormItem>
@@ -1531,7 +1538,7 @@ export function PurchaseForm({ mode = 'create' }: PurchaseFormProps) {
                             value={formatCurrency(totais.totalGeral)}
                             readOnly
                             disabled
-                            className="font-semibold"
+                            className="font-semibold text-right"
                           />
                         </FormControl>
                       </FormItem>

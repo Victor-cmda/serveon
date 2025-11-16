@@ -179,6 +179,44 @@ const AccountsPayableList: React.FC = () => {
     });
   }, [accounts, filters]);
 
+  // Ordenar as contas filtradas por Modelo → Série → Número → Fornecedor → Parcela
+  const sortedAccounts = useMemo(() => {
+    return [...filteredAccounts].sort((a, b) => {
+      // 1. Ordenar por Modelo
+      const modeloA = a.compraModelo || '';
+      const modeloB = b.compraModelo || '';
+      if (modeloA !== modeloB) {
+        return modeloA.localeCompare(modeloB);
+      }
+
+      // 2. Ordenar por Série
+      const serieA = a.compraSerie || '';
+      const serieB = b.compraSerie || '';
+      if (serieA !== serieB) {
+        return serieA.localeCompare(serieB);
+      }
+
+      // 3. Ordenar por Número
+      const numeroA = a.compraNumeroPedido || a.numeroDocumento || '';
+      const numeroB = b.compraNumeroPedido || b.numeroDocumento || '';
+      if (numeroA !== numeroB) {
+        return numeroA.localeCompare(numeroB);
+      }
+
+      // 4. Ordenar por Fornecedor
+      const fornecedorA = a.fornecedorNome || '';
+      const fornecedorB = b.fornecedorNome || '';
+      if (fornecedorA !== fornecedorB) {
+        return fornecedorA.localeCompare(fornecedorB);
+      }
+
+      // 5. Ordenar por Parcela
+      const parcelaA = a.parcela || 0;
+      const parcelaB = b.parcela || 0;
+      return parcelaA - parcelaB;
+    });
+  }, [filteredAccounts]);
+
   const formatDate = (dateString: string) => {
     return format(parseISO(dateString), 'dd/MM/yyyy', { locale: ptBR });
   };
@@ -260,23 +298,23 @@ const AccountsPayableList: React.FC = () => {
           <table className="w-full table-auto">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[140px]">
-                  Número
-                </th>
                 <th className="h-12 px-2 text-center align-middle font-medium text-muted-foreground whitespace-nowrap w-[80px]">
                   Modelo
                 </th>
                 <th className="h-12 px-2 text-center align-middle font-medium text-muted-foreground whitespace-nowrap w-[80px]">
                   Série
                 </th>
-                <th className="h-12 px-3 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[100px]">
-                  Tipo
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[140px]">
+                  Número
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">
+                  Fornecedor
                 </th>
                 <th className="h-12 px-2 text-center align-middle font-medium text-muted-foreground whitespace-nowrap w-[80px]">
                   Parcela
                 </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">
-                  Fornecedor
+                <th className="h-12 px-3 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[100px]">
+                  Tipo
                 </th>
                 <th className="h-12 px-3 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[100px]">
                   Emissão
@@ -286,9 +324,6 @@ const AccountsPayableList: React.FC = () => {
                 </th>
                 <th className="h-12 px-3 text-right align-middle font-medium text-muted-foreground whitespace-nowrap w-[120px]">
                   Valor Original
-                </th>
-                <th className="h-12 px-3 text-right align-middle font-medium text-muted-foreground whitespace-nowrap w-[110px]">
-                  Valor Pago
                 </th>
                 <th className="h-12 px-3 text-right align-middle font-medium text-muted-foreground whitespace-nowrap w-[100px]">
                   Saldo
@@ -302,9 +337,9 @@ const AccountsPayableList: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredAccounts.length === 0 ? (
+              {sortedAccounts.length === 0 ? (
                 <tr>
-                  <td colSpan={13} className="h-24 text-center">
+                  <td colSpan={12} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <Receipt className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -316,28 +351,16 @@ const AccountsPayableList: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredAccounts.map((account) => (
+                sortedAccounts.map((account) => (
                   <tr key={account.id} className="border-b hover:bg-muted/50">
-                    <td className="p-4 w-[140px]">
-                      <div className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">{account.compraNumeroPedido || account.numeroDocumento}</div>
-                    </td>
                     <td className="p-2 text-center w-[80px]">
                       <div className="text-sm whitespace-nowrap">{account.compraModelo || '-'}</div>
                     </td>
                     <td className="p-2 text-center w-[80px]">
                       <div className="text-sm whitespace-nowrap">{account.compraSerie || '-'}</div>
                     </td>
-                    <td className="p-3 w-[100px]">
-                      <div className="text-sm whitespace-nowrap overflow-hidden text-ellipsis">{getTipoDocumentoLabel(account.tipoDocumento)}</div>
-                    </td>
-                    <td className="p-2 text-center w-[80px]">
-                      {account.parcela ? (
-                        <div className="inline-flex items-center justify-center rounded-md bg-blue-100 dark:bg-blue-900 px-2 py-1 text-xs font-medium text-blue-800 dark:text-blue-300 whitespace-nowrap">
-                          {account.parcela}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground whitespace-nowrap">-</span>
-                      )}
+                    <td className="p-4 w-[140px]">
+                      <div className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">{account.compraNumeroPedido || account.numeroDocumento}</div>
                     </td>
                     <td className="p-4">
                       <div className="font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]" title={account.fornecedorNome || '-'}>
@@ -349,6 +372,18 @@ const AccountsPayableList: React.FC = () => {
                         </div>
                       )}
                     </td>
+                    <td className="p-2 text-center w-[80px]">
+                      {account.parcela ? (
+                        <div className="inline-flex items-center justify-center rounded-md bg-blue-100 dark:bg-blue-900 px-2 py-1 text-xs font-medium text-blue-800 dark:text-blue-300 whitespace-nowrap">
+                          {account.parcela}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground whitespace-nowrap">-</span>
+                      )}
+                    </td>
+                    <td className="p-3 w-[100px]">
+                      <div className="text-sm whitespace-nowrap overflow-hidden text-ellipsis">{getTipoDocumentoLabel(account.tipoDocumento)}</div>
+                    </td>
                     <td className="p-3 w-[100px]">
                       <div className="text-sm whitespace-nowrap">{formatDate(account.dataEmissao)}</div>
                     </td>
@@ -357,9 +392,6 @@ const AccountsPayableList: React.FC = () => {
                     </td>
                     <td className="p-3 text-right w-[120px]">
                       <div className="font-medium whitespace-nowrap">{formatCurrency(account.valorOriginal)}</div>
-                    </td>
-                    <td className="p-3 text-right w-[110px]">
-                      <div className="text-sm text-green-600 whitespace-nowrap">{formatCurrency(account.valorPago)}</div>
                     </td>
                     <td className="p-3 text-right w-[100px]">
                       <div className="font-medium text-blue-600 whitespace-nowrap">{formatCurrency(account.valorSaldo)}</div>
@@ -431,7 +463,7 @@ const AccountsPayableList: React.FC = () => {
       {/* Footer Info */}
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <div>
-          Mostrando {filteredAccounts.length} de {accounts.length} conta{accounts.length !== 1 ? 's' : ''}
+          Mostrando {sortedAccounts.length} de {accounts.length} conta{accounts.length !== 1 ? 's' : ''}
         </div>
       </div>
 

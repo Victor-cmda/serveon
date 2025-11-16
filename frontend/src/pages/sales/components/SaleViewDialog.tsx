@@ -136,7 +136,7 @@ const SaleViewDialog: React.FC<SaleViewDialogProps> = ({ sale, onClose }) => {
               
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Valor do Frete</label>
-                <p className="text-base font-medium">{formatCurrency(sale.valorFrete)}</p>
+                <p className="text-base font-medium text-right">{formatCurrency(sale.valorFrete)}</p>
               </div>
 
               <div>
@@ -153,12 +153,12 @@ const SaleViewDialog: React.FC<SaleViewDialogProps> = ({ sale, onClose }) => {
 
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Valor do Seguro</label>
-                <p className="text-base font-medium">{formatCurrency(sale.valorSeguro)}</p>
+                <p className="text-base font-medium text-right">{formatCurrency(sale.valorSeguro)}</p>
               </div>
 
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Outras Despesas</label>
-                <p className="text-base font-medium">{formatCurrency(sale.outrasDespesas)}</p>
+                <p className="text-base font-medium text-right">{formatCurrency(sale.outrasDespesas)}</p>
               </div>
             </div>
           </div>
@@ -169,17 +169,17 @@ const SaleViewDialog: React.FC<SaleViewDialogProps> = ({ sale, onClose }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Total dos Produtos</label>
-                <p className="text-base font-medium">{formatCurrency(sale.totalProdutos || 0)}</p>
+                <p className="text-base font-medium text-right">{formatCurrency(sale.totalProdutos || 0)}</p>
               </div>
 
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Valor de Desconto</label>
-                <p className="text-base font-medium text-green-600">{formatCurrency(sale.valorDesconto)}</p>
+                <p className="text-base font-medium text-green-600 text-right">{formatCurrency(sale.valorDesconto)}</p>
               </div>
 
               <div className="md:col-span-2 lg:col-span-1">
                 <label className="text-sm font-medium text-muted-foreground">Total a Pagar</label>
-                <p className="text-xl font-bold text-primary">{formatCurrency(sale.totalAPagar || 0)}</p>
+                <p className="text-xl font-bold text-primary text-right">{formatCurrency(sale.totalAPagar || 0)}</p>
               </div>
             </div>
           </div>

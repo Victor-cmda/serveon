@@ -153,6 +153,37 @@ const SalesList: React.FC = () => {
     });
   }, [sales, filters]);
 
+  // Ordenar as vendas filtradas por Modelo → Série → Número → Cliente
+  const sortedSales = useMemo(() => {
+    return [...filteredSales].sort((a, b) => {
+      // 1. Ordenar por Modelo
+      const modeloA = a.modelo || '';
+      const modeloB = b.modelo || '';
+      if (modeloA !== modeloB) {
+        return modeloA.localeCompare(modeloB);
+      }
+
+      // 2. Ordenar por Série
+      const serieA = a.serie || '';
+      const serieB = b.serie || '';
+      if (serieA !== serieB) {
+        return serieA.localeCompare(serieB);
+      }
+
+      // 3. Ordenar por Número
+      const numeroA = a.numeroPedido?.toString() || '';
+      const numeroB = b.numeroPedido?.toString() || '';
+      if (numeroA !== numeroB) {
+        return numeroA.localeCompare(numeroB);
+      }
+
+      // 4. Ordenar por Cliente
+      const clienteA = a.clienteNome || '';
+      const clienteB = b.clienteNome || '';
+      return clienteA.localeCompare(clienteB);
+    });
+  }, [filteredSales]);
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
@@ -243,33 +274,39 @@ const SalesList: React.FC = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-2 text-center align-middle font-medium text-muted-foreground whitespace-nowrap w-[80px]">
+                  Modelo
+                </th>
+                <th className="h-12 px-2 text-center align-middle font-medium text-muted-foreground whitespace-nowrap w-[80px]">
+                  Série
+                </th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[140px]">
                   Número
                 </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">
                   Cliente
                 </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[100px]">
                   Data Emissão
                 </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[110px]">
                   Data Entrega
                 </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground whitespace-nowrap w-[140px]">
                   Total a Pagar
                 </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[100px]">
                   Status
                 </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap w-[80px]">
                   Ações
                 </th>
               </tr>
             </thead>
             <tbody>
-              {filteredSales.length === 0 ? (
+              {sortedSales.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="h-24 text-center">
+                  <td colSpan={9} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <ShoppingBag className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
@@ -279,15 +316,16 @@ const SalesList: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredSales.map((sale) => (
+                sortedSales.map((sale) => (
                   <tr key={sale.id} className="border-b">
-                    <td className="p-4">
-                      <div className="font-medium">{sale.numeroPedido || '-'}</div>
-                      {sale.modelo && sale.serie && (
-                        <div className="text-sm text-muted-foreground">
-                          Mod: {sale.modelo} / Série: {sale.serie}
-                        </div>
-                      )}
+                    <td className="p-2 text-center w-[80px]">
+                      <div className="text-sm whitespace-nowrap">{sale.modelo || '-'}</div>
+                    </td>
+                    <td className="p-2 text-center w-[80px]">
+                      <div className="text-sm whitespace-nowrap">{sale.serie || '-'}</div>
+                    </td>
+                    <td className="p-4 w-[140px]">
+                      <div className="font-medium whitespace-nowrap">{sale.numeroPedido || '-'}</div>
                     </td>
                     <td className="p-4">
                       <div className="font-medium">{sale.clienteNome || '-'}</div>
@@ -298,7 +336,7 @@ const SalesList: React.FC = () => {
                     <td className="p-4">
                       <div className="text-sm">{sale.dataEntrega ? formatDate(sale.dataEntrega) : '-'}</div>
                     </td>
-                    <td className="p-4">
+                    <td className="p-4 text-right">
                       <div className="font-medium">{sale.totalAPagar ? formatCurrency(sale.totalAPagar) : '-'}</div>
                       <div className="text-sm text-muted-foreground">
                         Produtos: {sale.totalProdutos ? formatCurrency(sale.totalProdutos) : '-'}
@@ -368,10 +406,10 @@ const SalesList: React.FC = () => {
         </div>
       </div>
 
-      {filteredSales.length > 0 && (
+      {sortedSales.length > 0 && (
         <div className="flex items-center justify-between px-2">
           <div className="text-sm text-muted-foreground">
-            Mostrando {filteredSales.length} de {sales.length} venda(s)
+            Mostrando {sortedSales.length} de {sales.length} venda(s)
           </div>
         </div>
       )}
