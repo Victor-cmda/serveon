@@ -23,7 +23,7 @@ export class AccountsReceivableService {
 
         // Verificar se o cliente existe
         const customerCheck = await client.query(
-          'SELECT id, nome, cnpj_cpf FROM dbo.cliente WHERE id = $1',
+          'SELECT id, razao_social, cnpj_cpf FROM dbo.cliente WHERE id = $1',
           [createAccountReceivableDto.clienteId],
         );
 
@@ -576,12 +576,12 @@ export class AccountsReceivableService {
     // Buscar informações do cliente
     if (accountData.cliente_id) {
       const customerResult = await client.query(
-        'SELECT nome, cnpj_cpf FROM dbo.cliente WHERE id = $1',
+        'SELECT razao_social, cnpj_cpf FROM dbo.cliente WHERE id = $1',
         [accountData.cliente_id],
       );
 
       if (customerResult.rowCount > 0) {
-        accountData.cliente_nome = customerResult.rows[0].nome;
+        accountData.cliente_nome = customerResult.rows[0].razao_social;
         accountData.cliente_cnpj_cpf = customerResult.rows[0].cnpj_cpf;
       }
     }
