@@ -370,15 +370,19 @@ const PurchasesList: React.FC = () => {
                               <Printer className="mr-2 h-4 w-4" />
                               <span>Imprimir Compra</span>
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleDeny(purchase.id)}
-                              disabled={purchase.status === 'CANCELADO'}
-                              className="cursor-pointer text-red-600"
-                            >
-                              <X className="mr-2 h-4 w-4" />
-                              <span>Cancelar Compra</span>
-                            </DropdownMenuItem>
+                            {purchase.podeCancelar !== false && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => handleDeny(purchase.id)}
+                                  disabled={purchase.status === 'CANCELADO'}
+                                  className="cursor-pointer text-red-600"
+                                >
+                                  <X className="mr-2 h-4 w-4" />
+                                  <span>Cancelar Compra</span>
+                                </DropdownMenuItem>
+                              </>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>

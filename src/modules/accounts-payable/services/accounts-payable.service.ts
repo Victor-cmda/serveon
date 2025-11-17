@@ -439,6 +439,22 @@ export class AccountsPayableService {
 
         const paidAccount = await this.enrichAccountData(client, result.rows[0]);
 
+        // Atualizar status da compra para APROVADO quando a primeira parcela for paga
+        if (account.compra_numero_pedido && account.compra_modelo && account.compra_serie && account.compra_fornecedor_id) {
+          await client.query(
+            `UPDATE dbo.compra 
+             SET status = 'APROVADO',
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE numero_pedido = $1 
+               AND modelo = $2 
+               AND serie = $3 
+               AND fornecedor_id = $4
+               AND status != 'APROVADO'`,
+            [account.compra_numero_pedido, account.compra_modelo, account.compra_serie, account.compra_fornecedor_id],
+          );
+          console.log(`[DEBUG] Status da compra ${account.compra_numero_pedido} atualizado para APROVADO`);
+        }
+
         await client.query('COMMIT');
         return paidAccount;
       } catch (error) {

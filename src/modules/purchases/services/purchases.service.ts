@@ -419,11 +419,26 @@ export class PurchasesService {
             [row.numero_pedido, row.modelo, row.serie, row.fornecedor_id],
           );
 
+          // Verificar se há contas a pagar pagas (para determinar se pode cancelar)
+          const contasPagasResult = await this.databaseService.query(
+            `SELECT COUNT(*) as count FROM dbo.contas_pagar 
+             WHERE compra_numero_pedido = $1 
+               AND compra_modelo = $2 
+               AND compra_serie = $3 
+               AND compra_fornecedor_id = $4
+               AND status = 'PAGO'
+               AND ativo = TRUE`,
+            [row.numero_pedido, row.modelo, row.serie, row.fornecedor_id],
+          );
+
+          const hasParcelasPagas = parseInt(contasPagasResult.rows[0].count) > 0;
+
           // Adicionar itens e parcelas à compra
           return {
             ...compra,
             itens: itensResult.rows,
             parcelas: parcelasResult.rows,
+            podeCancelar: !hasParcelasPagas && compra.status !== 'CANCELADO',
           };
         })
       );
@@ -779,12 +794,9 @@ export class PurchasesService {
           ['CANCELADO', observacoesUpdate, id],
         );
 
-        // Cancelar também as contas a pagar em aberto desta compra
+        // Deletar as contas a pagar em aberto desta compra
         await client.query(
-          `UPDATE dbo.contas_pagar
-           SET status = 'CANCELADO',
-               observacoes = COALESCE(observacoes || ' | ', '') || 'Cancelada junto com a compra',
-               updated_at = CURRENT_TIMESTAMP
+          `DELETE FROM dbo.contas_pagar
            WHERE compra_numero_pedido = $1
            AND compra_modelo = $2
            AND compra_serie = $3
@@ -792,6 +804,8 @@ export class PurchasesService {
            AND status IN ('ABERTO', 'VENCIDO')`,
           [compra.numero_pedido, compra.modelo, compra.serie, compra.fornecedor_id],
         );
+        
+        console.log(`[DEBUG] Contas a pagar deletadas para a compra ${compra.numero_pedido}`);
 
         await client.query('COMMIT');
 

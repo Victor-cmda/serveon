@@ -34,6 +34,7 @@ export interface Purchase {
   updatedAt: string;
   itens?: any[];
   parcelas?: any[];
+  podeCancelar?: boolean;
 }
 
 export interface PurchaseItem {

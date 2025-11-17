@@ -11,7 +11,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
-import { accountsPayableApi } from '@/services/api';
+import { accountsPayableApi, supplierApi, paymentTermApi, paymentMethodApi } from '@/services/api';
 import { AccountPayable, PayAccountDto } from '@/types/account-payable';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -45,6 +45,8 @@ export function AccountsPayableDetailDialog({
   const [loading, setLoading] = useState(false);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [paymentTerm, setPaymentTerm] = useState<any>(null);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
 
   const [paymentData, setPaymentData] = useState<PayAccountDto>({
     valorPago: 0,
@@ -58,8 +60,18 @@ export function AccountsPayableDetailDialog({
   useEffect(() => {
     if (accountId && open) {
       loadAccount();
+      loadPaymentMethods();
     }
   }, [accountId, open]);
+
+  const loadPaymentMethods = async () => {
+    try {
+      const data = await paymentMethodApi.getAll();
+      setPaymentMethods(data);
+    } catch (error) {
+      console.error('Erro ao carregar formas de pagamento:', error);
+    }
+  };
 
   const loadAccount = async () => {
     if (!accountId) return;
@@ -69,16 +81,86 @@ export function AccountsPayableDetailDialog({
       const data = await accountsPayableApi.getById(accountId);
       setAccount(data);
       
-      // Calcular o valor total a pagar (valor original - desconto + juros + multa)
-      const valorTotal = data.valorOriginal - (data.valorDesconto || 0) + (data.valorJuros || 0) + (data.valorMulta || 0);
+      // Buscar o fornecedor para obter a condição de pagamento
+      let supplierPaymentTerm = null;
+      if (data.fornecedorId) {
+        try {
+          const supplier = await supplierApi.getById(data.fornecedorId);
+          
+          // Se o fornecedor tem condição de pagamento, buscar seus dados
+          if (supplier.condicaoPagamentoId) {
+            supplierPaymentTerm = await paymentTermApi.getById(supplier.condicaoPagamentoId);
+            setPaymentTerm(supplierPaymentTerm);
+          }
+        } catch (error) {
+          console.error('Erro ao buscar condição de pagamento:', error);
+        }
+      }
+      
+      // Calcular valores baseado na data atual e condição de pagamento
+      const hoje = new Date();
+      const vencimento = new Date(data.dataVencimento);
+      const diffDays = Math.floor((hoje.getTime() - vencimento.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Usar os valores já calculados da conta ou calcular novos se necessário
+      let desconto = data.valorDesconto || 0;
+      let juros = data.valorJuros || 0;
+      let multa = data.valorMulta || 0;
+      let formaPagamentoId = data.formaPagamentoId || 0;
+      
+      // Se ainda não tem valores calculados e tem condição de pagamento, calcular
+      if ((desconto === 0 && juros === 0 && multa === 0) && supplierPaymentTerm) {
+        if (diffDays < 0) {
+          // Pagamento antecipado - aplicar percentual de desconto da condição
+          const percentualDesconto = supplierPaymentTerm.discountPercentage || 0;
+          desconto = parseFloat((data.valorOriginal * (percentualDesconto / 100)).toFixed(2));
+        } else if (diffDays > 0) {
+          // Pagamento atrasado - aplicar multa e juros da condição
+          const percentualMulta = supplierPaymentTerm.fineRate || 0;
+          const percentualJuros = supplierPaymentTerm.interestRate || 0;
+          
+          multa = parseFloat((data.valorOriginal * (percentualMulta / 100)).toFixed(2));
+          juros = parseFloat((diffDays * (data.valorOriginal * (percentualJuros / 100))).toFixed(2));
+        }
+      }
+      
+      // Buscar forma de pagamento da condição se disponível
+      if (supplierPaymentTerm && supplierPaymentTerm.installments && supplierPaymentTerm.installments.length > 0) {
+        const firstInstallment = supplierPaymentTerm.installments[0];
+        formaPagamentoId = firstInstallment.paymentMethodId || data.formaPagamentoId || 0;
+        console.log('Forma de pagamento da condição:', formaPagamentoId);
+      } else {
+        console.log('Usando forma de pagamento da conta:', formaPagamentoId);
+      }
+      
+      // Calcular o valor total a pagar
+      // Se tem desconto calculado (pagamento antecipado), aplicar o desconto
+      // Caso contrário, usar o saldo devedor que já inclui juros e multa
+      let valorTotal: number;
+      if (desconto > 0) {
+        valorTotal = data.valorOriginal - desconto;
+      } else {
+        valorTotal = data.valorSaldo;
+      }
+      
+      console.log('Dados do pagamento:', {
+        valorOriginal: data.valorOriginal,
+        valorSaldo: data.valorSaldo,
+        desconto,
+        juros,
+        multa,
+        valorTotal,
+        formaPagamentoId,
+        diffDays
+      });
       
       setPaymentData({
-        valorPago: valorTotal,
+        valorPago: parseFloat(valorTotal.toFixed(2)),
         dataPagamento: new Date().toISOString().split('T')[0],
-        formaPagamentoId: data.formaPagamentoId || 0,
-        valorDesconto: data.valorDesconto || 0,
-        valorJuros: data.valorJuros || 0,
-        valorMulta: data.valorMulta || 0,
+        formaPagamentoId: formaPagamentoId,
+        valorDesconto: parseFloat(desconto.toFixed(2)),
+        valorJuros: parseFloat(juros.toFixed(2)),
+        valorMulta: parseFloat(multa.toFixed(2)),
       });
     } catch (error) {
       toast.error('Erro ao carregar conta');
@@ -484,7 +566,7 @@ export function AccountsPayableDetailDialog({
 
       {/* Payment Dialog */}
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Registrar Pagamento</DialogTitle>
             <DialogDescription>
@@ -506,6 +588,7 @@ export function AccountsPayableDetailDialog({
                 O pagamento deve ser feito pelo valor total. Pagamento parcial não é permitido.
               </p>
             </div>
+            
             <div className="space-y-2">
               <Label htmlFor="dataPagamento">Data de Pagamento *</Label>
               <Input
@@ -517,63 +600,94 @@ export function AccountsPayableDetailDialog({
                 }
               />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+
+            {/* Forma de Pagamento */}
+            <div className="space-y-2">
+              <Label>Forma de Pagamento *</Label>
+              <select
+                value={paymentData.formaPagamentoId || ''}
+                onChange={(e) => setPaymentData(prev => ({ ...prev, formaPagamentoId: parseInt(e.target.value) }))}
+                disabled={paymentTerm && paymentTerm.installments && paymentTerm.installments.length > 0}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Selecione a forma de pagamento</option>
+                {paymentMethods.map((method: any) => (
+                  <option key={method.id} value={method.id}>
+                    {method.name}
+                  </option>
+                ))}
+              </select>
+              {paymentTerm && paymentTerm.installments && paymentTerm.installments.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Definido automaticamente pela condição de pagamento
+                </p>
+              )}
+            </div>
+
+            {/* Valores Calculados Automaticamente */}
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="valorDesconto">Desconto</Label>
+                <Label>Desconto {paymentTerm && `(${paymentTerm.discountPercentage}%)`}</Label>
                 <Input
-                  id="valorDesconto"
-                  type="number"
-                  step="0.01"
-                  value={paymentData.valorDesconto}
-                  onChange={(e) => {
-                    const desconto = Number(e.target.value);
-                    const valorTotal = account ? 
-                      account.valorOriginal - desconto + (paymentData.valorJuros || 0) + (paymentData.valorMulta || 0) : 0;
-                    setPaymentData({ 
-                      ...paymentData, 
-                      valorDesconto: desconto,
-                      valorPago: valorTotal 
-                    });
-                  }}
+                  type="text"
+                  value={(paymentData.valorDesconto || 0).toLocaleString('pt-BR', { 
+                    style: 'currency', 
+                    currency: 'BRL' 
+                  })}
+                  readOnly
+                  className="font-mono bg-muted cursor-not-allowed"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Calculado automaticamente pela condição de pagamento
+                </p>
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="valorJuros">Juros</Label>
+                <Label>Juros {paymentTerm && `(${paymentTerm.interestRate}% ao dia)`}</Label>
                 <Input
-                  id="valorJuros"
-                  type="number"
-                  step="0.01"
-                  value={paymentData.valorJuros}
-                  onChange={(e) => {
-                    const juros = Number(e.target.value);
-                    const valorTotal = account ? 
-                      account.valorOriginal - (paymentData.valorDesconto || 0) + juros + (paymentData.valorMulta || 0) : 0;
-                    setPaymentData({ 
-                      ...paymentData, 
-                      valorJuros: juros,
-                      valorPago: valorTotal 
-                    });
-                  }}
+                  type="text"
+                  value={(paymentData.valorJuros || 0).toLocaleString('pt-BR', { 
+                    style: 'currency', 
+                    currency: 'BRL' 
+                  })}
+                  readOnly
+                  className="font-mono bg-muted cursor-not-allowed"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Calculado automaticamente pela condição de pagamento
+                </p>
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="valorMulta">Multa</Label>
+                <Label>Multa {paymentTerm && `(${paymentTerm.fineRate}%)`}</Label>
                 <Input
-                  id="valorMulta"
-                  type="number"
-                  step="0.01"
-                  value={paymentData.valorMulta}
-                  onChange={(e) => {
-                    const multa = Number(e.target.value);
-                    const valorTotal = account ? 
-                      account.valorOriginal - (paymentData.valorDesconto || 0) + (paymentData.valorJuros || 0) + multa : 0;
-                    setPaymentData({ 
-                      ...paymentData, 
-                      valorMulta: multa,
-                      valorPago: valorTotal 
-                    });
-                  }}
+                  type="text"
+                  value={(paymentData.valorMulta || 0).toLocaleString('pt-BR', { 
+                    style: 'currency', 
+                    currency: 'BRL' 
+                  })}
+                  readOnly
+                  className="font-mono bg-muted cursor-not-allowed"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Calculado automaticamente pela condição de pagamento
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Valor Total</Label>
+                <Input
+                  type="text"
+                  value={(paymentData.valorPago || 0).toLocaleString('pt-BR', { 
+                    style: 'currency', 
+                    currency: 'BRL' 
+                  })}
+                  readOnly
+                  className="font-mono bg-muted cursor-not-allowed font-bold text-lg"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Valor total calculado com todos os ajustes
+                </p>
               </div>
             </div>
           </div>
