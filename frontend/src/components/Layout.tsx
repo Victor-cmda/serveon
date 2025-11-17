@@ -23,7 +23,7 @@ const Layout = () => {
       {/* Mobile Overlay */}
       {!sidebarCollapsed && (
         <div 
-          className="fixed inset-0 z-10 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-10 backdrop-blur-md lg:hidden"
           onClick={toggleSidebar}
           aria-label="Close sidebar"
         />

@@ -36,7 +36,7 @@ const PurchaseViewDialog: React.FC<PurchaseViewDialogProps> = ({ purchase, onClo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md">
       <div className="bg-background rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto m-4">
         <div className="sticky top-0 bg-background border-b px-6 py-4 flex items-center justify-between">
           <h2 className="text-2xl font-bold">Visualizar Compra</h2>
