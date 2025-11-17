@@ -52,11 +52,11 @@
   --border: oklch(0.92 0 0); /* Light gray border */
   --input: oklch(0.96 0 0);
   --ring: oklch(0.4 0 0); /* Dark gray focus ring */
-  --chart-1: oklch(0.5 0.15 220); /* Professional blue */
-  --chart-2: oklch(0.55 0.18 160); /* Professional green */
-  --chart-3: oklch(0.45 0.2 280); /* Professional purple */
-  --chart-4: oklch(0.6 0.22 40); /* Professional orange */
-  --chart-5: oklch(0.65 0.16 320); /* Professional pink */
+  --chart-1: oklch(0.55 0.20 220); /* Professional blue */
+  --chart-2: oklch(0.60 0.22 160); /* Professional green */
+  --chart-3: oklch(0.50 0.24 280); /* Professional purple */
+  --chart-4: oklch(0.65 0.25 40); /* Professional orange */
+  --chart-5: oklch(0.70 0.20 320); /* Professional pink */
   --sidebar: oklch(0.98 0 0); /* Light gray sidebar */
   --sidebar-foreground: oklch(0.15 0 0);
   --sidebar-primary: oklch(0.35 0 0);
@@ -86,11 +86,11 @@
   --border: oklch(0.2 0 0); /* Dark gray border */
   --input: oklch(0.16 0 0);
   --ring: oklch(0.6 0 0); /* Medium gray focus ring */
-  --chart-1: oklch(0.6 0.15 220); /* Professional blue (lighter) */
-  --chart-2: oklch(0.65 0.18 160); /* Professional green (lighter) */
-  --chart-3: oklch(0.55 0.2 280); /* Professional purple (lighter) */
-  --chart-4: oklch(0.7 0.22 40); /* Professional orange (lighter) */
-  --chart-5: oklch(0.75 0.16 320); /* Professional pink (lighter) */
+  --chart-1: oklch(0.85 0.05 220); /* Light blue-gray for dark mode */
+  --chart-2: oklch(0.80 0.04 160); /* Light gray-green for dark mode */
+  --chart-3: oklch(0.75 0.05 280); /* Light gray-purple for dark mode */
+  --chart-4: oklch(0.90 0.03 40); /* Almost white with slight warmth */
+  --chart-5: oklch(0.88 0.04 0); /* Light neutral gray for dark mode */
   --sidebar: oklch(0.12 0 0); /* Dark charcoal sidebar */
   --sidebar-foreground: oklch(0.95 0 0);
   --sidebar-primary: oklch(0.7 0 0);
@@ -912,4 +912,44 @@ table.w-full tbody tr.loading-row {
   table.w-full tbody tr {
     animation: none;
   }
+}
+
+/* =================================================================
+   CHART STYLES - Tema escuro com gráficos claros
+   ================================================================= */
+
+/* Estilos para gráficos no tema escuro - cores claras/brancas */
+.dark .recharts-cartesian-grid-horizontal line,
+.dark .recharts-cartesian-grid-vertical line {
+  stroke: hsl(var(--border)) !important;
+  opacity: 0.3 !important;
+}
+
+.dark .recharts-text {
+  fill: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .recharts-legend-item-text {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .recharts-tooltip-wrapper {
+  outline: none !important;
+}
+
+/* Tema claro - cores vibrantes mantidas */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: hsl(var(--border)) !important;
+  opacity: 0.5 !important;
+}
+
+.recharts-text {
+  fill: hsl(var(--muted-foreground)) !important;
+  font-size: 12px !important;
+}
+
+.recharts-legend-item-text {
+  color: hsl(var(--foreground)) !important;
+  font-size: 13px !important;
 }
