@@ -33,6 +33,7 @@ export interface Sale {
   updatedAt: string;
   itens?: any[];
   parcelas?: any[];
+  podeCancelar?: boolean;
 }
 
 export interface SaleItem {

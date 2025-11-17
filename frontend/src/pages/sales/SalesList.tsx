@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Eye, ShoppingBag, MoreVertical, Check, X, Printer } from 'lucide-react';
+import { Plus, Eye, ShoppingBag, MoreVertical, X, Printer } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { salesApi } from '../../services/api';
 import { Sale } from '../../types/sale';
@@ -212,25 +212,15 @@ const SalesList: React.FC = () => {
     }
   };
 
-  const handleApprove = async (saleId: number) => {
-    try {
-      await salesApi.approve(saleId);
-      toast.success('Venda aprovada com sucesso!');
-      loadSales();
-    } catch (error) {
-      console.error('Erro ao aprovar venda:', error);
-      toast.error('Erro ao aprovar venda');
-    }
-  };
-
   const handleDeny = async (saleId: number) => {
     try {
       await salesApi.deny(saleId);
-      toast.success('Venda negada com sucesso!');
+      toast.success('Venda cancelada com sucesso!');
       loadSales();
-    } catch (error) {
-      console.error('Erro ao negar venda:', error);
-      toast.error('Erro ao negar venda');
+    } catch (error: any) {
+      console.error('Erro ao cancelar venda:', error);
+      const errorMessage = error?.response?.data?.message || 'Erro ao cancelar venda';
+      toast.error(errorMessage);
     }
   };
 
@@ -376,24 +366,19 @@ const SalesList: React.FC = () => {
                               <Printer className="mr-2 h-4 w-4" />
                               <span>Imprimir Venda</span>
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleApprove(sale.id)}
-                              disabled={sale.status === 'APROVADO' || sale.status === 'CANCELADO'}
-                              className="cursor-pointer"
-                            >
-                              <Check className="mr-2 h-4 w-4" />
-                              <span>Aprovar Venda</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleDeny(sale.id)}
-                              disabled={sale.status === 'APROVADO' || sale.status === 'CANCELADO'}
-                              className="cursor-pointer text-red-600"
-                            >
-                              <X className="mr-2 h-4 w-4" />
-                              <span>Negar Venda</span>
-                            </DropdownMenuItem>
+                            {sale.podeCancelar !== false && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => handleDeny(sale.id)}
+                                  disabled={sale.status === 'CANCELADO'}
+                                  className="cursor-pointer text-red-600"
+                                >
+                                  <X className="mr-2 h-4 w-4" />
+                                  <span>Cancelar Venda</span>
+                                </DropdownMenuItem>
+                              </>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>

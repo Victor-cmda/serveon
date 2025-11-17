@@ -131,14 +131,14 @@ export function AccountsReceivableDetailDialog({
         if (diffDays < 0) {
           // Pagamento antecipado - aplicar percentual de desconto da condição
           const percentualDesconto = customerPaymentTerm.discountPercentage || 0;
-          desconto = data.valorOriginal * (percentualDesconto / 100);
+          desconto = parseFloat((data.valorOriginal * (percentualDesconto / 100)).toFixed(2));
         } else if (diffDays > 0) {
           // Pagamento atrasado - aplicar multa e juros da condição
           const percentualMulta = customerPaymentTerm.fineRate || 0;
           const percentualJuros = customerPaymentTerm.interestRate || 0;
           
-          multa = data.valorOriginal * (percentualMulta / 100);
-          juros = diffDays * (data.valorOriginal * (percentualJuros / 100));
+          multa = parseFloat((data.valorOriginal * (percentualMulta / 100)).toFixed(2));
+          juros = parseFloat((diffDays * (data.valorOriginal * (percentualJuros / 100))).toFixed(2));
         }
       }
       
@@ -173,12 +173,12 @@ export function AccountsReceivableDetailDialog({
       });
       
       setReceiveData({
-        valorRecebido: valorTotal,
+        valorRecebido: parseFloat(valorTotal.toFixed(2)),
         dataRecebimento: new Date().toISOString().split('T')[0],
         formaPagamentoId: formaPagamentoId,
-        valorDesconto: desconto,
-        valorJuros: juros,
-        valorMulta: multa,
+        valorDesconto: parseFloat(desconto.toFixed(2)),
+        valorJuros: parseFloat(juros.toFixed(2)),
+        valorMulta: parseFloat(multa.toFixed(2)),
       });
     } catch (error) {
       toast.error('Erro ao carregar conta');

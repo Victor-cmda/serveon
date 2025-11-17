@@ -439,6 +439,22 @@ export class AccountsReceivableService {
 
         const receivedAccount = await this.enrichAccountData(client, result.rows[0]);
 
+        // Atualizar status da venda para APROVADO quando a primeira parcela for paga
+        if (account.venda_numero_pedido && account.venda_modelo && account.venda_serie && account.venda_cliente_id) {
+          await client.query(
+            `UPDATE dbo.venda 
+             SET status = 'APROVADO',
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE numero_pedido = $1 
+               AND modelo = $2 
+               AND serie = $3 
+               AND cliente_id = $4
+               AND status != 'APROVADO'`,
+            [account.venda_numero_pedido, account.venda_modelo, account.venda_serie, account.venda_cliente_id],
+          );
+          console.log(`[DEBUG] Status da venda ${account.venda_numero_pedido} atualizado para APROVADO`);
+        }
+
         await client.query('COMMIT');
         return receivedAccount;
       } catch (error) {

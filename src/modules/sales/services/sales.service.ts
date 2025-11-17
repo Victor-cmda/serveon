@@ -280,6 +280,53 @@ export class SalesService {
           }
         }
 
+        // Criar contas a receber automaticamente para cada parcela da venda
+        if (
+          createSaleDto.parcelas &&
+          createSaleDto.parcelas.length > 0
+        ) {
+          console.log(`[DEBUG] Criando contas a receber para ${createSaleDto.parcelas.length} parcelas...`);
+          
+          const totalParcelas = createSaleDto.parcelas.length;
+          
+          for (const parcela of createSaleDto.parcelas) {
+            // Converter número da parcela para formato string "1/3", "2/3", etc
+            const parcelaStr = `${parcela.parcela}/${totalParcelas}`;
+            
+            // Gerar número de documento único (VENDA-NUMEROPEDIDO-PARCELA)
+            const numeroDocumento = `VENDA-${numeroPedido}-${parcela.parcela}-${totalParcelas}`;
+            
+            await client.query(
+              `INSERT INTO dbo.contas_receber 
+                (venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id, 
+                parcela, cliente_id, numero_documento, tipo_documento,
+                data_emissao, data_vencimento, valor_original, valor_saldo, 
+                valor_desconto, valor_juros, valor_multa, status)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+              [
+                numeroPedido,
+                modelo,
+                serie,
+                createSaleDto.clienteId,
+                parcelaStr, // formato "1/3"
+                createSaleDto.clienteId, // cliente_id duplicado para facilitar consultas
+                numeroDocumento,
+                'FATURA', // tipo_documento padrão
+                createSaleDto.dataEmissao,
+                parcela.dataVencimento,
+                parcela.valorParcela,
+                parcela.valorParcela, // valor_saldo inicial = valor_original
+                0, // valor_desconto inicial
+                0, // valor_juros inicial
+                0, // valor_multa inicial
+                'ABERTO',
+              ],
+            );
+          }
+          
+          console.log(`[DEBUG] Contas a receber criadas com sucesso!`);
+        }
+
         await client.query('COMMIT');
         return this.mapToEntity(result.rows[0]);
       } catch (error) {
@@ -337,11 +384,26 @@ export class SalesService {
             [row.numero_pedido, row.modelo, row.serie, row.cliente_id],
           );
 
+          // Verificar se há contas a receber pagas (para determinar se pode cancelar)
+          const contasRecebidasResult = await this.databaseService.query(
+            `SELECT COUNT(*) as count FROM dbo.contas_receber 
+             WHERE venda_numero_pedido = $1 
+               AND venda_modelo = $2 
+               AND venda_serie = $3 
+               AND venda_cliente_id = $4
+               AND status = 'RECEBIDO'
+               AND ativo = TRUE`,
+            [row.numero_pedido, row.modelo, row.serie, row.cliente_id],
+          );
+
+          const hasParcelasPagas = parseInt(contasRecebidasResult.rows[0].count) > 0;
+
           // Adicionar itens e parcelas à venda
           return {
             ...venda,
             itens: itensResult.rows,
             parcelas: parcelasResult.rows,
+            podeCancelar: !hasParcelasPagas && venda.status !== 'CANCELADO',
           };
         })
       );
@@ -721,7 +783,7 @@ export class SalesService {
 
         // Verificar se a venda existe
         const checkResult = await client.query(
-          'SELECT numero_sequencial FROM dbo.venda WHERE numero_sequencial = $1',
+          'SELECT numero_pedido, modelo, serie, cliente_id FROM dbo.venda WHERE numero_sequencial = $1',
           [id],
         );
 
@@ -729,10 +791,48 @@ export class SalesService {
           throw new NotFoundException(`Venda com ID ${id} não encontrada`);
         }
 
+        const venda = checkResult.rows[0];
+
+        // Verificar se existem contas a receber vinculadas a esta venda
+        const contasReceberResult = await client.query(
+          `SELECT id, status FROM dbo.contas_receber 
+           WHERE venda_numero_pedido = $1 
+             AND venda_modelo = $2 
+             AND venda_serie = $3 
+             AND venda_cliente_id = $4
+             AND ativo = TRUE`,
+          [venda.numero_pedido, venda.modelo, venda.serie, venda.cliente_id],
+        );
+
+        // Verificar se alguma parcela já foi paga
+        const contasPagas = contasReceberResult.rows.filter(
+          conta => conta.status === 'RECEBIDO'
+        );
+
+        if (contasPagas.length > 0) {
+          throw new BadRequestException(
+            'Não é possível cancelar esta venda pois existem parcelas que já foram pagas'
+          );
+        }
+
+        // Deletar as contas a receber vinculadas à venda (apenas as em aberto)
+        if (contasReceberResult.rows.length > 0) {
+          await client.query(
+            `DELETE FROM dbo.contas_receber 
+             WHERE venda_numero_pedido = $1 
+               AND venda_modelo = $2 
+               AND venda_serie = $3 
+               AND venda_cliente_id = $4
+               AND status != 'RECEBIDO'`,
+            [venda.numero_pedido, venda.modelo, venda.serie, venda.cliente_id],
+          );
+          console.log(`[DEBUG] Contas a receber deletadas para a venda ${venda.numero_pedido}`);
+        }
+
         // Atualizar status para CANCELADO (negar = cancelar)
         const observacoesUpdate = motivo 
-          ? `Negado: ${motivo}` 
-          : 'Venda negada';
+          ? `Cancelado: ${motivo}` 
+          : 'Venda cancelada';
 
         const updateResult = await client.query(
           `UPDATE dbo.venda 
@@ -754,11 +854,11 @@ export class SalesService {
         client.release();
       }
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
-      console.error('Erro ao negar venda:', error);
-      throw new InternalServerErrorException('Erro ao negar venda');
+      console.error('Erro ao cancelar venda:', error);
+      throw new InternalServerErrorException('Erro ao cancelar venda');
     }
   }
 
