@@ -92,6 +92,12 @@ const Sidebar = ({ collapsed = false }: SidebarProps) => {
           path: '/accounts-payable',
         },
         {
+          id: 'accounts-receivable',
+          title: 'Contas a Receber',
+          icon: <Receipt className="h-4 w-4" />,
+          path: '/accounts-receivable',
+        },
+        {
           id: 'customers',
           title: 'Clientes',
           icon: <Users className="h-4 w-4" />,

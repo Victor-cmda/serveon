@@ -21,6 +21,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module';
 import { PurchasesModule } from './modules/purchases/purchases.module';
 import { SalesModule } from './modules/sales/sales.module';
 import { AccountsPayableModule } from './modules/accounts-payable/accounts-payable.module';
+import { AccountsReceivableModule } from './modules/accounts-receivable/accounts-receivable.module';
 import { CompanySettingsModule } from './modules/company-settings/company-settings.module';
 
 @Module({
@@ -50,6 +51,7 @@ import { CompanySettingsModule } from './modules/company-settings/company-settin
     PurchasesModule,
     SalesModule,
     AccountsPayableModule,
+    AccountsReceivableModule,
     CompanySettingsModule,
   ],
 })

@@ -846,7 +846,11 @@ CREATE TABLE estoque_movimento (
 -- Tabela contas_pagar (Contas a Pagar - Geradas das Compras)
 CREATE TABLE contas_pagar (
     id SERIAL PRIMARY KEY,
-    compra_id INTEGER REFERENCES compra(id),
+    compra_numero_pedido VARCHAR(20),
+    compra_modelo VARCHAR(10),
+    compra_serie VARCHAR(10),
+    compra_fornecedor_id INTEGER REFERENCES fornecedor(id),
+    parcela INTEGER,
     fornecedor_id INTEGER NOT NULL REFERENCES fornecedor(id),
     numero_documento VARCHAR(50) NOT NULL,
     tipo_documento VARCHAR(20) NOT NULL DEFAULT 'FATURA' CHECK (tipo_documento IN ('FATURA', 'DUPLICATA', 'BOLETO', 'NOTA_FISCAL')),
@@ -869,9 +873,14 @@ CREATE TABLE contas_pagar (
 );
 
 -- Tabela contas_receber (Contas a Receber - Geradas das Vendas)
+-- SEMPRE vinculadas a uma venda - não permite cadastro manual
 CREATE TABLE contas_receber (
     id SERIAL PRIMARY KEY,
-    venda_id INTEGER REFERENCES venda(id),
+    venda_numero_pedido VARCHAR(20) NOT NULL,
+    venda_modelo VARCHAR(10) NOT NULL,
+    venda_serie VARCHAR(10) NOT NULL,
+    venda_cliente_id INTEGER NOT NULL,
+    parcela VARCHAR(10) NOT NULL, -- Ex: '1/3', '2/3', '3/3'
     cliente_id INTEGER NOT NULL REFERENCES cliente(id),
     numero_documento VARCHAR(50) NOT NULL,
     tipo_documento VARCHAR(20) NOT NULL DEFAULT 'FATURA' CHECK (tipo_documento IN ('FATURA', 'DUPLICATA', 'BOLETO', 'NOTA_FISCAL')),
@@ -885,12 +894,15 @@ CREATE TABLE contas_receber (
     valor_recebido DECIMAL(15,2) DEFAULT 0.00,
     valor_saldo DECIMAL(15,2) NOT NULL,
     forma_pagamento_id INTEGER REFERENCES forma_pagamento(id),
-    status VARCHAR(20) NOT NULL DEFAULT 'ABERTO' CHECK (status IN ('ABERTO', 'RECEBIDO', 'PARCIAL', 'VENCIDO', 'CANCELADO')),
+    status VARCHAR(20) NOT NULL DEFAULT 'ABERTO' CHECK (status IN ('ABERTO', 'RECEBIDO', 'VENCIDO', 'CANCELADO')),
     observacoes TEXT,
     recebido_por INTEGER REFERENCES funcionario(id),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_contas_receber_venda FOREIGN KEY (venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id) 
+        REFERENCES venda(numero_pedido, modelo, serie, cliente_id),
+    CONSTRAINT uk_contas_receber_venda_parcela UNIQUE (venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id, parcela)
 );
 
 -- Tabela orcamento (Orçamentos separados das Vendas)

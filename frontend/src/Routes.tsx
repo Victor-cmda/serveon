@@ -40,6 +40,7 @@ import PurchaseForm from './pages/purchases/PurchaseForm';
 import SalesList from './pages/sales/SalesList';
 import SaleForm from './pages/sales/SaleForm';
 import { AccountsPayableList, AccountsPayableForm } from './pages/accounts-payable';
+import AccountsReceivablePage from './pages/accounts-receivable/AccountsReceivablePage';
 import { FormStateProvider } from './contexts/FormStateContext';
 // Print Components
 import SalePrintRoute from './components/print/SalePrintRoute';
@@ -108,6 +109,11 @@ const router = createBrowserRouter([
       {
         path: 'accounts-payable/new',
         element: <AccountsPayableForm />,
+      },
+      // Contas a Receber
+      {
+        path: 'accounts-receivable',
+        element: <AccountsReceivablePage />,
       },
       //Clientes
       {

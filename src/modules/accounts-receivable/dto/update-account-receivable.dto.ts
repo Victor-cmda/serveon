@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { 
-  IsNotEmpty, 
   IsOptional, 
   IsNumber, 
   IsEnum,
@@ -11,78 +10,22 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class CreateAccountReceivableDto {
-  @ApiProperty({
-    description: 'Número do pedido de venda',
-    example: 'PV-0001',
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'Número do pedido deve ser uma string' })
-  @MaxLength(20, { message: 'Número do pedido deve ter no máximo 20 caracteres' })
-  vendaNumeroPedido?: string;
-
-  @ApiProperty({
-    description: 'Modelo da nota fiscal',
-    example: '55',
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'Modelo deve ser uma string' })
-  @MaxLength(10, { message: 'Modelo deve ter no máximo 10 caracteres' })
-  vendaModelo?: string;
-
-  @ApiProperty({
-    description: 'Série da nota fiscal',
-    example: '001',
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'Série deve ser uma string' })
-  @MaxLength(10, { message: 'Série deve ter no máximo 10 caracteres' })
-  vendaSerie?: string;
-
-  @ApiProperty({
-    description: 'ID do cliente na venda',
-    example: 1,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber({}, { message: 'ID do cliente na venda deve ser um número' })
-  vendaClienteId?: number;
-
-  @ApiProperty({
-    description: 'Número da parcela da venda',
-    example: 1,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber({}, { message: 'Número da parcela deve ser um número' })
-  @Min(1, { message: 'Número da parcela deve ser maior ou igual a 1' })
-  parcela?: number;
-
-  @ApiProperty({
-    description: 'ID do cliente',
-    example: 1,
-  })
-  @IsNotEmpty({ message: 'ID do cliente é obrigatório' })
-  @IsNumber({}, { message: 'ID do cliente deve ser um número' })
-  clienteId: number;
-
+export class UpdateAccountReceivableDto {
   @ApiProperty({
     description: 'Número do documento',
     example: 'FAT-001',
+    required: false,
   })
-  @IsNotEmpty({ message: 'Número do documento é obrigatório' })
+  @IsOptional()
   @IsString({ message: 'Número do documento deve ser uma string' })
   @MaxLength(50, { message: 'Número do documento deve ter no máximo 50 caracteres' })
-  numeroDocumento: string;
+  numeroDocumento?: string;
 
   @ApiProperty({
     description: 'Tipo do documento',
     example: 'FATURA',
     enum: ['FATURA', 'DUPLICATA', 'BOLETO', 'NOTA_FISCAL'],
-    default: 'FATURA',
+    required: false,
   })
   @IsOptional()
   @IsEnum(['FATURA', 'DUPLICATA', 'BOLETO', 'NOTA_FISCAL'], {
@@ -93,33 +36,46 @@ export class CreateAccountReceivableDto {
   @ApiProperty({
     description: 'Data de emissão',
     example: '2024-01-15',
+    required: false,
   })
-  @IsNotEmpty({ message: 'Data de emissão é obrigatória' })
+  @IsOptional()
   @Type(() => Date)
   @IsDate({ message: 'Data de emissão deve ser uma data válida' })
-  dataEmissao: Date;
+  dataEmissao?: Date;
 
   @ApiProperty({
     description: 'Data de vencimento',
     example: '2024-02-15',
+    required: false,
   })
-  @IsNotEmpty({ message: 'Data de vencimento é obrigatória' })
+  @IsOptional()
   @Type(() => Date)
   @IsDate({ message: 'Data de vencimento deve ser uma data válida' })
-  dataVencimento: Date;
+  dataVencimento?: Date;
+
+  @ApiProperty({
+    description: 'Data de recebimento',
+    example: '2024-02-10',
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate({ message: 'Data de recebimento deve ser uma data válida' })
+  dataRecebimento?: Date;
 
   @ApiProperty({
     description: 'Valor original',
     example: 1500.00,
+    required: false,
   })
-  @IsNotEmpty({ message: 'Valor original é obrigatório' })
+  @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Valor original deve ser um número com no máximo 2 casas decimais' })
-  @Min(0.01, { message: 'Valor original deve ser maior que 0' })
-  valorOriginal: number;
+  @Min(0, { message: 'Valor original deve ser maior ou igual a 0' })
+  valorOriginal?: number;
 
   @ApiProperty({
     description: 'Valor de desconto',
-    example: 0.00,
+    example: 50.00,
     required: false,
   })
   @IsOptional()
@@ -129,7 +85,7 @@ export class CreateAccountReceivableDto {
 
   @ApiProperty({
     description: 'Valor de juros',
-    example: 0.00,
+    example: 25.00,
     required: false,
   })
   @IsOptional()
@@ -139,13 +95,23 @@ export class CreateAccountReceivableDto {
 
   @ApiProperty({
     description: 'Valor de multa',
-    example: 0.00,
+    example: 15.00,
     required: false,
   })
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Valor de multa deve ser um número com no máximo 2 casas decimais' })
   @Min(0, { message: 'Valor de multa deve ser maior ou igual a 0' })
   valorMulta?: number;
+
+  @ApiProperty({
+    description: 'Valor recebido',
+    example: 1490.00,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Valor recebido deve ser um número com no máximo 2 casas decimais' })
+  @Min(0, { message: 'Valor recebido deve ser maior ou igual a 0' })
+  valorRecebido?: number;
 
   @ApiProperty({
     description: 'ID da forma de pagamento',
@@ -157,8 +123,29 @@ export class CreateAccountReceivableDto {
   formaPagamentoId?: number;
 
   @ApiProperty({
+    description: 'Status da conta',
+    example: 'ABERTO',
+    enum: ['ABERTO', 'RECEBIDO', 'VENCIDO', 'CANCELADO'],
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(['ABERTO', 'RECEBIDO', 'VENCIDO', 'CANCELADO'], {
+    message: 'Status deve ser ABERTO, RECEBIDO, VENCIDO ou CANCELADO'
+  })
+  status?: string;
+
+  @ApiProperty({
+    description: 'ID do funcionário que realizou o recebimento',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber({}, { message: 'ID do funcionário deve ser um número' })
+  recebidoPor?: number;
+
+  @ApiProperty({
     description: 'Observações',
-    example: 'Conta referente à venda de produtos',
+    example: 'Recebimento com desconto negociado',
     required: false,
   })
   @IsOptional()

@@ -1085,3 +1085,91 @@ export const companySettingsApi = {
     return handleResponse(response);
   },
 };
+
+// Accounts Receivable API
+export const accountsReceivableApi = {
+  getAll: async (filters?: any): Promise<any[]> => {
+    const params = new URLSearchParams();
+    if (filters?.clienteId) params.append('clienteId', filters.clienteId.toString());
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.dataInicio) params.append('dataInicio', filters.dataInicio);
+    if (filters?.dataFim) params.append('dataFim', filters.dataFim);
+
+    const queryString = params.toString();
+    const url = queryString ? `${API_URL}/accounts-receivable?${queryString}` : `${API_URL}/accounts-receivable`;
+    
+    const response = await fetch(url);
+    return handleResponse(response);
+  },
+
+  getById: async (id: number): Promise<any> => {
+    const response = await fetch(`${API_URL}/accounts-receivable/${id}`);
+    return handleResponse(response);
+  },
+
+  getOverdue: async (): Promise<any[]> => {
+    const response = await fetch(`${API_URL}/accounts-receivable/overdue`);
+    return handleResponse(response);
+  },
+
+  getByCustomer: async (clienteId: number): Promise<any[]> => {
+    const response = await fetch(`${API_URL}/accounts-receivable/customer/${clienteId}`);
+    return handleResponse(response);
+  },
+
+  getByPeriod: async (dataInicio: string, dataFim: string): Promise<any[]> => {
+    const params = new URLSearchParams({
+      dataInicio,
+      dataFim,
+    });
+    const response = await fetch(`${API_URL}/accounts-receivable/period?${params}`);
+    return handleResponse(response);
+  },
+
+  create: async (data: any): Promise<any> => {
+    const response = await fetch(`${API_URL}/accounts-receivable`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  update: async (id: number, data: any): Promise<any> => {
+    const response = await fetch(`${API_URL}/accounts-receivable/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  receive: async (id: number, data: any): Promise<any> => {
+    const response = await fetch(`${API_URL}/accounts-receivable/${id}/receive`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  cancel: async (id: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/accounts-receivable/${id}/cancel`, {
+      method: 'POST',
+    });
+    return handleResponse(response);
+  },
+
+  updateOverdueStatus: async (): Promise<number> => {
+    const response = await fetch(`${API_URL}/accounts-receivable/update-overdue-status`, {
+      method: 'POST',
+    });
+    return handleResponse(response);
+  },
+};

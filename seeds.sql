@@ -957,35 +957,146 @@ INSERT INTO contas_pagar (
 );
 
 
--- Contas a receber das vendas
+-- =====================================================
+-- CONTAS A RECEBER - GERADAS AUTOMATICAMENTE DAS VENDAS
+-- =====================================================
+
+-- IMPORTANTE: Todas as contas a receber são criadas AUTOMATICAMENTE através do módulo de Vendas.
+-- Não é permitido cadastro manual de contas a receber.
+-- Cada conta deve estar vinculada a uma venda através dos campos:
+--   venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id (NOT NULL)
+-- A coluna 'parcela' é VARCHAR(10) e suporta formato "1/3", "2/3", etc.
+
+-- Venda 1-55-1: À VISTA com PIX (1 parcela única "1/1")
 INSERT INTO contas_receber (
-    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id,
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id, parcela,
     cliente_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
-    valor_original, valor_saldo, forma_pagamento_id, status, observacoes
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_recebido, valor_saldo,
+    forma_pagamento_id, status, observacoes
 ) VALUES (
-    '1', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
-    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 'REC-0001', 'DUPLICATA', CURRENT_DATE, CURRENT_DATE,
-    850.00, 850.00, (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 'ABERTO', 'A RECEBER DA VENDA 1-55-1'
+    '1', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), '1/1',
+    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 
+    '1-55-1', 'DUPLICATA', 
+    CURRENT_DATE, CURRENT_DATE,
+    850.00, 0.00, 0.00, 0.00, 0.00, 850.00,
+    (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 
+    'ABERTO', 
+    'Parcela 1/1 da venda 1-55-1 - Pagamento à vista com PIX'
+);
+
+-- Venda 2-55-1: Condição 30/60 (2 parcelas - "1/2" e "2/2")
+INSERT INTO contas_receber (
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id, parcela,
+    cliente_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_recebido, valor_saldo,
+    forma_pagamento_id, status, observacoes
+) VALUES (
+    '2', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), '1/2',
+    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 
+    '2-55-1', 'BOLETO', 
+    CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days',
+    237.50, 0.00, 0.00, 0.00, 0.00, 237.50,
+    (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 
+    'ABERTO', 
+    'Parcela 1/2 da venda 2-55-1 - Vencimento em 30 dias'
+),
+(
+    '2', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), '2/2',
+    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 
+    '2-55-1', 'BOLETO', 
+    CURRENT_DATE, CURRENT_DATE + INTERVAL '60 days',
+    237.50, 0.00, 0.00, 0.00, 0.00, 237.50,
+    (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 
+    'ABERTO', 
+    'Parcela 2/2 da venda 2-55-1 - Vencimento em 60 dias'
+);
+
+-- Venda 1-55-2: Condição 30 DIAS (1 parcela "1/1")
+INSERT INTO contas_receber (
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id, parcela,
+    cliente_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_recebido, valor_saldo,
+    forma_pagamento_id, status, observacoes
+) VALUES (
+    '1', '55', '2', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), '1/1',
+    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 
+    '1-55-2', 'BOLETO', 
+    CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days',
+    400.00, 0.00, 0.00, 0.00, 0.00, 400.00,
+    (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 
+    'ABERTO', 
+    'Parcela 1/1 da venda 1-55-2 - Vencimento em 30 dias'
+);
+
+-- Exemplo de conta VENCIDA (venda antiga já vencida, parcela "1/3")
+INSERT INTO venda (
+    numero_pedido, modelo, serie, cliente_id,
+    data_emissao, data_entrega, condicao_pagamento_id, forma_pagamento_id, funcionario_id,
+    tipo_frete, valor_frete, valor_seguro, outras_despesas, valor_desconto, valor_acrescimo, 
+    total_produtos, total_a_pagar, valor_produtos, valor_total, status, 
+    transportadora_id, observacoes
+) VALUES (
+    '100', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
+    CURRENT_DATE - INTERVAL '60 days', CURRENT_DATE - INTERVAL '55 days', 
+    (SELECT id FROM condicao_pagamento WHERE nome = '30/60/90'), 
+    (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 
+    (SELECT id FROM funcionario WHERE email = 'vendedor@exemplo.com'),
+    'CIF', 0.00, 0.00, 0.00, 0.00, 0.00,
+    2100.00, 2100.00, 2100.00, 2100.00, 'APROVADO',
+    (SELECT id FROM transportadora WHERE cnpj = '98765432000155'), 
+    'VENDA ANTIGA PARA EXEMPLO DE CONTAS VENCIDAS E RECEBIDAS'
 );
 
 INSERT INTO contas_receber (
-    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id,
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id, parcela,
     cliente_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
-    valor_original, valor_saldo, forma_pagamento_id, status, observacoes
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_recebido, valor_saldo,
+    forma_pagamento_id, status, observacoes
 ) VALUES (
-    '2', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
-    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 'REC-0002', 'BOLETO', CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days',
-    475.00, 475.00, (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 'A RECEBER DA VENDA 2-55-1'
+    '100', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), '1/3',
+    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 
+    '100-55-1', 'BOLETO', 
+    CURRENT_DATE - INTERVAL '60 days', CURRENT_DATE - INTERVAL '30 days',
+    700.00, 0.00, 14.00, 14.00, 0.00, 728.00,
+    (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 
+    'VENCIDO', 
+    'Parcela 1/3 da venda 100-55-1 - VENCIDA (juros de 2% e multa de 2% aplicados)'
 );
 
+-- Exemplo de conta RECEBIDA (parcela "2/3" da mesma venda)
 INSERT INTO contas_receber (
-    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id,
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id, parcela,
     cliente_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
-    valor_original, valor_saldo, forma_pagamento_id, status, observacoes
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_recebido, valor_saldo,
+    forma_pagamento_id, status, observacoes, data_recebimento, recebido_por
 ) VALUES (
-    '1', '55', '2', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'),
-    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 'REC-0003', 'BOLETO', CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days',
-    400.00, 400.00, (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 'ABERTO', 'A RECEBER DA VENDA 1-55-2'
+    '100', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), '2/3',
+    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 
+    '100-55-1', 'BOLETO', 
+    CURRENT_DATE - INTERVAL '60 days', CURRENT_DATE - INTERVAL '1 day',
+    700.00, 0.00, 0.00, 0.00, 700.00, 0.00,
+    (SELECT id FROM forma_pagamento WHERE nome = 'PIX'), 
+    'RECEBIDO', 
+    'Parcela 2/3 da venda 100-55-1 - RECEBIDA (pagamento antecipado sem juros)',
+    CURRENT_DATE - INTERVAL '5 days',
+    (SELECT id FROM funcionario WHERE email = 'vendedor@exemplo.com')
+);
+
+-- Exemplo de conta ABERTA (parcela "3/3" da mesma venda, ainda não vencida)
+INSERT INTO contas_receber (
+    venda_numero_pedido, venda_modelo, venda_serie, venda_cliente_id, parcela,
+    cliente_id, numero_documento, tipo_documento, data_emissao, data_vencimento,
+    valor_original, valor_desconto, valor_juros, valor_multa, valor_recebido, valor_saldo,
+    forma_pagamento_id, status, observacoes
+) VALUES (
+    '100', '55', '1', (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), '3/3',
+    (SELECT id FROM cliente WHERE cnpj_cpf = '45987654000100'), 
+    '100-55-1', 'BOLETO', 
+    CURRENT_DATE - INTERVAL '60 days', CURRENT_DATE + INTERVAL '30 days',
+    700.00, 0.00, 0.00, 0.00, 0.00, 700.00,
+    (SELECT id FROM forma_pagamento WHERE nome = 'BOLETO BANCÁRIO'), 
+    'ABERTO', 
+    'Parcela 3/3 da venda 100-55-1 - ABERTA (vencimento em 30 dias)'
 );
 
 -- =====================================================
