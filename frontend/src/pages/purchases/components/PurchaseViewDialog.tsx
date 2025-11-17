@@ -36,13 +36,13 @@ const PurchaseViewDialog: React.FC<PurchaseViewDialogProps> = ({ purchase, onClo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md">
-      <div className="bg-background rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto m-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md animate-in fade-in-0 duration-500">
+      <div className="bg-background rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto m-4 animate-in zoom-in-95 slide-in-from-top-[2%] duration-500 ease-out">
         <div className="sticky top-0 bg-background border-b px-6 py-4 flex items-center justify-between">
           <h2 className="text-2xl font-bold">Visualizar Compra</h2>
           <button
             onClick={onClose}
-            className="rounded-md p-2 hover:bg-muted transition-colors"
+            className="rounded-md p-2 hover:bg-muted transition-all duration-300 ease-out hover:scale-110 hover:rotate-90"
           >
             <X className="h-5 w-5" />
           </button>
