@@ -414,12 +414,11 @@ const SalesList: React.FC = () => {
         </div>
       )}
 
-      {selectedSale && (
-        <SaleViewDialog
-          sale={selectedSale}
-          onClose={() => setSelectedSale(null)}
-        />
-      )}
+      <SaleViewDialog
+        sale={selectedSale}
+        open={!!selectedSale}
+        onOpenChange={(open) => !open && setSelectedSale(null)}
+      />
     </div>
   );
 };

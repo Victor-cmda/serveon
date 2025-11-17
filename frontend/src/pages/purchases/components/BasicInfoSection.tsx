@@ -143,7 +143,7 @@ export function BasicInfoSection({
             <Label htmlFor="codigo">Código</Label>
             <Input
               id="codigo"
-              value={data.codigo || ''}
+              value={''}
               onChange={(e) => handleCodeChange('codigo', e.target.value)}
               placeholder="Código da nota"
               maxLength={50}
@@ -179,7 +179,7 @@ export function BasicInfoSection({
             <Label htmlFor="codigoFornecedor">Código Fornecedor</Label>
             <Input
               id="codigoFornecedor"
-              value={data.codigoFornecedor || ''}
+              value={''}
               onChange={(e) =>
                 handleCodeChange('codigoFornecedor', e.target.value)
               }

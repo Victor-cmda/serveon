@@ -399,12 +399,11 @@ const PurchasesList: React.FC = () => {
         </div>
       )}
 
-      {selectedPurchase && (
-        <PurchaseViewDialog
-          purchase={selectedPurchase}
-          onClose={() => setSelectedPurchase(null)}
-        />
-      )}
+      <PurchaseViewDialog
+        purchase={selectedPurchase}
+        open={!!selectedPurchase}
+        onOpenChange={(open) => !open && setSelectedPurchase(null)}
+      />
     </div>
   );
 };

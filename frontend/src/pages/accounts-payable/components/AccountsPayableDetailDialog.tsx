@@ -7,6 +7,9 @@ import {
   User,
   CreditCard,
   Package,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import { accountsPayableApi } from '@/services/api';
 import { AccountPayable, PayAccountDto } from '@/types/account-payable';
@@ -132,16 +135,41 @@ export function AccountsPayableDetailDialog({
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-      ABERTO: { label: 'Aberto', variant: 'default' },
-      PAGO: { label: 'Pago', variant: 'secondary' },
-      VENCIDO: { label: 'Vencido', variant: 'destructive' },
-      CANCELADO: { label: 'Cancelado', variant: 'outline' },
+    const variants: Record<string, { 
+      label: string; 
+      variant: 'default' | 'secondary' | 'destructive' | 'outline';
+      icon: React.ReactNode;
+    }> = {
+      ABERTO: { 
+        label: 'Aberto', 
+        variant: 'default',
+        icon: <Clock className="h-3 w-3" />
+      },
+      PAGO: { 
+        label: 'Pago', 
+        variant: 'secondary',
+        icon: <CheckCircle2 className="h-3 w-3" />
+      },
+      VENCIDO: { 
+        label: 'Vencido', 
+        variant: 'destructive',
+        icon: <AlertCircle className="h-3 w-3" />
+      },
+      CANCELADO: { 
+        label: 'Cancelado', 
+        variant: 'outline',
+        icon: <XCircle className="h-3 w-3" />
+      },
     };
 
     const config = variants[status] || variants.ABERTO;
 
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+    return (
+      <Badge variant={config.variant} className="gap-1.5">
+        {config.icon}
+        {config.label}
+      </Badge>
+    );
   };
 
   const getTipoDocumentoLabel = (tipo: string) => {
@@ -179,16 +207,17 @@ export function AccountsPayableDetailDialog({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <DialogTitle className="text-2xl">
-                  Conta a Pagar #{account?.id}
-                </DialogTitle>
+            <div className="space-y-3">
+              <DialogTitle className="text-2xl flex items-center gap-2">
+                <DollarSign className="h-6 w-6" />
+                Conta a Pagar #{account?.id}
+              </DialogTitle>
+              <div className="flex items-center justify-between">
                 <DialogDescription>
                   Documento: {account?.numeroDocumento}
                 </DialogDescription>
+                {account && getStatusBadge(account.status)}
               </div>
-              {account && getStatusBadge(account.status)}
             </div>
           </DialogHeader>
 
