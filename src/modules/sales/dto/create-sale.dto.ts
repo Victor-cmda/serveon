@@ -210,31 +210,34 @@ export class CreateSaleInstallmentDto {
 
 export class CreateSaleDto {
   @ApiProperty({
-    description: 'Número do pedido/nota fiscal',
+    description: 'Número do pedido/nota fiscal (gerado automaticamente se não fornecido)',
     example: '1',
+    required: false,
   })
-  @IsNotEmpty({ message: 'Número do pedido é obrigatório' })
+  @IsOptional()
   @IsString({ message: 'Número do pedido deve ser uma string' })
   @MaxLength(20, { message: 'Número do pedido deve ter no máximo 20 caracteres' })
-  numeroPedido: string;
+  numeroPedido?: string;
 
   @ApiProperty({
-    description: 'Modelo da nota fiscal',
+    description: 'Modelo da nota fiscal (padrão: 55)',
     example: '55',
+    required: false,
   })
-  @IsNotEmpty({ message: 'Modelo é obrigatório' })
+  @IsOptional()
   @IsString({ message: 'Modelo deve ser uma string' })
   @MaxLength(10, { message: 'Modelo deve ter no máximo 10 caracteres' })
-  modelo: string;
+  modelo?: string;
 
   @ApiProperty({
-    description: 'Série da nota fiscal',
+    description: 'Série da nota fiscal (padrão: 1)',
     example: '1',
+    required: false,
   })
-  @IsNotEmpty({ message: 'Série é obrigatória' })
+  @IsOptional()
   @IsString({ message: 'Série deve ser uma string' })
   @MaxLength(10, { message: 'Série deve ter no máximo 10 caracteres' })
-  serie: string;
+  serie?: string;
 
   @ApiProperty({
     description: 'ID do cliente',

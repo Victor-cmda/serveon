@@ -7198,17 +7198,17 @@
         "properties": {
           "numeroPedido": {
             "type": "string",
-            "description": "Número do pedido/nota fiscal",
+            "description": "Número do pedido/nota fiscal (gerado automaticamente se não fornecido)",
             "example": "1"
           },
           "modelo": {
             "type": "string",
-            "description": "Modelo da nota fiscal",
+            "description": "Modelo da nota fiscal (padrão: 55)",
             "example": "55"
           },
           "serie": {
             "type": "string",
-            "description": "Série da nota fiscal",
+            "description": "Série da nota fiscal (padrão: 1)",
             "example": "1"
           },
           "clienteId": {
@@ -7344,9 +7344,6 @@
           }
         },
         "required": [
-          "numeroPedido",
-          "modelo",
-          "serie",
           "clienteId",
           "dataEmissao",
           "condicaoPagamentoId",
@@ -7364,17 +7361,17 @@
         "properties": {
           "numeroPedido": {
             "type": "string",
-            "description": "Número do pedido/nota fiscal",
+            "description": "Número do pedido/nota fiscal (gerado automaticamente se não fornecido)",
             "example": "1"
           },
           "modelo": {
             "type": "string",
-            "description": "Modelo da nota fiscal",
+            "description": "Modelo da nota fiscal (padrão: 55)",
             "example": "55"
           },
           "serie": {
             "type": "string",
-            "description": "Série da nota fiscal",
+            "description": "Série da nota fiscal (padrão: 1)",
             "example": "1"
           },
           "clienteId": {

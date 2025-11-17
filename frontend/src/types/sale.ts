@@ -59,8 +59,8 @@ export interface SaleInstallment {
 
 export interface CreateSaleDto {
   numeroPedido?: string;
-  modelo: string;
-  serie: string;
+  modelo?: string;  // Opcional, gerado automaticamente se não fornecido (padrão: '55')
+  serie?: string;   // Opcional, gerado automaticamente se não fornecido (padrão: '1')
   clienteId: number;
   dataEmissao: string;
   dataEntrega?: string;

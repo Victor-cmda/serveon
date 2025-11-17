@@ -92,10 +92,11 @@ interface Parcela {
 }
 
 // NOTA: numeroNota no formulário mapeia para numeroPedido no backend
+// Modelo, Série e Número são gerados automaticamente pelo backend
 const formSchema = z.object({
-  numeroNota: z.string().min(1, 'Número da nota é obrigatório'),
-  modelo: z.string().min(1, 'Modelo é obrigatório'),
-  serie: z.string().min(1, 'Série é obrigatória'),
+  numeroNota: z.string().optional(),
+  modelo: z.string().optional(),
+  serie: z.string().optional(),
   idCliente: z.string().min(1, 'Cliente é obrigatório'),
   dataEmissao: z.string().min(1, 'Data de emissão é obrigatória'),
   tipoFrete: z.enum(['CIF', 'FOB']).default('CIF'),
@@ -163,7 +164,6 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
   const [isProductsLocked, setIsProductsLocked] = useState(false);
 
   // Estado para controle de verificação de chave composta
-  const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
 
   // Listas de entidades
@@ -192,7 +192,7 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
     },
   });
 
-  // Verifica se o header está completo (Número, Modelo, Série e Cliente preenchidos)
+  // Verifica se o header está completo (somente Cliente preenchido - modelo, série e número são gerados automaticamente)
   const numeroNota = form.watch('numeroNota');
   const idCliente = form.watch('idCliente');
   const modelo = form.watch('modelo');
@@ -200,12 +200,9 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
 
   const isHeaderComplete = useMemo(() => {
     return (
-      numeroNota?.trim() !== '' &&
-      idCliente?.trim() !== '' &&
-      modelo?.trim() !== '' &&
-      serie?.trim() !== ''
+      idCliente?.trim() !== ''
     );
-  }, [numeroNota, idCliente, modelo, serie]);
+  }, [idCliente]);
 
   // Função para verificar se a chave composta já existe
   const checkDuplicateSale = async (
@@ -225,7 +222,6 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
       return;
     }
 
-    setIsCheckingDuplicate(true);
     setDuplicateError(null);
 
     try {
@@ -250,8 +246,6 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
       toast.warning(
         'Não foi possível verificar duplicidade. Prossiga com cautela.',
       );
-    } finally {
-      setIsCheckingDuplicate(false);
     }
   };
 
@@ -644,9 +638,9 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
     setIsLoading(true);
     try {
       const payload = {
-        numeroPedido: data.numeroNota, // O campo numeroNota do form é o número do pedido
-        modelo: data.modelo,
-        serie: data.serie,
+        numeroPedido: data.numeroNota || undefined, // Será gerado automaticamente se não fornecido
+        modelo: data.modelo || undefined, // Será gerado automaticamente se não fornecido
+        serie: data.serie || undefined, // Será gerado automaticamente se não fornecido
         clienteId: parseInt(data.idCliente),
         dataEmissao: data.dataEmissao,
         tipoFrete: data.tipoFrete,
@@ -759,13 +753,14 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                       name="modelo"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Modelo *</FormLabel>
+                          <FormLabel>Modelo</FormLabel>
                           <FormControl>
                             <InputWithIcon
                               icon={<FileText className="h-4 w-4" />}
                               {...field}
-                              disabled={isHeaderLocked || isLoading}
-                              className={duplicateError ? 'border-red-500' : ''}
+                              disabled={true}
+                              placeholder=""
+                              className="bg-muted"
                             />
                           </FormControl>
                           <FormMessage />
@@ -780,13 +775,14 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                       name="serie"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Série *</FormLabel>
+                          <FormLabel>Série</FormLabel>
                           <FormControl>
                             <InputWithIcon
                               icon={<FileText className="h-4 w-4" />}
                               {...field}
-                              disabled={isHeaderLocked || isLoading}
-                              className={duplicateError ? 'border-red-500' : ''}
+                              disabled={true}
+                              placeholder=""
+                              className="bg-muted"
                             />
                           </FormControl>
                           <FormMessage />
@@ -801,21 +797,17 @@ export function SaleForm({ mode = 'create' }: SaleFormProps) {
                       name="numeroNota"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Número da Nota*</FormLabel>
+                          <FormLabel>Número da Nota</FormLabel>
                           <FormControl>
                             <InputWithIcon
                               icon={<Hash className="h-4 w-4" />}
                               {...field}
-                              disabled={isHeaderLocked || isLoading}
-                              className={duplicateError ? 'border-red-500' : ''}
+                              disabled={true}
+                              placeholder=""
+                              className="bg-muted"
                             />
                           </FormControl>
                           <FormMessage />
-                          {isCheckingDuplicate && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Verificando duplicidade...
-                            </p>
-                          )}
                         </FormItem>
                       )}
                     />

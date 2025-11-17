@@ -44,6 +44,10 @@ export class SalesService {
           console.log(`[CRIAÇÃO VENDA] Usando funcionário padrão ID: ${funcionarioId}`);
         }
 
+        // Gerar valores padrão para campos opcionais
+        const modelo = createSaleDto.modelo || '55';
+        const serie = createSaleDto.serie || '1';
+        
         // Usar o número do pedido informado pelo usuário ou gerar um sequencial
         let numeroPedido: string;
         
@@ -59,6 +63,8 @@ export class SalesService {
           numeroPedido = sequenceResult.rows[0].next_number.toString();
           console.log('[DEBUG] Número do pedido gerado automaticamente:', numeroPedido);
         }
+        
+        console.log('[DEBUG] Valores gerados:', { modelo, serie, numeroPedido });
 
         // Calcular totais
         const totalProdutos =
@@ -104,8 +110,8 @@ export class SalesService {
           RETURNING *`,
           [
             numeroPedido,
-            createSaleDto.modelo,
-            createSaleDto.serie,
+            modelo,  // Usar variável gerada (padrão: '55')
+            serie,   // Usar variável gerada (padrão: '1')
             createSaleDto.numeroNota || null,
             createSaleDto.clienteId,
             createSaleDto.dataEmissao,
@@ -180,8 +186,8 @@ export class SalesService {
 
             console.log(`[DEBUG] Inserindo item com dados:`, {
               numeroPedido: numeroPedido,
-              modelo: createSaleDto.modelo,
-              serie: createSaleDto.serie,
+              modelo: modelo,
+              serie: serie,
               clienteId: createSaleDto.clienteId,
               codigo: produto.codigo || item.produtoId.toString(),
               produtoId: item.produtoId,
@@ -200,8 +206,8 @@ export class SalesService {
               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)`,
               [
                 numeroPedido,
-                createSaleDto.modelo,
-                createSaleDto.serie,
+                modelo,  // Usar variável gerada
+                serie,   // Usar variável gerada
                 createSaleDto.clienteId,
                 produto.codigo || item.produtoId.toString(),
                 item.produtoId,
@@ -260,8 +266,8 @@ export class SalesService {
               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
               [
                 numeroPedido,
-                createSaleDto.modelo,
-                createSaleDto.serie,
+                modelo,  // Usar variável gerada
+                serie,   // Usar variável gerada
                 createSaleDto.clienteId,
                 parcela.parcela,
                 parcela.codigoFormaPagto || parcela.formaPagamentoId.toString(),
